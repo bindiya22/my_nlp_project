@@ -1,0 +1,847 @@
+INTERNATIONALJOURNALOFPRODUCTIONRESEARCH
+2023,VOL.61,NO.13,4220–4236
+https://doi.org/10.1080/00207543.2021.2010827
+Aknowledgeaugmentedimagedeblurringmethodwithdeeplearningforin-situ
+qualitydetectionofyarnproduction
+ChuqiaoXu a,JunliangWangb∗ ,JingTaoc,JieZhang bandRayY.Zhong d
+aSchoolofMechanicalEngineering,ShanghaiJiaoTongUniversity,Shanghai,People’sRepublicofChina;bInstituteofArtificialIntelligence,
+DonghuaUniversity,Shanghai,People’sRepublicofChina;cCollegeofMechanicalEngineering,DonghuaUniversity,Shanghai,People’s
+RepublicofChina;dDepartmentofIndustrialandManufacturingSystemEngineering,UniversityofHongKong,HongKong,People’sRepublic
+ofChina
+ABSTRACT ARTICLEHISTORY
+Inthein-situqualitydetectionofyarnproduction,imagedeblurringplaysacriticalroleinthevision- Received18April2021
+baseddetectionsystemstorestoreasharpimageandprovidemoreaccurateinputforinspection. Accepted10November2021
+However,imagedeblurringisstillchallengingsincethecurrentmethodsaremainlybasedonthe
+KEYWORDS
+pre-definedblurdegree.Indynamicyarnproduction,therelationshipbetweenthedefocusblur
+Knowledgeaugmented;
+degreesandtheposesoftheyarnbodyishighlyassociated,whichcanbeexcavatedtopriorknowl- deeplearning;image
+edgeinimagedeblurringtoachievemoreeffectiverestoration.Thus,aknowledgeaugmenteddeep deblurring;machinevision
+learningmodelisproposedtoadaptivelydebluryarnimageswithvariabledefocusblurdegrees.A detection;yarnproduction
+poseclassificationmoduledesignedbypriorknowledgeisembeddedintothedeepneuralnetwork,
+whichclassifiestheyarnposesandfeedsthemintomulti-scaledeblurringchannels.Ineachchan-
+nel,weincorporatetheimagegradientpriorintothespeciallydesignedlossfunctiontoattractthe
+attentionofthedeblurringnetworkontheedgedetailsoftheyarn.Theexperimentalresultsfrom
+actualspinningprocessesdemonstratethattheproposedmethodperformsabettereffectnotonly
+inthevariable-scaledeblurringoftheglobalimagebutalsointherestorationoftheedgedetails.
+1. Introduction
+yarn will not be in the focal plane during the imaging
+Product quality detection is an indispensable subject of process, which will produce out-of-focus blurry images
+production research (Genta, Galetto, and Franceschini for a vision-based detection system. Therefore, image
+2020). In yarn production, product quality is unstable. deblurring(Wangetal.2011)isacriticalissueforin-situ
+Timely yarn quality detection is particularly important qualitydetectioninyarnproduction.
+(Jing et al. 2020). With the development of machine Ingeneral,thedegradationprocessoftheout-of-focus
+vision and machine learning technologies (Perng, Lee, blurryimagecanbeformulatedbyastandardmodelthat
+andChou2010;Raietal.2021),somepioneeringworks theblurryimageisequaltotheconvolutionoftheclear
+havebeenconductedtodetectyarnqualityreplacingthe imageandtheblurkernelplusnoise(Chengetal.2020).
+traditionalsubjectivehumanmethod(Guhaetal. 2010; Recently,withthedevelopmentofdeeplearningtechnol-
+Li et al. 2017; Chen, Zhang, and Wu 2020). However, ogy,somepioneeringstudiesperformimagedeblurring
+most of such studies capture and analyse yarn images byend-to-endnetworks(Cai,Zuo,andZhang2020;Wan
+inastableexperimentalenvironment,resultinginineffi- etal.2020;Wuetal.2020;Zhaoetal.2020).Thesemeth-
+ciencyandlaggedeffortswhenconsideringin-situqual- ods establish a fixed mapping between blurry and clear
+ity detection systems (Khan et al. 2019; Wang, Lee, and imagesfromplentyoftrainingdata,whichareattemptto
+Angelica2020).Thecurrentvision-baseddetectionsys- buildageneralmodelthatcoverallout-of-focusblurred
+tem is not capable of in-situ yarn detection because of scenes.
+the blurry images caused by high-speed rotation of the Invision-basedin-situqualitydetectionofyarnpro-
+yarn. During yarn production, the spindle rotates at a duction,imagedeblurringremainsachallengingtaskdue
+highspeedtotwistthefibresintofineryarnswithacer- tothefollowingtwoaspects.First,thedefocusdistance
+tain geometric shape and mechanical properties, which of the yarn from the imaging focal plane is variable. As
+drives the yarn space to revolve and jump. Thus, the shown in Figure 1, in the yarn production process, the
+CONTACT JieZhang mezhangjie@dhu.edu.cn Room2-2406,No.2999RenminNorthRoad,Songjiang,Shanghai,China
+∗Presentaddress:NationalSyntheticFiberEngineeringTechnologyResearchCenter,BeijingChongleeMachineryEngineeringCo.,Ltd,Beijing,People’sRepublic
+ofChina
+©2022InformaUKLimited,tradingasTaylor&FrancisGroupINTERNATIONALJOURNALOFPRODUCTIONRESEARCH 4221
+Figure1.Vision-basedin-situqualitydetectionduringspinning.
+rovingisdraftedintoafineryarnofabout0.2mmbytwo Therestofthispaperisorganisedasfollows.Section
+sets of rollers with velocity differences. Meanwhile, the 2 reviews the significantly related works about image
+yarn is driven to rotate in space by the spindle. In this deblurring. Next, the proposed knowledge augmented
+process,theyarnsegmentleavestheimagingfocalplane deep learning model for image deblurring in vision-
+at a cyclically changing distance, which causes blurred based in-situ quality detection of yarn production is
+images in variable scales. Hence, how to deal with the detailed in section 3. Experimental results and discus-
+variable scale blur between images is challenge. Second, sionsaredemonstratedinsection4.Finally,conclusions
+inyarnqualitydetection,theedgedetailinformationof andfutureworkaresummarisedinsection5.
+theyarnbodyiscrucial.Theclarityoftheyarnboundary
+directlyaffectsthemeasurementaccuracyofthequality
+indicators.However,theproportionoftheyarnissmall
+2. Relatedworks
+comparedtotherestofbackgroundintheimage.Hence,
+howtomakethedeblurringmodelfocus on the restora- 2.1. Priorknowledge-drivenmethods
+tion of the edge details of the yarn body instead of the
+backgroundisanotherchallenge. The typical prior knowledge-driven methods of image
+This paper proposes a knowledge augmented deep deblurring mainly include Wiener filter algorithm (Luo
+learning model (KD-DeblurNet) for image deblurring et al. 2019) and Lucy-Richardson (LR) iterative decon-
+to address the above two challenges. Firstly, the rela- volution algorithm (Abang, Ramli, and Halim 2018).
+tionship between yarn poses and defocus blur degrees Wienerfilterdeblurringapproachisbasedontheprinci-
+is investigated. This prior knowledge is taken to guide plethattheFouriertransformoftheconvolutionoftwo
+theconstructionofthedeepneuralnetworkwithmulti- functionsequalstheFouriertransformofthetwofunc-
+scale deblurring channels. Secondly, in each channel, tions.IftheFouriertransformofthedegradationmodel
+we incorporate the image gradient prior into the spe- andtheblurryimageisknown,theFouriertransformof
+cially designed loss function to attract the attention of theclearimagecanbeobtained.Thus,theclearimagecan
+the deblurring network on the edge details of the yarn. berestoredthroughtheinverseFouriertransformation.
+Themaincontributionsofthisworkaresummarisedas Since the limitations of the above methods that the
+follows. high-frequency information of sharp edges is lost, the
+maximumaposterior(MAP)methodology(Sha,Schon-
+• The corresponding relationship between the defocus feld, and Wang 2020; Zhou et al. 2020; Wang, Zhu, and
+blurdegreeandtheposeoftheyarnbodyinthevision- Bai2021)isdevelopedwithdifferentlikelihoodfunctions
+based detection systems is revealed, which provides andimagepriors.Overtheyears,numerousstudieswere
+a new view for improving the vision-based in-situ devoted to carefully designing regularisation priors by
+qualitydetectionsystem. domainknowledge.BeckandTeboulle(2009)deriveda
+• Aknowledgeaugmenteddeeplearningmodelispro- gradient-based shrinkage/thresholding algorithm based
+posed for image deblurring in vision-based in-situ on the discretized total variation (TV) minimisation
+qualitydetectionofyarnproduction,whichprovidesa model with constraints for image deblurring. Yan et al.
+possiblewayforintegratingtheproductionknowledge (2017) observed the phenomenon that the bright pix-
+intodeeplearningmodelsinproductionresearch. els in the clear images are not likely to be bright after4222 C.XUETAL.
+the deblurring process. Xu, Chen, and Li (2020) pro- developedaselectivesharingschemeforconstrainingthe
+posed an iteration-wise (cid:2) -norm regularisation strategy deblurringnetworkstructure(PSNC),whichincluded3
+p
+to enhance the salient edge selection of MAP image encoder stages and 3 decoder stages. It is composed of
+deblurringframework.Basedonthisobservation,ajoint 3 kinds of modules including feature extraction, non-
+prior (bright and dark channel prior) was proposed to lineartransformation,andfeaturereconstructionwitha
+obtain a sharp latent image during image deblurring. skipconnectiontoachievehigherperformanceandfewer
+Zhang et al. (2021) used (cid:2) -regularised gradient prior parametersfordynamicscenedeblurring.
+0
+to improve the restoration ability of the sharp edge in In summary, the data-driven deep neural networks
+naturalimagedeblurring. forimagedeblurring,whichmainly includes3modules
+These knowledge-based regularisation priors are offeatureextraction(encoder),non-linearmapping,and
+indeedbeneficialtorestoresharpedgesofimages.How- reconstruction(decoder),aresuccessfulinimagedeblur-
+ever, this kind of method requires complex derivation ring.However,thiskindofmethodattemptstoestablisha
+and iterative optimisation for each image with a differ- generalmodelthatcoversallblurredsceneswhileignor-
+entblurkernel,resultinginhighcomputationalcostsand ingthedetailsofsharpstructuresinimages.Inspiredby
+inefficientperformance. the literature, integrating knowledge-driven priors into
+deeplearningmodelswillbeapossiblesolutionforimage
+deblurring in vision-based in-situ quality detection of
+2.2. Data-drivenmethods
+yarnproduction.
+Inrecentyears,withthesuccessofdeeplearning(Kusiak
+2020; Fan et al. 2021), some studies started to adopt
+data-driven methods to estimate the complicated blur 3. Proposedmethod
+kernel for image deblurring. Sun et al. (2015) adopted
+This section introduces the proposed knowledge aug-
+a convolutional neural network (CNN) composed of 6
+mented deep learning model for image deblurring in
+layersofconvolutionallayersandfullyconnectedlayers
+in-situyarnqualitydetection,whichincludesthreeparts.
+to output the probability of each candidate motion ker-
+We firstly investigate the movement of yarn in spin-
+nel,whichcaneffectivelyestimatenon-uniformmotion
+ning to analyse the defocusing phenomenon. Next, a
+blur. Chakrabarti (2016) proposed a multi-resolution
+deep neural network with multi-scale deblurring chan-
+decompositionfullconnectedneuralnetworktopredict
+nelsisconstructedundertheguidanceoftheyarndefo-
+the Fourier coefficients of a deconvolution filter, which
+cusdistribution.Finally,thedetailsofdeblurringmodel
+encode the input patch into four ‘bands’ to successfully
+implementationareintroduced.
+handlelargeblurkernels.
+Somerecentstudiesadopteddata-drivenmethodsfor
+image deblurring by directly learning the end-to-end
+3.1. Defocusanalysisoftheyarnmovementinthe
+mapping relationship between blurry images and clear
+spinningprocess
+imagesfromplentyoftrainingdata.Nah,Kim,andLee
+(2017) proposed a deep multi-scale CNN embedded in Binocular cameras are used to capture high-frequency
+multipleResBlocksineachscalethattookablurryimage yarn images during spinning to obtain the spatial coor-
+pyramid as the input and output an estimated latent dinatesoftheyarnmovementpoints.Fitthemovement
+image pyramid, which outperformed in dynamic scene trajectory and analyse the corresponding yarn image
+deblurring.Kupynetal.(2018)developedadeblurgen- sharpnessdistributionoftheyarnmovement.Itisimple-
+erative adversarial network (DeblurGAN) based on the mentedin5steps,asshowninFigure2.
+VGG19networkforblindmotiondeblurring,whichwas
+special in that it adopted a combined loss function to • Step1:Deploybinocularcameras.
+focus on restoring general content and texture details.
+However, to pursue better deblurring performance, the Two cameras of the same type are used to capture
+network structures became deeper and more complex. imagesoftheyarnsimultaneouslyfromthefrontandside
+Thus,somelateststudiessuggestedstreamliningthenet- ofthespinningspindle.
+work structures of image deblurring. Tao et al. (2018)
+proposedascale-recurrentnetwork(SRN)composedof (1) Placethetwocamerasata90-degreeangle.
+a series of convolutional layers, ResBlocks, deconvolu- (2) Keep the same parameter settings for the two
+tionallayers,andlongshort-termmemory(LSTM).The cameras.
+advantageofSRNwasthatithadfewerparametersthan (3) Useacalibrationplatetoensurethatthetwocameras
+previous multi-scale deblurring ones. Gao et al. (2019) areatthesameheightandshootinginthesamearea.INTERNATIONALJOURNALOFPRODUCTIONRESEARCH 4223
+Figure2.Defocusanalysisoftheyarnmovementinthespinningprocess.
+(4) Use the hardware trigger signal to control the two get the maximum, the corresponding t is the optimal
+camerastoshootatthesametime. threshold.
+• Step2:Getyarncoordinates.
+(2) Perform opening and closing operations on the
+binaryimagetoobtainaconnectedarea.
+Forthetwoimagesobtainedateachshootingmoment,
+(3) Calculatetheborderoftheconnectedarea,thebor-
+takingtheyarncentreoftheimagecapturedbythefront
+deroftheconnectedareawiththelargestareaisthe
+camera as the x coordinate and the yarn centre of the
+border of the yarn backbone. Average the coordi-
+imagecapturedbythesidecameraastheycoordinate,the
+natesoftheleftandrightlimitpositionsoftheyarn
+spatial coordinates of the yarn position at this moment
+backboneborderistheyarncentrecoordinates.
+can be obtained. The collection of the coordinates of
+(4) Combinethexcoordinateofthefrontimageandthe
+all captured images forms a point cloud covering the
+ycoordinateofthesideimagetogetthespacepoint
+movementoftheyarn.
+coordinatesoftheyarnatthatmoment.Thecollec-
+(1) Use OSTU (proposed by Nobuyuki Otsu) thresh- tion of spatial point coordinates on the time series
+old segmentation algorithm (Zhong and Ma 2021) formsaspatialpointcloudcoveringthemovement
+tobinarizethecapturedgreyscaleimages.Assuming oftheyarn.
+that the segmentation threshold of yarn and back-
+ground is t, the proportion of yarn pixels in the • Step3:Eliminateoutlierpoints.
+imageisw ,andthemeanisu .Theproportionof
+0 0
+backgroundpixelsintheimageisw ,andthemean (1) Use LOF (local outlier factor) algorithm to detect
+1
+is u . Then, the mean value of the whole image is outliersintheyarnmovementpointcloudandelim-
+1
+goingtobe: inatethem.
+(2) Calculatethelocaloutlierfactorforeachpointpin
+u=w ∗u +w ∗u . (1)
+0 0 1 1 thepointcloud.
+(cid:2)
+Theobjectivefunctionisdefinedas:
+lrdk(o)
+LOF (p)=
+o∈Nk(p) lrdk(p)
+(3)
+g(t)=w ∗(u −u)2+w ∗(u −u)2. (2)
+k |N k(p)|
+0 0 1 1
+Where g(t) is the expression of the variance between WhereLOF (p)representstheaverageratioofthelocal
+k
+classeswhenthesegmentationthresholdist.Wheng(t) reachabledensityoftheneighbouringpointN (p)tothe
+k4224 C.XUETAL.
+localreachabledensityofthepointp.Thelocalreachable WhereD(cid:2)(f)
+denotesthenormalisedsharpnessofimage
+i
+density of the point p can be expressed by the follow- i, n is the number of pixels in the image i, D(f) is the
+ing formula. The local reachable density lrd k(p) can be originalsharpnessofimageibeforenormalised,Di (f)
+max
+calculatedbythefollowingformula. and D(f) respectively represent the maximum and
+(cid:3)(cid:2) (cid:4) min
+lrd (p)=1/
+o∈Nk(p)reach_dist k(p,o)
+(4)
+minimumoriginalsharpnessinallimages.
+k |N (p)|
+k (3) According to the sharpness of all captured points,
+Where reach_dist (p,o) denotes the kth reachable dis- calculate the sharpness distribution of images in
+k
+the yarn movement. Establish the correspondence
+tance from point o to point p, which can be calculated
+between the pixel coordinate system and the world
+bythefollowingformula.
+coordinatesystem.Mapthesharpnessvalueofeach
+reach_dist (p,o)=max{k_dist(o), d(p,o)} (5) point to the corresponding colour value to draw a
+k
+heat map in the world coordinate system, which
+Where k_dist(o) represents the kth distance, that is, the
+reflects the mapping relationship between the yarn
+distanceofthekthpointawayfromp,excludingp.d(p,o)
+movement position and the defocus blur degree of
+representsthetwopointspando.
+theimagingsystemintheactualspinningprocess.
+(3) IfLOF (p)(cid:4)=1,then,pointpisregardedasanout-
+k Basedontheaboveanalysis,itisfoundthattheyarn
+lier and eliminated from the yarn movement point
+movement in the ring spinning process is an elliptical
+cloud.
+trajectory of reciprocating translation, which causes the
+imageout-of-focusblurdegreetospreadtothesurround-
+• Step4:Fittheboundaryfunction.
+ingswiththeguidehookasthecentre.Sincetheyarnsat
+different positions have different coordinate ranges and
+(1) Use the Graham scan algorithm (Ferrada, Navarro,
+inclinationangles(calledposeinthispaper),thatis,the
+andHitschfeld2020)tofindthediscretepointsthat
+posesoftheyarnsarecloselyrelatedtothedegreeofout-
+form the smallest convex hull of yarn movement
+of-focusblur.AsshowninTable1,themovementposes
+pointcloud.
+aredividedinto11categoriesaccordingtothequadrants,
+(2) UsetheB-splinecurve(Xuetal.2020)topiecewise
+directions,andinclinationanglesoftheyarn.Then,the
+fit a smooth boundary of selected discrete points
+categoriesaremappedto4degreesofblur,accordingto
+withthesmallestconvexhull.
+the corresponding imaging sharpness distribution heat
+(3) Use the least squares method to fit the movement
+map. Since various degrees of blur correspond to dif-
+trajectoryoftheyarnthroughthepointsonthetime
+ferentialdeblurringfunctions(non-linearmappingrela-
+series,whichisalongitudinalreciprocalmovement
+tionshipbetweenblurredimagesandclearimages),this
+ofapproximatelyelliptical.
+prior knowledge can be used to guide the construction
+• Step5:Calculatetheimagesharpnessdistribution. of the yarn image deblurring network. The pose of the
+yarncanberecognisedfromthecapturedimagetodeter-
+(1) Usethevariancefunctiontoevaluatethesharpness minethedefocusblurdegreeoftheimage.Then,images
+ofthesegmentedyarntrunkimage. with different defocus degrees can be fed into different
+(cid:5)(cid:5) deblurringchannelstoseparatelyestablishthemapping
+D(f)= |f(x,y)−f(x,y)|2 (6) relationshipbetweenblurredimagesandclearimages.
+y x
+3.2. Deblurringnetworkintegratingprior
+WhereD(f)isthecalculationresultoftheimagesharp-
+knowledgeofyarnmovement
+ness, f(x,y) is the grey value of the pixel (x,y) cor-
+responding to the image f, and f(x,y) represents the Based on previous deep neural networks for image
+averagegreyvalueoftheentireimage. deblurring, the main functional structures of encoder
+modules,non-linearmappings,anddecodermodulesare
+(2) To avoid the function value being affected by the worked out. Specifically, a pose classification module is
+image size, the results of the image sharpness D(f) designed to distinguish the different movement poses,
+aredividedbythenumberofpixelstobenormalised. which have different degrees of defocus blur. Addition-
+ally,aposegateisdesignedtosendtheextractedfeatures
+D(cid:2)(f) = 1 ∗ D(f) i−D(f) min (7) to the corresponding reconstruction channel accord-
+i n D(f) max−D(f) min ing to the pose category, where different reconstructionINTERNATIONALJOURNALOFPRODUCTIONRESEARCH 4225
+Table1.The relationship between yarn poses and defocus moduleiscomposedofmultiplechannels,andeachchan-
+degrees. nel that represents different out-of-focus blur mapping
+Quadrant Direction Inclinationangles Blurdegree includes3consecutivedeconvolutionlayers(DECONV.).
+I Front 0°∼7° Low&Middle(2) Thereconstructiongateintegratestheinformationfrom
+I Front >7° High(4) allchannelstooutputaclearimage.Thedetailednetwork
+II Backward 0°∼7° Low(1)
+II Backward 7°∼20° Low&Middle(2) structureparametersareshowninTable2,someofwhich
+II Backward >20° High(4) referto(Taoetal.2018).
+III Backward 0°∼7° Low(1)
+III Backward 7°∼20° Low&Middle(2) Input layer: the input X h×w×c of the network is the
+III Backward >20° High(4) blurry image, which is a pixel matrix. h and w are the
+IV Front 0°∼7° Low&Middle(2) heightandwidthoftheimage,cisthenumberofimage
+IV Front 7°∼20° Middle&High(3)
+IV Front >20° High(4) channels.
+Feature extraction module: the feature extraction
+moduleisanalternatelytransmittingoperationthrough
+3convolutions,batchnormalizations,andnonlinearacti-
+channels learn different deblurring mappings. A recon-
+vation functions. The convolutional layer extracts blur
+structiongateisalsodesignedtointegratethereconstruc-
+features from the input blurry image by convolutional
+tion information from all channels to generate a clear
+kernels to transform the input image into multivariate
+image.Furthermore,thelossfunction ofthenetworkis
+featuremaps.
+improved by adding a (cid:2) -regularised gradient prior to
+0
+strengthentherestorationabilityofthesharpedgeofthe (cid:5)r (cid:5)r
+yarn.
+H
+ij
+= K mnX(m+i×l)(n+j×l)+B,
+m=1n=1 (8)
+h−k w−k
+3.2.1. Networkstructure 0≤i≤ ,0≤j≤ .
+l l
+TheproposedKD-DeblurNet,asshowninFigure3,con-
+sists of an input layer, 3 modules (feature extraction WhereH denotestheextractedfeaturemapthroughthe
+module, pose classification module, and reconstruction convolutionoperation,i,jarethepositioncoordinatesof
+module),2gates(posegateandreconstructiongate),and thefeaturemapmatrix.Krepresentstheconvolutionker-
+an output layer. The inputs of the network are blurry nelofsizer×r.Xisthepixelmatrixoftheinputblurry
+images,andtheoutputsarecorrespondingclearimages. image.ldenotesthestridelengthoftheconvolutionker-
+Thefeatureextractionmoduleiscomposedof3convolu- nel’s movement. B is the bias. h and w are the height
+tionallayers(CONV.)and1maxpoolinglayer(MAXP.). and width of the input image respectively. Then, H is
+The Pose classification module is composed of 2 fully batchnormalisedandactivatedbyBatchNormandRelu
+connected layers (FC.), where the last fully connected functions.
+layer outputs the categories of yarn poses. Pose gate The third convolutional layer is followed by a max
+outputs the blur features of the yarn pose to the cor- poolinglayer,whichisusedtoundersamplethefeatures
+responding reconstruction channel. The reconstruction extractedbytheconvolutionallayertoreducethesizeof
+Figure3.ThenetworkstructureofproposedKD-DeblurNet.4226 C.XUETAL.
+Table2.ThenetworkstructureparametersoftheproposedKD- kthfullconnectedlayer,respectively.Thefirstconnected
+DeblurNet. layeriscomposedof512neurons.Thesecondconnected
+Layer Size Filters Stride Input Output layer is composed of C neurons, which are equal to the
+CONV.1 5∗5 32 1 796∗2448∗3 796∗2448∗32 categoriesofblurdegrees.
+CONV.2 5∗5 64 2 796∗2448∗32 398∗1224∗64 Pose gate: the pose gate sends the extracted fea-
+CONV.3 5∗5 128 1 398∗1224∗64 398∗1224∗128
+MAXP. 2∗2 / 2 398∗1224∗128 199∗612∗128 ture maps to the corresponding reconstruction channel
+FC.1 / 1024 / 199∗612∗128 1024 accordingtotheposecategoryoftheyarnintheimage,
+FC.2 / 4 / 1024 4
+whichisachievedbymultiplyingthefeaturemapandthe
+DECONV.1 3∗3 64 2 199∗612∗128 398∗1224∗64
+DECONV.2 3∗3 32 2 398∗1224∗64 796∗2448∗32 probabilities that the feature map belongs to the corre-
+DECONV.3 5∗5 3 1 796∗2448∗32 796∗2448∗3 spondingposecategory.
+Table3.Thekeytechnicalparametersofthecameraandtelecen- P i =H i(k)·H, i∈[1,2,··· ,C] (10)
+triclens.
+WhereP representstheprobabilisticfeaturemap.Itisthe
+i
+Camera Telecentriclens (k)
+parameters Value parameters Values product of the feature map H and the probability H i
+Typeofsensor 2/3(cid:7)(cid:7)CMOS Magnification 1.0 while the feature map belongs to the ith category. P i is
+Resolutionrate 2448∗2048 Focallength 110mm close to 0 when H does not belong to the ith category.
+Pixelsize 3.45μm×3.45μm Format (cid:3)11mm(2/3)(cid:7)(cid:7)
+Onthecontrary,whenH belongstotheithcategory,P
+Framerate 23.5fps Fieldangle D:11mm i
+H:8.8mm iscloseto1.Thus,wecanobtainCprobabilisticfeature
+V:6.6mm
+mapsthroughposegate.
+Datainterface GigabitEthernet Mount C
+Reconstruction module: the reconstruction mod-
+ule is composed of C reconstruction channels. The ith
+the feature map and suppress the overfitting. After the probabilistic feature map is fed into ith reconstruction
+above threesets of convolution and pooling operations, channels.Eachreconstructionchanneliscomposedof3
+n∗n feature maps extracted from the blurry image are deconvolutionallayerstoreconstructtheclearfeaturesby
+available.Thefeaturemapsarefedintotheposeclassifi- deconvolvingthefeaturemaps.
+cation module and the pose gate respectively, which hit
+twobirdswithonestone. S i =DT i P i, i∈[1,2,··· ,C] (11)
+Pose classification module: the pose classification
+Where S denotes the reconstructed clear features at ith
+module is used to classify the types of yarn movement i
+channel.DT denotesthedeconvolutionoperation,which
+posesfromtheextractedfeaturemapsofblurryimages. i
+isthereverseofconvolutionP =DS.
+As shown in Table 1, there are 11 types of movement i i i
+Reconstructiongate: the reconstruction gateassem-
+poses. Since one or more poses correspond to a fixed
+blestheclearfeaturesofeachreconstructionchannelto
+blur degree, these types are divided into 4 blur degrees.
+outputthesumofallclearfeatures.
+Therefore, the blur degrees of the yarn can be classified
+accordingtoitsposes,whichisbeneficialforcustomising (cid:5)C
+exclusive reconstruction channels for images with dif- Y = S (12)
+i
+ferent blur degrees. During the model training, images i=1
+will be labelled with categories of blur degrees to guide
+Output layer: the output Y h×w×c of the network is the
+theposeclassificationmoduletolearnthediscrimination
+clearimageofthesamesizeastheoriginalblurryimage.
+abilityofposeandblurdegree.
+Theposeclassificationmoduleiscomposedof2fully
+3.2.2. Lossfunction
+connected layers. In this module, the extracted feature
+In the backward propagation process during training,
+maps of a blurry image are unified into one dimension.
+the network parameters are optimised according to the
+Then,theunifiedfeaturesareperformednonlinearmap-
+gradient of the loss function and the learning rate to
+ping by the first fully connected layer and output the
+minimisetheloss.
+probability of belonging to each pose category by the
+secondfullconnectedlayer. θ(k+1)
+=θ(k)−α∂loss
+(13)
+∂θ(k)
+H(k) =δ(w(k) H(k−1)+b(k))
+(9)
+Where
+θ(k)
+denotes the values of network parameters
+WhereH(k) representsthehiddenrepresentationofkth in kth iteration.α is the learning rate, which is used to
+full connected layer. δ denotes the nonlinear activation controltheamplitudeofeachoptimisationandfindthe
+functionRelu.w(k) andb(k)
+aretheweightsandbiasofthe optimalsolution.lossisthelossfunctionnetwork,whichINTERNATIONALJOURNALOFPRODUCTIONRESEARCH 4227
+is the optimal object of the deblurring model. In gen- 3.3. Deblurringmodelimplementation
+eral,thelossfunctionisthemeansquarederrorbetween
+Theproceduresofmodelimplementationareillustrated
+networks’outputvaluesandgroundtruth.
+inFigure4,whichiscomposedof3steps.
+(cid:5)N
+1
+loss = (y −(cid:6)y)2 (14) (1) Datacollection
+o i i
+N
+i=1
+Wherey denotestheoriginalclearimages.(cid:6)y represents A yarn image collection platform is constructed as
+i i
+shown in Figure 5. The key technical parameters of the
+the output deblurred images of the proposed model. N
+cameraandtelecentriclensaredetailedinTable3.Adjust
+is the batch size, which means the number of training
+the front and rear distance of the camera making the
+samplesfedineachiteration.loss aimstominimisethe
+o
+imaging focal plane of the camera fall on the middle of
+overallerrorbetweentheblurryimagesandtheoriginal
+theyarnmotionrange.Basedontheanalysisoftheyarn
+clearimages.
+movement,wesimulatethevariouspositionsoftheyarn
+Since the detailed edge restoration of the yarn body
+inthemotionrange.Ateachposition,wefirsttakeanini-
+is focused instead of the background, we improved the
+general loss function by adding a loss of (cid:2) -regularised tialblurryimage,andthenaclearimagebyadjustingthe
+0
+camera’sfocus.Hence,pairsof‘blurry-clear’yarnimage
+gradient prior to attract the attention of the deblurring
+datacouldbeobtained.
+networkontheedgedetailsoftheyarn.
+loss=loss o+λ·loss(cid:2)
+0
+(15) (2) Modeltraining
+Where λ is a weight coefficient to balance two losses. Pytorch is used to establish the proposed network
+loss(cid:2) isadifferenceofregularisationtermofpixelgradi- structure,whichistrainedbythecollecteddatatolearn
+0
+entsbetweenoriginalclearimagesandoutputdeblurred thenonlinearrelationshipsbetweentheblurryandclear
+images. images.TheAdamoptimiserisemployedtooptimisethe
+parametersofthenetworktominimisethelossfunction.
+(cid:5)N
+1
+loss(cid:2)
+0
+=
+N
+(||∇y i|| 0−||∇(cid:6)y i|| 0)2 (16) T anh ae lytr sia sin ai rn eg lip star inam Tae bte lers 4e .ttingsobtainedbyasensitivity
+i=1
+Where ||∇y|| counts the number of nonzero-intensity (3) Statisticalevaluation
+i 0
+pixelsiny.Withthisintensityproperty,thesharpedge
+i
+andbackgroundofimagescanbedifferentiated.Thepixel After training, the network should be tested by
+gradient value of the background area of the image is the test data to evaluate the deblurring performance.
+mostly 0, while the pixel gradient of the sharp edge is The quantitative measure of peak-signal-to-noise ratio
+non-zero. The pixel gradient of images is calculated by (PSNR), which is the most common and widely used
+theSobeloperator. objective measurement method for evaluating image
+(cid:7) quality,isemployedtoevaluatethequalityofrecovered
+∇y(u,v) = 2G2 u+G2
+v
+(17) images.PSNRisdefinedasfollows.
+(cid:8) (cid:9)
+WhereG uisthepixelgradientinthehorizontaldirection, PSNR=10·log MAX I2 (20)
+andG isthepixelgradientintheverticaldirection. 10 MSE
+v
+∂f
+Where MAX represents the maximum value of the
+G = =[f(u+1,v−1)+2∗f(u+1,v) I
+u ∂u image pixel. In our images, MAX
+I
+is equal to 255. MSE
++f(u+1,v+1)]−[f(u−1,v−1) denotes the mean squared error between the original
+clearimageandtheprocessedimage.
++2∗f(u−1,v)+f(u−1,v+1)] (18)
+G v = ∂∂ vf =[f(u−1,v−1)+2∗f(u,v−1) MSE= h×w1 ×c(cid:5)c (cid:5)w (cid:5)h (X i,j,k−Y i,j,k)2 (21)
+k=1 j=1 i=1
++f(u+1,v−1)]−[f(u−1,v+1)
++2∗f(u,v+1)+f(u+1,v+1)] (19) Wherehandwaretheheightandwidthoftheimage,cis
+thenumberofimagechannels.X isthepixelvalueof
+i,j,k
+Where f(u,v) denotes the pixel value at (u,v) coordi- theoriginalclearimageat(i,j,k)coordinate.Y isthe
+i,j,k
+natesoftheimage. pixelvalueoftheprocessedimageat(i,j,k)coordinate.4228 C.XUETAL.
+Figure4.Theproceduresoftheproposedmodelimplementation.
+Figure5.Theyarnimagecollectionplatform.
+Table4.Parametersettingsofthenetworktraining. Table5.Thestatisticalinformationofthedataset.
+Hyperparameter Symbol Values Characteristics Attributes/values Unit
+Maximalepochs E 200 Datasetname Yarndeblurreddataset /
+Batchsize b 16 Datatype Greyscaleimage /
+Learningrate α 0.001 Dataformat Bitmap .bmp
+Thenumberofneuronsinthelastlayerofthe C 4 Numberofinstances 800 pair
+poseclassifier Size 2448∗796 pixel
+Weightcoefficientofthelossfunction λ 1/2448/100
+Note that the higher the PSNR value, the less dis- as training data, 10% are used for validation and the
+tortedtheimagewillbe.Ingeneral,PSNRbelow20dBis remaining 10% are used for the performance testing.
+notacceptableforimages.20–30dBindicatespoorimage The deblurring network is conducted on a computer
+quality. 30–40dB usually indicates that the image qual- server with the following option: the Linux system is
+ity is good (the distortion is detectable but acceptable). used with a Tesla V100 PCIe 32GB GPU card. The
+PSNRhigherthan40dBindicatesthattheimagequality algorithmiscompiledwithPython3.0,Pytorch1.8,and
+isveryclosetotheoriginalimage. CUDA10.2.
+4. Experimentalresultsanddiscussion 4.1. Deblurringperformancecomparison
+To verify the effectiveness of the proposed method, Toverifytheefficiencyoftheproposedmethodforimage
+experiments in the actual spinning process are con- deblurring,itiscomparedwiththestate-of-the-artprior
+ducted.Thestatisticalinformationofthedatasetispro- knowledge-driven and deep learning deblurring meth-
+vided in Table 5. 80% of the collected images are taken ods,respectively.INTERNATIONALJOURNALOFPRODUCTIONRESEARCH 4229
+(2) Comparisonwithpriorknowledge-drivenmethods ofquantitativeandvisualcomparisonsforthetestphase
+through10-foldcrossvalidationarerespectivelyreported
+In this section, the proposed method is compared inFigure7.
+with prior knowledge-driven deblurring methods such From Figure 7(a), SNR, PSNC, and the proposed
+as Wiener filter (WF) (Luo et al. 2019), LR iterative method outperform CNN and DeblurGAN on PSNR,
+deconvolution (LR) (Abang, Ramli, and Halim 2018), whichprovestheeffectivenessofmulti-scaledeblurring
+and (cid:2) -regularised prior methods ((cid:2) -R) (Zhang et al. networkstructuresfordeblurringtheentireyarnimage
+0 0
+2021). We summarise the statistical performance and insuchdynamicspinningscenewithvariable-scaledefo-
+visual comparisons of each method for the test phase cusing.Inparticular,theproposedmethodachievesthe
+through 10-fold cross validation, which are respectively highest PSNR, which is 0.3354 higher than the state-
+reportedinFigure6. of-the-art PSNC method on average with images of
+Figure6(a)showsthestatisticsoftheaveragedpeak- 2448∗2048pixels.FromFigure7(b),thenonzerogradi-
+signal-to-noiseratioofimagesdeblurredbycomparison entvaluesofcomparisondata-drivenmethodsaredenser
+methods and the original blurry images (input) in the than those of the ground truth. It shows that the cur-
+testset.TheproposedmethodachievesthehighestPSNR rent data-driven deblurring networks aim to minimise
+compared with the original blurry images and typical theaverageerroroftheoverallpixelvalueswhileignor-
+knowledge-driven deblurring methods. That indicates ingtheabilitytorestoretheedgesoftheimage.Although
+the effectiveness of the proposed method for deblur- theSNRandPSNCmethodshavegoodeffectsondeblur-
+ring the entire yarn image in such a dynamic spinning ringtheentireimage,theyarenotenoughtorestorethe
+scene with variable-scale defocusing. On the contrary, edgesoftheimage.Incontrast,theproposedmethodhas
+the PSNR of WF and LR methods are worse than the the steepest peak around the 0 value and fits the gra-
+originalblurryimages.Itisindicatedthatthesimpleker- dient curve of the ground truth well, which indicates
+nel estimation method is not suitable for this kind of that the proposed method keeps the global variable-
+variable-scaleblurredscene,andevenhasacounterpro- scale deblurring ability while paying attention to the
+ductive effect of noise (as shown in Figure 6(c)). The restorationofimageedges.Itcanbeseenfromthevisual
+(cid:2) -R method has an average improvement of 0.6828 in comparisonsinFigure7(c).
+0
+PSNRcomparedwiththeoriginalblurryimages,which
+demonstratestheregularisationmethodwithconstraints
+4.2. Qualitydetectionperformancecomparison
+hasaslightdeblurringeffectinthisvariable-scaleblurred
+scenario. To verify the model for quality detection, the proposed
+Figure 6(b) shows the pixel intensity distributions methodiscomparedwiththestate-of-the-artdeblurring
+of gradient elements generated from the blurry image methodsinthequalityindexofyarnevenness.Yarneven-
+(input), clear image (ground truth), and deblurred nessisoneofthemostimportantyarnqualityindicators,
+images. The zero values of images gradients with sharp whichreferstotheuniformityoftheyarnbodydiameter
+edges are denser than those of blurry ones. As it can alongtheaxialsegment.Theyarnbodydiametercanbe
+be seen, the (cid:2) -R method has the steepest peak around calculatedbycountingthepixelsineachrowoftheimage
+0
+the 0 value, which indicates that the regularised inten- thatbelongtotheyarnbody.Then,thecoefficientofvari-
+sityandgradientpriorisbeneficialtorestoresharpedges ation(CV)ofdiametersisusedtoevaluatethequalityof
+of images. However, the gradient curve of (cid:2) -R method theyarn.
+0
+(cid:10)
+isfarawayfromthegroundtruth,whichillustratesthat (cid:11)
+the(cid:2) 0-Rmethodfocusesmoreontheedgesofanimage
+CV=(cid:11)
+(cid:12)1
+(cid:5)Q
+(d −d¯)2÷d¯ (22)
+i
+buthassomedistortionsinthevariable-scaledeblurring Q
+i=1
+oftheentireimage(asshowninFigure6(c)).Incontrast,
+benefitingfromtheimprovedlossfunction,ourproposed Where Q is the number of yarn body diameters taken
+¯
+method can better fit the gradient curve of the ground withinafixedyarnlength,andd representstheaverage
+truth,whichisvisualisedinFigure6(c). valueoftheyarnbodydiameters.
+In the experiment, the CV value calculated from
+(1) Comparisonwithdeeplearningmethods deblurred images is compared with the results detected
+by the laboratory precision instrument. The mean rela-
+Inthissection,theproposedmethodiscomparedwith tiveerror(CV-MRE)isemployedastheevaluationmet-
+deep learning methods such as CNN (Sun et al. 2015), rics. Comparisons of different deblurring methods are
+DeblurGAN (Kupyn et al. 2018), SRN (Taoet al. 2018), made in terms of such fashion. The quantitative results
+and PSNC (Gao et al. 2019). The experimental results arereportedinTable6.4230 C.XUETAL.
+Figure6.ComparisonsoftheproposedKD-DeblurNetandknowledge-drivenmethods.
+Itcanbeseenthattheproposedmethodgetsanerror (Tesla V100 PCIe 32GB GPU). For the deep-learning-
+ratiooflessthan1%onthequalityindex.Meanwhile,it based approach, the trained model is directly used in
+is found that the error on the quality index is not com- theactualdetectionprocess.Therefore,thetrainingtime
+pletely positively correlated with the overall sharpness is not included in the detection time except the time
+of the image (PSNR). This echoes that the edge detail intervalbetweentheinputofablurredimageandtheout-
+information of the yarn body is more crucial in yarn putofaclearimage.Thequantitativeresultsarereported
+quality detection. The proposed model focuses on the inTable6.
+restoration of the edge details of the yarn body instead The results show that the detection time of the pro-
+ofthebackground,whichoutperformsothermethodsin posed method is 0.7534 seconds, which is not superior
+qualitydetection. compared to other methods due to the multi-channel
+structure increasing the amount of parameter calcula-
+tion. However, for the actual industrial application, the
+4.3. Runningtimecomparison
+proposedmethodisfeasible.Thedetectionfrequencyis
+Considering the timely requirements of online quality 1 second which will process 1 image within a second.
+detection, the running time is compared with the state- Adding0.0426secondsforthecameratotakeanimage,
+of-the-art deblurring methods on the same platform thetotaltimeoftheproposedmethodforeachdetectionINTERNATIONALJOURNALOFPRODUCTIONRESEARCH 4231
+Figure7.ComparisonsoftheproposedKD-DeblurNetanddata-drivenmethods.
+islessthan1second,whichcanmeettherequirementsof Table6.Quantitative comparison of the proposed method
+onlinedetection. withthestate-of-the-artdeblurringmethodsoncomprehensive
+indicators.
+Detection
+4.4. Discussion Methods PSNR CV-MRE(%) time(s)
+WF(Luoet al.2019) 27.8267 6.2408 0.6211
+(1) Parametersettings LR(Abang,Ramli,andHalim2018) 27.9846 5.6121 0.2450
+(cid:2) 0-R(Zhanget al.2021) 32.3249 6.7977 0.2753
+CNN(Sunet al.2015) 31.6363 5.2860 0.1148
+The proposed model involves three main parame-
+DeblurGAN(Kupynet al.2018) 32.5796 4.0478 1.9473
+ters, α (learningrate),C (thenumberof neuronsinthe SRN(Taoet al.2018) 34.9595 2.2564 0.6210
+last layer of the pose classifier), and λ (weight coeffi- PSNC(Gaoet al.2019) 35.1409 1.3829 0.3960
+KD-DeblurNet(Ours) 35.4763 0.9040 0.7534
+cientofthelossfunction).Inthissection,theparameter
+settingformodeltrainingwillbediscussedviasensitivity
+analysis. 2448isthenumberofpixelsintheimage.Figure8shows
+For each parameter, experiments are conducted with thesensitivityanalysisresultsofα,C,andλ.Theparam-
+different parameter settings by varying one and fixing etersettingwithhigherPSNRandlowercomputational
+otherswiththePSNRmetric.Forparameterα,thevalue overheadisselectedformodeltraining.Forthelearning
+issetfrom10−5to10−1withtheincrementofamultiple rateα,thelowerthevalue,thegreaterthecomputational
+of10.ForparameterC,itissetfrom1to10withthestep costduetotheshorterconvergencestep.Whenitislower
+sizeof1.Forparameterλ,valueisfrom10−4×1/2448 than10−3,thePSNRisbasicallythesame,sowechoose
+to1/2448withtheincrementofamultipleof10,where 10−3 as its parameter setting. For the number of pose4232 C.XUETAL.
+Figure8.Sensitivityanalysisofα,C,andλ fortheproposedmodel.
+categoriesC,thehigherthevalue,thegreaterthecompu- To further evaluate the performance gains from the
+tationalcostduetomorereconstructionchannels.When pose classification module and the (cid:2) loss function, the
+0
+it is between 4 and 8, higher PSNR will be achieved, so proposedmethodisfurthercomparedwiththenetwork
+we choose 4 as its parameter setting. For the weight of removing pose classification module, and (cid:2) loss func-
+0
+coefficientoflossfunctionλ,itsvaluedoesnotaffectthe tion.Thequantitativeresultsandvisualcomparisonsare
+calculationoverhead,sowechoose10−2×1/2448asits
+respectivelyreportedinFigure9.
+parametersettingduetothehighestPSNR. As shown in Figure 9(a), removing the pose classi-
+fication module reduces 3.3149% of the average PSNR
+(2) Effectivenessofimprovements value, while removing the (cid:2) loss function has basically
+0
+no effect on PSNR. It is observed that the proposed
+The outperformance of the proposed method can be poseclassificationmoduleisbeneficialforvariable-scale
+attributed to the pose classification module and (cid:2) loss deblurring of yarn images in spinning. As shown in
+0
+function. The pose classification module distinguishes Figure 9(b), removing the pose classification module
+theyarnposestoclassifyvaryingdegreesofdefocusblur, (onlykeep(cid:2) regularisationinlossfunction)causesthe
+0
+because different poses correspond to different out-of- gradient curve to steepen sharply near the value of 0,
+focusdistances.Inthisway,imageswithdifferentdefocus whileusingthenormallossfunctionwithout(cid:2) regular-
+0
+degreescanbefedintodifferentdeblurringchannelsfor isation causes the nonzero gradient values to be denser.
+differentiated deblurring, instead of arbitrarily indiffer- It is observed that the (cid:2) regularisation is beneficial for
+0
+enceprocessingforallimages.The(cid:2) lossfunctionmin- the restoration of image edges. However, only keeping
+0
+imisesthegradientlossbetweenpixelstoguidethemodel the (cid:2) loss function for all kinds of blurry yarn images
+0
+tofocusonthedeblurringoftheedgedetailsoftheyarn without the pose classification module will result in an
+body,becausetheedgeoftheyarnatthejunctionwiththe excessive sharpening edge of the yarn body and distor-
+backgroundchangesstronglyinpixelgradient.Underthe tion of the entire image. The visual results in Figure
+combinedeffect,theproposedmodeloutperformsother 9(c) also illustrate that integrating the pose classifica-
+models. tion module and the improved loss function achieves aINTERNATIONALJOURNALOFPRODUCTIONRESEARCH 4233
+Figure9.ComparisonsoftheproposedKD-DeblurNet,removingpose,andremoving(cid:2) .
+0
+better deblurring effect of the yarn image closer to the state-of-the-art methods for yarn image deblurring,
+groundtruth. which provided more accurate input for yarn quality
+detection.
+Futureworkwillfocusonabstractingageneraldeblur-
+5. Conclusionandfuturework
+ringmodelformorescenarioscharacterisedbyvariable-
+Thispaperproposedanewapproachviaknowledgeaug- scale and edge details, which can adaptively learn the
+mented deep learning modelling to deblur yarn images knowledgeofdifferentindustrialfields.
+in dynamic spinning scenes with variable-scale defo-
+cusing. It was beneficial to timely and accurate detec-
+Notesoncontributors
+tion of product quality abnormalities, thereby improv-
+ing product quality and reducing production losses. Chuqiao Xu received the M.S. degree
+By investigating the movement of the yarn in spin- inmechanicalengineeringfromXinjiang
+ning,thepriorknowledgebetweenyarnposesanddefo- University, Urumchi, China, in 2017. He
+is currently working toward the Ph.D.
+cus blur degrees was excavated to guide the construc-
+degree in big data driven product qual-
+tion of the deblurring neural network. Benefit from
+ityinspectionforindustrialengineeringat
+the prior knowledge embedded improvement for deep SchoolofMechanicalEngineering,Shang-
+learning model, the proposed method outperformed haiJiaoTongUniversity,Shanghai,China.4234 C.XUETAL.
+Hiscurrentresearchfocusesonbigdataanalyticsandcomputer and Control, New Zealand Chinese Youth Scientist Award
+visionsolutionsforyarnspinningsystems. (NZCYSA) 2017 and the Young Author Prize in the 15th
+IFAC/IEEE/IFIP/IFORS Symposium on Information Control
+Junliang Wang received the B.S. degree
+ProblemsinManufacturing.
+in scheduling of manufacturing systems
+from Wuhan University of Technology,
+Wuhan, China, in 2009 and the Ph.D.
+Disclosurestatement
+degree in big data driven operation for
+industrial engineering at School of Nopotentialconflictofinterestwasreportedbytheauthor(s).
+Mechanical Engineering, Shanghai Jiao
+TongUniversity,Shanghai,China,in2018.
+Since 2018, he is a Research Assistant with College of Funding
+MechanicalEngineering,DonghuaUniversity,Shanghai,China.
+This work was supported by Shanghai Science and Technol-
+Heistheauthorof2books,morethan30articles.Hiscurrent
+ogyProject:[GrantNumber19411951506],TheFundamental
+researchfocusesonbigdataanalyticsandoperationincomplex
+Research Funds for the Central Universities: [Grant Number
+manufacturingsystems.
+2232021A-08],ShanghaiChenguangProgram:[GrantNumber
+Jing Tao received the Bachelor’s degree 20CG41].
+inmechanicalengineeringfromDonghua
+University,Shanghai,China,in2020.Sheis
+currentlyworkingtowardstheM.S.degree Dataavailabilitystatement
+in mechanical engineering at Donghua
+Thedatathatsupportthefindingsofthisstudyareavail-
+University. Her current research focuses
+oncomputervision. ableonrequestfromthecorrespondingauthor,J.Zhang.
+Thedataarenotpubliclyavailableduetotheircontain-
+ing information that could compromise the privacy of
+Jie Zhang received the Ph.D. degree in
+schedulingofmanufacturingsystemsfrom cooperativeenterprise.
+Nanjing University of Aeronautics and
+Astronautics, Nanjing, China, in 1997.
+She is currently the Dean of College of ORCID
+Mechanical Engineering, Donghua Uni-
+ChuqiaoXu http://orcid.org/0000-0001-5611-2990
+versity, Shanghai, China. Before joining
+JieZhang http://orcid.org/0000-0002-6215-0237
+Donghua University, she was a Professor
+with the Institute of Intelligent Manufacturing and Informa- RayY.Zhong http://orcid.org/0000-0002-3011-2009
+tion Engineering, Shanghai Jiao Tong University, Shanghai,
+China. She is the author of 6 books, more than 100 articles.
+References
+Herresearchinterestsincludeindustrialbigdataanalysis,intel-
+ligentproductionscheduling,productioncontrolinintelligent
+Abang, M. Z., M. S. Ramli, and S. A. Halim.2018. “Applica-
+manufacturingsystem,andintelligentqualityanalysis.
+tionofBlindDeconvolutionandLucy-RichardsonDecon-
+RayY.Zhongreceived the B.S. degree in volution for Image Deblurring.” Journal of Fundamental
+mathematics and computer science and and Applied Sciences 9 (5S): 232–244. doi:10.4314/jfas.v9i
+technologyfromGannanNormalUniver- 5s.17.
+sity, Ganzhou, China, in 2004, the M.S. Beck,A.,and M. Teboulle. 2009.“FastGradient-BasedAlgo-
+degreeinsignalandinformationprocess- rithmsforConstrainedTotalVariationImageDenoisingand
+ing from the Guangdong University of DeblurringProblems.”IEEETransactionsonImageProcess-
+Technology, Guangzhou, China, in 2009, ing18(11):2419–2434.doi:10.1109/TIP.2009.2028250.
+and the Ph.D. degree in industrial and Cai,J.,W.Zuo,andL.Zhang.2020.“DarkandBrightChan-
+manufacturing systems engineering from the University of nel Prior Embedded Network for Dynamic Scene Deblur-
+Hong Kong, Hong Kong, in 2013. He is now an Assistant ring.”IEEETransactionsonImageProcessing29:6885–6897.
+Professor with the Department of Industrial and Manufac- doi:10.1109/TIP.2020.2995048.
+turing Systems Engineering, University of Hong Kong. His Chakrabarti, A. 2016. “A Neural Approach to Blind Motion
+current research interests include big data in manufacturing Deblurring.” Paper presented at the European Conference
+and service, advanced planning and scheduling, and RFID onComputerVision,Cham,September17.doi:10.1007/978-
+in Internet of manufacturing things. Dr. Zhong is a member 3-319-46487-9_14.
+of CIRP RA, Logistics and Supply Chain Management Hong Chen,J.,Z.Zhang,andF.Wu.2020.“AData-DrivenMethod
+Kong, Institution of Engineering and Technology, American forEnhancingtheImage-BasedAutomaticInspectionofIC
+SocietyofMechanicalEngineers,andIEEE.Raywasawarded WireBondingDefects.”InternationalJournalofProduction
+the 2018 IJPR Best Paper with the title of ‘Big Data Analyt- Research59(16):4779–4793.doi:10.1080/00207543.2020.18
+icsforPhysicalInternet-basedintelligentmanufacturingshop 21928.
+floor,’ Best Conference Paper Award with the title of ‘Analy- Cheng,S.,R.Liu,Y.He,X.Fan,andZ.Luo.2020.“BlindImage
+sisofRFIDDatasetsforSmartManufacturingShopFloors’in DeblurringviaHybridDeepPriorsModeling.”Neurocom-
+15th IEEE International Conference on Networking, Sensing puting387:334–345.doi:10.1016/j.neucom.2020.01.004.INTERNATIONALJOURNALOFPRODUCTIONRESEARCH 4235
+Fan, Q., H. Huang, Y. Li, Z. Han, Y. Hu, and D. Huang. Sha, L., D. Schonfeld, and J. Wang. 2020. “Graph Lapla-
+2021. “Beetle Antenna Strategy Based Grey Wolf Opti- cianRegularizationwithSparseCodingforImageRestora-
+mization.” Expert Systems with Applications 165: 113882. tion and Representation.” IEEE Transactions on Circuits
+doi:10.1016/j.eswa.2020.113882. and Systems for Video Technology 30 (7): 2000–2014.
+Ferrada,H.,C.A.Navarro,andN.Hitschfeld.2020.“AFiltering doi:10.1109/TCSVT.2019.2913411.
+TechniqueforFastConvexHullConstructioninR2.”Jour- Sun, J., W. Cao, Z. Xu, and J. Ponce. 2015. “Learning a Con-
+nalofComputationalandAppliedMathematics364:112298. volutional Neural Network for Non-Uniform Motion Blur
+doi:10.1016/j.cam.2019.06.014. Removal.”Paperpresentedatthe2015IEEEConferenceon
+Gao, H., X. Tao, X. Shen, and J. Jia. 2019. “Dynamic Scene ComputerVisionandPatternRecognition(CVPR),Boston,
+Deblurring with Parameter Selective Sharing and Nested June7–12.doi:10.1109/CVPR.2015.7298677.
+SkipConnections.”Paperpresentedatthe2019IEEE/CVF Tao, X., H. Gao, X. Shen, J. Wang, and J. Jia. 2018. “Scale-
+Conference on Computer Vision and Pattern Recognition RecurrentNetworkforDeepImageDeblurring.”Paperpre-
+(CVPR),LongBeach,June15–20.doi:10.1109/CVPR.2019. sented at the 2018 IEEE/CVF Conference on Computer
+00397. VisionandPatternRecognition,SaltLakeCity,June18–23.
+Genta,G.,M.Galetto,andF.Franceschini.2020.“Inspection doi:10.1109/CVPR.2018.00853.
+ProceduresinManufacturingProcesses:RecentStudiesand Wan,S.,S.Tang,X.Xie,J.Gu,R.Huang,B.Ma,andL.Luo.
+ResearchPerspectives.”InternationalJournalofProduction 2020. “Deep Convolutional-Neural-Network-Based Chan-
+Research58(15):4767–4788.doi:10.1080/00207543.2020.17 nelAttentionforSingleImageDynamicSceneBlindDeblur-
+66713. ring.” IEEE Transactions on Circuits and Systems for Video
+Guha,A.,C.Amarnath,S.Pateria,andR.Mittal.2010.“Mea- Technology31(8):2994–3009.doi:10.1109/TCSVT.2020.30
+surement of Yarn Hairiness by Digital Image Processing.” 35664.
+The Journal of The Textile Institute 101 (3): 214–222. Wang,C.,B.C.Jiang,Y.S.Chou,andC.C.Chu.2011.“Mul-
+doi:10.1080/00405000802346412. tivariate Analysis-Based Image Enhancement Model for
+Jing, J., H. Li, H. Zhang, Z. Su, and K. Zhang. 2020. MachineVisionInspection.”InternationalJournalofProduc-
+“Detection of Bobbin Yarn Surface Defects by Visual tionResearch49(10):2999–3021.doi:10.1080/00207541003
+SaliencyAnalysis.”FibersandPolymers21(11):2685–2694. 801242.
+doi:10.1007/s12221-020-9728-8. Wang, K. J., Y. H. Lee, and S. Angelica. 2020. “Digital Twin
+Khan, S. U., I. U. Haq, S. Rho, S. W. Baik, and M. Y. Lee. DesignforReal-TimeMonitoring–ACaseStudyofDieCut-
+2019. “Cover the Violence: A Novel Deep-Learning-Based tingMachine.”InternationalJournalofProductionResearch
+ApproachTowardsViolence-DetectioninMovies.”Applied 59 (21): 6471–6485. doi:10.1080/00207543.2020.1817
+Sciences9(22):4963.doi:10.3390/app9224963. 999.
+Kupyn, O., V. Budzan, M. Mykhailych, D. Mishkin, and J. Wang, M. W., F. Z. Zhu, and Y. Y. Bai. 2021. “An Improved
+Matas.2018.“DeblurGAN:BlindMotionDeblurringUsing Image Blind Deblurring Based on Dark Channel Prior.”
+ConditionalAdversarialNetworks.”Paperpresentedatthe Optoelectronics Letters 17 (1): 40–46. doi:10.1007/s11801-
+2018IEEE/CVFConferenceonComputerVisionandPat- 021-0081-y.
+tern Recognition (CVPR), Salt Lake City, June 18–23. Wu,J.,Q.Li,S.Liang,andS.Kuang.2020.“ConvolutionalNeu-
+doi:10.1109/CVPR.2018.00854. ralNetworkwithSqueezeandExcitationModulesforImage
+Kusiak, A. 2020. “Convolutional and Generative Adversarial BlindDeblurring.”Paperpresentedatthe2020Information
+NeuralNetworksinManufacturing.”InternationalJournalof CommunicationTechnologiesConference(ICTC),Nanjing,
+ProductionResearch58(5):1594–1604.doi:10.1080/002075 May29–31.doi:10.1109/ICTC49638.2020.9123259.
+43.2019.1662133. Xu,Z.,H.Chen,andZ.Li.2020.“BlindImageDeblurringvia
+Li, Z., N. Xiong, J. Wang, R. Pan, W. Gao, and N. Zhang. the Weighted Schatten p-Norm Minimization Prior.” Cir-
+2017. “An Intelligent Computer Method for Automatic cuits, Systems, and Signal Processing 39 (12): 6191–6230.
+Mosaic of Sequential Slub Yarn Images Based on Image doi:10.1007/s00034-020-01457-z.
+Processing.” Textile Research Journal 88 (24): 2854–2866. Xu, C., J. Wang, J. Zhang, and C. Lu. 2020. “A New Weld-
+doi:10.1177/0040517517732081. ing Path Planning Method Based on Point Cloud and
+Luo, T., R. Fan, Z. Chen, X. Wang, and D. Chen. 2019. Deep Learning.” Paper presented at the 2020 IEEE 16th
+“Deblurring Streak Image of Streak Tube Imaging Lidar InternationalConferenceonAutomationScienceandEngi-
+UsingWienerDeconvolutionFilter.”OpticsExpress27(26): neering(CASE),HongKong,Aug.20–21.doi:10.1109/CASE
+37541–37551.doi:10.1364/OE.27.037541. 48305.2020.9216866.
+Nah, S., T. H. Kim, and K. M. Lee. 2017. “Deep Multi-Scale Yan, Y., W. Ren, Y. Guo, R. Wang, and X. Cao. 2017.
+ConvolutionalNeuralNetworkforDynamicSceneDeblur- “ImageDeblurringviaExtremeChannelsPrior.”Paperpre-
+ring.”Paperpresentedatthe2017IEEEConferenceonCom- sented at the 2017 IEEE Conference on Computer Vision
+puter Vision and Pattern Recognition (CVPR), Honolulu, and Pattern Recognition (CVPR), Honolulu, July 21–26.
+July21–26.doi:10.1109/CVPR.2017.35. doi:10.1109/CVPR.2017.738.
+Perng,D.,S.Lee,andC.Chou.2010.“AutomatedBondingPosi- Zhang, Y., Y. Shi, L. Ma, J. Wu, L. Wang, and H. Hong.
+tion Inspection on Multi-Layered Wire IC Using Machine 2021. “Blind Natural Image Deblurring with Edge Preser-
+Vision.”InternationalJournalofProductionResearch48(23): vationBasedonL0-RegularizedGradientPrior.”Optik225:
+6977–7001.doi:10.1080/00207540903059497. 165735.doi:10.1016/j.ijleo.2020.165735.
+Rai, R., M. K. Tiwari, D. Ivanov, and A. Dolgui. 2021. Zhao,H.,Z.Ke,N.Chen,S.Wang,K.Li,L.Wang,X.Gong,etal.
+“Machine Learning in Manufacturing and Industry 4.0 2020.“ANewDeepLearningMethodforImageDeblurring
+Applications.” International Journal of Production Research inOpticalMicroscopicSystems.”JournalofBiophotonics13
+59(16):4773–4778.doi:10.1080/00207543.2021.1956675. (3):e201960147.doi:10.1002/jbio.201960147.4236 C.XUETAL.
+Zhong, Z., and Z. Ma. 2021. “A Novel Defect Detec- L0-Regularized Intensity and Gradient Priors.” Paper pre-
+tion Algorithm for Flexible Integrated Circuit Package sented at the Proceedings – International Conference on
+Substrates.” IEEE Transactions on Industrial Electronics. Image Processing (ICIP), Abu Dhabi, September 25-28.
+doi:10.1109/TIE.2021.3057026. doi:10.1109/ICIP40778.2020.9191010.
+Zhou, K., P. Zhuang, J. Xiong, J. Zhao, and M. Du. 2020.
+“BlindImageDeblurringwithJointExtremeChannelsandCopyrightof InternationalJournalof ProductionResearchisthepropertyof Taylor&Francis
+Ltdanditscontentmaynotbecopiedor emailedtomultiplesitesor postedtoalistserv
+withoutthecopyrightholder's express writtenpermission.However, users mayprint,
+download,or emailarticlesfor individualuse.

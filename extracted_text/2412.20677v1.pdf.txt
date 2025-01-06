@@ -1,0 +1,825 @@
+Align Attention Heads Before Merging Them: An Effective Way for
+Converting MHA to GQA
+QingyunJin1,2 XiaohuiSong2 FengZhou2 ZengchangQin1 *
+1BeihangUniversity,Beijing,China
+2OPPOAICenter,Beijing,China
+{jinqingyun, zcqin}@buaa.edu.cn
+{songxiaohui, zhoufeng1}@oppo.com
+Abstract
+Large language models have been shown to
+performwellonavarietyofnaturallanguage MLP Layer
+processingproblems. However,asthemodel
+sizeandtheinputsequence’slengthincrease,
+the rapid increase of KV Cache significantly
+slowsdowninferencespeed. ThereforeGQA
+model, as an alternative to MHA model, has
+been widely introduced into LLMs. In this
+work,weproposealow-costmethodforprun-
+ingMHAmodelsintoGQAmodelswithany
+compression ratio of key-value heads. Our
+methodisbasedonL maskstograduallyre-
+0
+move redundant parameters. In addition, we
+applyorthogonaltransformationstoattention
+headswithoutchangingthemodeltoincrease
+similaritybetweenattentionheadsbeforeprun-
+ingtraining,inordertofurtherimproveperfor-
+manceofthemodel. Ourmethodcanbecom-
+patiblewithrotarypositionembedding(RoPE),
+which means the model after training can be
+fullyadaptedtothemainstreamstandardGQA
+framework. Experimentsdemonstratethatour
+strategycancompressupto87.5%ofkey-value
+headsoftheLLaMA2-7Bmodelwithouttoo
+muchperformancedegradation,justachieved
+throughsupervisedfine-tuning.
+1 Introduction
+Recently, Large language models (LLMs) (Rad-
+fordetal.,2018;Brownetal.,2020;Ouyangetal.,
+2022)showremarkableperformanceonavarietyof
+naturallanguageprocessingtasks. However,since
+mostLLMsarebasedonTransformerarchitecture
+(Vaswani, 2017), the expansion of the sequence
+lengthduringinferenceresultsinalinearincrease
+inthememoryfootprintofKVCache,significantly
+slowingdownmodelinference. Therefore,reduc-
+ingthesizeofKVCacheisakeyissueforLLMs.
+Multi-query attention (MQA) (Shazeer, 2019)
+andgrouped-queryattention(GQA)(Ainslieetal.,
+*Correspondingauthor.
+new
+value
+new
+key
+logits distillation
+LM Head LM Head
+MLP Layer
+values transfer
+to
+×N ×N
+Attention Layer keys ×G
+queries
+Embedding Embedding
+origin model pruned model
+Figure1:Anillustrationofourpruningtrainingprocess.
+Thetraininglossconsistsoftwoparts: distillationloss
+betweenteachermodelandpruningmodel,andpruning
+losstoimposekey-valueprojectionmatricesgradually
+transferred to new ones. After pruning, original key-
+valueprojectionmatriceswillbediscarded,thenweget
+astandardGQAmodel.
+2023)reduceKVCachebyallowingmultipleatten-
+tionheadstoshareasinglekey-valuehead,which
+issimpleandeffective. SinceGQAhasbetterinfer-
+encestabilityandperformance,ithasbeenwidely
+usedinLLaMA2(Touvronetal.,2023),LLaMA
+3(Dubeyetal.,2024),Qwen2(Yangetal.,2024),
+Mistral (Jiang et al., 2023) and other LLMs (Liu
+etal.,2024;Zhangetal.,2024).
+AmethodforconvertingMHAmodeltoGQA
+model is also proposed in (Ainslie et al., 2023).
+Theyconstructeachgroupkeyandvalueheadby
+mean-pooling all the original heads within that
+group and then uptrain the model to restore the
+modelperformance. However,thecomputational
+resourcesrequiredforuptrainingareunaffordable
+inmostconditions.
+In this work, we use L masks (Louizos et al., 0
+4202
+ceD
+03
+]LC.sc[
+1v77602.2142:viXra2017)totransferoriginalkey-valueprojectionma- alinearrateduringtheprocessofpruningtraining.
+trices to new ones. Figure 1 shows our concept. InCoFi(Xiaetal.,2022),theL methodisapplied
+0
+Inaddition,basedontheideaofcomputationalin- directly to LLMs by introducing pruning masks
+varianceinthemodel(Ashkboosetal.,2024),we withdifferentgranularities. Theyprunethehidden
+apply orthogonal transformations to the matrices dimension, the intermediate dimension, the num-
+ofattentionheadswithoutchangingthemodelbe- berofattentionheads,andevenanentireMHAor
+fore pruning training: We measure the similarity FFNlayer. ThesubsequentworkSheared-LLaMA
+betweenKVCachesofdifferentattentionheadsaf- (Xia et al., 2023) incorporates previous methods
+terorthogonaltransformation,thendivideattention andspecifiesthetargetstructuresothatthepruned
+headswithhighsimilarityofKVCachesintothe model can be directly adapted to standard LLM
+samegroup. ThesimilarityamongtheKVCaches frameworks.
+derivedfromtheattentionheadswithinthesame
+group is then maximized through an orthogonal 2.2 TransferMHAtoGQA
+transformation. Experimentsshowthatthismethod (Ainslie et al., 2023) proposes GQA for the first
+can significantly improve the performance of the time, in which MHA is converted to GQA using
+prunedmodelafterthetransformationofattention meanpoolinginitialization. However,thismethod
+heads. (Yuetal.,2024)isthemostrelevantworkto requiresuptrainingtorestoreperformanceandin-
+ours;however,theirmethodisnotfullycompatible curs significant computational costs. (Yu et al.,
+withRoPE(Suetal.,2024). Ourcontributionsare 2024) keeps the corresponding parameters based
+asfollows. on the principal components of the collected KV
+Caches,thenusesLoRA(Huetal.,2021)tofine-
+• We propose a general and low-cost method
+tunethemodeltorestoreperformance. (Chenetal.,
+forconvertingMHAstructuretoGQA,which
+2024) proposes to regroup attention heads based
+cancompressthekeyandvalueheadstoany
+on the criterion of cosine similarity and allows
+percentageandbasicallyrestoreperformance
+for varying group sizes. However, none of the
+aftersupervisedfine-tuning.
+aforementionedimprovementmethodscanbefully
+adaptedtothestandardGQAmodel.
+• Ourstudyprovidesanewperspectiveforeval-
+uatingthesimilaritybetweenattentionheads,
+2.3 Compressingmodelbasedonthe
+which presents new insights for future re-
+principalcomponentsoffeatures
+searchrelatedtocompressingKVCache.
+Somepreviousworks(Liuetal.,2023;YuandWu,
+• Weconductexperimentsonpruningtraining 2023)havepointedoutthatthefeaturesofLLMs
+theLLaMA2-7Bmodel(Touvronetal.,2023) aregenerallylow-rank. Therefore,identifyingand
+intoGQA-16,GQA-8,andGQA-4,separately. deletingthelow-rankcomponentsofthemodelis
+Themodelperformancedoesnotdecreasesig- aneffectivemethodformodelcompression.
+nificantly compared to that of the full-size LowRankBERT(NoachandGoldberg,2020)
+model. reducesthenumberofparametersandincreasesin-
+ferencespeedbydecomposingtheweightmatrices
+2 RelatedWorks
+intotwolow-rankmatrices. SliceGPT(Ashkboos
+2.1 L regularization etal.,2024)introducestheideaofcomputational
+0
+invarianceinTransformerarchitectureandremoves
+L regularization(Louizosetal.,2017)isastruc-
+0 columnsorrowsofthetransformedweightmatri-
+turedpruningapproachthattransformsapruning
+cestoreducemodelsize. (Yuetal.,2024)applies
+problemintoanoptimizationproblemundercon-
+orthogonaltransformationstokey-valueprojection
+straints. Thepruningprocessisperformedsimul-
+matricesbyanalyzingthelow-rankfeaturesofKV
+taneously with model optimization by introduc-
+Cache.
+ingtrainablemasks. Withthewideapplicationof
+LLMs,thismethodhasbeenappliedtocompress-
+3 Method
+ingLLMs. Intheworkof(Wangetal.,2019),the
+L methodisappliedbasedonlow-rankpruningto In this section, we will specifically describe our
+0
+achievefurtherimprovementsineffectiveness,and method. Ourmethodconsistsoftwoparts,transfor-
+theyproposetograduallyincreasethetargetsizeat mationofthenetworkandpruningtraining. Trans-0.6
+0.5
+0.4
+0.3
+0.2
+0.1
+0.0
+0 5 10 15 20 25 30
+Block Index
+ytiralimiS
+enisoC
+Cosine similarity between KV Cache in each block
+value
+175
+key
+400
+150
+125
+300
+100
+200 75
+50
+100
+25
+0 0
+tnuoC
+Figure2: IneachblockofLLaMA2-7B,theaveragecosinesimilarityiscalculatedbetweeneverytwokeyandvalue
+caches. Forconvenience,theaveragesimilaritiesshowninthisfigurearetheirabsolutevalues. Itcanbeseenthat
+mostpairsofKVCachesarealmostorthogonal. Thismayexplainwhydirectlymergingkey-valueheadscauses
+significantloss.
+formation of the network represents applying or- 1 N (cid:88)−1
+SimVori = cos(V [n]·V [n]) (3)
+thogonal transformations to the projection matri- i,j N i j
+cesinordertoincreasethesimilaritybetweenat- n=0
+tention heads of the same group, so that we can where i,j are any two of attention heads in the
+increase efficiency of model optimization. The sameblock,nrepresentsthenthtokeninthiscache.
+pruningtrainingprocesscombinespruningusing AsshowninFigure2,wenoticethatwhileafew
+L 0 masks (Louizos et al., 2017) and knowledge pairs of KV Caches share high cosine similarity
+distillation(Gouetal.,2021). with each other, the vast majority of them are al-
+most orthogonal. This is the reason why directly
+3.1 Motivation
+mean-poolingprojectionmatricesresultsinsignif-
+ToanalyzethecharacteristicsofKVCache,wefol- icant loss so that uptraining is needed to restore
+lowapriorcalibrationmethodforLLMs(Frantar performance.
+andAlistarh,2023;Sunetal.,2023)inordertoob- However, according to (Yu et al., 2024), KV
+taincalibrationdata: Sample128sequencesfrom CachesareLow-rank. Giventhatthesecachesoc-
+the C4 (Raffel et al., 2020) training set and each cupyonlyaportionofspatialdimensions,applying
+sequenceis2048tokenslong,262144tokensinto- appropriateorthogonaltransformationstothepro-
+tal. ThenperformmodelinferenceonLLaMA2-7B jectionmatricestoalignkeyandvaluecachescan
+andcollectKVCaches,i.e., reducethedifficultyofmodeloptimization. Fortu-
+nately,thisapproachisfeasible.
+K = [K ;...;K ] V = [V ;...;V ] (1)
+1 H 1 H
+3.2 Preliminaries
+whereK,V ∈ Rd×N areKVcachescorresponding
+Given two sets of vectors of the same shape:
+toeachblock,whichcanbedividedintoK ,V ∈
+i i
+RdH×N,N isthenumberoftokens,disembedding X = {x 1,x 2,...,x N} ∈ RM×N and Y =
+{y ,y ,...,y } ∈ RM×N, how to find the op-
+dimensionandH representsthenumberofheadsin 1 2 N
+timalorthogonaltransformationthatalignsthetwo
+eachMHA,d issettod/H,thenwecancalculate
+H
+setsofvectors? ThiskindofproblemsiscalledOr-
+theaveragecosinesimilaritybetweeneachoftwo
+thogonalProcrustesproblem,anditsmathematical
+headsasfollows:
+formulationisasfollows:
+N−1
+1 (cid:88)
+SimK io ,r ji =
+N
+cos(K i[n]·K j[n]) (2) min∥QX−Y∥2
+F
+(4)
+n=0 QTheoptimalorthogonaltransformationcanbede- For each block, the output of self-attention layer
+rived from SVD of the matrix YXT, the general canbeseenasthesumofallattentionheads:
+solutionis(Schönemann,1966):
+PerformSVDonthecovariancematrixofXand
+MultiHead(W ,W ,W ,W )
+Q K V O
+Y,
+(YXT) = ΦΣΨT (5)
+=(cid:88)H
+(W (W
+X)Softmax(cid:18) (W KiX √)T(W Qix)(cid:19)
+)
+Oi Vi
+d
+i=1 H
+ThenobtaintheoptimalorthogonalmatrixQ: (11)
+wheretheprojectionmatricesintheattentionheads
+Q = ΨΦT (6) areW Qi,W Ki,W
+Vi
+∈ RdH×d andW
+Oi
+∈ Rd×dH,
+X ∈ Rd×len represents the input sequence, and
+WecanusethesamewaytoalignanytwoKV x ∈ Rd×1 representsthecurrenttoken. Forbrevity,
+Cachesfromdifferentattentionheadsinthesame RoPEisignoredhere. Thenwecanfusetheorthog-
+block. Furthermore,ifwewanttoalignmorethan onal matrix into the value projection matrix W
+Vj
+twosetsofcaches,GeneralizedProcrustesanalysis and the output projection matrix W to ensure
+Oj
+(Wikipediacontributors,2022)isagoodsolution. computationalinvariance:
+Thedetaileddescriptionisshowninalgorithm1.
+′
+W = Q W (12)
+Vj Vj Vj
+Algorithm1GeneralizedProcrustesAnalysis
+Require: MatricesX 1,X 2,...,X H W O′ j = W OjQT Vj (13)
+Ensure: AlignedmatricesY ,Y ,...,Y
+1 2 H
+AsforW andW ,duetotheexistenceofRoPE,
+InitializeY = X foralli Q K
+i i
+ComputemeanshapeM¯ = 1 (cid:80)H Y orthogonal transformation cannot be applied di-
+H i=1 i
+rectly. However, we can divide the d-dimension
+repeat
+spaceintod/2sub-spacesandapplytheorthogo-
+fori = 1toH do
+ComputeΦ Σ ΨT = SVD(YTM) naltransformationineverytwodimensionjustlike
+i i i i
+UpdateY = Y Ψ ΦT RoPE, which is to say the orthogonal matrix for
+i i i i
+keyprojectionmatrixshouldbeinthisform:
+endfor
+UpdatemeanshapeM¯ = H1 (cid:80)H i=1Y
+i  R 0 ··· 0 
+untilconvergence θ1
+return Y 1,Y 2,...,Y H R Kj =   
+
+0 . .
+.
+R . . .θ2 · .· ..· 0 . .
+.
+  
+
+(14)
+0 0 ··· R
+θ
+d/2
+3.3 Transformationofattentionheads
+whereR isa2Drotationmatrix. Thenwefusethe
+Tocalculatetheoptimalorthogonalmatrixforeach θ·
+orthogonal matrix R into the query projection
+pairofkeyandvalueheads,wecollectKVCaches Kj
+matrixW andkeyprojectionmatrixW :
+according to the method mentioned above. Here, Qj Kj
+weusetwocriteriatoperformthecalculations.
+′
+W = R W (15)
+Based on cosine similarity. Firstly normalize Qj kj Qj
+each vector in K and V to roughly reduce the
+i i
+′
+influenceofmagnitudeofthevector: W Kj = R kjW Kj (16)
+So,weget
+K [∗]
+Kˆ [∗] = i (7)
+i
+∥K [∗]∥
+i q′Tk′ =(Rd (R W )x )T(Rd (R W )x )
+s t Θ,s Kj Qj s Θ,t Kj Kj t
+Vˆ[∗] = V i[∗] (8) =xT sW QT j(R KT jR Θd ,t−sR Kj)W Kjx t
+i ∥V [∗]∥ =xTWT Rd W x
+i s Qj Θ,t−s Kj t
+thenwecangettheoptimalorthogonalmatrixQ
+V
+=(R Θd ,sW Qjx s)T(R Θd ,tW Kjx t)
+toalignanytwovaluecaches,takingVˆ i andVˆ j as =q sTk t
+example: (17)
+(VˆVˆT ) = ΦΣΨT (9) whereq s representsthequeryofthesth position
+i j andk representsthekeyofthetth position. This
+t
+Q = ΨΦT (10) transformationdoesn’tchangethemodeleither.
+VjFigure3: Thisfigureshowstheaveragecosinesimilarityofkeyandvaluecachesbetweenanytwoheadsbefore
+andafteranapplyingtransformationinsomeblocksofLLaMA2-7B.Appropriateorthogonaltransformationscan
+significantlyimprovethecosinesimilaritybetweenKVCaches.
+Inthisway,givenanytwokeyorvaluecaches, P = ΩΘT (21)
+Vj
+wecanusethismethodtocalculatethemaximum
+N−1
+cosinesimilarityachievable. SimVafter = − 1 (cid:88) ∥V [n]−(P V [n])∥
+i,j N i Vj j F
+N−1
+SimKafter = 1 (cid:88) cos(K [n]·(R K [n])) n=0 (22)
+i,j N i Kj j
+n=0 In the next section, we will compare the perfor-
+(18)
+mancesofthetwocriteria.
+N−1
+SimVafter = 1 (cid:88) cos(V [n]·(Q V [n]))
+i,j N i Vj j 3.4 Findbettergroupingmethod
+n=0
+(19) Afterobtainingthesimilarityscoresbetweenevery
+NoticingSimVafter isequaltoSimVafter
+,sois pair of attention heads, we can regroup attention
+i,j j,i
+SimKafter. Figure3showsthecosinesimilarity heads based on these scores. We define the sim-
+betweenKVCachesbeforeandafterapplyingthe ilarity score of a group as the sum of similarity
+transformation. scoresbetweeneverypairofattentionheadswithin
+Based on Euclidean distance. Similar to ap- thatgroup, andthetotalsimilarityscoreforeach
+plyingtransformationsbasedoncosinesimilarity, grouping result is the sum of similarity scores of
+wealsoapplytransformationsbasedonEuclidean allgroups. Ourobjectiveistodeterminethegroup-
+distancebetweentwoKVCaches. Inthiscase,we ing result with the highest total score1. We use
+don’tnormalizevectorsandthesimilaritybetween SimKafter and SimVafter as grouping criteria,
+twocachescanbedescribedasthenegativevalue
+1While the highest similarity between pairs within the
+oftheEuclideandistanceofthem,forbrevity,only
+samegroupdoesnotnecessarilyequatetothelowestcostin
+somekeyformulasaredisplayedhere: termsofconvergingtothesameparametersduringpruning,
+thisstrategyremainsacceptableconsideringcomputationand
+(V iV jT) = ΘΛΩT (20) timecosts.respectively. Inthenextsection,wewillcompare After grouping, we can use Generalized Pro-
+the performances of these two ways. The mathe- crustesanalysistoalignattentionheadsinthesame
+maticalexpressionofthescoreofagroupingresult group.
+A = {A ,A ,··· ,A }isasfollows:
+1 2 G
+3.5 AdaptationofL regularization
+0
+Score (A) = (cid:88)G (cid:88) SimKafter During pruning training, we add new projection
+key Ag[i],Ag[j] matriceswhichareinitializedbymean-poolingall
+g=10≤i<j<D
+theoriginalheadswithinthatgrouptothemodel
+(23)
+(Ainslieetal.,2023),hereweuseW˜ orW˜
+G K k,g V k,g
+Score (A) = (cid:88) (cid:88) SimVafter to represent new projection matrices of the gth
+value Ag[i],Ag[j] groupinthekth blockofthemodel:
+g=10≤i<j<D
+(24)
+where A
+g
+is the gth group in G groups, the ele-
+W˜ =
+1 (cid:88)D
+W (25)
+mentsinA g aretheserialnumberofanattention K k,g D K k,(g−1)∗D+i
+i=1
+headandthereareD = H/Gheadsinagroup.
+WeuseSimulatedAnnealingAlgorithmtoget
+D
+1 (cid:88)
+the best grouping result: Exchange two random W˜ = W (26)
+V V
+k,g D k,(g−1)∗D+i
+heads in different groups and calculate the new
+i=1
+score,acceptingthenewresultifitreachesahigher
+These new matrices will be trained together with
+score. Repeat this process for multiple iterations.
+themodelandreplaceoriginalkey-valueheadsaf-
+Becauseinitializationhasasignificantimpacton
+terpruning. AssumethemodelhasN blocks
+blocks
+thefinalresult,werunthealgorithmmultipletimes.
+and H heads in an attention layer, we introduce
+Thedetailsofthealgorithm2areshownbelow.
+L
+0
+masksz ∈ RN blocks×H (Louizosetal.,2017)to
+achievethisgoal:
+Algorithm2SimulatedAnnealing
+Require: maxIter,epoch,SimK orSimV Wapply = z W +(1−z )W˜ (27)
+Ensure: grouping result with the highest score K k,j k,j K k,j k,j K k,g
+bestG
+n Wapply = z W +(1−z )W˜ (28)
+Setscore best ← −∞ V k,j k,j V k,j k,j V k,g
+fori = 1 to epochdo
+where g = ⌈j ⌉, W and W are the orig-
+InitializesolutionG randomly D K k,j V k,j
+n inal projection matrices, W˜ and W˜ are
+score current ←calculate_score(G n,SimV) K k,g V k,g
+ifscore
+current
+>score
+best
+then thenewlyaddedprojectionmatrices,W Kap kp ,jly and
+Setscore best ←score current Wapply aretheprojectionmatricesemployeddur-
+V
+k,j
+SetbestG n ←G n ing pruning. Following the L 0 regularization ap-
+endif proach,weparametrizethepruningmaskstohard
+forj = 1 to maxIter do concrete distributions. Initially, each mask is set
+G′ ←exchangerandomelementsfromdif- z = 1,weconstrainthemaskstozeroduringprun-
+n
+ferentgroupsinG n ing(Xiaetal.,2023). Andtheoriginalprojection
+score new ←calculate_score(G′ n,SimV) matrixwillbetransferredtothenewmatrixwhen
+ifscore new >score current then z = 0. Unlike traditional L 0 regularization, we
+SetG n ←G′ n aim to eliminate any original key or value heads
+score current ←score new andjustutilizeL 0 maskstograduallytransferthe
+ifscore new >score best then original heads to newly added heads. All masks
+Setscore best ←score new acrossblocksareconstrainedbyasinglelossfunc-
+SetbestG n ←G n tion:
+endif
+endif
+endfor L˜ L0 =(cid:18) ( Nblo1 ckH (cid:88) z)−T(cid:19) +(cid:18) ( Nblo1 ckH (cid:88) z)−T(cid:19)2
+(29)
+endfor
+where T is the target size and equals zero after
+return bestG
+n sparsitywarm-upsteps.WeusevanillaKLlossandBiLDloss(Lietal., "grouping by key" and "grouping by value" in-
+2024)toencouragealignmentofstudentlogitswith dicate grouping attention heads based on key or
+teacherlogits. valuecachesimilarity. "cos"and"dist"represent
+the transformation based on cosine similarity or
+L˜ distill = L˜ KL+L˜ BiLD (30) Euclideandistance.
+Tosumup,theoveralltraininglossis: 4.3 MainResults
+WereporttheexperimentalresultsinTable1. Ex-
+L = L˜ +L˜ (31)
+distill L0 cept for one set of experiments, all transformed
+modelsoutperformthebaseline. Asthesparsityof
+4 Experiments
+key-valueheadincreases,theadvantageofmodel
+4.1 Settings transformationbecomesmoreobvious,demonstrat-
+ingtheeffectivenessofaligningtheattentionheads.
+Modelconfigurations. Weapplyourmethodtothe
+WhiletheresultsoftheGQA-8don’tmeetexpec-
+LLaMA2-7Bmodel(Touvronetal.,2023)through-
+tations,inotherexperiments,modelstransformed
+out all experiments. We will convert the source
+based on value cache similarity, using Euclidean
+modeltoGQA-16,GQA-8,andGQA-4,andcom-
+distanceasthecriterion,achievedthebestperfor-
+pare them to the fine-tuned full-size model sepa-
+mance.
+rately.
+Datasets. We use the following open-source 4.4 Analysisoftheresults
+datasetsforpruningtrainingandevaluation: BoolQ
+The experimental results indicate that the group-
+(Clarketal.,2019),PIQA(Bisketal.,2020),Hel-
+ingofattentionheadsdoeshaveanimpactonthe
+laSwag (Zellers et al., 2019), WinoGrande (Sak-
+performanceofprunedmodels,andthatgrouping
+aguchietal.,2021),ARC-easy(Clarketal.,2018),
+attentionheadsbasedonvaluecachesimilaritiesis
+ARC-challenge(Clark et al., 2018), SIQA (Sap
+beneficial for the model performance. This is no
+et al., 2019) and OpenbookQA (Mihaylov et al.,
+surprise,asthevaluecachedirectlycontributesto
+2018). The size and instruction template of each
+theoutputvectoroftheattentionlayer. Although
+datasetarelistedinAppendixB.
+our experiments utilize L masks to accelerate
+Implementation Details. We use 1 NVIDIA 0
+trainingprocess,modeltransformationcanbenefit
+A100GPUtoperformmodeltransformation,and
+anyMHAtoGQAconversionprocess.
+8NVIDIAA100GPUsforsupervisedfine-tuning
+(SFT)theteachermodelandpruningtraining. We
+1.0
+randomlyselect128sequencesof2048tokenslong
+fromtheC4trainingset(Raffeletal.,2020)ascal-
+0.8
+ibrationdatainmodeltransformation. Inallexperi-
+ments,theinitiallearningrateis1e-5forthemodel 0.6
+parameters and 1e-2 for the pruning masks. The
+cosineschedulerisemployedtoreducethelearn- 0.4
+ingrateto0bytheendoftraining. Weperform2
+epochsofSFTontheteachermodel,5epochsof 0.2
+pruningtrainingonGQA-16,15epochsonGQA-8,
+0.0
+and20epochsonGQA-4.
+0 5 10 15 20 25 30
+More hyperparameter settings can be found in Block Index
+AppendixA.
+4.2 Ablationstudies
+We test the impact of different similarity evalua-
+tioncriteria(seeSection3.3)andgroupingstrate-
+gies (see Section 3.4). All results are presented
+in Table 1. Here, "baseline" refers to pruning di-
+rectlywithoutanytransformation,"defaultgroup-
+ing" refers to merging adjacent attention heads,
+eziS
+laeR
+target size 75%
+target size 50%
+target size 25%
+Figure4:ThesharedsparsityofL masksacrossblocks
+0
+allows different pruning speeds for different blocks,
+leadingtoamorestabletrainingprocess.
+In addition, during the experiment, we found
+thatthemodelwithintroductionofnewKVheads
+performsmuchbetterthanthemodelretainingorig-
+inalones. That’swhywechoosenottoretainany
+originalKVheads,thissettingalsoallowsdifferentModel Methods BoolQ PIQA HellaSwag WinoGrande ARC-C ARC-E OpenbookQA SIQA Avg.
+MHA Teacher 89.42 77.15 87.62 85.16 73.91 85.09 82.00 78.10 85.48
+baseline 86.85 81.39 87.08 82.95 66.22 80.88 79.00 77.53 84.60
+cos 88.62 81.50 89.08 83.82 67.56 81.40 81.40 77.53 86.08
+defaultgrouping
+dist 87.98 81.61 89.42 83.14 68.23 82.63 79.20 78.04 86.16
+GQA-16 cos 88.47 80.79 88.26 82.64 69.23 82.28 79.20 77.94 85.53
+groupingbykey
+dist 88.44 80.25 88.96 82.72 70.23 80.35 77.40 77.28 85.68
+cos 87.61 81.23 88.39 82.79 69.23 80.35 75.80 77.12 85.28
+groupingbyvalue
+dist 87.80 82.10 89.66 83.50 71.24 81.93 80.80 77.74 86.35
+baseline 84.56 79.71 83.53 80.90 60.54 75.26 75.00 76.25 81.65
+cos 86.76 80.52 86.66 81.06 64.88 79.30 77.60 76.92 84.01
+defaultgrouping
+dist 86.76 81.61 87.25 82.64 65.22 81.05 77.80 76.61 84.54
+GQA-8 cos 86.91 80.68 87.01 82.56 64.21 80.00 76.60 76.20 84.24
+groupingbykey
+dist 86.79 80.03 86.39 82.56 65.89 80.00 78.40 76.46 83.94
+cos 86.39 76.28 81.80 79.64 63.54 74.74 69.20 73.90 80.32
+groupingbyvalue
+dist 86.60 81.50 86.96 83.74 67.22 79.47 79.00 76.31 84.42
+baseline 81.86 76.93 76.97 78.30 55.52 73.86 69.80 74.56 77.03
+cos 85.47 78.89 83.18 81.53 59.53 77.02 74.40 75.49 81.53
+defaultgrouping
+dist 84.83 79.27 83.72 80.74 59.53 77.54 76.80 75.54 81.77
+GQA-4 cos 85.41 79.38 83.37 80.90 61.20 77.19 74.40 75.49 81.66
+groupingbykey
+dist 85.26 78.73 81.14 81.21 62.54 75.79 73.20 75.18 80.37
+cos 86.18 79.38 84.05 82.16 60.87 76.67 74.00 75.44 82.17
+groupingbyvalue
+dist 85.69 79.54 84.32 82.00 63.21 77.89 75.40 75.64 82.36
+Table1:PerformancesofprompttuningonLLaMA2modelswithvariousMethods. Thelastcolumn,Avg. (Average
+Accuracy),indicatestheaverageaccuracyofallthesesubdatasets.
+pruningspeedsfordifferentblocks. Figure4shows ing method may not be the optimal one. How to
+the actual average size of masks in each block at find a more reasonable grouping method is one
+differenttargetsizes. of the future research directions. Moreover, our
+methodentirelyreliesonthestatisticalmathemati-
+5 Conclusion calfeaturesofeachattentionhead,withoutconsid-
+eringsemanticinformationofeachattentionhead.
+In this paper, we propose a general method for
+In fact, compressing attention heads based on se-
+pruning an MHA model into a GQA model with
+mantic information is also a promising direction
+anycompressionratioofkey-valueheads. Wefind
+(Tangetal.,2024).
+that applying appropriate orthogonal transforma-
+tions to the model can increase the similarity be-
+tweenkey-valueheadswithoutchangingthemodel, References
+thereby reducing the difficulty of model pruning.
+JoshuaAinslie,JamesLee-Thorp,MichieldeJong,Yury
+Furthermore,weintroduceL 0 masksduringprun- Zemlyanskiy,FedericoLebrón,andSumitSanghai.
+ing training, which reduce the impact of directly Gqa: Traininggeneralizedmulti-querytransformer
+eliminatingparametersonthemodel. Ourmethod modelsfrommulti-headcheckpoints. arXivpreprint
+arXiv:2305.13245,2023.
+isapplicabletoallkey-valueheadpruningcondi-
+tions. Saleh Ashkboos, Maximilian L Croci, Marcelo Gen-
+nari do Nascimento, Torsten Hoefler, and James
+Hensman. Slicegpt: Compresslargelanguagemod-
+Limitations
+els by deleting rows and columns. arXiv preprint
+arXiv:2401.15024,2024.
+Ourworkhastwomainlimitations. First,wedon’t
+delveintothegroupingmethod,andcurrentgroup- YonatanBisk,RowanZellers,JianfengGao,YejinChoi,etal. Piqa: Reasoningaboutphysicalcommonsense Edward J Hu, Yelong Shen, Phillip Wallis, Zeyuan
+innaturallanguage. InProceedingsoftheAAAIcon- Allen-Zhu,YuanzhiLi,SheanWang,LuWang,and
+ferenceonartificialintelligence,volume34,pages WeizhuChen. Lora: Low-rankadaptationoflarge
+7432–7439,2020. languagemodels. arXivpreprintarXiv:2106.09685,
+2021.
+Tom Brown, Benjamin Mann, Nick Ryder, Melanie
+Subbiah,JaredDKaplan,PrafullaDhariwal,Arvind Albert Q Jiang, Alexandre Sablayrolles, Arthur Men-
+Neelakantan,PranavShyam,GirishSastry,Amanda sch,ChrisBamford,DevendraSinghChaplot,Diego
+Askell, Sandhini Agarwal, Ariel Herbert-Voss, delasCasas,FlorianBressand,GiannaLengyel,Guil-
+Gretchen Krueger, Tom Henighan, Rewon Child, laume Lample, Lucile Saulnier, et al. Mistral 7b.
+AdityaRamesh,DanielZiegler,JeffreyWu,Clemens arXivpreprintarXiv:2310.06825,2023.
+Winter, Chris Hesse, Mark Chen, Eric Sigler, Ma-
+teusz Litwin, Scott Gray, Benjamin Chess, Jack MinchongLi,FengZhou,andXiaohuiSong. Bild: Bi-
+Clark, ChristopherBerner, SamMcCandlish, Alec directionallogitsdifferencelossforlargelanguage
+Radford, Ilya Sutskever, and Dario Amodei. Lan- modeldistillation. arXivpreprintarXiv:2406.13555,
+guagemodelsarefew-shotlearners. InH.Larochelle, 2024.
+M.Ranzato,R.Hadsell,M.F.Balcan,andH.Lin,ed-
+itors, Advances in Neural Information Processing Yixin Liu, Kai Zhang, Yuan Li, Zhiling Yan, Chujie
+Systems,volume33,pages1877–1901.CurranAsso- Gao, Ruoxi Chen, Zhengqing Yuan, Yue Huang,
+Hanchi Sun, Jianfeng Gao, et al. Sora: A re-
+ciates,Inc.,2020.
+view on background, technology, limitations, and
+opportunitiesoflargevisionmodels. arXivpreprint
+Tony Cai, Jianqing Fan, and Tiefeng Jiang. Distribu-
+arXiv:2402.17177,2024.
+tionsofanglesinrandompackingonspheres. The
+JournalofMachineLearningResearch,14(1):1837–
+ZichangLiu,JueWang,TriDao,TianyiZhou,Binhang
+1864,2013.
+Yuan,ZhaoSong,AnshumaliShrivastava,CeZhang,
+YuandongTian,ChristopherRe,etal. Dejavu: Con-
+Yuang Chen, Cheng Zhang, Xitong Gao, Robert D
+textual sparsity for efficient llms at inference time.
+Mullins,GeorgeAConstantinides,andYirenZhao.
+InInternationalConferenceonMachineLearning,
+Optimisedgrouped-queryattentionmechanismfor
+pages22137–22176.PMLR,2023.
+transformers. arXiv preprint arXiv:2406.14963,
+2024.
+Shayne Longpre, Le Hou, Tu Vu, Albert Webson,
+HyungWonChung,YiTay,DennyZhou,QuocVLe,
+Christopher Clark, Kenton Lee, Ming-Wei Chang,
+Barret Zoph, Jason Wei, et al. The flan collection:
+Tom Kwiatkowski, Michael Collins, and Kristina
+Designing data and methods for effective instruc-
+Toutanova. Boolq: Exploring the surprising diffi-
+tiontuning. InInternationalConferenceonMachine
+culty of natural yes/no questions. arXiv preprint
+Learning,pages22631–22648.PMLR,2023.
+arXiv:1905.10044,2019.
+ChristosLouizos,MaxWelling,andDiederikPKingma.
+PeterClark,IsaacCowhey,OrenEtzioni,TusharKhot,
+Learningsparseneuralnetworksthroughl_0regular-
+AshishSabharwal,CarissaSchoenick,andOyvind
+ization. arXivpreprintarXiv:1712.01312,2017.
+Tafjord. Thinkyouhavesolvedquestionanswering?
+tryarc,theai2reasoningchallenge. arXivpreprint
+TodorMihaylov,PeterClark,TusharKhot,andAshish
+arXiv:1803.05457,2018.
+Sabharwal. Canasuitofarmorconductelectricity?a
+newdatasetforopenbookquestionanswering. arXiv
+AbhimanyuDubey,AbhinavJauhri,AbhinavPandey,
+preprintarXiv:1809.02789,2018.
+AbhishekKadian,AhmadAl-Dahle,AieshaLetman,
+Akhil Mathur, Alan Schelten, Amy Yang, Angela MatanBenNoachandYoavGoldberg. Compressing
+Fan,etal. Thellama3herdofmodels. arXivpreprint pre-trainedlanguagemodelsbymatrixdecomposi-
+arXiv:2407.21783,2024. tion. In Proceedings of the 1st Conference of the
+Asia-PacificChapteroftheAssociationforCompu-
+EliasFrantarandDanAlistarh. Sparsegpt: Massivelan- tationalLinguisticsandthe10thInternationalJoint
+guagemodelscanbeaccuratelyprunedinone-shot. ConferenceonNaturalLanguageProcessing,pages
+InInternationalConferenceonMachineLearning, 884–889,2020.
+pages10323–10337.PMLR,2023.
+LongOuyang,JeffreyWu,XuJiang,DiogoAlmeida,
+JianpingGou,BaoshengYu,StephenJMaybank,and CarrollWainwright,PamelaMishkin,ChongZhang,
+DachengTao. Knowledgedistillation: Asurvey. In- SandhiniAgarwal,KatarinaSlama,AlexRay,etal.
+ternationalJournalofComputerVision,129(6):1789– Traininglanguagemodelstofollowinstructionswith
+1819,2021. human feedback. Advances in neural information
+processingsystems,35:27730–27744,2022.
+DanHendrycks,CollinBurns,StevenBasart,AndyZou,
+MantasMazeika,DawnSong,andJacobSteinhardt. AlecRadford,KarthikNarasimhan,TimSalimans,and
+Measuringmassivemultitasklanguageunderstand- IlyaSutskever. Improvinglanguageunderstanding
+ing. arXivpreprintarXiv:2009.03300,2020. bygenerativepre-training. 2018.ColinRaffel,NoamShazeer,AdamRoberts,Katherine ZihengWang,JeremyWohlwend,andTaoLei. Struc-
+Lee,SharanNarang,MichaelMatena,YanqiZhou, tured pruning of large language models. arXiv
+WeiLi,andPeterJLiu. Exploringthelimitsoftrans- preprintarXiv:1910.04732,2019.
+fer learning with a unified text-to-text transformer.
+Journalofmachinelearningresearch,21(140):1–67, Wikipedia contributors. Generalized procrustes
+2020. analysis — Wikipedia, the free encyclopedia,
+2022. URL https://en.wikipedia.org/w/
+Keisuke Sakaguchi, Ronan Le Bras, Chandra Bhaga- index.php?title=Generalized_Procrustes_
+vatula,andYejinChoi. Winogrande: Anadversarial analysis&oldid=1126373270. [Online; accessed
+winograd schema challenge at scale. Communica- 24-October-2024].
+tionsoftheACM,64(9):99–106,2021.
+MengzhouXia,ZexuanZhong,andDanqiChen. Struc-
+V Sanh. Distilbert, a distilled version of bert: turedpruninglearnscompactandaccuratemodels.
+smaller, faster, cheaperandlighter. arXivpreprint arXivpreprintarXiv:2204.00408,2022.
+arXiv:1910.01108,2019.
+MengzhouXia,TianyuGao,ZhiyuanZeng,andDanqi
+Maarten Sap, Hannah Rashkin, Derek Chen, Ronan Chen. Shearedllama: Acceleratinglanguagemodel
+LeBras,andYejinChoi. Socialiqa: Commonsense pre-trainingviastructuredpruning. arXivpreprint
+reasoningaboutsocialinteractions. arXivpreprint arXiv:2310.06694,2023.
+arXiv:1904.09728,2019.
+Can Xu, Qingfeng Sun, Kai Zheng, Xiubo Geng,
+Peter H Schönemann. A generalized solution of the PuZhao,JiazhanFeng,ChongyangTao,andDaxin
+orthogonalprocrustesproblem. Psychometrika,31 Jiang. Wizardlm: Empoweringlargelanguagemod-
+(1):1–10,1966. els to follow complex instructions. arXiv preprint
+arXiv:2304.12244,2023.
+Noam Shazeer. Fast transformer decoding: One
+write-head is all you need. arXiv preprint
+An Yang, Baosong Yang, Binyuan Hui, Bo Zheng,
+arXiv:1911.02150,2019.
+BowenYu,ChangZhou,ChengpengLi,Chengyuan
+Li,DayihengLiu,FeiHuang,etal. Qwen2technical
+Richard Socher, Alex Perelygin, Jean Wu, Jason
+report. arXivpreprintarXiv:2407.10671,2024.
+Chuang,ChristopherDManning,AndrewYNg,and
+Christopher Potts. Recursive deep models for se-
+Hao Yu and Jianxin Wu. Compressing transformers:
+manticcompositionalityoverasentimenttreebank.
+featuresarelow-rank,butweightsarenot! InPro-
+In Proceedings of the 2013 conference on empiri-
+ceedingsoftheAAAIConferenceonArtificialIntelli-
+calmethodsinnaturallanguageprocessing,pages
+gence,volume37,pages11007–11015,2023.
+1631–1642,2013.
+Hao Yu, Zelan Yang, Shen Li, Yong Li, and Jianxin
+JianlinSu, MurtadhaAhmed, YuLu, ShengfengPan,
+Wu. Effectivelycompresskvheadsforllm. arXiv
+Wen Bo, and Yunfeng Liu. Roformer: Enhanced
+preprintarXiv:2406.07056,2024.
+transformerwithrotarypositionembedding. Neuro-
+computing,568:127063,2024.
+Rowan Zellers, Ari Holtzman, Yonatan Bisk, Ali
+Farhadi, and Yejin Choi. Hellaswag: Can a ma-
+Kai Sun, Dian Yu, Dong Yu, and Claire Cardie. In-
+chine really finish your sentence? arXiv preprint
+vestigatingpriorknowledgeforchallengingchinese
+arXiv:1905.07830,2019.
+machinereadingcomprehension. Transactionsofthe
+Association for Computational Linguistics, 8:141–
+Peiyuan Zhang, Guangtao Zeng, Tianduo Wang, and
+155,2020.
+WeiLu. Tinyllama: Anopen-sourcesmalllanguage
+model. arXivpreprintarXiv:2401.02385,2024.
+MingjieSun,ZhuangLiu,AnnaBair,andJZicoKolter.
+A simple and effective pruning approach for large
+languagemodels. arXivpreprintarXiv:2306.11695,
+2023.
+HanlinTang,YangLin,JingLin,QingsenHan,Shikuan
+Hong, Yiwu Yao, and Gongyi Wang. Razoratten-
+tion:Efficientkvcachecompressionthroughretrieval
+heads. arXivpreprintarXiv:2407.15891,2024.
+Hugo Touvron, Louis Martin, Kevin Stone, Peter Al-
+bert, Amjad Almahairi, Yasmine Babaei, Nikolay
+Bashlykov,SoumyaBatra,PrajjwalBhargava,Shruti
+Bhosale,etal. Llama2: Openfoundationandfine-
+tunedchatmodels. arXivpreprintarXiv:2307.09288,
+2023.
+A Vaswani. Attention is all you need. Advances in
+NeuralInformationProcessingSystems,2017.A Hyperparametersettings
+To reduce memory usage, we employ DeepSpeed during both SFT and pruning training, we set k=16
+forBiLDloss(Lietal.,2024). Duringthepruningtrainingprocess,thesparsitywarm-upstepsaccount
+for30%ofthetotalsteps,duringwhichthetargetsizeoftheL masksdecreaseslinearlytozero. The
+0
+maximumpruningstepscomprise80%ofthetotalsteps,afterwhichthemasktrainingceases,onlythe
+modelparametersareadjusted. SomemorehyperparametersettingsforSFTteachermodelandpruning
+trainingareshowninTable2.
+SFTteacher pruningtraining
+batchsize 128 64
+microbatchsize 4 1
+warmupsteps 16 32
+initiallrofmasks \ 1e-2
+initiallrofmodel 1e-5
+Table2: Somehyperparameterssettingforexperiments.
+B Detailsofdatasets
+ThesizesofsubdatasetsareshowninTable 3.
+datasets train test
+BoolQ 9427 3270
+PIQA 16113 1838
+HellaSwag 39905 10042
+WinoGrande 40398 1267
+ARC-C 1119 299
+ARC-E 2251 570
+OpenbookQA 4957 500
+SIQA 33410 1954
+total 147580 19740
+Table3: Sizesofdifferentdatasets
+ThetemplateofeachdatasetcanbeseeninTable 4.Dataset Template
+Arc-C Whichcolorshirtwillreflectthemostlightonahot,sunnyday?
+Arc-E Choices: [’black’,’blue’,’red’,’white’]
+OpenbookQA Answer:
+HellaSwag Pleasechoosethemostappropriatetexttocompletethepassagebelow:
+Passage: Amaleathleteputspowderonhishands. he
+Choices: [’bends and inspects his hands for damage.’, ’shakes them shakingly
+beforeputtingtheminhismouth.’,’mountsahighbeaminthegym.’,’thenjumps
+upanddoesahighjump.’]
+Answer:
+BoolQ The Coroner – The BBC announced on 2 March 2017 that there would be no
+furtherseries.
+Question: willtherebeasecondseriesofthecoroner?
+Choices: [’true’,’false’]
+Answer:
+Winogrande Choosethemostsensibletexttoreplacethe’_’inthefollowingsentence: Natalie
+waslessreligousthanPatricia,therefore_attendedchurchservicesmoreoftenon
+Sundays.
+Choices: [’Natalie’,’Patricia’]
+Answer:
+PIQA Goal: howdoyoufloodaroom?
+Choose the most sensible solution to achieve the goal. Choices: [’fill it with
+objects.’,’fillitwithwater.’]
+Answer:
+SIQA Sashatookhimtovegasforavacation.
+Question: HowwouldSashafeelafterwards??
+Choices: [’sad’,’depressed’,’fulfilled’]
+Answer:
+Table4: Thetemplateofeachdataset

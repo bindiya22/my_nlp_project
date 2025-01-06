@@ -1,0 +1,440 @@
+2023 International Conference on Computing, Communication, and Intelligent Systems (ICCCIS)
+An Implementation of Machine Learning Based
+Healthcare Chabot for Disease Prediction (MIBOT)
+Gaurav Ganguly Sourav Kumar
+Department of Computer Science & Engineering Department of Computer Science & Engineering
+University of Engineering & Management Jaipur University of Engineering & Management Jaipur
+Jaipur, India. Jaipur, India.
+gauravgngly@gmail.com sourav.kumar03021996@gmail.com
+Abstract— In an era where quality healthcare is pivotal for a diseases based on various symptoms that users provide.
+successful life journey, challenges arise when seeking medical Through the Chabot’s interface, this system is capable of
+attention amid the ongoing pandemic. The traditional approach of detecting symptoms by providing input from the user. Using
+consulting doctors in person or visiting hospitals is hindered, NLP [1] automatic translation the text and classify text into
+emphasizing the necessity for innovative solutions. Harnessing the categories after these extracted symptoms, chatbot diagnoses
+capabilities of Natural Language Processing (NLP) and machine and prescribes a treatment for the disease. Instant Messaging
+learning, this study introduces an advanced chatbot application.
+(IM) applications can easily accommodate the chatbot. SVM
+Built upon supervised machine learning, the proposed chatbot
+[2] classifying is a machine learning algorithm [3] that
+system not only offers disease diagnosis and comprehensive
+determines decision boundaries in the range of the problem by
+treatment insights but also does so preemptively, prior to
+using hyper-planes that define decision boundaries. A neural
+consulting a physician. This system boasts a user-friendly GUI-
+network is an example of support vector machines (SVM’s) [4].
+based text assistant, facilitating seamless interaction with the
+The use of neural networks (NNs) and Bayesian networks can
+chatbot. Unlike existing models, this approach intelligently
+be used in static imperfection prediction. The TF-IDF [5] is
+presents user symptoms and corresponding risk factors, tailored
+vectorized and the cosine similarity measure [6] is used to
+to the user's ailment, while also offering optimal
+recommendations. Moreover, the chatbot clarifies the appropriate generate similarities between texts. Medical Chatbots can
+instances for in-person medical consultations. By addressing the diagnose patients with simple symptom analysis, proving that
+underutilization highlighted in previous research, this study they can somewhat accurately diagnose patients and natural
+signifies the chatbot's potential advantages. By embracing this language processing is used to create a conversational
+cost-free application, individuals can circumvent cumbersome approach.
+hospital visits. The comparison with the reference model
+Medical chatbots have a substantial impact on healthcare
+demonstrates the enhanced efficacy of the proposed approach in
+culture, enhancing reliability while reducing human errors.
+addressing healthcare challenges, ensuring convenient and
+accessible medical guidance. Today, individuals often prioritize online platforms over their
+health, leading to untreated mild illnesses that can escalate into
+Keywords— Chatbot; Healthcare; Consultant System; Artificial major diseases. To address this, we propose a free, accessible
+Intelligence; Machine Learning; NLP; TF-IDF chatbot solution. The user-friendly nature and widespread
+accessibility of chatbots lower the cost of consulting expert
+I. INTRODUCTION healthcare professionals. This approach aims to raise awareness
+Most people are unaware the increasing health information about health maintenance and encourage timely action. By
+from internet. When people search for information on health, simplifying the healthcare process, individuals can easily
+they are influenced by a variety of factors. In their busy life access chatbots, ensuring minimal disruption to their daily
+schedule, it becomes very difficult for people to be aware and routines. This increased health consciousness and accessibility
+careful about their health issues. Most working-class people have the potential to benefit both individuals and the healthcare
+claim that their hectic schedules do not allow them to consult industry.
+their physician on a regular basis and they ignore any
+The paper is structured as follows: Part II includes a
+discomfort they feel until it becomes too intense. The use of
+literature review. Part III explains the proposed method with
+reputable medical information including diseases, symptoms
+examples, a demonstration of the algorithm, and a system
+and treatments is important before visiting a doctor or a medical
+diagram. In Part IV of the article, performance and
+center or shop for assistant with a common illness. However,
+experimental findings are illustrated. In Part V, a performance
+less computer knowledge of users leads to access difficulties. A
+analysis is offered, and in Part VI, the report is concluded with
+number of health applications like “Doctor Me”, “MedBot”,
+a discussion of the shortcomings of our suggested system and
+and “MedChat” are available to inform all. Even so, multiple
+future plans.
+steps are required to reach desired information.
+This proposed system involves the development of an
+II. LITERATURE REVIEW
+intelligent agent (MIBOT) to facilitate the interaction between Innovations in healthcare and education have been sparked
+users and a chatbot that returns the diagnosis of different by the emergence of artificial intelligence (AI) and natural
+ISBN: 979-8-3503-0611-8/23/$31.00 ©2023 IEEE
+1141
+52152401.3202.16306SICCCI/9011.01
+:IOD
+|
+EEEI
+3202©
+00.13$/32/8-1160-3053-8-979
+|
+)SICCCI(
+smetsyS
+tnegilletnI
+dna
+,noitacinummoC
+,gnitupmoC
+no
+ecnerefnoC
+lanoitanretnI
+3202
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:14:37 UTC from IEEE Xplore. Restrictions apply.2023 International Conference on Computing, Communication, and Intelligent Systems (ICCCIS)
+language processing (NLP) technology. Various studies have In summary, the reviewed papers collectively contribute to
+explored the potential of chatbots, powered by AI, to the growing body of literature exploring AI-driven chatbots'
+revolutionize medical consultation, education, and healthcare potential in healthcare and education. From preliminary
+management. diagnosis to symptom analysis, these studies illuminate how AI
+and NLP can reshape medical services, bridge information
+The work by Athota et al. [7] emphasizes the significance
+gaps, and foster more efficient and effective patient care.
+of healthcare accessibility and cost reduction. Their chatbot
+utilizes AI to diagnose diseases and offer preliminary medical III. PROPOSED METHOD
+information, aiding users before consulting a doctor. This aligns
+In this proposed system, “MIBOT” designed in this project
+with the broader trend of AI-driven healthcare systems
+serves as conversational agent that facilitates the discussion of
+enhancing patient engagement and knowledge dissemination.
+health concerns based on the symptoms provided. Using a user
+Oniani and Wang's research [8] delves into COVID-19- interface, chatbot can identify different diseases based on input
+related information dissemination challenges. They leverage from the user. The NLP technology used in the Chabot’s
+advanced language models like GPT-2 to develop chatbots that diagnosis and treatment of the disease relies on automatic
+automatically address consumer questions. Such applications translation and categorization of the text based on the extracted
+bridge the gap between rapidly evolving health concerns and symptoms. Written commands are input into the proposed
+on-demand, accurate information, illustrating the potential for system because it is text-based approach. At the start of the
+NLP in the healthcare domain. process, bot ready to prompted for user’s query like
+Kandpal et al. [9] extend the concept of chatbots beyond You: ‘Hi’ or ‘how are you’ or ‘is anyone there?’
+information provision. They explore context-based chatbots, MIBOT: ‘Hello’ or ‘Hi there, how can I help?’
+evolving from menu-based to keyword-based, with a focus on
+Chatbot face many challenges during the input natural
+healthcare. Integrating deep learning and natural language
+language by the user. Input from the user can take any form of
+processing, they envision chatbots reshaping healthcare
+organization and any structure. Input can be provided by a user
+delivery, offering predictive diagnoses and support, thus
+in a variety of ways at different times and it is possible for
+revolutionizing patient care.
+different users to provide input in many ways.
+Mellado-Silva, Faúndez-Ugalde, and Lobos [10]
+Such as: ‘what is your name’, ‘what should I call you’,
+underscore the transformative impact of chatbots on business
+‘what’s your name?’
+processes and education. Their study explores using decision
+tree-based chatbots to teach complex subjects. The research Meanwhile, the chatbot awaits a command. The commands
+reveals promising results in enhancing student learning and in our system can be divided into two types,
+experience, exemplifying the versatility of chatbots across 1.Command type: Disease classification
+various sectors. 2.Command type: General
+Srivastava and Singh [11] offer insights into the potential of The core task of the system is the disease classification
+medical chatbots. By building a diagnosis bot that engages command. For example,
+patients in conversation, they demonstrate that AI-driven 1.I need help
+chatbots can offer accurate disease predictions. Their work 2.I have some problem
+contributes to the ongoing dialogue on the integration of AI in 3.Can you help me?
+healthcare services, focusing on symptom analysis and 4.Tell me
+personalized medical guidance.
+Symptoms will be asked by the system. At a time, it will
+Mohan et al.'s study [2] highlights the role of support vector take one symptom of a disease. On the other hand, inserting too
+machines (SVM) in data mining and pattern recognition. SVM, many symptoms at a time by the user is also unexpected. As
+a robust classification tool, contributes to accurate data analysis many symptoms as possible are encouraged to be entered into
+and classification tasks, which is especially valuable in fields the system. When there are more symptoms, the actual disease
+like healthcare where precise categorization is crucial. can be predicted more accurately. Our bot, after a user inputs a
+symptom, instantly identifies the pattern using Cosine
+The study by Divya et al. [12] underscores the importance
+Similarity to measure our training and TF-IDF for vectorization
+of healthcare and introduces an AI-powered medical chatbot for
+using user-inputted symptoms and our training set features.
+disease diagnosis and information dissemination. This chatbot,
+According to our system, based on both the train and test sets,
+capable of personalized text-to-text diagnosis based on
+the SVM classifier gives the highest accuracy among all the
+symptoms, aims to enhance healthcare accessibility, knowledge
+symptoms. On the basis of the classification result, the system
+dissemination, and early intervention.
+generates appropriate suggestions. On the other hand, the
+The work of other researchers, including Mathew et al. [13], general commands are analyzed for keywords and whether only
+Rosruen and Samanchuen [14], Setiaji and Wibowo [15], and medical information is required. Such as:
+Rahman et al. [16], collectively underline the expansive
+1.Yellowish white part of eye
+potential of AI-powered chatbots in healthcare. From disease
+2.Bleeding from the bottom (rectal bleeding)
+prediction to medical consultation, these studies emphasize AI's
+3.I am suffering from anxiety
+role in enhancing healthcare accessibility, diagnosis accuracy,
+4.I am suffering from sneezing and an itchy
+and patient engagement.
+1142
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:14:37 UTC from IEEE Xplore. Restrictions apply.2023 International Conference on Computing, Communication, and Intelligent Systems (ICCCIS)
+An enormous collection of disease information is available Using natural language inputs from users, the dataset
+in our enriched knowledge base. Several authentic internet complexity is reduced without losing originality. As mentioned
+sources are used to collect this information. The bot retrieves earlier, users indicate that symptoms usually vary and are fewer.
+information about diseases from our knowledge base whenever Additionally, the datasets have a high number of features with
+a command asks about them based on similarity measure ‘0s’ indicating negatives and ‘1s’ indicating positives. Here is
+(Cosine Similarity). an example of abstract data of the “Dehydration”
+One of the most important tasks of the bot is the creation of
+TABLE I. ABSTRACT OVERVIEW DATA OF THE DEHYDRATION
+test and training datasets. It is necessary to rely on a reliable
+source of information for us to be able to real-life symptoms Light
+Lazi Dry Mild
+into categories that correspond to real-life illnesses. Our test ness Itching headed- mouth fever
+ness
+datasets contain independent tests based, on the most
+commonly used disease classification train [17]. Data were 1 0 1 1 0 Dehydration
+collected from various doctors and hospitals directly by the
+authors. The first step is to remove all the negative features and keep
+only the positive ones. After that, in step 2, we have placed the
+positive feature names where they belong.
+Laziness Light headed-ness Dry mouth Dehydration
+Table II illustrates the relationship between prognosis and
+specialty.
+TABLE II. DIAGNOSIS AND SPECIALTY MAPPING EXAMPLE
+Diagnosis Medical specialty
+Dehydration Gastroenterology
+Blisters and Pustules Dermatology
+Excessive Urination Endocrinology/Urology
+A. Dataset:
+Disease Prediction Using Machine Learning with GUI [17]
+is the name of the dataset that was crawled from Kaggle for this
+project. The training dataset has 4920 records and 649572
+symptoms, and the testing dataset contains 41 logs and 5544
+occurrences of symptoms. The attribute's mean value fills in the
+gaps left by normalizing the data in the range [0, 1]. For testing
+our MIBOT algorithm for human illness identification, this
+dataset supplied 41 different distinct ailments.
+B. Algorithm:
+Once the user has categorized, the bot shows suggestions.
+The mapping is used to identify the illness, and the user is then
+sent to the right clinician. The suggested system's operation is
+described in Algorithm 1.
+Fig. 1. Schematic diagram of the proposed system Algorithm 1: The MIBOT Algorithm
+One of the most important tasks of the system is the creation 01: Take basic input from user
+of test and training datasets. Symptoms in real life of real-life
+02: "MIBOT": Reply According to users Input
+diseases must be classified by a reliable source of information.
+03: command ← Take command input
+There are also independent test datasets in [18] which used the
+04: command ← Filter command using Tokenization (such as
+most popular disease classification trains. Datasets were
+gathered by contacting doctors and hospitals directly and in Lowercase)
+collecting data from them. Table I summarizes the source 05: keyword ← Extract keywords from command
+datasets. 06: type ← Type of detect from keyword
+1143
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:14:37 UTC from IEEE Xplore. Restrictions apply.2023 International Conference on Computing, Communication, and Intelligent Systems (ICCCIS)
+07: tally ← 0
+08: if command type is Disease Classification, then
+09: symptom ← Ask the user to provide certain signs
+10: tally ← tally + 1
+11: indicator ← utilizing the Cosine Similarity Measure,
+match the attribute with the symptom.
+12: if tally is less than the threshold then
+13: repeat from 9
+14: else
+15: if user wants to set additional symptoms, then
+16: repeat from 9
+17: else
+18: Arrange symptoms based on indicator using the SVM
+algorithm
+19: show suitable proposition consequently
+20: end
+21: end
+22: else
+Fig. 3. Output Snapshot of MIBOT
+23: if user necessary information, then
+24: Reply from database accordingly (Predict Disease
+Information, Diagnosis, etc.)
+25: else
+26: Show "MIBOT: I am just a chatbot Please consult a
+doctor for your query."
+27: end
+28: end
+IV. EXPERIMENTAL RESULTS
+The new “MIBOT” application has been tested with sick
+people. They used Chatbots to check the state of their health.
+The Chatbot is designed to integrate with a web browser. The
+presence of a cold fever is characterized by symptoms such as
+coughing, headaches, body aches. On the basis of those
+symptoms, the MIBOT was able to correctly predict cold fever
+based on the dataset. The dataset and training requirements vary
+between different algorithms. Different algorithms have
+Fig. 4. Output Snapshot of MIBOT
+different accuracy levels. This is done with the SVM algorithm.
+SVM is the algorithm that was better at our experiment because V. PERFORMANCE ANALYSIS
+it had the highest accuracy of 98.58 percent, which is the good
+performance among the entire algorithms. It is clear, therefore, TABLE III. COMPARISON OF OLD AND NEW MODEL
+that SVM should be the system central classifier.
+MedBot DoctorMe
+Disha [9] MIBOT
+[4] [4]
+Chatbot
+AI Based Rule Based AI Based AI Based
+Types
+Installation
+No Yes No No
+Required
+Knowledge
+No Yes No No
+Required
+Computer, Computer,
+Computer,
+Device Mobile, Laptop, Laptop,
+Laptop,
+Compatibility Tablet Mobile, Mobile,
+Tablet
+Tablet Tablet
+Symptoms 16 Various Various Various
+Covered symptoms Symptoms symptoms symptoms
+Fig. 2. Output Snapshot of MIBOT Medium Thai Thai Bangla English
+1144
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:14:37 UTC from IEEE Xplore. Restrictions apply.2023 International Conference on Computing, Communication, and Intelligent Systems (ICCCIS)
+Experimental results were performed on a system with 32 For simple testing Decision Tree, Random Forest,
+GB RAM, Intel Processor with 8GB graphics card. The Multinomial NB, KNN, SVM, AdaBoost algorithms are
+experiment was conducted with Python 3.7. The classifier has basically used. The majority of the time, SVM provided perfect
+been validated using an independent test set as well as K fold results and can handle large datasets as well as work faster.
+cross validation with K-fold CV, the complete dataset is Table III holds a comparison between the old and new models,
+randomly subdivided into equal sized samples. As training data, whereas, the K-Fold average score summary for MIBOT is
+K-1 subsamples are employed, while one subsample is used as given in Table IV.
+test data. Afterward, K Cross-Validation runs were performed.
+Fig. 5 showcases a graphical comparison between the
+In our experiment we used a 20-fold CV. Table IV summarizes
+different algorithms employed for Disha [9] as well as our
+the average 20-Fold score.
+proposed MIBOT system. Among the six supervised machine
+A. Algorithm Comparison: learning algorithms, Support Vector Machine (SVM)
+demonstrated superior effectiveness in disease prediction.
+There are two types of datasets that were used in this
+medical chatbot: training dataset with 75% and testing dataset
+with 25% respectively.
+Fig. 5. Graph representation of Test Accuracy for Disha vs. MIBOT. Test set contains a range of samples from each class
+accuracy, precision and F1-Score are weighted according to the
+TABLE IV. K-FOLD AVERAGE SCORE SUMMARY number of samples from each class. According to the definition,
+metrics are defined as follows:
+Algorithms K-Fold average score
+Multinomial Naive Bayes 0.9625 The accuracy (Acc.) measures how many samples were
+effectively classified out of all the samples, and it measures how
+Decision Trees 0.9685
+well the classification process worked overall. The computation
+Random Forest 0.9753
+looks like this:
+KNN 0.9713
+𝑇𝑃+𝑇𝑁
+Acc.= ×100 % (1)
+SVM 0.9856
+𝑇𝑃+𝑇𝑁+𝐹𝑃+𝑇𝑁
+AdaBoost 0.9687
+The precision (Prec.) is the ratio of positively classed
+samples that are successfully classified to all positively
+Our own dataset of independent tests, however, is also used projected samples. It is computed as follows and serves as a
+to test the model. Three performance metrics are used in our measure of how precisely a positive sample is identified as
+experiment: F1- Score (Weighted average), Precision such:
+(Weighted average), and Accuracy. Prec.=
+𝑇𝑃
+× 100 % (2)
+𝑇𝑃+ 𝐹𝑃
+TABLE V. CONFUSION MATRIX The sensitivity (Sens.) is the proportion of positively
+categorized samples to all positive samples. Thus, false-
+Actual Class Predicted Class
+negative results will be reduced as sensitivity increases. This is
+Positive Negative
+how it is calculated:
+Positive TP FN 𝑇𝑃
+Negative FP TN
+Sens.= ×100 % (3)
+𝑇𝑃+𝐹𝑁
+1145
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:14:37 UTC from IEEE Xplore. Restrictions apply.2023 International Conference on Computing, Communication, and Intelligent Systems (ICCCIS)
+The F1 Score (F 1) is referred to as the harmonic median of REFERENCES
+sensitivity and accuracy. It reveals how accurate and reliable [1] M. C. Surabhi, "Natural language processing future," 2013 International
+the classifier is. The F1 Score is established as follows, and Conference on Optical Imaging Sensor and Security (ICOSS),
+Coimbatore, India, 2013, pp. 1-3, doi: 10.1109/ICOISS.2013.6678407.
+elevated values correlate to high categorization performance:
+[2] L. Mohan, J. Pant, P. Suyal and A. Kumar, "Support Vector Machine
+Accuracy Improvement with Classification," 2020 12th International
+F = 2 ×𝑃𝑟𝑒𝑐.×𝑆𝑒𝑛𝑠. ×100 % (4) Conference on Computational Intelligence and Communication Networks
+1 𝑃𝑟𝑒𝑐.+𝑆𝑒𝑛𝑠. (CICN), Bhimtal, India, 2020, pp. 477-481, doi:
+10.1109/CICN49253.2020.9242572.
+[3] Batta Mahesh, “Machine Learning Algorithms-A Review”, International
+TABLE VI. OVERVIEW OF EXPERIMENTAL RESULTS Journal of Science and Research (IJSR) ISSN: 2319-7064 Research Gate
+Impact Factor (2018): 0.28| SJIF (2018): 7.426.
+Precision F1- Score
+[4] Evgeniou, Theodoros & Pontil, Massimiliano, (2001), Support Vector
+Algorithms Accuracy (Weighted (Weighted Machines: Theory and Applications, 2049, 249-257, 10.1007/3-540-
+avg.) avg.) 44673-7_12.
+Multinomial Naive Bayes 95.77 96.89 96.10 [5] Qaiser, Shahzad, and Ramsha Ali. "Text mining: use of TF-IDF to
+examine the relevance of words to documents." International Journal of
+Decision Trees 97.28 98.64 97.68 Computer Applications 181, no. 1 (2018): 25-29.
+[6] Rahutomo, Faisal, Teruaki Kitasuka, and Masayoshi Aritsugi. "Semantic
+Random Forest 97.85 98.98 98.25 cosine similarity." In The 7th international student conference on
+advanced science and technology ICAST, vol. 4, no. 1, p. 1. 2012.
+KNN 96.16 97.36 96.48
+[7] L. Athota, V. K. Shukla, N. Pandey and A. Rana, "Chatbot for Healthcare
+SVM 98.58 99.25 98.65 System Using Artificial Intelligence," 2020 8th International Conference
+on Reliability, Infocom Technologies and Optimization (Trends and
+AdaBoost 97.46 98.89 97.92 Future Directions) (ICRITO), Noida, India, 2020, pp. 619-622, doi:
+10.1109/ICRITO48877.2020.9197833.
+[8] David Oniani and Yanshan Wang. 2020. A Qualitative Evaluation of
+Language Models on Automatic Question-Answering for COVID-19. In
+Although the entire algorithms the SVM algorithm is the Proceedings of the 11th ACM International Conference on
+most accurate and best performance at 98.58 percent, even Bioinformatics, Computational Biology and Health Informatics (BCB
+'20). Association for Computing Machinery, New York, NY, USA,
+though all algorithms have shown high performance with high Article 33, 1–9. https://doi.org/10.1145/3388440.3412413.
+accuracy. [9] P. Kandpal, K. Jasnani, R. Raut and S. Bhorge, "Contextual Chatbot for
+Healthcare Purposes (using Deep Learning)," 2020 Fourth World
+Conference on Smart Trends in Systems, Security and Sustainability
+Among the other models, Random Forest, meanwhile, (WorldS4), London, UK, 2020, pp. 625-634, doi:
+shows the best performance in this case with 97.85 percent 10.1109/WorldS450073.2020.9210351.
+[10] R. Mellado-Silva, A. Faúndez-Ugalde and M. B. Lobos, "Learning tax
+accuracy rate, whereas Multinomial Naive Bayes offers the
+regulations through rules-based chatbots using decision trees: a case study
+worst result with 95.77 percent accuracy rates. SVM is clearly at the time of COVID-19," 2020 39th International Conference of the
+Chilean Computer Science Society (SCCC), Coquimbo, Chile, 2020, pp.
+the most suitable classifier for the system. 1-8, doi: 10.1109/SCCC51225.2020.9281267.
+[11] P. Srivastava and N. Singh, "Automatized Medical Chatbot (Medibot),"
+VI. CONCLUSION AND FUTURE WORK 2020 International Conference on Power Electronics & IoT Applications
+in Renewable Energy and its Control (PARC), Mathura, India, 2020, pp.
+Our research successfully deployed MIBOT, a machine 351-354, doi: 10.1109/PARC49193.2020.236624.
+[12] Divya, S., V. Indumathi, S. Ishwarya, M. Priyasankari, and S. Kalpana
+learning-based healthcare chatbot for disease prediction. We
+Devi. "A self-diagnosis medical chatbot using artificial intelligence."
+systematically outlined the chatbot's construction process, Journal of Web Development and Web Designing 3, no. 1 (2018): 1-7.
+which included the creation of custom datasets. Among six [13] R. B. Mathew, S. Varghese, S. E. Joy and S. S. Alex, "Chatbot for Disease
+Prediction and Treatment Recommendation using Machine Learning,"
+supervised machine learning algorithms, Support Vector 2019 3rd International Conference on Trends in Electronics and
+Informatics (ICOEI), Tirunelveli, India, 2019, pp. 851-856, doi:
+Machine (SVM) demonstrated superior effectiveness in disease
+10.1109/ICOEI.2019.8862707.
+prediction. However, minor shortcomings persist, primarily [14] N. Rosruen and T. Samanchuen, "Chatbot Utilization for Medical
+stemming from the challenge of capturing comprehensive Consultant System," 2018 3rd Technology Innovation Management and
+Engineering Science International Conference (TIMES-iCON), Bangkok,
+symptom profiles from users, potentially leading to occasional Thailand, 2018, pp. 1-5, doi: 10.1109/TIMES-iCON.2018.8621678.
+incorrect predictions. We are actively exploring strategies to [15] B. Setiaji and F. W. Wibowo, "Chatbot Using a Knowledge in Database:
+Human-to-Machine Conversation Modeling," 2016 7th International
+address this limitation. Our next research phase will focus on Conference on Intelligent Systems, Modelling and Simulation (ISMS),
+enhancing MIBOT's robustness through Deep Learning (DL) Bangkok, Thailand, 2016, pp. 72-77, doi: 10.1109/ISMS.2016.53.
+[16] M. M. Rahman, R. Amin, M. N. Khan Liton and N. Hossain, "Disha: An
+integration. This will enable the chatbot to accommodate a
+Implementation of Machine Learning Based Bangla Healthcare Chatbot,"
+broader range of symptoms and patterns. In forthcoming 2019 22nd International Conference on Computer and Information
+Technology (ICCIT), Dhaka, Bangladesh, 2019, pp. 1-6, doi:
+iterations of our research, we will provide a comprehensive 10.1109/ICCIT48885.2019.9038579.
+elucidation of the specific factors that contributed to SVM's [17] Neelima, “Disease Prediction Using Machine Learning with GUI”, 2019.
+[Online].Available: https://www.kaggle.com/datasets/neelima98/disease-
+superior performance in comparison to alternative machine
+prediction-using-machine-learning. [Accessed: May 7, 2023].
+learning methodologies. Additionally, the viability of chatbots [18] Tin Kam Ho, Random Decision Forests, In Document Analysis and
+in healthcare and their potential integration with doctor Recognition, 1995., proceedings of the 3rd International Conference on,
+volume 1, pages 278-282, IEEE, 1995.
+consultation is pivotal. We are committed to addressing these
+aspects in our ongoing research, ensuring that MIBOT evolves
+into a valuable tool for disease prediction and seamless
+collaboration with healthcare professionals.
+1146
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:14:37 UTC from IEEE Xplore. Restrictions apply.

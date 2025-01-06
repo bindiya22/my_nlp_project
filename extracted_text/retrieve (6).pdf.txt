@@ -1,0 +1,743 @@
+BriefingsinBioinformatics,2024,25(3),bbae145
+https://doi.org/10.1093/bib/bbae145
+ProblemSolvingProtocol
+A new paradigm for applying deep learning to
+protein–ligand interaction prediction
+ZechenWang,ShengWang,YangyangLi,JingjingGuo,YanjieWei,YuguangMu,LiangzhenZheng andWeifengLi
+Correspondingauthors:WeifengLi,SchoolofPhysics,ShandongUniversity,Jinan,Shandong,250100,China.E-mail:lwf@sdu.edu.cn;LiangzhenZheng,Shanghai
+ZelixirBiotechCompanyLtd.,Shanghai200030,China;ShenzhenInstituteofAdvancedTechnology,ChineseAcademyofSciences,Shenzhen,Guangdong518055,
+China.E-mail:astrozheng@gmail.com
+Abstract
+Protein–ligandinteractionpredictionpresentsasignificantchallengeindrugdesign.Numerousmachinelearninganddeeplearning
+(DL) models have been developed to accurately identify docking poses of ligands and active compounds against specific targets.
+However,currentmodelsoftensufferfrominadequateaccuracyorlackpracticalphysicalsignificanceintheirscoringsystems.Inthis
+researchpaper,weintroduceIGModel,anovelapproachthatutilizesthegeometricinformationofprotein–ligandcomplexesasinputfor
+predictingtherootmeansquaredeviationofdockingposesandthebindingstrength(pKd,thenegativevalueofthelogarithmofbinding
+affinity)withinthesamepredictionframework.Thisensuresthattheoutputscorescarryintuitivemeaning.Weextensivelyevaluate
+theperformanceofIGModelonvariousdockingpowertestsets,includingtheCASF-2016benchmark,PDBbind-CrossDocked-Coreand
+DISCO set,consistently achieving state-of-the-art accuracies.Furthermore,we assess IGModel’s generalizability and robustness by
+evaluatingitonunbiasedtestsetsandsetscontainingtargetstructuresgeneratedbyAlphaFold2.Theexceptionalperformanceof
+IGModel on these sets demonstrates its efficacy.Additionally,we visualize the latent space of protein–ligand interactions encoded
+by IGModel and conduct interpretabilityanalysis,providing valuable insights.This study presents a novel framework for DL-based
+predictionofprotein–ligandinteractions,contributingtotheadvancementofthisfield.TheIGModelisavailableatGitHubrepository
+https://github.com/zchwang/IGModel.
+Keywords:protein–ligandinteraction;scoringfunction;deeplearning;graphneuralnetwork
+INTRODUCTION
+high-resolution structures or capturing the dynamic aspects
+Understandingtheprecisebindingposesofligandswithinprotein of the binding process [9, 10]. Furthermore, experimental
+receptor structures is of immense significance in drug design approaches may be constrained by the availability of suitable
+[1–4].Accurately predicting ligand binding poses provides valu- proteinsamplesandthecomplexityofthesystemunderinves-
+able insights into the intricate mechanisms underlying drug– tigation.Therefore,relyingsolelyonexperimentaltechniquesfor
+target interactions.Thisknowledge enables researchers to opti- determiningligandbindingposesmaynotmeetthedemandsof
+mizebindingaffinity,selectivityandpharmacologicalproperties, high-throughputdrugdiscoveryanddesign[11].
+ultimatelyleadingtothedevelopmentofmorepotentandeffi- Computational methods, such as molecular docking, play a
+cienttherapeuticagents[5,6]. crucial role in this endeavor by offering efficient and accurate
+However,experimental methods for determining the binding toolstoexplorethevastchemicalspaceandguiderationaldrug
+mode of small molecules within proteins are often inefficient design efforts [12–15]. Scoring functions (SFs) are developed to
+andtheiraccuracyisnotalwaysguaranteed[7,8].Experimental guide fast and accurate prediction of protein–ligand complex
+techniques,suchasX-raydiffractionoffersatomicinsightsinto structures, particularly the ligand binding pattern when the
+protein–ligand interactions but are often time-consuming and protein structure is already known or determined [16, 17].
+resource-intensive. They may also face challenges in obtaining SFs calculate the binding energy or score associated with
+ZechenWangisaPhDcandidatestudentattheSchoolofPhysics,ShandongUniversity,China.Heisworkingonprotein-ligandinteractionpredictionanddrug
+design.
+ShengWangistheCEO(ChiefExecutiveOfficer)ofShanghaiZelixirBiotechCompanyLtd.HisresearchareaisproteinstructurepredictionandAI-based
+syntheticbiology.
+YangyangLiiscurrentlyaprofessorattheSchoolofPhysics,ShandongUniversity.Hisresearchinterestsfocusontheinvestigationofnovelphysical(quantum)
+propertiesandfunctionalitiesoftransition-metal-oxideswithstronglycorrelatedelectrons.
+JingjingGuoisaprofessorattheCentreinArtificialIntelligenceDrivenDrugDiscovery,FacultyofAppliedScience,MacaoPolytechnicUniversity.Herresearch
+interestsarecomputationalbiologyandAI-drugdiscovery.
+YanjieWeiistheexecutivedirectorofCenterforHighPerformanceComputingatShenzhenInstitutesofAdvancedTechnology,ChineseAcademyofSciences.His
+researchareaisbioinformaticsandhighperformancecomputing.
+YuguangMuisanassociateprofessorattheSchoolofBiologicalSciences,NanyangTechnologicalUniversity,Singapore.Heisworkingonproteindynamics,
+moleculardockinganddrugdiscovery.
+LiangzhenZhenisaseniorresearchscientistatShanghaiZelixirBiotechCompanyLtd.HeisalsoanAssociateInvestigatoratShenzhenInstituteofAdvanced
+Technology,ChineseAcademyofSciences.Heisworkingonproteinmodelingandprotein-ligandinteractionmodeling.
+WeifengLiisafullprofessorattheSchoolofPhysics,ShandongUniversity.Heisinterestedinmulti-scalesimulationsofbiologicalsystemsanddrugdevelopment.
+Received:November6,2023.Revised:February21,2024.Accepted:March18,2024
+©TheAuthor(s)2024.PublishedbyOxfordUniversityPress.
+ThisisanOpenAccessarticledistributedunderthetermsoftheCreativeCommonsAttributionLicense(https://creativecommons.org/licenses/by/4.0/),which
+permitsunrestrictedreuse,distribution,andreproductioninanymedium,providedtheoriginalworkisproperlycited.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+20242 | Wangetal.
+each pose, allowing for the ranking and selection of the most canofferdirectlyinterpretableindicatorswithphysicalmeanings,
+favorable binding configurations [9, 17]. These SFs consider whichismoreintuitiveforcomputationaldrugdevelopers[28,45].
+various factors, including molecular shape complementarity, Othermethodslackrobustness,especiallywhenusingpredicted
+electrostaticinteractions,vanderWaalsforces,hydrogenbonding structuresorcross-dockedstructuresasproteintemplates.There
+andsolvationeffects[11],toestimatetheoverallbindingaffinity arefewapproachesthatcanaccuratelypredicttheoptimalligand
+or likelihood of a ligand pose being biologically relevant. SFs bindingposes[46,47].
+facilitatetheexplorationofligandconformationalspacebyiden- To address these limitations,we propose an SF based on the
+tifying potential binding modes and providing insights into the geometricgraphneuralnetwork,IGModel,toenhancethepredic-
+strengthandspecificityofligand–receptorinteractions[18].They tionofprotein–ligandinteractions,especiallythedockingposes
+allow researchers to prioritize ligand poses for further analysis prediction. The input of IGModel consists of two graphs: one
+or optimization, thereby aiding in the rational design of drug representstheproteinbindingpocket,andtheotherrepresents
+candidateswithenhancedbindingaffinityandselectivity[9,19]. the protein–ligand atomic interactions. Unlike previous graph
+Inthe1980s,rulesweredesignedbasedonphysicalknowledge representations [48,49],IGModel incorporates the distance and
+and expert experience, or by using force field parameters orientation between interacting atoms as geometric features of
+from bio-molecule simulation systems,which formed the early the complex, providing a more comprehensive description of
+SFs [20]. However, traditional SFs, usually polynomials with the relative positions of the ligand within the binding pocket.
+few parameters and atom-type definitions, are not accurate We employ EdgeGAT layers proposed by Kamin´ski et al.[50] to
+enough to describe the conformational space of protein–ligand encode protein–ligand interactions and derive a latent vector,
+complexes [21]. Another category of SFs involves machine which is subsequently decoded to yield the RMS) of the pose
+learning (ML)-based approaches, which have been developed and the binding strength to the protein via two decoding mod-
+since 2004 [22]. These SFs predict ligand binding affinity by ules.Hence,IGModel can be segmented into two sub-branches:
+extractinginteractionfeaturesusingvariousMLtechniques[23, IGModelRMSDandIGModelpkd.IntheCASF-2016[28]testfordock-
+24]. Notable SFs, such as RF-Score [25] (including its virtual ingpower,IGModelRMSDattainedthehighestTop1dockingsuccess
+screen version, RF-score-VS), NN-Score [26], AGL-Score [27], rate(97.5%withnativeposesincludedand95.1%whenexcluded).
+have achieved excellent performance (‘scoring power’; [28]) in Additionally,IGModelhasshowncommendableperformanceon
+PDBbind-related benchmarks. With the availability of public cross-docking datasets such as the PDBbind-CrossDocked-Core
+experimental data and advancements in deep learning (DL) set [51] and the DISCO [52], comparable to or even surpassing
+algorithms,therehasbeenarisingtrendofutilizingDLmodels otherbaselinemodels.Additionally,IGModeldemonstratesexcel-
+for predicting protein–ligand interactions [29–31]. Since 2017, lentperformanceonunbiasedtestsetsanddatasetscontaining
+various DL-based models have emerged for predicting protein– target structures generated by AlphaFold2 [53],proving its out-
+ligand affinity. AtomNet [32], Kdeep [33] and Pafnucy [34] have standinggeneralizabilityandpracticalityfordrugdiscovery.The
+utilized 3D convolutional neural networks (CNNs) to correlate modelcaptureskeycharge-chargeorhydrogenbondinteractions,
+the three-dimensional mesh representation of a complex with indicatingpotentialrobustnessforprotein–ligandinteractionpre-
+its affinity. Additionally, our group has developed two models diction and suggesting its potential use for lead optimization.
+based on 2D convolution—OnionNet and OnionNet-2—which Overall, we present a highly accurate ligand pose and binding
+estimate protein–ligand affinity by tallying the number of affinitypredictionmodelwithenhanceddrugdesigncapability.
+contactsbetweenligandatomsandproteinatoms/residuesacross
+various distance intervals [35, 36]. Nevertheless, recent studies
+indicatethatMLorDLmodelstrainedsolelyonnativestructures
+METHODS
+tendtounderperformintasksrelatedtodockingandscreening
+Datasets
+power,despitetheirrobustperformanceinscoringpower[37].To
+make the models applicable to practical scenarios, researchers In this study, we utilized the native protein–ligand complexes
+have designed predictors that can directly identify near-native fromthePDBbinddatabase(v.2019)[54]andtheircorresponding
+poses of the ligand or screen active compounds. For instance, docking poses for training. To increase the diversity of ligand
+DeepBSPuses3DCNNtopredicttherootmeansquaredeviation binding conformations, an average of 15 docking poses were
+(RMSD)ofliganddockingposes[38].DeepRMSD+Vina,previously generatedforeachnativeprotein–ligandcomplexusingAutoDock
+proposed by our group, adopts modified formats of van der Vina[55]andledock[56].Weexcludedprotein–ligandpairsfrom
+Waals and Coulombic terms used in traditional force fields as the CASF-2016 test set and those with peptide ligands, as well
+features and has been effective in docking power and docking as any samples that could not be parsed by certain programs,
+pose optimization [39]. Additionally, DeepDock utilizes a graph such as rdkit [57]. The actual RMSD of the docking poses was
+neural network to learn the distance probability distribution calculatedusingthespyrmsdpackage[58].Thebindingaffinity
+between protein–ligand atoms rather than directly predicting (pKd) of the native protein–ligand complex is expressed as the
+the protein–ligand binding affinity or ligand pose RMSD. [40]. negative logarithm of the dissociation constant (Kd),the inhibi-
+BuildingupontheideaofDeepDock,RTMScoreintroducesanovel tionconstant(K)orthehalf-inhibitoryconcentration(IC50).The
+i
+graphrepresentationandemploysagraphtransformermodelto relationshipbetweenbindingfreeenergyandKd is(cid:2)G=RTlnKd,
+learn distance probability distributions, achieving state-of-the- where R is the gas constant and T is the temperature. At the
+art(SOTA)resultsacrossmultiplevirtualscreeningtestsetsand roomtemperature,T=298.15K,(cid:2)G=−1.3633pKd.Thedivision
+dockingposepredictiontasks[41].However,ithasbeenobserved of the training and validation sets follows the same procedure
+thatmanyDLSFsperformpoorlyforallevaluationmetrics[28]. asinpreviouswork[39],wherein1000protein–ligandpairswere
+More researchers now recognize the importance of achieving randomlyselectedfromtherefinesetasthevalidationset,andall
+balanced performance for both docking and screening tasks remainingsamplesfromthegeneralsetwereusedasthetraining
+[42–44]. Among the numerous DL methods mentioned above, set. This ensures that there are no overlapping protein–ligand
+someprovideaffinitypredictionorligandposeprediction,butfew pairs in training,validation and test sets.The parameters used
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+2024Protein–ligandinteractionprediction | 3
+formoleculardockingandthedistributionsofRMSDandpKdfor minimumdistancebetweentworesiduesislessthan10Å.Node
+dockingposesareshowninSupplementarypart1. featuresprimarilyincludetheresiduetype,distancedistribution
+betweeninternalatoms,andthepositionrelativetothepocket’s
+center.Meanwhile,edge features convey the distances between
+Graphicalrepresentationofprotein–ligand
+nodesassociatedwiththemainchainatoms.TableS2providesa
+complexes
+comprehensivesummaryofthedetailednodeandedgefeatures
+Generally,thebindingofaligandwithinthepocketisgoverned ofthebindingpocketgraph.
+by non-covalent interactions,and the potential energy surfaces
+Architecture
+associatedwithprotein–ligandbindingdisclosepreferredgeome-
+triesamongatoms.Therefore,toaccuratelydescribetherelative IGModelcomprisesthreemaincomponents:theinteractionfea-
+positions of atoms in the protein–ligand system, which is cru- tureencodingmodule,theRMSDdecodingmoduleandthepKd
+cial for characterizing protein–ligand interactions,we construct decodingmodule.
+aheterogeneousgraphGRR,LL,RL.Thisgraphconsistsoftwotypes TheencodingportionofIGModelincludestwobranchesthat
+of nodes: protein atom nodes (VR) and ligand atom nodes (VL). are tasked with processing the binding pocket graph and the
+Toconservecomputationalresources,onlyproteinatomswithin protein–ligandinteractiongraph,respectively,witheachbranch
+8 Å of the ligand co-crystal structure are used for interaction featuringtwoEdgeGATlayers.Whenthebindingpocketgraphis
+modeling.There are four message-passing channels in GRR,LL,RL, inputintotheencoder,itsnodefeatureshpock andedgefeatures
+namelyERR (VR toVR),ELL (VL toVL),ERL (VR toVL)andELR (VL to fpockareupdatedasshowninEquation(1).Theupdatednodefea-
+VR). turesh(cid:3) areconvertedintoavectoroflength1024torepresent
+pock
+WithintheligandsubgraphGL=(VL,ELL),wedefineseventypes thebindingpocketembedding:
+ofligandatoms:C,N,O,P,S,Hal(representinghalogenF,Cl,Br,
+andI),andDU(representingotherelementtypes).Ifacovalent h(cid:3) pock,f p(cid:3) ock=EGATConv(EGATConv(hpock,fpock)) (1)
+bondexistsbetweenatomsiandj,anedgeeL isdefinedbetween
+ij
+nodes vL i and vL j. The rdkit package enables the extraction of Fortheprotein–ligandinteractiongraph,theinitialmessage-
+physicalandchemicalinformationpertainingtochemicalbonds, passingphaseisshowninEquations(2)–(5).Followingthisphase,
+whichservesastheedgefeaturealongsidebondlength.Forthe thenodesrepresentingtheproteinandligandatomsareupdated.
+protein subgraph GR=(VR,ERR),we redefine atom types based on Therevisednodesoftheproteinandligandsubgraphs,denoted
+the element type, the residue type to which they blong, and ash(cid:3) andh(cid:3) ,areasshowninEquations(6)–(7).Afterundergo-
+rec lig
+their location in either the main chain or the side chain. For ing two rounds of updates,the node features for both the pro-
+example, ‘LYS-MC’ and ‘LYS-SC’ represent the carbon atom on teinandtheligandareconvertedinto1024-dimensionalvectors,
+themainchainandsidechainofthelysineresidue,respectively. whichactsasembeddingsencapsulatingdetailsabouttheprotein
+Theone-hotencodingofatomtypes,combinedwitharomaticity, andligandatoms.Theamalgamationofthesetwoembeddings,
+charge, and distance to the α-C atom, are collectively used as along with the binding pocket embedding,constitutes the final
+node features for GR. When the distance between two nodes latentspacethatencapsulatestheentiretyoftheprotein–ligand
+vR i and vR j is less than 5 Å, an edge eR ij is established, and the interaction:
+edge length serves as the edge feature.If the distance between
+ea dp gr eo ste ei Rn Ln ao nd de ev LR i Ra an rd
+e
+a crl eig aa ten dd ,n wo hd ee revL i ei Rs Ll des es noth tea sn t8 heÅ, dd irir ee cc tt ioe nd h(cid:3) rec1,f r(cid:3) ec1=EGATConv(hrec,frec) (2)
+i,i i,i i,i
+f mro um ltilv aR i teto rav lL i a, ra cn hd ite eL i c,R i ture rp er fe as ce in lit ts att eh se td hi ere ic nt tio en grf ar to iom nv oL i ft no ov dR i e.T ah ni ds h(cid:3) rec2,f l(cid:3) ig−rec=EGATConv((h lig,hrec),f lig−rec) (3)
+edge information within the protein–ligand graph.To provide a
+morecomprehensivedescriptionoftherelativepositionsbetween h(cid:3) lig1,f l(cid:3) ig1=EGATConv(h lig,f lig) (4)
+protein–ligandatoms,inadditiontoconsideringtheinteratomic
+distance,weintroduceanovelorientationfeature.Specifically,we h(cid:3) lig2,f r(cid:3) ec−lig=EGATConv((hrec,h lig),f rec−lig) (5)
+introduceadihedralangleϕ (formedbythegeometriccenterof
+thepose,vL i,vR i andα-C),aswellastwoanglesθ 1andθ 2,asshown h(cid:3) rec=BatchNorm(h(cid:3) rec1)+BatchNorm(Linear(h(cid:3) rec2)) (6)
+inFigure1(B).InFigure1(B),Cα,R,LandPrepresenttheCαofthe
+residue,aspecificatomwithintheresidue,aspecificatomwithin h(cid:3) =BatchNorm(h(cid:3) )+BatchNorm(Linear(h(cid:3) )) (7)
+theligandandthegeometriccenteroftheligand,respectively.θ
+1
+lig lig1 lig2
+andθ
+2
+aretheanglesformedbetweentheCα-RedgeandtheL-
+Redge,aswellastheP-LedgeandR-Ledge,respectively.Finally, EachlearningmoduleinthedecodingpartconsistsofagMLP
+sin(ϕ/2),cos(θ 1/2),cos(θ 2/2)anddistanceareusedasfeaturesfor [61] layer and two linear layers. After passing through the two
+theinteractionedge.TableS1summarizesallthenodeandedge learning modules, the latent space is converted into two 128-
+featureswithinthisheterogeneousgraph.
+dimensionalvectors,VRMSDandVpkd.Toensurethatthepredicted
+Thephysicochemicalenvironmentofthebindingpocketiscrit- pKd considers the change in RMSD of the ligand pose,we map
+icalforligandbinding[59,60].However,macroscopicdescriptions VRMSD toanewvectorV(cid:3) pkd inthespaceofVpkd throughalinear
+of binding pockets cannot be adequately represented solely by
+layer.ThisnewvectorisintegratedwithVpkdfordecodingthepKd.
+atomic-level interaction graphs.Toovercome thischallenge,we Thetrainingdatasetencompassesbothexperimentallyverified
+construct an undirected graph Gp=(Vp, Ep) to characterize the structuresandvirtualconformationsproducedthroughmolecu-
+residuestates inthebindingpocket.In amanner akinto RTM- lardocking.However,bindingaffinitydataissolelyavailablefor
+Score,wedefinethebindingpocketastheresidueswithin8Åof native complexes. It is postulated that the binding strength of
+theco-crystallizedligand.Eachnodevp ∈Vprepresentsaresidue a given pose to its target is inversely proportional to its RMSD
+i
+withinthebindingpocket,andanedgeepisestablishedwhenthe from the native conformation, with the native protein–ligand
+ij
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+20244 | Wangetal.
+Figure1.OverviewofIGModel.(A)IllustrationofpredictingRMSDandpKdfromtheprotein–ligandcomplexstructure.(B)Theorientationinformation
+ontherelativepositionsofprotein–ligandatoms.Cα,R,LandPrepresenttheCαoftheresidue,acertainatomwithintheresidue,acertainatomwithin
+theligandandthegeometriccenteroftheligand,respectively.Theθ1andθ2aretheanglesbetweenCα-RandL-R,andbetweenP-LandR-L,respectively.
+TheψdenotesthedihedralangleformedbyCα,R,LandP.
+conformationprocessingthehighestbindingaffinity.Thisstudy ensure that IGModel fits pKd in a ‘descending’ direction, facil-
+aims to decode the relationship between the RMSD of docking itating a negative correlation between the predicted pKd and
+posesandtheirbindingstrengthusingDL.Additionally,themodel theRMSD.
+isdesignedtopredictadecayfactorW (illustratedinFigure1A
+anddefinedinEquation8)thatrangesfromof0to1withinthe
+RESULTS
+pKddecodingsegment,toportraythediminishingpKdvalueas
+theRMSDincreases.UsingWandthepreviousassumptions,the EvaluationonCASF-2016benchmark
+bindingstrength(pKdlabel)ofthedockingposetothereceptorcan TheperformanceoftheSFisevaluatedacrossfourdimensions:
+bededuced,whichservesasthelabelforpKd(Equation9): scoring power, ranking power, docking power, and screening
+power, as defined by the CASF-2016 benchmark [28]. Previous
+W=Sigmoid(Linear(V p(cid:3) kd+Vpkd)) (8) research indicates that SFs with robust docking or screening
+power often exhibit weaker scoring and ranking power, such
+as DeepRMSD+Vina [39] and RTMScore [41]. Our model aims
+pKdlabel=pKdnat−W∗RMSDreal (9) to achieve balanced performance across various tasks. Despite
+primarily focusing on identifying near-native conformations of
+the ligand (docking power), what is surprising is that IGModel
+InEquation(8),pKdnatrepresentsthebindingaffinitybetweenthe
+also demonstrates a relatively balanced performance in other
+nativeconformationoftheligandandthereceptor,andRMSDreal
+tasks(Figure2andTablesS3–S4).Firstly,fordockingpower,the
+istherealRMSDofthedockingpose.WhenRMSDrealiscloseto0,
+pKdlabelwillbeclosetopKdnat.
+top 1 success rate of IGModelrmsd with native poses included in
+the test set is 97.5%, and the value remains as high as 95.1%
+Thelossfunctionduringtrainingisdefinedasfollows:
+whenthenativeposesareexcluded.Atthesametime,IGModelpkd
+also achieves higher top 1 success rates compared to most
+L=α∗mse(RMSDreal,RMSDpred)+
+models, which are 93.3 and 90.9% when crystal structures are
+1 (cid:2) (10) includedandexcludedinthetestset,respectively.Theablation
+β∗mse(pKdlabel,pKdpred)+γ∗
+N
+pKdpred
+experiments of IGModel on the validation set and the CASF-
+2016 docking power are detailed in Supplementary part 4. We
+where weights α,β,and γ are used to sum up the components also conducted a ‘binding funnel analysis’ by calculating the
+withinthelossfunction,whicharesetas1,0.5and0.05inthis Spearman’s correlation coefficient (SCC) between the RMSD or
+study.Nisthenumberofsamplesinamini-batch.Accordingto pKdpredictedbytheIGModelandtheactualRMSDforthedecoy
+ourassumption,thebindingstrengthbetweentheligandandthe setofeachprotein–ligandpair,andthencalculatingtheaverage
+targetexhibitsanegativecorrelationwiththeRMSDoftheligand SCC across different RMSD intervals. The result indicates that
+binding pose. The last term in the loss function is designed to IGModelmaintainsaclearadvantageacrossvariousRMSDranges
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+2024Protein–ligandinteractionprediction | 5
+Figure 2.Comparisonofscoring,ranking,anddockingpowerusingtheCASF-2016benchmarkagainstotherSFs.(A)Scoringpowermeasuresthe
+correlationbetweenthescoresofthemodelandexperimentalaffinity,usingthePCCasthemetric.(B)RankingpowerevaluatestheabilityofaSFto
+ranktheknownligandsforacertaintarget,withtheSpearman’scorrelationcoefficientservingasthemetric.(C)and(D)displaythetop1successrate
+whenthecrystalstructuresareincludedandexcludedfromthetestset,respectively.
+(FigureS2).However,thecocrystallizedligandmaybeunknown the 0.686 achieved by GatedCGN ft 1.0 (Table S4). To further
+in actual virtual screening, thus we retrain the the IGModel assess the screening power of IGModel, the DUD-E and DUD-
+(called IGModel self−ref) using the docking poses themselves as AD sets were utilizes as additional test sets.On the DUD-E set,
+the reference to determine the binding pocket of the target. In RTMScore,GatedCGN ft 1.0andGT ft 1.0demonstrateasignif-
+this scenario, the performance of IGModel self−ref in the CASF- icant advantage over IGModel,both in terms of EF and AUROC.
+2016 docking power test significantlydeclined compared to the On the unbiased DUD-AD set,RTMScore,GatedCGN ft 1.0 and
+baselineversionofIGModel(TableS3).Recently,AI-basedprotein– GT ft 1.0 still exhibited optimal EF, despite their AUROC being
+ligandblinddockingalgorithmshavebeensignificatlydeveloped, slight lower than that of IGModel. This indicates that there is
+suchasDiffDock,agenerativemodelbasedonthediffusionmodel still a gap between IGModel and SOTA SFs in screening tasks.
+[62].We attempted to regenerate the binding poses of protein– ThedetailedresultsarepresentedinFigure3andSupplementary
+ligand complex from the CASF-2016 test set using DiffDock. Part6.
+Subsequently, these binding poses were scored by IGModel,
+GatedCGN ft 1.0,GT ft 1.0andVina.ByanalyzingthePCCand
+SCCvaluesobtainedfromtheseSFs,wefurtherdemonstratedthe Evaluationontheredockingandcross-docking
+versatilityofIGModel(seedetailinSupplementarypart5). testsets
+Additionally, screening power refers to the ability of the SFs Currently,inmostmoleculardockingapplications,theproteinis
+toidentifythetruebinderstoaspecificreceptoramongalarge treatedasarigidmolecule,whichdeviatesfromtheactualpro-
+library of compounds. This is measured by two indicators: the tein–ligandbindingbehaviorobservedinreality.Thisisbecause
+firstisthesuccessrateofidentifyingthehighest-affinitybinder thebindingpocketcanaccommodatedifferentcompoundswith
+among the top 1, 5 or 10% of ranked ligands across all 57 tar- flexiblesidechainsand,sometimes,evenwithadjustableback-
+get proteins in the test set; the second is the enrichment fac- bones [63]. Redocking and cross-docking are two methods for
+tor (EF), which is calculated by the average percentage of true evaluatingmoleculardocking.Redockinginvolvesreintroducing
+binders among the top 1,5 or 10% of ranked candidates across aligandintoitscognatereceptor,whilecross-dockingpertainsto
+all57targets.IGModelachievesatop1%successrateof66.7%, dockingaligandintoanon-cognatereceptorwithintheoriginal
+which is comparable to RTMScore [41], but slightly lower than pocket [52]. To comprehensively assess the docking power of
+GT ft 1.0[43].However,theEFachievedbyIGModelpkdisonly19.4, IGModel,variousredockingandcross-dockingbenchmarkshave
+whichissignificantlylowerthanthatofRTMScoreandGT ft 1.0, beenadopted.
+but still higher than most predictors, such as DeepDock [40]. The first test set we assessed is PDBbind-CrossDocked-Core
+In general, IGModel exhibits a relatively balanced performance [51], with all receptors and ligands derived from the PDBbind
+acrossvariousmetricsbasedontheCASF-2016benchmark.Inter- v2016coreset.Eachligandwasextractedfrom285protein–ligand
+estingly, for scoring power, IGModelpkd achieved a Person cor- crystalstructures,andthenwasredockedintotheoriginalprotein
+relation coefficient (PCC) of 0.831, very close to the 0.834 and orfourotherproteinsbelongingtothesametargetclusterusing
+0.824achievedbyGatedCGN ft 1.0[43]andPLANET[42],respec- three docking software: Surflex-Dock, Glide SP and AutoDock
+tively.The scatter plots of IGModelpkd on the validation set and Vina.IGModelwastestedinthesethreegroupsofposesandcom-
+CASF-2016coresetareshowninFigureS3.Finally,fortherank- paredwithotherSFs.TheresultsareshowninFigure4.Forcross-
+ingpowertest,IGModelpkd achievedaSCCof0.723,higherthan docking,thetop1successratesonposesgeneratedbyIGModelrmsd
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+20246 | Wangetal.
+Figure3.TheperformanceofSFsontheDUD-EandDUD-ADsets.(A)and(C)showtheEF(0.5,1.05and5.0%)achievedbytheSFsontheDUD-ADand
+DUD-Edatasets,respectively.(B)and(D)presenttheAUROCofSFsontheDUD-ADandDUD-Edatasets,respectively.Thewhitecirclesintheboxplot
+denotesthemeanvaluewithineachgroupofdata.TheboxplotforRTMScoreandGenScoreonDUD-Esetcanbefoundontheoriginalpapers.
+with Surflex,Glide and Vina are 0.662,0.595 and 0.594,respec- thatofIGModel.Thissubstantiatesthepracticalapplicationvalue
+tively, slightly better than GT ft 1.0 and GatedGCN ft 1.0, ofIGModel self−ref_rmsdinrealmoleculardockingscenarios.
+but outperformed most predictors. Meanwhile, IGModelpkd still Another cross-docking test set used in this study is DISCO,
+performed well,comparable to GatedGCN ft 1.0,although it is whichcontains4399crystalprotein–ligandcomplexesacross95
+slightlyworsethantheIGModelrmsd.Forredockingtasks,thetop protein targets [52]. The targets were derived from the DUD-E
+1successratesofIGModelrmsdandIGModelpkdonposesgenerated database[64],therebyencompassingabroadspectrumofprotein
+bySurflex,GlideandVinaare0.854and0.850,0.786and0.779,as families.LigandposesweregeneratedusingAutoDockVina[55],
+wellas0.761and0.754,respectively,demonstratingasignificant producing20posesperprotein–ligandpairbydefault.Forconsis-
+advantageoverotherSFs.However,itmustbeacknowledgedthat tencywithourpriorresearch,wetreatedeachtarget-ligandpair
+onlyfewproteinshaveknownnativebindingligandsandpredict- asanindividualcasewhencalculatingthetop1successrate,a
+ing protein pockets through computational methods remains a methodthatdiffersfromtheintegratedwhentestedonPDBbind-
+challenge,and this will restrict the applicability of SFs such as CrossDocked-Coreset.TheperformanceofIGModelincompari-
+RTMScore, GenScore and IGModel, which define pockets based sontoseveralbaselineSFsontheDISCOsetisdepictedinFigure5.
+on the co-crystal ligand. Therefore, grabbing pockets through It is evident that IGModelrmsd outperforms other baseline SFs,
+docking pose itself is suitable for all application scenarios.The whileIGModelpkdshowscomparableresultstoGatedGCN ft 1.0.
+overall performance of IGModel self−ref_rmsd on the three cross- TheoutstandingperformanceofIGModelinbothredockingand
+dockingtestsetsisslightlysuperiortothatofIGModel,although cross-dockingtasksunderscoresitssignificantpracticalvaluefor
+itsperformanceontheredockingtestsetsisslightlyworsethan applications.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+2024Protein–ligandinteractionprediction | 7
+Figure4.DockingpowerofIGModelandotherSFsonPDBbind-CrossDocked-Coreset.(A),(B)and(C)showthetop1successrateofSFsonposes
+generatedbySurflex,GLideandAutoDockVina,respectively.TheresultsofSFsotherthanIGModelarecitedfromthereference.
+by the product of protein sequence similarity (calculated by
+NW-align, http://zhanglab.dcmb.med.umich.edu/NW-align) and
+the Tanimoto similarity of the ligand Morgan fingerprints
+calculated by rdkit [57]. Secondly, predicting the binding pose
+of a ligand becomes even more challenging when the native
+conformationofthetargetisunknown.Computationalmethods
+such as AlphaFold2 [53] provide solutions for rapidly obtaining
+high-precision protein structures. Based on these predicted
+protein structures, molecular docking was applied to generate
+poses of the ligands. In our previous study, CASF-2016 and the
+unbias-v2019 sets were used to construct the test sets for the
+AlphaFold2 version, namely CASF-2016-AF2 and unbias-2019-
+AF2,respectively[46].
+We evaluated the docking performance of SFs on the three
+mentioned datasets. Table 1 presents the Pearson correlation
+coefficient (PCC) and Spearman correlation coefficient (SCC)
+betweenthescoresofSFsandthetrueRMSD.Itisevidentthat
+IGModel demonstrates significantly higher accuracy compared
+Figure5.ThetopNsuccessrateofIGModelandotherbaselinemodels to other baseline SFs.Particularly,on the unbias-v2019-AF2set,
+onDISCOset.
+IGModel maintains robust performance.The top 1 success rate
+achievedbySFswith2and3ÅascutoffsisshowninTable2,and,
+GeneralizationassessmentofIGModel
+notably,IGModeloutperformsotherSFsbyasignificantmargin.
+Recent studies have shown that the performance of DL models Thiseffectivelyconfirmsthegeneralizationabilityandrobustness
+is susceptible to biases within the data set, such as protein ofIGModelindifferentscenarios.However,forCASF2016-AF2and
+sequencesimilarity[65].Inthispaper,weassessedthegeneral- unbias-v2019-AF2,twodatasetsbasedonstructurespredictedby
+izabilityoftheIGModelfromtwoadditionalperspectives.Firstly, AlphaFold2,theoveralltop1successrateislowerduetothelarger
+mostSFsdonotrigorouslyeliminateredundancyinthetraining RMSDs of the poses generated by molecular docking relative to
+set,whichmayresultinbetterperformanceonthetestsetthan thenativeposes.
+inactualscenarios.Toaddressthis,weintroducedanunbiased
+testset(theunbias-v2019setinthiswork)thatwepreviouslypro-
+DISCUSSION
+posed.Thissetcontainsprotein–ligandpairswithlowsimilarity
+tothoseinthePDBbinddatabasev2019,andthenativeconforma- DifferentSFshavebeendevelopedusingvarioustrainingdatafor
+tionoftheligandswasexcluded[46].Thesimilarityisdetermined pKdorRMSDpredictions,andasinglescore(eitheratraditional
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+20248 | Wangetal.
+Table1:Pearsoncorrelationcoefficient(PCC)andSpearmancorrelationcoefficient(SCC)ofIGModelandotherSFstestedonthe
+CASF2016-AF2,unbias-v2019andunbias-v2019-AF2datasets
+CASF2016-AF2 unbias-v2019 unbias-v2019-AF2
+SFs PCC SCC PCC SCC PCC SCC
+Vinaa 0.035 0.071 0.364 0.356 0.209 0.192
+DeepBSPa 0.401 0.375 0.543 0.507 0.451 0.418
+DeepRMSDa 0.463 0.430 0.285 0.246 0.261 0.247
+DeepRMSD+Vinaa 0.248 0.290 0.405 0.362 0.299 0.287
+GT ft 1.0 0.503 0.455
+GatedGCN ft 1.0 0.560 0.524
+zPoseScorea 0.659 0.593 0.604 0.535 0.554 0.507
+IGModelpkd 0.736 0.649 0.611 0.522 0.580 0.519
+IGModelrmsd 0.751 0.669 0.633 0.542 0.609 0.552
+aTheresultsarecitedfromreference[46].
+Table2: Top1successrateofIGModelandotherSFstestedontheCASF2016-AF2,unbias-v2019andunbias-v2019-AF2datasets
+CASF2016-AF2 unbias-v2019 unbias-v2019-AF2
+SFs 2Å 3Å 2Å 3Å 2Å 3Å
+Vinaa 0.127 0.208 0.453 0.526 0.130 0.219
+DeepBSPa 0.180 0.324 0.453 0.584 0.169 0.254
+DeepRMSDa 0.269 0.425 0.210 0.324 0.089 0.185
+DeepRMSD+Vinaa 0.261 0.416 0.441 0.534 0.144 0.253
+GT ft 1.0 0.273 0.448
+GatedGCN ft 1.0 0.292 0.465
+zPoseScorea 0.339 0.506 0.599 0.700 0.185 0.274
+IGModelpkd 0.338 0.558 0.562 0.690 0.227 0.318
+IGModelrmsd 0.364 0.571 0.587 0.690 0.227 0.296
+aTheresultsarecitedfromreference[46].
+SF or an ML/DL-based SF) may effectively address the quality graphmodules:thepocketgraphmoduleandtheprotein–ligand
+of docking poses for pose selection [44] and virtual screening atomic graph module. We then apply EdgeGAT layers [50] to
+[28].RMSDreflectsthedifferencebetweenthedockingposeand encode the interaction features.Tests under differentscenarios
+the native conformation, providing insight into ‘how it binds’. havedemonstratedthatIGModelperformswellinpredictingthe
+However,itdoesnotrepresentthebindingstrengthwiththetarget RMSD of docking poses for redocking, cross-docking, and AF2-
+protein.Ontheotherhand,pKdrepresentsthebindingstrength baseddockingtasks,indicatingitsexcellentgeneralizationability
+betweenthemoleculeandthetarget,addressingthe”howstrong androbustnessforposeselection.
+itbinds’problem,butitdoesnotreflectthedifferencebetween To visualize the protein–ligand interaction potential energy
+thedockingposeandthenativepose[66]. surface encoded by the graph neural network,we visualize the
+EarlyML-orDL-basedSFsoftendirectlypredictprotein–ligand ligandembeddingoutputbythelastEdgeGATlayerintheprotein–
+bindingaffinity(pKd)usingnativeprotein–ligandcomplexstruc- ligandgraphbranch,aswellastheoverallcomplexembedding.
+tures[25,34–36].However,testinghasshownthatthescoresof Wehaveemployedprincipalcomponentanalysis(PCA)tocluster
+suchmodelsarechallengingtodistinguishcorrectbindingposes the latent space and ligand embeddings of samples from the
+generatedbydockingtools[28],andtheiraccuraciesinscreening validation set, subsequently coloring them according to actual
+tasks are not satisfactory [37].Subsequently,researchers began RMSD,predictedRMSD,pKdlabel andpredictedpKd.Theresulting
+to directly predict the RMSD of docking poses (such as Gnina distributionsofRMSDandpKdwithinthelatentspacearepre-
+[67],DeepRMSD[39]andDeepBSP[38]),orusescoresfromother sentedinFigure6(A–D).TheseplotsrevealthatasRMSDandpKd
+mathematicalspaces(suchasDeepDock[40],RTMScore[41]and vary,distinctstratificationpatternsbecomeapparent.Analogous
+GenScore[43])trainedwithdockingposes.Thedistancelikelihood patternsarediscernibleintheligandembeddingplots(Figure6E–
+potential generated by DeepDock,RTMScore and Genscore,it is H). A noteworthy observation is the broader coverage area in
+difficulttointuitivelydescribeRMSDandthebindingstrengthand thelatentspaceimagescomparedtothoseofligandembedding,
+couldnotprovideanexplicitandphysicalmeaningfulprediction suggestingasuperiorcapacityofthelatentspacetodifferentiate
+for computational chemists. However, RMSD-corrected pKd is betweenvariousclusters.Thisenhanceddifferentiationcanlikely
+also used as a training target to construct ML models, which beascribedtotheincorporationofproteinpocketinformationinto
+providesadirectestimateforboththeposebindingpatternand thelatentspace,therebyrefiningthedepictionofprotein–ligand
+themolecule’sbindingstrengthwithasinglescore[45,68].Some interactions.
+representativeSFsarelistedinTableS8. IGModel, as the first DL model capable of simultaneously
+Inourwork,weaimtoaddressbothquestionsofRMSDpre- predictingtheRMSDofliganddockingposesrelativetothenative
+diction for ‘how it binds’ and pKd prediction for ‘how strong conformation and the binding strength to the target, is based
+it binds’ within an integrated framework. We achieve this by on the assumption of a negative correlation between binding
+characterizingtheprotein–ligandinteractionusingtwogeometric strengthandRMSDsofdockingposes.Therelationshipbetween
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+2024Protein–ligandinteractionprediction | 9
+Figure6.Visualizationofthecomplexembedding,ligandembeddingandthedecayfactorW.(A)–(D)(E–H)showthevisualizationofthecomplex
+embedding(ligandembedding)ofsamplesinthevalidationsetafterPCAclustering,coloredaccordingtorealRMSD,predictedRMSD,pKdlabel and
+predictedpKd,respectively.(I)–(K)presentvisualizationofthedecayweightofbindingstrengthwithrespecttoRMSDvariations,organizedaccordingto
+pKdnat-realRMSD,pKdlabel-realRMSDandpredictedpKd-PredictedRMSD,respectively,wherepKdnatreferstothebindingaffinityofthenativeprotein–
+ligandcomplex.
+thedecayweightofbindingstrengthandtheRMSDsofdocking Considering atoms in different residue side chains and even
+posesremainsuncertain.Pastresearchhasinvolvedempirically those within the same residue display diverse physicochemical
+setting functions to model the change in binding strength with characteristics,itiscrucialtoaccountforvariousfeaturessuch
+RMSD [45, 68], but such manual interventions may introduce asresiduetype,elementtype,aswellaspolarityandaromaticity.
+biases.Weaimforthemodeltodeduceappropriatedecayweights Thisapproachprovidesmeaningfuldescriptorsforproteinatoms,
+autonomouslyforvariousprotein–ligandcomplexes,asdepicted enabling IGModel to identify essential non-bonded interactions
+in Figure1. The decay weights are represented with respect to likehydrogenbonds,asillustratedinFigure7.Weanalyzedthe
+pKdnat-real RMSD (Figure6I), pKdlabel-real RMSD (Figure6J) and attentionvaluesassignedbyIGModeltoeachprotein–ligandatom
+predictedpKd-predictedRMSD(Figure6K).Anotabletrendisthat pairintheprotein–ligandcomplexesfromtheCASF-2016dataset
+the decay weight W tends to increase with the rise in RMSD, todetermineifthemodeleffectivelyhighlightsthephysicalinter-
+confirmingourinitialhypothesisthatposesclosertothenative actions.Aproteinatom’simportanceisdeterminedbytheaggre-
+structureexhibitstrongerbinding. gated attention values from the interaction edges with the lig-
+Moreover, we investigate the model’s proficiency in learning and atoms.We compiled the importance scores for all types of
+the physical aspects of protein–ligand interactions. It is widely proteinatomsandpresentedthetop20inFigure7.Itisevident
+accepted that protein–ligand binding predominantly involves that among the most critical protein atoms, polar atoms are
+non-bondedinteractions[69],solvation[70]andentropiceffects predominant,underscoring their vital role of polar interactions
+[71]. Specifically, short-range non-bonded interactions like in protein–ligand binding [72] for binding strength and binding
+hydrophobiccontacts,cation-π,saltbridges,hydrogenbondsand specificity. Moreover, certain non-polar atoms, such as ILE-CD1
+π-π stacking are known to contribute favorably to the binding andPHE-CZ,arealsoidentifiedassignificantcontributors.This
+freeenergiesofthecomplexes[69,72,73].However,mostcurrent significance arises as alpha carbon atoms and aromatic rings
+ML/DL-based SFs fail to explicitly or implicitly emphasize or arecommonlyinvolvedinhydrophobicinteractions,amongthe
+highlightthedirectnon-bondedinteractionsbetweentheprotein most prevalent in protein–ligand binding.Figure7(B) illustrates
+andtheligand. thatproteinatomsengagedinhydrogenbondingreceivehigher
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+202410 | Wangetal.
+Figure7.Explainabilityandcasestudy.(A)Rankingofimportanceofproteinatomsatthebindingpocket(onlythetop20proteinatomtypesareshown).
+(B)and(C)showtwocases(1QF1and2QE4)whereIGModelidentifieskeyinteractions,includinghydrogenbondingandπ-πstacking.Inthetwopictures
+locatedontheright,thedistancesbetweenkeyatomsareshown(black),andthenamesandimportancevaluesofkeyatomsintheproteinarecolored
+inblue.
+importancescores,indicatingthatIGModeleffectivelyrecognizes protein–ligandinteractions,movingbeyondthetraditionalsingle-
+hydrogen bonds and allocates increased attention to them. In scoreoutputofSFs,toensureoutputswithclearphysicalinterpre-
+Figure7(C),theimportancevalueisnotablyhighfortheedgesof tation.Wepositthatthisframeworkholdssubstantialpromisefor
+thebenzeneringinphenylalaninewhenproximaltotheligand’s moleculardockingapplicationsandtherefinementandoptimiza-
+benzenering,suggestingthatIGModelcanaptlydetectπ-πstack- tionofleadcompoundsindrugdesign.Inconclusion,ourresearch
+inginteractions. presentsanewdirectionforthefuturedesignofSFsandopensup
+freshchallengesinthefield.
+CONCLUSION
+KeyPoints
+In thisstudy,we introduceIGModel,a novel scoring framework
+• We introduce the first framework for simultaneously
+forpredictingprotein–ligandinteractions,capableofconcurrently
+predictingtheRMSDoftheliganddockingposeandits
+predicting RMSD of ligand binding poses and binding strength
+bindingstrengthtothetarget.
+tothetarget.ThemodelemploystheEdgeGATlayerstoencode
+• IGModelcaneffectivelyimprovetheaccuracyofidenti-
+inputgraphsintoalatentspacethatcharacterizesprotein–ligand
+fyingthenear-nativebindingposesoftheligands,and
+interactions, subsequently decoding this space into RMSD and
+can still outperform most baseline models in scoring
+pKd values using two separate decoders. IGModel has demon-
+power,rankingpowerandscreeningpowertasks.
+stratedSOTAperformanceacrossvariousdockingpowertestsets.
+• IGModelisstillaheadofotherstate-of-the-artmodelsin
+Whiledesignedtoprovideaholisticassessmentofdockingposes,
+theunbiaseddatasetandthetargetstructurepredicted
+IGModelalsoexcelsinscoringpowerandrankingpowertestson
+by AlphaFold2, proving its excellent generalization
+theCASF-2016benchmark,matchingorsurpassingothermodels.
+ability.
+Additionally,itoutperformsmostbaselineSFsinscreeningpower.
+• Latent space provided by IGModel learns the physi-
+TherobustnessofIGModelisfurthervalidatedonthechalleng-
+cal interactions, thus indicating the robustness of the
+ing unbias-v2019 set and datasets containing targets predicted
+model.
+by AlphaFold2,showcasing its strong generalizability.Visualiza-
+tion of the latent space encoded by IGModel offers an intuitive
+depictionoftheenergylandscapethatdescribestheRMSDand
+bindingstrengthofdockingposes.CasestudiesrevealIGModel’s
+FUNDING
+adeptnessinidentifyingkeyinteractionslikehydrogenbonding
+andπ-πstacking. ThisresearchissupportedbyNationalKeyR&DProgramofChina
+It is acknowledged that no single SF can excel in all tasks, (2023YFA0915500).ThisworkisfinanciallysupportedbytheNat-
+yetIGModelmanagestoachieverelativelybalancedperformance. uralScienceFoundationofShandongProvince(ZR2020JQ04)and
+Significantly, IGModel pioneers a novel approach in predicting LocalScienceandTechnologyDevelopmentFundGuidedbythe
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+2024Protein–ligandinteractionprediction | 11
+CentralGovernmentofShandongProvince(YDZX2022089).This 16. Baig MH,Ahmad K,Roy S,et al.Computer aided drug design:
+workispartlysupportedbytheSingaporeMinistryofEducation successandlimitations.CurrPharmDes2016;22(5):572–81.
+(MOE), tier 1 grants RG97/22 (M.Y.). This work was partly sup- 17. DsouzaS,PremaKV,BalajiS.Machinelearningmodelsfordrug–
+portedbytheKeyResearchandDevelopmentProjectofGuang- target interactions: current knowledge and future directions.
+dongProvinceundergrantno.2021B0101310002,NationalScience DrugDiscovToday2020;25(4):748–56.
+Foundation of China under grant no. 62272449, the Shenzhen 18. LiJ,AilingF,ZhangL.Anoverviewofscoringfunctionsusedfor
+Basic Research Fund under grant nos RCYX20200714114734194, protein–ligandinteractionsinmoleculardocking.InterdiscipSci:
+KQTD20200820113106007,ZDSYS20220422103800001.We would ComputLifeSci2019;11:320–8.
+also like to thank the funding support by the Youth Innovation 19. Agamah FE, Mazandu GK, Hassan R, et al. Computational/in
+PromotionAssociation(Y2021101),CAStoYanjieWei.Theauthors silicomethodsindrugtargetandleadprediction.BriefBioinform
+sincerelythankthesupportfromCoreFacilitySharingPlatform 2020;21(5):1663–75.
+ofShandongUniversityandNationalDemonstrationCenterfor 20. DesJarlaisRL,SheridanRP,SeibelGL,etal.Usingshapecomple-
+ExperimentalPhysicsEducation(ShandongUniversity). mentarityasaninitialscreenindesigningligandsforareceptor
+bindingsiteofknownthree-dimensionalstructure.JMedChem
+1988;31(4):722–9.
+AUTHOR CONTRIBUTIONS STATEMENT 21. HuangS-Y,GrinterSZ,ZouX.Scoringfunctionsandtheirevalu-
+ationmethodsforprotein–liganddocking:recentadvancesand
+Z.W.designed research,performed research,analyzed data and
+futuredirections.PhysChemChemPhys2010;12(40):12899–908.
+wrote the paper; S.W., Y.L., J.G. and Y.W. analyzed data; Y.M.
+22. DengW,BrenemanC,EmbrechtsMJ.Predictingprotein-ligand
+analyzed data and wrote the paper; L.Z. and W.L. designed
+binding affinities using novel geometrical descriptors and
+research,analyzeddataandwrotethepaper.
+machine-learning methods. J Chem Inf Comput Sci 2004;44(2):
+699–703.
+REFERENCES 23. Ain QU, Aleksandrova A, Roessler FD, Ballester PJ. Machine-
+learningscoringfunctionstoimprovestructure-basedbinding
+1. AndersonAC.Theprocessofstructure-baseddrugdesign.Chem affinity prediction and virtual screening. Wiley Interdiscip Rev:
+Biol2003;10(9):787–97. ComputMolSci2015;5(6):405–24.
+2. PinziL,RastelliG.Moleculardocking:shiftingparadigmsindrug 24. Lavecchia A. Machine-learning approaches in drug discovery:
+discovery.IntJMolSci2019;20(18):4331. methodsandapplications.DrugDiscovToday2015;20(3):318–31.
+3. GrinterSZ,ZouX.Challenges,applications,andrecentadvances 25. Ballester PJ, Mitchell JBO. A machine learning approach to
+of protein-ligand docking in structure-based drug design. predictingprotein–ligandbindingaffinitywithapplicationsto
+Molecules2014;19(7):10150–76. moleculardocking.Bioinformatics2010;26(9):1169–75.
+4. Prosser KE, Stokes RW, Cohen SM. Evaluation of 3- 26. DurrantJD,AndrewMcCammonJ.Nnscore:aneural-network-
+dimensionality in approved and experimental drug space. basedscoringfunctionforthecharacterizationofprotein-ligand
+ACSMedChemLett2020;11(6):1292–8. complexes.JChemInfModel2010;50(10):1865–71.
+5. StephaniJoyY,MacalinoVG,HongS,ChoiS.Roleofcomputer- 27. NguyenDD,WeiG-W.AGL-Score:algebraicgraphlearningscore
+aided drug design in modern drug discovery. Arch Pharm Res forprotein–ligandbindingscoring,ranking,docking,andscreen-
+2015;38:1686–701. ing.JChemInfModel2019;59(7):3291–304.
+6. GuareschiR,LukacI,GilbertIH,ZuccottoF.SophosQM:accu- 28. MinyiS,DuQifanYangY,FengG,etal.Comparativeassessment
+ratebindingaffinitypredictionincompoundoptimization.ACS of scoring functions: the CASF-2016 update. J Chem Inf Model
+Omega2023;8(17):15083–98. 2018;59(2):895–913.
+7. PaulD,SanapG,ShenoyS,etal.Artificialintelligenceindrug 29. ChenH,EngkvistO,WangY,etal.Theriseofdeeplearningin
+discoveryanddevelopment.DrugDiscovToday2021;26(1):80. drugdiscovery.DrugDiscovToday2018;23(6):1241–50.
+8. Lane TJ. Protein structure prediction has reached the single- 30. JingY,BianY,ZihengH,etal.Deeplearningfordrugdesign:an
+structurefrontier.NatMethods2023;20(2):170–3. artificialintelligenceparadigmfordrugdiscoveryinthebigdata
+9. MeliR,MorrisGM,BigginPC.Scoringfunctionsforprotein-ligand era.AAPSJ2018;20:1–10.
+bindingaffinitypredictionusingstructure-baseddeeplearning: 31. MengZ,XiaK.Persistentspectral–basedmachinelearning(per-
+areview.FrontBioinform2022;2:57. spectml)forprotein-ligandbindingaffinityprediction.SciAdv
+10. YuntaMJR.Dockingandligandbindingaffinity:usesandpitfalls. 2021;7(19):eabc5329.
+AmJModelOptim2016;4(3):74–114. 32. GomesJ,RamsundarB,FeinbergEN,PandeVS.Atomicconvo-
+11. Xing D, Li Y, Xia Y-L, et al. Insights into protein–ligand inter- lutionalnetworksforpredictingprotein-ligandbindingaffinity.
+actions: mechanisms, models, and methods. Int J Mol Sci arXivpreprintarXiv:1703.10603,2017.
+2016;17(2):144. 33. Jiménez J,Skalic M,Martinez-Rosell G,De Fabritiis G.KDEEP:
+12. FerreiraLG,DosSantosRN,OlivaG,AndricopuloAD.Molecular protein–ligand absolute binding affinity prediction via 3d-
+docking and structure-based drug design strategies. Molecules convolutional neural networks. J Chem Inf Model 2018;58(2):
+2015;20(7):13384–421. 287–96.
+13. TorresPHM,SoderoACR,JofilyP,Silva-JrFP.Keytopicsinmolec- 34. Stepniewska-Dziubinska MM, Zielenkiewicz P, Siedlecki P.
+ulardockingfordrugdesign.IntJMolSci2019;20(18):4574. Development and evaluation of a deep learning model
+14. Saikia S,Bordoloi M.Molecular docking: challenges,advances for protein–ligand binding affinity prediction. Bioinformatics
+and its use in drug discovery perspective. Curr Drug Targets 2018;34(21):3666–74.
+2019;20(5):501–21. 35. Zheng L, Fan J, Yuguang M. OnionNet: a multiple-layer
+15. In Lam HY,Pincket R,Han H,et al.Application of variational intermolecular-contact-basedconvolutionalneuralnetworkfor
+graphencodersasaneffectivegeneralistalgorithmincomputer- protein–ligandbindingaffinityprediction.ACSomega2019;4(14):
+aideddrugdesign.NatMachIntell2023;5(7):754–64. 15956–65.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+202412 | Wangetal.
+36. Wang Z, Zheng L, Liu Y, et al. OnionNet-2: a convolutional 54. Wang R,Fang X,Yipin L,Wang S.The pdbbind database: col-
+neural network model for predicting protein-ligand binding lectionofbindingaffinitiesforprotein-ligandcomplexeswith
+affinity based on residue-atom contacting shells. Front Chem known three-dimensional structures. J Med Chem 2004;47(12):
+2021;9:753002. 2977–80.
+37. Shen C, Ye H, Wang Z, et al. Beware of the generic machine 55. Trott O, Olson AJ. AutoDock Vina: improving the speed and
+learning-based scoring functions in structure-based virtual accuracy of docking with a new scoring function, efficient
+screening.BriefBioinform2021;22(3):bbaa070. optimization, and multithreading. J Comput Chem 2010;31(2):
+38. BaoJ,HeX,ZhangJZH.DeepBSP—amachinelearningmethod 455–61.
+for accurate prediction of protein–ligand docking structures.J 56. LiuN,XuZ.UsingLeDockasadockingtoolforcomputational
+ChemInfModel2021;61(5):2231–40. drug design. In: IOP Conference Series: Earth and Environmental
+39. Wang Z, Zheng L, Wang S, et al. A fully differentiable ligand Science,Vol.218,p.012143.IOPPublishing,2019.
+pose optimization framework guided by deep learning and a 57. LandrumG,etal.RDKit:open-sourcecheminformaticssoftware.
+traditionalscoringfunction.BriefBioinform2023;24(1):bbac520. 2006.https://rdkit.org/docs/index.html.
+40. Méndez-LucioO,AhmadM,AntonioE,etal. Ageometricdeep 58. MeliR,BigginPC.SpyRMSD:symmetry-correctedRMSDcalcu-
+learningapproachtopredictbindingconformationsofbioactive lationsinPython.Journalof.JChem2020;12(1):1–7.
+molecules.NatMachIntell2021;3(12):1033–9. 59. García-Sosa AT. Hydration properties of ligands and drugs in
+41. ShenC,ZhangX,DengY,etal.Boostingprotein–ligandbinding proteinbindingsites:tightly-bound,bridgingwatermolecules
+pose prediction and virtual screening based on residue–atom andtheireffectsandconsequencesonmoleculardesignstrate-
+distancelikelihoodpotentialandgraphtransformer.JMedChem gies.JChemInfModel2013;53(6):1388–405.
+2022;65(15):10691–706. 60. SpyrakisF,AhmedMH,BaydenAS,etal.Therolesofwaterinthe
+42. ZhangX,GaoH,WangH,etal.Planet:amulti-objectivegraph proteinmatrix:alargelyuntappedresourcefordrugdiscovery.
+neural network model for protein–ligand binding affinity pre- JMedChem2017;60(16):6781–827.
+diction.JChemInfModel2023. 61. LiuH,DaiZ,SoD,LeQV.PayattentiontoMLPs.AdvNeuralInf
+43. ShenC,ZhangX,HsiehC-Y,etal.Ageneralizedprotein–ligand ProcessSyst2021;34:9204–15.
+scoringframeworkwithbalancedscoring,docking,rankingand 62. Corso G, Stärk H, Jing B, et al. DiffDock: diffusion steps,
+screeningpowers.ChemSci2023;14(30):8129–46. twists, and turns for molecular docking. arXiv preprint
+44. ZhengL,MengJ,JiangK,etal.Improvingprotein–liganddocking arXiv:2210.01776,2022.
+and screening accuracies by incorporating a scoring function 63. FanJ,AilingF,ZhangL.Progressinmoleculardocking.QuantBiol
+correctionterm.BriefBioinform2022;23(3):bbac051. 2019;7:83–9.
+45. YangC,ZhangY.Deltamachinelearningtoimprovescoring- 64. Mysinger MM, Carchia M, Irwin JJ, Shoichet BK. Directory of
+ranking-screeningperformancesofprotein–ligandscoringfunc- usefuldecoys,enhanced(DUD-E):betterligandsanddecoysfor
+tions.JChemInfModel2022;62(11):2696–712. betterbenchmarking.JMedChem2012;55(14):6582–94.
+46. TaoS,FuxuL,ZechenW,etal.zPoseScoremodelforaccurateand 65. Kanakala GC, Aggarwal R, Nayar D, et al. Latent biases in
+robustprotein-liganddockingposescoringinCASP15.Proteins machinelearningmodelsforpredictingbindingaffinitiesusing
+2023. populardatasets.ACSOmega2023;8(2):2389–97.
+47. Chatterjee A,Walters R,Shafi Z,et al.Improving the general- 66. RamírezD,CaballeroJ.Isitreliabletotakethemoleculardock-
+izabilityofprotein-ligandbindingpredictionswithAI-Bind.Nat ingtopscoringpositionasthebestsolutionwithoutconsidering
+Commun2023;14(1):1989. availablestructuraldata?Molecules2018;23(5):1038.
+48. JiangH,WangJ,CongW,etal.Predictingprotein–liganddock- 67. McNuttAT,FrancoeurP,AggarwalR,etal.GNINA1.0:molecular
+ing structure with graph neural network. J Chem Inf Model dockingwithdeeplearning.JChem2021;13(1):1–20.
+2022;62(12):2923–32. 68. Jianing L, Hou X, Wang C, Zhang Y. Incorporating explicit
+49. Zhang Z, Chen L, Zhong F, et al. Graph neural network watermoleculesandligandconformationstabilityinmachine-
+approaches for drug-target interactions. Curr Opin Struct Biol learning scoring functions. J Chem Inf Model 2019;59(11):
+2022;73:102327. 4540–9.
+ˇ 50. Kamin´ski K,Ludwiczak J,Jasin´ski M,et al.Rossmann-toolbox: 69. Cerny J, Hobza P. Non-covalent interactions in biomacro-
+a deep learning-based protocol for the prediction and design molecules.PhysChemChemPhys2007;9(39):5291–303.
+ofcofactorspecificityinRossmannfoldproteins.BriefBioinform 70. Amidon GL, Pearlman RS, Anik ST. The solvent contribution
+2022;23(1):bbab371. to the free energy of protein-ligand interactions. J Theor Biol
+51. Shen C, Xueping H, Gao J, et al. The impact of cross-docked 1979;77(1):161–70.
+poses on performance of machine learning classifier for pro- 71. DuanL,LiuX,ZhangJZH.Interactionentropy:anewparadigm
+tein–ligandbindingposeprediction.JChem2021;13(1):1–18. forhighlyefficientandreliablecomputationofprotein–ligand
+52. Wierbowski SD, Wingert BM, Zheng J, Camacho CJ. Cross- bindingfreeenergy.JAmChemSoc2016;138(17):5722–8.
+dockingbenchmarkforautomatedposeandrankingprediction 72. FriedenE.Non-covalentinteractions:keytobiologicalflexibility
+ofligandbinding.ProteinSci2020;29(1):298–305. andspecificity.JChemEduc1975;52(12):754.
+53. JumperJ,EvansR,PritzelA,etal.Highlyaccurateproteinstruc- 73. WendlerK,TharJ,ZahnS,KirchnerB.Estimatingthehydrogen
+turepredictionwithalphafold.Nature2021;596(7873):583–9. bondenergy.ChemAEurJ2010;114(35):9529–36.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/3/bbae145/7641193
+by
+Jnls
+Cust
+Serv
+on
+22
+May
+2024©2024Oxford UniversityPress. Copyrightof BriefingsinBioinformaticsisthepropertyof
+Oxford UniversityPress /USA anditscontentmaynotbecopiedor emailedtomultiplesites
+or postedtoalistservwithoutthecopyrightholder's express writtenpermission.However,
+users mayprint,download,or emailarticlesfor individualuse.

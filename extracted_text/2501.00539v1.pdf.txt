@@ -1,0 +1,680 @@
+MCP-Solver: Integrating Language Models with
+Constraint Programming Systems
+Stefan Szeider
+Algorithms and Complexity Group
+TU Wien, Vienna, Austria
+www.ac.tuwien.ac.at/people/szeider/
+Abstract
+While Large Language Models (LLMs) perform exceptionally well at natural lan-
+guagetasks,theyoftenstrugglewithpreciseformalreasoningandtherigorousspecifi-
+cationofproblems. WepresentMCP-Solver,aprototypeimplementationoftheModel
+Context Protocol that demonstrates the potential for systematic integration between
+LLMs and constraint programming systems. Our implementation provides interfaces
+forthecreation,editing,andvalidationofaconstraintmodel. Throughanitem-based
+editing approach with integrated validation, the system ensures model consistency at
+every modification step and enables structured iterative refinement. The system han-
+dlesconcurrentsolvingsessionsandmaintainsapersistentknowledgebaseofmodeling
+insights. InitialexperimentssuggestthatthisintegrationcaneffectivelycombineLLMs’
+natural language understanding with constraint-solving capabilities. Our open-source
+implementationisproofofconceptforintegratingformalreasoningsystemswithLLMs
+throughstandardizedprotocols. Whilefurtherresearchisneededtoestablishcompre-
+hensiveformalguarantees,thisworktakesafirststeptowardprincipledintegrationof
+natural language processing with constraint-based reasoning.
+1 Introduction
+Large Language Models (LLMs) have demonstrated remarkable capabilities across diverse
+natural language tasks yet exhibit fundamental limitations in logical reasoning and formal
+problem specification. Recent studies have established that LLMs struggle with complex
+reasoningchains,backtrackingfromfailedsolutionattempts,andmaintainingprecisequan-
+tifierrelationships[8]. Theselimitationsareparticularlyevidentinmathematicalandlogical
+problem-solvingcontexts,whereLLMsoftenfailtoprovidereliableformalspecificationsde-
+spite their fluency in natural language descriptions [16].
+ResearchershavetackledLLMs’limitationsbypairingthemwithspecializedformalsys-
+tems. Some integrate theorem provers into the reasoning pipeline, while others connect
+LLMs to calculators or verification tools. Integrating theorem provers [20] represents one
+promising direction, while other approaches leverage external calculators and verification
+frameworks. A breakthrough came with Wei et al.’s [18] demonstration that chain-of-
+thought prompting can unlock complex reasoning capabilities in large language models.
+Further advancing the field, Drori et al. [5] showcased the power of combining LLMs with
+scientific computing libraries, while Betz et al. [2] contributed valuable insights through
+their work on procedural reasoning networks for understanding physical systems. However,
+thesesolutionsoftenneedcustomintegrationworkforeachreasoningsystem, limitingtheir
+broader applicability.
+4202
+ceD
+13
+]IA.sc[
+1v93500.1052:viXraTheModelContextProtocol (MCP)introducesauniversalstandardforconnectingLLMs
+with external systems, offering a principled solution to this integration challenge [1]. Since
+its launch by Anthropic, developers have created hundreds of MCP servers1, establishing
+MCPasakeyframeworkforAIintegration. Theprotocolprovidesaflexibleyetrigorousar-
+chitecture where data and computational capabilities can be exposed through standardized
+servers while AI applications connect as clients to access these resources. McGuinness [9]
+provides an in-depth analysis of this architectural approach and its practical implications.
+Theprotocolhasgainedbroadadoption,withcompanieslikeBlockandApolloimplementing
+MCPinproductionanddevelopmentplatformslikeZed,Replit,Codeium,andSourcegraph
+integrating it into their workflows. Anthropic has accelerated adoption by providing pre-
+built MCP servers for popular enterprise systems like Google Drive, Slack, GitHub, Git,
+Postgres, and Puppeteer2. While MCP shows promise as a standard for systematic inter-
+actionbetweeninformalnaturallanguageprocessingandformalcomputationalsystems, its
+successdependsonindustrysupportandsolutionsforsecurity,scalability,andcompatibility
+across platforms.
+WepresentthefirstapplicationofMCPtobridgethegapbetweenLLMsandConstraint
+Programming (CP) systems, specifically focusing on integration with MiniZinc, a widely
+adopted constraint modeling language. Our implementation provides a precise interface
+for transforming natural language specifications into formal constraint models, validating
+these models, and verifying solutions. This bridges the fundamental reasoning limitations
+of LLMs with the formal guarantees provided by constraint solvers.
+Our open-source implementation demonstrates the practical viability of this approach,
+offering tools for model submission, parameter management, solution retrieval, and interac-
+tive refinement. The system maintains a solver state, handles concurrent solving sessions,
+and provides detailed feedback for model validation and solution verification. This imple-
+mentation is a prototype for integrating formal reasoning systems with LLMs through the
+MCP standard.
+Thecontributionsofthispaperinclude(i)aformalspecificationoftheMCP-basedinte-
+grationbetweenLLMsandconstraintsolvers,(ii)acompleteimplementationdemonstrating
+the practical viability of this approach, and (iii) an analysis of the complementary capa-
+bilities enabled by this integration. We argue that this work represents a significant step
+toward more reliable and verifiable LLM-based problem-solving systems.
+2 Related Work
+Recent research has linked large language models (LLMs) with constraint solving through
+different approaches. Curtis et al. [4] created PRoC3S, which uses a two-stage archi-
+tecture for robotics planning—an LLM generates parameterized skill sequences that go
+through continuous constraint satisfaction. For program synthesis, Jha et al. [6] built a
+counterexample-guided framework that combines an LLM synthesizer with an SMT solver
+verifier to strengthen correctness guarantees. SATLM by Ye et al. [21] translates natural
+language into logical formulas suitable for SAT solving. Pan et al. [14] developed LOGIC-
+LM as a complete pipeline from LLM through symbolic solver to interpreter. Wu et al. [19]
+created Lemur, which provides a task-agnostic LLM framework for program synthesis.
+Kambhampatietal.[7]establishedtheoreticalfoundationsforLLM-Moduloframeworks
+that pair LLMs with external verifiers. For constraint solving specifically, R´egin et al. [15]
+built GenCP, which integrates LLMs into the domain generation of constraint solvers for
+texttasks. Voboriletal.[17]focusedonreal-timeconstraintsolvingbycreatingStreamLLM
+1https://glama.ai/mcp/servers, https://mcp.so, https://mcp-get.com
+2https://www.anthropic.com/news/model-context-protocol
+2to generate constraint streamliners. In automated modeling, Michailidis et al. [11] demon-
+strated how pre-trained LLMs can transform textual problem descriptions into executable
+Constraint Programming specifications using retrieval-augmented in-context learning.
+While these approaches demonstrate the benefits of combining LLMs with constraint
+solving, they typically implement fixed pipelines or tight integration for specific use cases.
+In contrast, MCP Solver provides a flexible protocol-based architecture that enables itera-
+tive interaction and supports a broader range of applications through its standardized tool
+interface.
+While prior work has demonstrated various approaches to combining LLMs with con-
+straint solvers, these solutions typically implement fixed integration patterns optimized for
+specific use cases. In contrast, our MCP Solver takes a more flexible approach by imple-
+menting the standardized Model Context Protocol, enabling dynamic interaction patterns
+between LLMs and constraint-solving capabilities. This protocol-based architecture allows
+for iterative refinement of constraint models through natural language interaction while
+maintaining solver integrity. The following sections detail our implementation’s core com-
+ponents and design principles, showing how this flexibility is achieved without sacrificing
+reliability or formal guarantees.
+3 System Overview
+3.1 Code and Technical Description
+The MCP Solver is available as an open-source project at:
+https://github.com/szeider/mcp-solver
+The implementation requires Python 3.9 or higher and MiniZinc with the Chuffed solver.
+The system supports macOS, Windows, and Linux platforms, though Linux users currently
+need an alternative to the Claude Desktop app. The server can be installed via standard
+Python package management tools, and configuration is handled through JSON files in
+platform-specific locations. Documentation includes installation instructions, configuration
+guides, and example usage. The project follows MCP’s protocol specifications for tool
+interfaces and messaging, ensuring compatibility with any MCP-compliant client.
+3.2 Design Principles
+TheMCPSolveraddressesthreekeychallengesinintegratingLLMswithconstraintsolvers:
+maintaining solver integrity, managing model state, and providing effective tool interfaces.
+Ourasynchronousmodelmanagementkeepsmodificationandsolvingoperationsstrictly
+separate. A validation step precedes each change to the model, maintaining its consistency.
+We handle solver timeouts and resource cleanup through a robust session management
+system.
+Knowledge accumulation occurs through a file-backed memo system that maintains
+solver insights between sessions, creating a growing knowledge base of successful model-
+ing patterns and providing structured error recovery suggestions.
+The MCP Solver connects three key components (Figure 1): the Claude Desktop app
+as the MCP client, the MCP Solver as the server, and MiniZinc [13] as the constraint-
+solving backend. The client enables LLMs like Claude to interact with constraint models
+through natural language, while the server manages these interactions and translates them
+into MiniZinc operations using its Python API. MiniZinc then compiles these models into
+FlatZinc specifications that can be processed by a constraint solver.
+3LLM user
+MCP Client
+get_model add_item delete_item replace_item solve_model get_solution get_memo edit_memo
+MCP Solver
+MiniZinc know
+ledge
+base
+…
+solver1 solver2
+Figure 1: System architecture of the MCP Solver showing the interaction between the
+The systemLLM, MCP Client, and the solver components. The MCP Client exposes eight
+standardizedtoolstointerfacewiththeMCPSolver, whichcoordinatesbetweenMiniZinc’s
+constraint-solving capabilities and a persistent knowledge base.
+TheserversupportsallsolverscompatiblewithMiniZinc,withChuffed[3]asthedefault
+solver. The Python MiniZinc library [12] manages model validation, solver configuration,
+and solution extraction.
+A system prompt guides the LLM’s interaction with the solver by providing key infor-
+mationabouttools, modelstructure, andvalidationrules. ThisallowstheLLMtofunction
+as a constraint modeling assistant that can effectively translate natural language specifica-
+tions into valid MiniZinc models while maintaining best practices and supporting iterative
+refinement.
+The system prompt is still under construction and evolves based on practical experi-
+ence. When specific instructions in the knowledge base are essential for reliable operation,
+we migrate them to the system prompt. This iterative refinement of the prompt reflects
+our growing understanding of optimally structure LLM interaction with constraint-solving
+capabilities.
+3.3 MCP tools
+The MCP Solver implements these core operations as “tools” adhering to the MCP specifi-
+cation [10]:
+• get model: View the current model with numbered items
+• add item: Add new item at a specific index
+• delete item: Delete item at index
+• replace item: Replace item at index
+• clear model: Reset model
+• solve model: Execute with Chuffed solver
+4• get solution: Get solution variable value with array indices
+• get solve time: Get execution timing
+• get memo: Access knowledge base
+• edit memo: Update knowledge base
+The server implements MCP’s request-response protocol with validation and error han-
+dling. Model modification has transitioned from line-based to item-based editing for im-
+provedrobustness. Thememosystemmaintainssolutioninsightsbetweensessions,enabling
+knowledge accumulation from past modeling experiences.
+3.4 Model Management
+The system implements an item-based model management approach through four comple-
+mentary tools: get model, add item, delete item, and replace item. get model enables
+inspection of the current model state with numbered items, while the editing tools provide
+atomic operations for model modification.
+The item-based editing approach ensures model validity by integrating validation into
+every modification operation. Each proposed change triggers Python MiniZinc’s complete
+validation chain: syntax parsing, type checking, and instantiation verification. Changes are
+only applied if validation succeeds, maintaining the invariant that the current model is al-
+waysinavalidstate(seeFigure2). Thisapproacheliminatesthepossibilityofaccumulated
+inconsistencies that could arise in line-based editing.
+Valid MiniZinc Model
+LLM
+empty
+add_item(0,”int: n=5;”)
+validation
+0|int: n=5;
+add_item(1,”vr 1xy,”)
+validation
+error: unexpected integer
+0|int: n=5;
+add_item(1,”var 1..n: x;”)
+validation
+0|int: n=5;
+1|var 1..n: x;
+add_item(1,”constraint x>0;”)
+validation
+0|int: n=5;
+1|var 1..n: x;
+2|constraint x>0;
+replace_item(0,”int: n=7;”)
+validation
+0|int: n=7;
+1|var 1..n: x;
+2|constraint x>0;
+Figure 2: Example for MCP Solver’s item-based model editing with validation. Each modi-
+ficationisvalidatedbeforebeingapplied,maintainingmodelconsistency. Numbersindicate
+item indices.
+Each operation returns the current model with numbered items in truncated form, en-
+suring consistent tracking. This granular modification capability enables LLMs to refine
+5models by iteratively adding constraints, modifying objective functions, or adjusting pa-
+rameter declarations based on solver feedback. ”The validation system provides detailed
+diagnostic information, enabling precise error reporting and allowing LLMs to perform tar-
+geted refinements.
+The continuous validation during editing lets LLMs explore modeling approaches freely
+while preserving the model’s integrity.
+The system maintains the solver session state, including the current model, solution
+cache, and performance statistics. It implements proper resource cleanup through async
+contextmanagers,particularlyforhandlingsolverprocesstermination. Theimplementation
+coordinates model updates, solving operations, and solution retrieval while maintaining
+thread safety for concurrent operations.
+3.5 Persistent Knowledge Base
+The memo system maintains a growing knowledge base of solving and modeling insights
+that persist between sessions in a text file that can be periodically reviewed and curated.
+The LLM automatically records successful modeling strategies and solutions to complex
+problems. Users also contribute to this knowledge collection by prompting the LLM to
+documentspecificinsights. Theget memoandedit memotoolsprovideaccesstothisgrowing
+knowledge base through a line-based editing interface.
+4 Preliminary Experimental Evaluation
+We evaluated the MCP Solver on various natural problems stated in natural language to
+assess its flexibility, robustness, and interaction patterns. While these experiments are not
+rigorous benchmarks, theyprovide valuableinsights into the system’s practicalcapabilities.
+We tested the system on several dozen problems covering different constraint program-
+mingparadigms. Theseincludedpuresatisfactionproblems(e.g.,castingconstraints),opti-
+mization problems (e.g., Traveling Salesperson Problem), and parameter exploration (e.g.,
+N-Queens with varying board sizes). The appendix provides detailed transcripts of repre-
+sentative examples that demonstrate different aspects of the system:
+• The casting example shows how the LLM effectively translates complex logical condi-
+tions into boolean constraints.
+• The TSP example demonstrates both optimization modeling and model adaptation
+when new constraints arise (blocked road)
+• The N-Queens example illustrates parameter exploration while maintaining model
+structure
+Current implementation restricts solving times to a few seconds, which suffices for mod-
+erately sized problems but may require modifications for larger instances. While the memo
+systemsuccessfullycapturesmodelinginsightswhenprompted,autonomousknowledgebase
+updates by the LLM were rare, suggesting room for improvement in the system prompt to
+encourage more proactive knowledge accumulation.
+5 Conclusion
+The MCP Solver demonstrates that protocol-based integration of LLMs with constraint
+solversofferssignificantadvantagesoverfixedpipelineapproaches. Theflexiblearchitecture
+6enablesdynamicproblemrefinement,wheresolutionscantriggernewconstraintsandmodel
+adjustments based on user feedback. This adaptability is particularly valuable during the
+exploratoryphaseofconstraintmodeling,whereproblemspecificationsoftenevolvethrough
+iteration.
+Our preliminary experiments demonstrate that the MCP Solver effectively combines
+natural language understanding with constraint modeling capabilities. The system shows
+particular strength in iterative model refinement and error recovery through natural dia-
+logue, though some aspects, like autonomous knowledge accumulation could benefit from
+further development.
+WhilethesystemeffectivelybridgesLLMcapabilitieswithconstraintsolving,somerelia-
+bilitychallengesremain. LLMsoccasionallymisinterpretsolveroutputsormaketranslation
+errors. Although the current verification mechanisms generally catch and correct these
+issues, more rigorous system prompts and validation procedures could improve reliability.
+ThebalancebetweenflexibilityandreliabilityrepresentsanongoingchallengeinLLM-solver
+integration.
+Ourworkpointstoseveralpromisingresearchdirections: AddingSATsolversandmini-
+malunsatisfiablesubsetanalysiswouldbroadenthesystem’sscope. Thereliabilityofresults
+could benefit from more sophisticated verification methods without sacrificing the system’s
+flexibility. The observed self-reflection capabilities of LLMs also suggest new possibilities
+for interactive modeling.
+An inspiring direction lies in leveraging the broader MCP ecosystem. With hundreds of
+existing MCP services available, rich opportunities exist for creating more comprehensive
+problem-solving environments. Instance data could be seamlessly imported from databases
+or online spreadsheets through database MCP servers, while visualization servers could
+provide interactive result analysis. This interoperability with the broader MCP ecosystem
+enables the creation of sophisticated end-to-end workflows that combine constraint solving
+with data access, preprocessing, and result visualization.
+The MCP Solver represents a significant step toward integrating natural language un-
+derstandingwithconstraint programming, demonstratingthat protocol-based architectures
+can effectively combine the strengths of both domains while maintaining the system flexi-
+bility. The broader MCP ecosystem opens up possibilities for building more sophisticated
+constraint-solving applications.
+A Appendix: Case Studies
+Here are a few transcripts of chat conversations. We used Claude Desktop app (version
+0.7.7) and Claude Sonnet 3.5, and MCP Server (version 2.0.0).
+A.1 Casting
+This is based on an example by George Johnson (NYT, July 13, 1999).
+User
+Suppose that a theatrical director feels obligated to cast either his ingenue, Actress
+Alvarez, or his nephew, Actor Cohen, in a production. But Miss Alvarez won’t be
+in a play with Mr. Cohen (her former lover), and she demands that the cast include
+hernewflame,ActorDavenport. Theproducer,withherownfavorstorepay,insists
+that Actor Branislavsky have a part. But Mr. Branislavsky won’t be in any play
+with Miss Alvarez or Mr. Davenport. Can the director cast the play?
+7LLM
+Let me model this casting problem using MiniZinc. We’ll use boolean variables to
+represent whether each actor is cast.
+MCP clear model
+Model cleared
+MCP add item (multiple)
+var bool: alvarez;
+var bool: cohen;
+var bool: branislavsky;
+var bool: davenport;
+constraint alvarez ∨ cohen;
+constraint not (alvarez ∧ cohen); constraint alvarez →
+davenport; constraint branislavsky;
+constraint not (branislavsky ∧ alvarez);
+constraint not (branislavsky ∧ davenport);
+solve satisfy;
+MCP solve model
+{’status’: ’SAT’, ’solution’: Solution(alvarez=False, cohen=True,
+branislavsky=True, davenport=False, _checker=’’),
+’solve_time’: 0.0}
+LLM
+The problem has a solution: cast Cohen and Branislavsky, but not Alvarez or Dav-
+enport. Let’s verify:
+1. Either Alvarez or Cohen must be cast ✓(Cohen is cast)
+2. Alvarez and Cohen can’t both be cast ✓(only Cohen is cast)
+3. If Alvarez is cast, Davenport must be cast ✓(Alvarez isn’t cast)
+4. Branislavsky must be cast ✓(Branislavsky is cast)
+5. Branislavsky won’t work with Alvarez ✓(Alvarez isn’t cast)
+6. Branislavsky won’t work with Davenport ✓(Davenport isn’t cast)
+The director can cast the play with Cohen and Branislavsky.
+A.2 Traveling Salesperson
+This example shows how the same model can be re-used with different parameter settings,
+and how solving times are compared.
+8User
+A saleswoman based in Vienna needs to plan her upcoming tour through Austria,
+visiting each province capital once. Help find the shortest route. Distances in km:
+1 = Vienna, 2 = St. P¨olten, 3 = Eisenstadt, 4 = Linz, 5 = Graz, 6 = Klagenfurt,
+7= Salzburg, 8= Innsbruck, 9= Bregenz
+1 2 3 4 5 6 7 8 9
+1 0 65 60 184 195 319 299 478 631
+2 65 0 125 119 130 254 234 413 566
+3 60 125 0 184 157 281 261 440 593
+4 184 119 184 0 208 252 136 315 468
+5 195 130 157 208 0 136 280 459 629
+6 319 254 281 252 136 0 217 391 566
+7 299 234 261 136 280 217 0 188 343
+8 478 413 440 315 459 391 188 0 157
+9 631 566 593 468 629 566 343 157 0
+LLM
+I’ll model this as a Traveling Salesperson Problem using a circuit constraint.
+MCP add item (multiple)
+include "globals.mzn";
+int: n = 9;
+array[1..n,1..n] of int: dist =
+[| 0, 65, 60,184,195,319,299,478,631
+| 65, 0,125,119,130,254,234,413,566
+| 60,125, 0,184,157,281,261,440,593
+|184,119,184, 0,208,252,136,315,468
+|195,130,157,208, 0,136,280,459,629
+|319,254,281,252,136, 0,217,391,566
+|299,234,261,136,280,217, 0,188,343
+|478,413,440,315,459,391,188, 0,157
+|631,566,593,468,629,566,343,157, 0|];
+array[1..n] of var 1..n: succ;
+var int: total dist = sum(i in 1..n)(dist[i,succ[i]]);
+constraint circuit(succ);
+solve minimize total dist;
+9LLM
+Optimal route found: Vienna → St. P¨olten → Linz → Salzburg → Bregenz →
+Innsbruck → Klagenfurt → Graz → Eisenstadt → Vienna
+Total distance: 1,564 km
+Route verification:
+• Each city visited exactly once: ✓(circuit constraint)
+• Distance calculation correct: ✓
+• Starting/ending in Vienna (city 1): ✓
+User
+AssumetheroadbetweenViennaandEisenstadtisblocked,whatisnowtheshortest
+tour?
+LLM
+I’ll modify the distance matrix to make the Vienna-Eisenstadt route impossible (in-
+finite distance).
+MCP edit model
+array[1..n,1..n] of int: dist =
+[| 0, 65,9999,184,195,319,299,478,631
+| 65, 0,125,119,130,254,234,413,566
+|9999,125, 0,184,157,281,261,440,593
+|184,119,184, 0,208,252,136,315,468
+|195,130,157,208, 0,136,280,459,629
+|319,254,281,252,136, 0,217,391,566
+|299,234,261,136,280,217, 0,188,343
+|478,413,440,315,459,391,188, 0,157
+|631,566,593,468,629,566,343,157, 0|];
+LLM
+Optimal route: Vienna → Linz → St. P¨olten → Salzburg → Bregenz → Innsbruck
+→ Klagenfurt → Graz → Eisenstadt → Vienna
+Total distance: 1,694 km (+130 km compared to unblocked route)
+A.3 N-Queens
+Thisexampleshowshowthesamemodelcanbesolvedwithdifferentparametervalues,and
+the solving times can be obtained.
+User
+Check whether you can place n Queens on an nxn chessboard. Try n=10,20,30,40
+and compare the solving times
+10LLM
+Let me create a model for the N-Queens problem and test different sizes.
+MCP clear model
+Model cleared
+MCP add item (multiple)
+int: n = 10;
+array[1..n] of var 1..n: queens;
+constraint alldifferent(queens);
+constraint alldifferent([queens[i] + i | i in 1..n]);
+constraint alldifferent([queens[i] - i | i in 1..n]);
+solve satisfy;
+LLM
+Testing n=10:
+MCP solve model
+{’status’: ’SAT’,
+’solution’: Solution(queens=[3,6,9,1,8,4,2,7,5,10],_checker=’’),
+’solve_time’: 0.001}
+LLM
+Testing n=20:
+MCP edit model
+int: n = 20;
+MCP solve model
+{’status’: ’SAT’, ’solution’: Solution(
+queens=[4,18,16,11,13,1,3,19,8,12,17,2,10,15,6,14,9,7,5,20],
+checker=’’), ’solve time’: 0.005}
+LLM
+Testing n=30:
+11MCP edit model
+int: n = 30;
+MCP solve model
+{’status’: ’SAT’, ’solution’: Solution(
+queens=[17,23,9,18,2,13,8,1,24,21,6,22,11,26,
+5,25,19,14,10,3,29,27,15,4,12,20,16,7,28,30], checker=’’),
+’solve time’: 0.04}
+LLM
+Testing n=40:
+MCP edit model
+int: n = 40;
+MCP solve model
+{’status’: ’SAT’, ’solution’: Solution(
+queens=[12,34,23,8,20,31,15,27,18,33,5,2,26,10,16,32,4,11,14,3,
+9,25,28,30,35,6,1,17,21,37,13,29,24,19,7,22,39,36,38,40],
+_checker=’’), ’solve_time’: 0.043}
+LLM
+Solve times comparison: n=10: 0.001s n=20: 0.005s n=30: 0.040s n=40: 0.043s
+Solutions exist for all tested board sizes. Time complexity increases non-linearly but
+remains manageable up to n=40.
+A.4 Timetabling
+This example showcases a timetabling problem. As a follow up question, the user asks for
+a more balanced schedule.
+User
+We need to schedule 6 courses in a university department. Each course has different
+requirements-someneedlabs, someneedcomputerrooms, andafewneed2consec-
+utive time slots instead of just one. We have 4 rooms with different equipment and
+sizes, and 4 time slots (9am-4pm).
+12User
+Specifically:
+• 3 courses need lab access (one also requires computers)
+• 3 courses need computer rooms
+• 2 courses are ”double-length” needing 2 slots
+• Student groups range from 15 to 45 students
+• Room capacities range from 30 to 50 students
+The goal is to find a feasible schedule where everyone gets the room they need when
+they need it.
+LLM
+Letmehelpcreateamodelforthisschedulingproblem. I’llformulateitstepbystep.
+MCP clear model
+MCP add item (multiple)
+int: n courses = 6;
+int: n rooms = 4;
+int: n slots = 4;
+array[1..n rooms] of int: room capacity = [30, 35, 45, 50];
+array[1..n courses] of int: course size = [15, 30, 35, 40, 45, 25];
+array[1..n rooms] of bool:
+has lab = [true, true, false, false];
+array[1..n rooms] of bool:
+has computers = [false, true, true, true];
+array[1..n courses] of bool:
+needs lab = [true, true, true, false, false, false];
+array[1..n courses] of bool:
+needs computers = [false, true, false, true, true, true];
+array[1..n courses] of bool:
+is double = [true, false, true, false, false, false];
+LLM
+Now let’s define our decision variables:
+MCP add item (multiple)
+array[1..n courses, 1..n slots] of var bool: schedule;
+array[1..n courses, 1..n rooms] of var bool: room assignment;
+13LLM
+Let’s add constraints:
+MCP add item (multiple)
+constraint forall(c in 1..n courses)(sum(s in 1..n slots)
+(schedule[c,s]) = if is double[c] then 2 else 1 endif);
+constraint forall(c in 1..n courses)(sum(r in 1..n rooms)
+(room assignment[c,r]) = 1);
+constraint forall(s in 1..n slots, r in 1..n rooms)
+(sum(c in 1..n courses)
+(schedule[c,s] * room assignment[c,r]) ≤ 1);
+constraint forall(c in 1..n courses where is double[c])(
+forall(s in 1..n slots-1)(schedule[c,s] = 1 →
+schedule[c,s+1] = 1));
+constraint forall(c in 1..n courses, r in 1..n rooms)(
+room assignment[c,r] = 1 → (
+(needs lab[c] ≤ has lab[r]) ∧
+(needs computers[c] ≤ has computers[r]) ∧
+(course size[c] ≤ room capacity[r])
+)
+);
+solve satisfy;
+LLM
+Let’s solve it:
+MCP solve model
+{’status’: ’SAT’, ’solution’: Solution(schedule=
+[[False, False, True, True],
+[False, True, False,False],
+[False, False, True, True],
+[False, False, True, False],
+[False, False, False,True],
+[False, False, False,True]],
+room assignment=
+[[True, False, False, False],
+[False, True, False, False],
+[False, True, False, False],
+[False, False, False, True],
+[False, False, True, False],
+[False, False, False, True]], checker=’’), ’solve time’: 0.002}
+14LLM
+A solution has been found! Let me interpret it:
+• Course 1 (double length, needs lab): Room 1, Slots 3-4
+• Course 2 (needs lab + computers): Room 2, Slot 2
+• Course 3 (double length, needs lab): Room 2, Slots 3-4
+• Course 4 (needs computers): Room 4, Slot 3
+• Course 5 (needs computers): Room 3, Slot 4
+• Course 6 (needs computers): Room 4, Slot 4
+This solution satisfies all constraints:
+• Double-length courses are scheduled in consecutive slots
+• Room capacities match course sizes
+• Lab and computer requirements are met
+• No room is double-booked
+• Each course gets its required number of slots
+User
+Give me the timetable please.
+LLM
+Timetable based on the solution:
+Timeslots:
+1 (9am): -
+2 (10am): C2 in Room 2
+3 (11am): C1 in Room 1, C3 in Room 2, C4 in Room 4
+4 (12pm): C1 in Room 1, C3 in Room 2, C5 in Room 3, C6 in Room 4
+Room assignments:
+Room 1 (Lab): C1 (15 students)
+Room 2 (Lab+Computers): C2 (30 students), C3 (35 students)
+Room 3 (Computers): C5 (45 students)
+Room 4 (Computers): C4 (40 students), C6 (25 students)
+User
+Can you make it more balanced, that for each time slots a similar number of courses
+are scheduled?
+15LLM
+Let me add a constraint to balance the load across time slots and rerun the model.
+MCP add item
+constraint forall(s1,s2 in 1..n slots)(
+abs(sum(c in 1..n courses)(schedule[c,s1]) -
+sum(c in 1..n courses)(schedule[c,s2])) ≤ 1
+);
+MCP solve model
+{’status’: ’SAT’, ’solution’: Solution(schedule=
+[[False, False, True, True],
+[True, False, False, False],
+[False, False, True, True],
+[False, True, False, False],
+[False, True, False, False],
+[True, False, False, False]],
+room assignment=
+[[True, False, False, False],
+[False, True, False, False],
+[False, True, False, False],
+[False, False, True, False],
+[False, False, False, True],
+[False, False, False, True]], checker=’’), ’solve time’: 0.002}
+LLM
+New timetable:
+Slot 1 (9am): C2 in Room 2, C6 in Room 4
+Slot 2 (10am): C4 in Room 3, C5 in Room 4
+Slot 3 (11am): C1 in Room 1, C3 in Room 2
+Slot 4 (12pm): C1 in Room 1, C3 in Room 2
+Each slot now has either 2 courses (balancing double-length courses across slots).
+User
+Check that all constraints are still satisfied.
+16LLM
+Let me verify all constraints:
+Room Resources:
+• C1 (lab needed) → Room 1 (has lab) ✓
+• C2 (lab+computers) → Room 2 (has lab+computers) ✓
+• C3 (lab needed) → Room 2 (has lab+computers) ✓
+• C4 (computers) → Room 3 (has computers) ✓
+• C5 (computers) → Room 4 (has computers) ✓
+• C6 (computers) → Room 4 (has computers) ✓
+Room Capacities:
+• Room 1 (30) > C1 (15) ✓
+• Room 2 (35) > C2,3 (30,35) ✓
+• Room 3 (45) > C4 (40) ✓
+• Room 4 (50) > C5,6 (45,25) ✓
+Double-length courses:
+• C1: Slots 3-4 consecutive ✓
+• C3: Slots 3-4 consecutive ✓
+No room conflicts:
+• Each room has max 1 course per slot ✓
+Load balancing:
+• Slot 1: 2 courses
+• Slot 2: 2 courses
+• Slot 3: 2 courses
+• Slot 4: 2 courses
+Perfect balance achieved ✓
+All constraints are satisfied.
+References
+[1] Anthropic. Model context protocol: A standard for AI system integration. https:
+//modelcontextprotocol.io, 2023. Accessed: 2024-03-15.
+[2] G. Betz, K. Richardson, and M. A. Musen. Procedural reasoning networks for under-
+standing mechanisms in physical systems. arXiv preprint arXiv:2110.00088, 2021.
+17[3] G. Chu. Chuffed: A lazy clause generation solver. In Proceedings of the Workshop on
+Constraint Modelling and Reformulation, 2011.
+[4] A.Curtis,N.Kumar,J.Cao,T.Lozano-P´erez,andL.P.Kaelbling. TrustthePRoC3S:
+Solving long-horizon robotics problems with llms and constraint satisfaction. In Pro-
+ceedings of the Conference on Robot Learning (CoRL), 2024.
+[5] I. Drori, L. Kates, Y. Katz, K. Sinha, J. Zou, Y. Shen, Y. Guo, J. Lepert, X. Cheng,
+C.B.Bruss,etal. Integratinglargelanguagemodelswithscientificcomputinglibraries.
+arXiv preprint arXiv:2306.08999, 2023.
+[6] S. K. Jha, S. Jha, P. Lincoln, N. D. Bastian, A. Velasquez, R. Ewetz, and S. Neema.
+Counterexample guided inductive synthesis using large language models and satisfia-
+bility solving. In MILCOM 2023 - 2023 IEEE Military Communications Conference,
+pages 944–949. IEEE, 2023.
+[7] S. Kambhampati et al. LLMs can’t plan, but can help planning in LLM-modulo
+frameworks. In Proceedings of the 41st International Conference on Machine Learning
+(ICML), 2024.
+[8] J. Lee, T. Le, J. Chen, and D. Lee. Do language models plagiarize? In Y. Ding,
+J. Tang, J. F. Sequeda, L. Aroyo, C. Castillo, and G. Houben, editors, Proceedings of
+the ACM Web Conference 2023, WWW 2023, Austin, TX, USA, 30 April 2023 - 4
+May 2023, pages 3637–3647. ACM, 2023.
+[9] P. McGuinness. Model context protocol changes AI integration, 2024.
+[10] MCP Working Group. Machine-client protocol (MCP) specification, 2023. Available
+online at https://spec.modelcontextprotocol.io/specification/.
+[11] K. Michailidis, D. Tsouros, and T. Guns. Constraint modelling with LLMs using
+in-context learning. In Proceedings of the 30th International Conference on Principles
+andPracticeofConstraintProgramming,CP2024,pages20:1–20:16.SchlossDagstuhl–
+Leibniz-Zentrum fuer Informatik, 2024.
+[12] MiniZincTeam. PythonMiniZinc: PythonbindingsfortheMiniZincAPI,2021. Avail-
+able online at https://pypi.org/project/minizinc/.
+[13] N. Nethercote, P. J. Stuckey, R. Becket, S. Brand, G. J. Duck, and G. Tack. MiniZinc:
+An open-source tool for constraint modeling and solving. Constraints, 15(2):123–145,
+2010.
+[14] L. Pan, A. Albalak, X. Wang, and W. Y. Wang. LOGIC-LM: Empowering large lan-
+guage models with symbolic solvers for faithful logical reasoning. In Proceedings of
+the 2023 Conference on Empirical Methods in Natural Language Processing (EMNLP),
+2023.
+[15] F. R´egin, E. D. Maria, and A. Bonlarron. Combining constraint programming reason-
+ing with large language model predictions. In Proceedings of the 30th International
+Conference on Principles and Practice of Constraint Programming (CP), 2024.
+[16] S. Sharma and B. Sodhi. Calculating originality of llm assisted source code. arXiv
+preprint arXiv:2307.04492, 2023.
+[17] F.Voboril,V.P.Ramaswamy,andS.Szeider. Realtimegenerationofstreamlinerswith
+large language models. arXiv preprint arXiv:2408.10268, 2024.
+18[18] J. Wei, X. Wang, D. Schuurmans, M. Bosma, B. Ichter, F. Xia, E. Chi, Q. Le, and
+D. Zhou. Chain-of-thought prompting elicits reasoning in large language models. In
+Advances in Neural Information Processing Systems, volume 35, pages 24824–24837,
+2022.
+[19] H. Wu, C. Barrett, and N. Narodytska. Lemur: Integrating large language models in
+automatedprogramverification. InThe 3rd Workshop on Mathematical Reasoning and
+AI at NeurIPS’23, 2023.
+[20] R.Yamauchi,S.Sonoda,A.Sannai,andW.Kumagai. LPML:LLM-promptingmarkup
+language for mathematical reasoning, 2023.
+[21] Y. Ye et al. SATLM: satisfiability-aided language models using declarative prompting.
+In Advances in Neural Information Processing Systems (NeurIPS), 2023.
+19

@@ -1,0 +1,491 @@
+The Roles of English in Evaluating Multilingual Language Models
+WesselPoelman and MiryamdeLhoneux
+DepartmentofComputerScience
+KULeuven,Belgium
+{wessel.poelman, miryam.delhoneux}@kuleuven.be
+Abstract 2020; Ruder et al., 2022). With the increase of
+prompt-based evaluations of models, a new issue
+Multilingual natural language processing has appeared: English being used as an interface,
+isgettingincreasedattention,withnumer- ratherthananaturallanguage.
+ousmodels,benchmarks,andmethodsbe-
+In recent work, Zhang et al. (2023) propose a
+ing released for many languages. English
+taxonomyofprompt-basedmultilingualLMeval-
+is often used in multilingual evaluation to
+uations. Theyconcludethat“[themodel]achieves
+prompt language models (LMs), mainly
+higher performance when the task is presented in
+toovercomethelackofinstructiontuning
+English.” Thisfindingisconsistentamongalarge
+data in other languages. In this position
+number of papers (Shi et al., 2022; Huang et al.,
+paper, we lay out two roles of English in 2022; Fu et al., 2022; Lin et al., 2022; Asai et al.,
+multilingual LM evaluations: as an inter-
+2024; Etxaniz et al., 2024, inter alia). Resort-
+face and as a natural language. We argue
+ing to using English like this is hardly surprising
+that these roles have different goals: task
+given that instruction tuning datasets are expen-
+performanceversuslanguageunderstand-
+sive to create and not readily available for most
+ing. This discrepancy is highlighted with
+languages. Less surprising still is the finding that
+examplesfromdatasetsandevaluationse-
+Englishperformswell,asitisincludedinvirtually
+tups. Numerous works explicitly use En-
+allLMs. Itdoesbringintoquestion: whatisbeing
+glish as an interface to boost task perfor-
+evaluatedandwhatdowelearnfromthis?
+mance. We recommend to move away
+To illustrate: MaLa-500 (Lin et al., 2024) is a
+fromthisimprecisemethodandinsteadfo-
+Llama 2-based model (Touvron et al., 2023) that
+cusonfurtheringlanguageunderstanding.
+underwentcontinuedpre-traininginover500lan-
+guages. It is partially evaluated on a news topic
+1 Introduction
+classification task using SIB-200 (Adelani et al.,
+With the increase of in-context, prompt-based 2024a), a dataset of (sentence,topic) pairs in 205
+evaluation of auto-regressive languages models languages. Themodelispromptedasfollows:
+(LMs, Brown et al., 2020), choices have to be
+Thetopicofthenews{sentence}is{topic}
+made on how prompts are created. Specifically
+in multilingual evaluation, a crucial choice is in UsingthepromptwithaTurkish1 examplegives:
+which language(s) prompts are written. In prac-
+The topic of the news Bu oteller gu¨nu¨n zenginlerinin
+tice, English tends to be mixed with a target lan- ve u¨nlu¨lerinin kalacag˘ı yerlerdi ve c¸og˘u zaman kaliteli
+guagewiththeexplicitgoalofincreasingtaskper- yemeklerevegecehayatınasahipti.isentertainment
+formance. Wearguethisgoalisdifferentfromfur-
+This format is used across all 205 languages in
+thering language understanding. In this position
+few-shot setups from one to ten. This mixture of
+paper, we outline two roles of English at the core
+Englishandatargetlanguageis,arguably,notvery
+ofthisdiscrepancyandtheirimplications.
+‘natural’. WerefertothisroleofEnglishasanin-
+Severalworkshavehighlightedmethodological
+terface,ratherthananaturallanguage. Inthenext
+issues in multilingual evaluation setups (Artetxe
+sections, we outline these roles and why they are
+etal.,2020;Ploegeretal.,2024). Thedominance
+importanttoconsiderinmultilingualevaluation.
+of English in natural language processing (NLP)
+has also been discussed repeatedly (Joshi et al., 1EnglishtranslationsofexamplesareinAppendixA.
+4202
+ceD
+11
+]LC.sc[
+1v29380.2142:viXraNatural Language
+Language Understanding
+Monolingual or
+Code-switched
+Multilingual
+Mixed-prompt LM
+Task
+Interface
+Performance
+Role Format Goal
+Figure1–SchematicoverviewofthedifferentrolesofEnglishinmultilingualLMevaluation.
+2 EvaluationGoals peciallyinafew-shotsetup. Ratherthananatural
+language that tells something about language un-
+Language understanding. We take the com-
+derstanding,Englishisusedasaninterfacetothe
+mon perspective that evaluation concerns a task
+LMwiththegoalofincreasingtaskperformance.
+whichisusedasaproxyforunderstanding. Thisis
+Werefertothismixingasamixed-prompt.
+exemplified by the natural language understand-
+ing(NLU)labelmanydatasetsandmodelsadhere
+Task performance. Another widespread per-
+to (including SIB-200). A news topic classifica- spective on evaluation in (multilingual) NLP con-
+tion task shows that the model (arguably) ‘under- siders performance on a task as an end in itself.4
+stands’someofthedifferencesbetweennewscat- If we want to classify news topics in a practi-
+egories. A model that rewrites, translates or sum- calapplicationoperatinginamultilingualsetting,
+marizes ‘understands’ both task instructions and whatamodelsupposedlyunderstandsorhowwell
+target passages. In a multilingual setting, the un- it models a particular language is of little value.
+derstanding of interest is generalizability across Whatmattersisthesystemperformingitstaskad-
+languages; a model performing a task in a tar- equatelyacrosslanguages. WithoutusingEnglish,
+get language supposedly understands something the system might not even work at all. This is
+about that language. This is then applied to mul- a common justification; mixing in English is ar-
+tiple languages. We refer to this as ‘multilingual guablybetterthannothavingasystematall.
+natural language understanding’ (MLU). Specifi-
+Whilepractical,thisperspectiveisseeminglyat
+cally, we use MLU to mean ‘understanding a tar-
+oddswiththemanytasksanddatasetsthatpresent
+get language is part of multilingual natural lan-
+themselvesundertheaforementionedlabeloflan-
+guageunderstanding.’2
+guage understanding. Additionally, task perfor-
+Understanding English by itself and under-
+manceasthesolegoalintroducesausabilityissue.
+standinganaturalmixofEnglishandanotherlan-
+Auto-regressiveLMsareincreasinglymeanttobe
+guage are both part of MLU. The latter enters
+directly interacted with (a natural language inter-
+the domain of code-switching: the phenomenon
+face). If we have to resort to a mixed-prompt for
+where a speaker fluently switches between multi-
+thesystemtoevenfunction, itmeanstheuserhas
+ple different languagesduring the same conversa-
+to be able to write English and get familiar with
+tionalturn(MilroyandMuysken,1995).3
+thisunnaturalmixingoflanguages.
+TheMaLa-500promptmixesEnglishandatar-
+Figure 1 summarizes our argument and termi-
+getlanguage. However,itishardtoclassifythisas
+nology. Next, we provide more details regarding
+code-switching,astheswitchishardlynatural,es-
+the discrepancies between using English as an in-
+terfaceversususingitasanaturallanguage.
+2Weareawarethis(ab)useofterminologyisnotstandard.
+3Some differentiate between code-switching and code-
+mixing, we do not make a distinction. For an overview of 4Wethanktworeviewersforsuggestingtoputmoreem-
+code-switchinginNLP,werefertoWinataetal.(2023). phasisonthisperspective.3 EvaluationMethods Youareahighlyknowledgeableandintelligent
+artificialintelligencemodelanswersmultiple-choice
+Asmentionedin§1,alargebodyofcontemporary questionsabout{subject}
+Question:{question}
+research in multilingual NLP focuses on prompt-
+Choices:
+ing methods. Common evaluation setups range A:{choice1}
+from (i) prompts fully in a target language, to (ii) B:{choice2}
+C:{choice3}
+Englishinstructionswithtask-specificpassagesin
+D:{choice4}
+thetargetlanguage,to(iii)translatingalltextinto Answer:
+Englishbeforepresentingittoamodel.5 Noneof
+ThepromptandsubjectarealwaysinEnglish,
+these works refer to this mixture as being code-
+the question and choices in the target lan-
+switched text. All conclude that a mixture of En-
+guage. With this setup, more is tested than just a
+glishandatargetlanguage(amixed-prompt)gen-
+taskinatargetlanguage:
+erally results in the best task performance. In this
+• Code-switching,ifthisisconsiderednatural,
+sectionweshowwhyamixed-promptisaninher-
+orunnatural‘mixed-prompt’switching.
+ently imprecise method to use in evaluation, even
+ifmaximizingtaskperformanceisthegoal. • Script-switching, if the target language uses
+If we use a prompt fully in a target language, anon-Latinscript(whichappliestoAmharic
+we are clearly evaluating part of MLU. A mixed- inIrokoBench,usingtheGe‘ezscript).
+promptintroducesadditionalfactorsthatareeval-
+• InstructionfollowinginEnglish.
+uatedthatareneitherthetasknorMLU.Weillus-
+• GrammaticalerrorcorrectioninEnglish.6
+trate this from two angles: the representation of
+the prompt and fortuitous issues from unnaturally • Answeringhigh-schoollevelexamquestions
+mixingEnglishandatargetlanguage. inthetargetlanguage.
+Considerhowtoevaluateamultilingualmasked With these mixed-prompts, we arguably do not
+languagemodelonthenewsclassificationtask. A testMLU,asthatwouldentailanativetargetlan-
+classificationlayerisaddedtoapre-trainedmodel guageprompt. Atthesametime,wetestmorethan
+to predict the topic labels; it sees label indices just the task, even though that is the explicit goal
+that are consistent across languages. The labels ofusingEnglishinthisway.
+arelanguage-agnosticforthemodel(i.e.,detached Whileweonlydiscussedclassificationtasksun-
+from natural language). The evaluation method tilnow,ourargumentalsoappliestoothertypesof
+and goal are clear: mapping a target language se- tasks. Consider the following zero-shot machine
+quencetooneoftheseindices. Therearenoaddi- translationpromptfromHendyetal.(2023):
+tionalsignalsinfluencingthisprocess.
+Translatethissentencefrom{source}to{target}
+In a prompting setup, the representation of the
+Source:{source sentence}
+labels can either be language-agnostic (numbers, Target:
+letters, symbols, etc.), or not (English words, tar-
+ThepromptisalwaysinEnglish,thesourceand
+get language words, etc.). These options result in
+target are English words referring to the lan-
+any number of tokens, which will have different
+guages,andthesource sentenceisinthetar-
+representations within the model, unless specifi-
+getlanguage. Filledin,itlookslikethis:
+cally accounted for. In many multilingual eval-
+uation prompts, the classification labels are En- #DE→NL
+TranslatethissentencefromGermantoDutch
+glish words (such as in the MaLa-500 example).
+Source:DugehstmiraufdenKeks
+Without target language words or (to an extent) Target:
+language-agnostic labels, the evaluation method
+#NL→DE
+andgoalwillbeinherentlyimprecise.
+TranslatethissentencefromDutchtoGerman
+Inadditiontothedifferentrepresentation,more Source:tijdvooreenbakjekoffie
+thanjustthetaskisevaluatedwithamixed-prompt Target:
+setup. To illustrate this, consider the following
+6WehavenotifiedtheAfriMMLUauthorsaboutthis.The
+setupfromtheAfriMMLUsubtaskofIrokoBench
+typoisinthepromptinthepaperandinthelm-evaluation-
+(Adelanietal.,2024b): harness(Bidermanetal.,2024),whichisusedtoobtaintheir
+results: https://github.com/EleutherAI/lm-evaluation-harness/
+5We do not further discuss ‘translate everything’ as this blob/7882043b4ee1ef9577b829809c2f4970b0bdba91/lm_eval/tasks/
+resemblesevaluatingEnglishasanaturallanguage. afrimmlu/direct/utils.py.The authors mention they “explore prompt selec- are natural language-agnostic as the meaning (as
+tion strategies along two dimensions: quality and interpreted by a compiler or interpreter) does not
+relevance”, but do not mention target language change. Variablenamesandkeywordscanbecho-
+prompts. To underline the interface role of En- sen arbitrarily.8 This is not the case with prompt-
+glish: it is neither the translation source nor tar- ing, which is sensitive to slight changes, both in
+gethere. Hendyetal.(2023)mentionthat“keep- English(Sclaretal.,2023)andmultilingualsetups
+ing the prompt format the same allows us to po- (Zhangetal.,2023;Asaietal.,2024).
+tentially leverage the benefits of the underlying Additionally,evaluationsetupsthatuseEnglish
+instruction finetuning protocol to the full extent.” asaninterfaceintroduceknowledgeleakagefrom
+This makes explicit the goal of task performance. English to the target language. This is, again,
+Promptingamodeltotranslateasentenceiseasily with the explicit goal of improving task perfor-
+doneinamannerthatmorecloselyalignswiththe mance.9 BeingabletounderstandEnglishinstruc-
+goal of MLU, does not use English, and is closer tions is not the same as being able to understand
+tonaturalcode-switching: target language instructions. If English truly was
+a programming language, this would not matter,
+#DE→NL(Dutchspeaker)
+Wat betekent “Du gehst mir auf den Keks” in het as the meaning of the instructions would be sepa-
+Nederlands? rate from the meaning of the target language pas-
+sages. Given that English is a natural language,
+#NL→DE(Dutchspeaker)
+Hoezegje“tijdvooreenbakjekoffie”inhetDuits? thisdefactomeansmoreisevaluatedthanjustthe
+task. Consequently, such evaluations are impre-
+ciseatbest,asshownin§3.
+4 Whydoesthismatter?
+Prompt-based evaluations should extend MLU
+Interacting with computers in a natural manner to the instruction domain. A mixed-prompt setup
+is arguably the ultimate goal of numerous sub- claiming to test “multilingualunderstanding”
+fields of computer science. Work on natural might more accurately be described as “under-
+language interfaces to information systems dates standing English instructions interleaved with
+back decades (Winograd, 1972; Waltz, 1978). passages from target language(s), albeit not in a
+LMsbringuseverclosertothisgoal. However,in naturalcode-switchingsetup.”
+a multilingual setting, it is important to consider
+whatnaturallanguageis,whatisbeingevaluated, Naturallanguage. Whenwe considerthe other
+roleofEnglishinmultilingualprompt-basedeval-
+and what promises are sold. Next, we outline the
+implications of the interface versus natural lan- uation,weshouldtreatitthesameasanyotherlan-
+guagerolesonevaluationpractices. guage. The ‘Multilingual Exemplars’ setup from
+Shietal.(2022)isacreativeinterpretationofthis
+Interface. LetusstartwiththeroleinwhichEn- perspective. Inthisfew-shotsetup,themodelsees
+glish is akin to a programming language.7 We various examples, all in different languages. The
+need an interface to communicate with a system, final question is asked in the target language. A
+in a way the system can understand. We have setup like this extends the definition of ‘multilin-
+seen that mixed-prompts are used to get the sys- gual language understanding’ to the extreme. It
+tem to perform better on a given task. Given the becomes harder to interpret what a multilingual
+scarcityofinstructiontuningdatasetsandthecosts modelknowsaboutanyindividuallanguageinthis
+involvedincreatingthese,itisunderstandablethat context,butEnglishiscertainlynotaninterface,it
+this is a common (albeit sometimes implicit) per- isanaturallanguagelikeallothers.
+spective. Englishbecomesthe‘programming’lan- A less extreme setup would simply use native,
+guagethatgluestargetlanguagepassagestogether target language prompts or natural code-switched
+and makes the system perform a task. Program- prompts. This is costly, but it aligns much bet-
+ming languages also predominantly use English
+labels for their keywords. However, if the key-
+8Withinthespecificationsoftheprogramminglanguage.
+9Knowledgeleakagealsoexplicitlyhappensinparameter
+wordforawhileloophappenstobemientras
+sharing (Zeman and Resnik, 2008) or cross-lingual transfer
+or kjsdfk is irrelevant for its function. These (Philippy et al., 2023). However, these methods are funda-
+mentally different from mixed-prompts as they (i) treat En-
+7Alsoreflectedinthisfamouspost: https://x.com/ glishasanaturallanguage,and(ii)targetknowledgesharing
+karpathy/status/1617979122625712128 atthetrainingorfinetuningphase,nottheevaluationphase.ter with the goal of multilingual natural language References
+understanding. Indeed, several works specifically
+DavidAdelani,HannahLiu,XiaoyuShen,NikitaVass-
+explore this direction (Ko¨pf et al., 2023; Singh
+ilyev,JesujobaAlabi,YankeMao,HaonanGao,and
+et al., 2024). This approach clearly tests multi- En-Shiun Lee. 2024a. SIB-200: A Simple, Inclu-
+lingual language understanding, including the in- sive,andBigEvaluationDatasetforTopicClassifi-
+cationin200+LanguagesandDialects. InProceed-
+struction domain. If performance on a particular
+ingsofthe18thConferenceoftheEuropeanChap-
+task in a particular language is lagging behind, or
+teroftheAssociationforComputationalLinguistics
+notworkingatall,itmeansfocusshouldbeputon (Volume1: LongPapers),pages226–245.
+addressing the core of these issues (e.g., data or
+David Ifeoluwa Adelani, Jessica Ojo, Israel Abebe
+modeling). Ideally,weshouldnotresorttoimpre-
+Azime, Jian Yun Zhuang, Jesujoba O. Alabi, Xu-
+cisemethodstoboosttaskperformance.
+anli He, Millicent Ochieng, Sara Hooker, Andiswa
+Bukula, En-Shiun Annie Lee, Chiamaka Chuk-
+5 Conclusion
+wuneke, Happy Buzaaba, Blessing Sibanda, God-
+son Kalipe, Jonathan Mukiibi, Salomon Kabongo,
+In this position paper we outline two roles of En-
+Foutse Yuehgoh, Mmasibidi Setaka, Lolwethu
+glish in multilingual language model evaluation: Ndolela,NkirukaOdu,RooweitherMabuya,Sham-
+asaninterface,withthegoaloftaskperformance, suddeenHassanMuhammad,SalomeyOsei,Sokhar
+Samb,TadesseKebedeGuge,andPontusStenetorp.
+and as a natural language, with the goal of lan-
+2024b. IrokoBench: ANewBenchmarkforAfrican
+guageunderstanding. We(i)listworksthatincor-
+Languages in the Age of Large Language Models.
+porate English with the explicit goal of boosting arXivpreprint,arXiv:2406.03368v1.
+task performance, even in tasks such as transla-
+tion where it is neither the source nor target, un- Mikel Artetxe, Sebastian Ruder, Dani Yogatama,
+GorkaLabaka,andEnekoAgirre.2020. ACallfor
+derlining the interface role, (ii) show that mix-
+More Rigor in Unsupervised Cross-lingual Learn-
+ing English with a target language in a mixed-
+ing. In Proceedings of the 58th Annual Meeting
+promptisunnatural(i.e.,notcode-switching),and of the Association for Computational Linguistics,
+(iii) outline why the interface role is an imprecise pages7375–7388.
+choicewhenevaluatingmultilinguallanguageun-
+Akari Asai, Sneha Kudugunta, Xinyan Yu, Terra
+derstandingoflanguagemodels.
+Blevins, HilaGonen,MachelReid,YuliaTsvetkov,
+Additionally, we argue that using a mixed- Sebastian Ruder, and Hannaneh Hajishirzi. 2024.
+prompttestsmorethanjustperformanceonacer- BUFFET: Benchmarking Large Language Models
+for Few-shot Cross-lingual Transfer. In Proceed-
+tain task. Because English is a natural language
+ingsofthe2024ConferenceoftheNorthAmerican
+and not a programming language, using it in a
+Chapter of the Association for Computational Lin-
+mixed prompt will inherently lead to fortuitous guistics:HumanLanguageTechnologies(Volume1:
+factorssuchas(un)naturalswitchingbetweenlan- LongPapers),pages1771–1800.
+guages or scripts, grammatical error correction,
+Stella Biderman, Hailey Schoelkopf, Lintang
+andmore. Thisallresultsinimpreciseormislead-
+Sutawika, Leo Gao, Jonathan Tow, Baber Abbasi,
+ing evaluations, even if the ultimate goal was to
+Alham Fikri Aji, Pawan Sasanka Ammanamanchi,
+evaluateandimprovetaskperformance. Sidney Black, Jordan Clive, Anthony DiPofi, Julen
+We finally contrast the implications of the two Etxaniz, Benjamin Fattori, Jessica Zosa Forde,
+Charles Foster, Jeffrey Hsu, Mimansa Jaiswal,
+roles on evaluation practices. We recommend to
+WilsonY.Lee,HaonanLi,CharlesLovering,Niklas
+move away from using English as an interface in
+Muennighoff, Ellie Pavlick, Jason Phang, Aviya
+multilingual evaluations and ultimately advocate Skowron, Samson Tan, Xiangru Tang, Kevin A.
+forthegoaloflanguageunderstanding. Wang, Genta Indra Winata, Franc¸ois Yvon, and
+Andy Zou. 2024. Lessons from the Trenches on
+Acknowledgments Reproducible Evaluation of Language Models.
+arXivpreprint,arXiv.2405.14782v2.
+WP is funded by a KU Leuven Bijzonder Onder-
+Tom Brown, Benjamin Mann, Nick Ryder, Melanie
+zoeksfondsC1projectwithreferenceC14/23/096.
+Subbiah, Jared D Kaplan, Prafulla Dhariwal,
+We thank the LAGoM-NLP group at KU Leuven
+Arvind Neelakantan, Pranav Shyam, Girish Sastry,
+for valuable paper recommendations and Mahdi Amanda Askell, Sandhini Agarwal, Ariel Herbert-
+Dhaini for reviewing an early draft of this paper. Voss, Gretchen Krueger, Tom Henighan, Rewon
+Child, Aditya Ramesh, Daniel Ziegler, Jeffrey
+We also thank the reviewers for their constructive
+Wu, Clemens Winter, Chris Hesse, Mark Chen,
+comments.
+Eric Sigler, Mateusz Litwin, Scott Gray, BenjaminChess, Jack Clark, Christopher Berner, Sam Mc- In Proceedings of the 2022 Conference on Empiri-
+Candlish, Alec Radford, Ilya Sutskever, and Dario calMethodsinNaturalLanguageProcessing,pages
+Amodei. 2020. Language Models are Few-Shot 9019–9052.
+Learners. In Advances in Neural Information Pro-
+cessingSystems,volume33,pages1877–1901. LesleyMilroyandPieterMuysken,editors.1995. One
+Speaker, Two Languages: Cross-Disciplinary Per-
+Julen Etxaniz, Gorka Azkune, Aitor Soroa, Oier La- spectivesonCode-Switching. CambridgeUniversity
+calle, and Mikel Artetxe. 2024. Do Multilingual Press.
+LanguageModelsThinkBetterinEnglish? InPro-
+ceedingsofthe2024ConferenceoftheNorthAmer- Fred Philippy, Siwen Guo, and Shohreh Haddadan.
+ican Chapter of the Association for Computational 2023. Towards a Common Understanding of Con-
+Linguistics: Human Language Technologies (Vol- tributingFactorsforCross-LingualTransferinMul-
+ume2: ShortPapers),pages550–564. tilingualLanguageModels: AReview. InProceed-
+ings of the 61st Annual Meeting of the Association
+JinlanFu,See-KiongNg,andPengfeiLiu.2022. Poly- forComputationalLinguistics(Volume1: LongPa-
+glot Prompt: Multilingual Multitask Prompt Train- pers),pages5877–5891.
+ing. InProceedingsofthe2022ConferenceonEm-
+pirical Methods in Natural Language Processing, EstherPloeger,WesselPoelman,MiryamdeLhoneux,
+pages9919–9935. and Johannes Bjerva. 2024. What is “Typological
+Diversity”inNLP? InProceedingsofthe2024Con-
+AmrHendy,MohamedAbdelrehim,AmrSharaf,Vikas ferenceonEmpiricalMethodsinNaturalLanguage
+Raunak, Mohamed Gabr, Hitokazu Matsushita, Processing,pages5681–5700.
+Young Jin Kim, Mohamed Afify, and Hany Has-
+san Awadalla. 2023. How Good Are GPT Models Sebastian Ruder, Ivan Vulic´, and Anders Søgaard.
+atMachineTranslation? AComprehensiveEvalua- 2022. Square One Bias in NLP: Towards a Multi-
+tion. arXivpreprint,arXiv:2302.09210v1. DimensionalExplorationoftheResearchManifold.
+In Findings of the Association for Computational
+LianzheHuang,ShumingMa,DongdongZhang,Furu Linguistics: ACL2022,pages2340–2354.
+Wei, and Houfeng Wang. 2022. Zero-shot Cross-
+lingualTransferofPrompt-basedTuningwithaUni- Melanie Sclar, Yejin Choi, Yulia Tsvetkov, and Alane
+fied Multilingual Prompt. In Proceedings of the Suhr. 2023. Quantifying Language Models’ Sen-
+2022 Conference on Empirical Methods in Natural sitivity to Spurious Features in Prompt Design or:
+LanguageProcessing,pages11488–11497. How I learned to start worrying about prompt for-
+matting. In The Twelfth International Conference
+Pratik Joshi, Sebastin Santy, Amar Budhiraja, Kalika onLearningRepresentations.
+Bali, andMonojitChoudhury.2020. TheStateand
+Fate of Linguistic Diversity and Inclusion in the Freda Shi, Mirac Suzgun, Markus Freitag, Xuezhi
+NLP World. In Proceedings of the 58th Annual Wang,SurajSrivats,SoroushVosoughi,HyungWon
+Meeting of the Association for Computational Lin- Chung, Yi Tay, Sebastian Ruder, Denny Zhou, Di-
+guistics,pages6282–6293. panjan Das, and Jason Wei. 2022. Language mod-
+els are multilingual chain-of-thought reasoners. In
+Andreas Ko¨pf, Yannic Kilcher, Dimitri von Ru¨tte, TheEleventhInternationalConferenceonLearning
+Sotiris Anagnostidis, Zhi Rui Tam, Keith Stevens, Representations.
+Abdullah Barhoum, Duc Minh Nguyen, Oliver
+Stanley, Richa´rd Nagyfi, Shahul Es, Sameer Suri, Shivalika Singh, Freddie Vargus, Daniel D’souza,
+David Alexandrovich Glushkov, Arnav Varma Bo¨rjeKarlsson, AbinayaMahendiran, Wei-YinKo,
+Dantuluri, Andrew Maguire, Christoph Schuh- Herumb Shandilya, Jay Patel, Deividas Mataciu-
+mann, Huu Nguyen, and Alexander Julian Mattick. nas, Laura O’Mahony, Mike Zhang, Ramith Het-
+2023. OpenAssistant Conversations - Democratiz- tiarachchi, Joseph Wilson, Marina Machado, Luisa
+ing Large Language Model Alignment. In Thirty- Moura, Dominik Krzemin´ski, Hakimeh Fadaei,
+SeventhConferenceonNeuralInformationProcess- Irem Ergun, Ifeoma Okoh, Aisha Alaagib, Oshan
+ingSystemsDatasetsandBenchmarksTrack. Mudannayake, Zaid Alyafeai, Vu Chien, Sebastian
+Ruder, Surya Guthikonda, Emad Alghamdi, Sebas-
+PeiqinLin,ShaoxiongJi,Jo¨rgTiedemann,Andre´ F.T. tian Gehrmann, Niklas Muennighoff, Max Bartolo,
+Martins, and Hinrich Schu¨tze. 2024. MaLA-500: Julia Kreutzer, Ahmet U¨stu¨n, Marzieh Fadaee, and
+Massive Language Adaptation of Large Language Sara Hooker. 2024. Aya Dataset: An Open-Access
+Models. arXivpreprint,arXiv:2401.13303v2. Collection for Multilingual Instruction Tuning. In
+Proceedingsofthe62ndAnnualMeetingoftheAs-
+XiVictoriaLin,TodorMihaylov,MikelArtetxe,Tianlu sociationforComputationalLinguistics(Volume1:
+Wang, ShuohuiChen, DanielSimig, MyleOtt, Na- LongPapers),pages11521–11567.
+manGoyal,ShrutiBhosale,JingfeiDu,Ramakanth
+Pasunuru,SamShleifer,PunitSinghKoura,Vishrav Hugo Touvron, Louis Martin, Kevin Stone, Peter Al-
+Chaudhary, Brian O’Horo, Jeff Wang, Luke Zettle- bert, Amjad Almahairi, Yasmine Babaei, Niko-
+moyer, Zornitsa Kozareva, Mona Diab, Veselin lay Bashlykov, Soumya Batra, Prajjwal Bhargava,
+Stoyanov, and Xian Li. 2022. Few-shot Learn- Shruti Bhosale, Dan Bikel, Lukas Blecher, Cris-
+ingwithMultilingualGenerativeLanguageModels. tian Canton Ferrer, Moya Chen, Guillem Cucurull,David Esiobu, Jude Fernandes, Jeremy Fu, Wenyin A Examples
+Fu, Brian Fuller, Cynthia Gao, Vedanuj Goswami,
+Naman Goyal, Anthony Hartshorn, Saghar Hos- The examples containing Turkish, Dutch or Ger-
+seini, RuiHou, HakanInan, MarcinKardas, Viktor manarerepeatedherewithEnglishtranslations.
+Kerkez, Madian Khabsa, Isabel Kloumann, Artem
+SIB-200(sample755):
+Korenev, PunitSinghKoura, Marie-AnneLachaux,
+ThibautLavril,JenyaLee,DianaLiskovich,Yinghai The topic of the news Bu oteller gu¨nu¨n zenginlerinin
+Lu,YuningMao,XavierMartinet,TodorMihaylov, ve u¨nlu¨lerinin kalacag˘ı yerlerdi ve c¸og˘u zaman kaliteli
+PushkarMishra, IgorMolybog, YixinNie, Andrew yemeklerevegecehayatınasahipti.isentertainment
+Poulton,JeremyReizenstein,RashiRungta,Kalyan
+Saladi, Alan Schelten, Ruan Silva, Eric Michael
+ThetopicofthenewsThesehotelswerewheretherich
+andthefamousofthedaywouldstay,andoftenhadfine
+Smith, Ranjan Subramanian, Xiaoqing Ellen Tan,
+diningandnightlife.isentertainment
+Binh Tang, Ross Taylor, Adina Williams, Jian Xi-
+ang Kuan, Puxin Xu, Zheng Yan, Iliyan Zarov, Interfacetranslationexamples:
+Yuchen Zhang, Angela Fan, Melanie Kambadur,
+SharanNarang,AurelienRodriguez,RobertStojnic, #DE→NL
+SergeyEdunov,andThomasScialom.2023. Llama TranslatethissentencefromGermantoDutch
+2: Open Foundation and Fine-Tuned Chat Models. Source:DugehstmiraufdenKeks
+Target:
+arXivpreprint,arXiv:2307.09288v2.
+#DE→NL
+David L. Waltz. 1978. An English language question
+TranslatethissentencefromGermantoDutch
+answering system for a large relational database.
+Source:You’regettingonmynerves
+CommunicationsoftheACM,21(7):526–539.
+Target:
+GentaWinata, AlhamFikriAji, ZhengXinYong, and
+#NL→DE
+Thamar Solorio. 2023. The Decades Progress on
+TranslatethissentencefromDutchtoGerman
+Code-Switching Research in NLP: A Systematic
+Source:tijdvooreenbakjekoffie
+Survey on Trends and Challenges. In Findings of
+Target:
+theAssociationforComputationalLinguistics:ACL
+2023,pages2936–2978. #NL→DE
+TranslatethissentencefromDutchtoGerman
+Terry Winograd. 1972. Understanding natural lan- Source:timeforacupofcoffee
+guage. CognitivePsychology,3(1):1–191. Target:
+Daniel Zeman and Philip Resnik. 2008. Cross- Naturaltranslationexamples:
+Language Parser Adaptation between Related Lan-
+guages. InProceedingsoftheIJCNLP-08Workshop #DE→NL(Dutchspeaker)
+Wat betekent “Du gehst mir auf den Keks” in het
+onNLPforLessPrivilegedLanguages.
+Nederlands?
+XiangZhang,SenyuLi,BradleyHauer,NingShi,and
+#DE→NL(Dutchspeaker)
+Grzegorz Kondrak. 2023. Don’t Trust ChatGPT
+Whatdoes“DugehstmiraufdenKeks”meaninDutch?
+when your Question is not in English: A Study of
+Multilingual Abilities and Types of LLMs. In Pro-
+#NL→DE(Dutchspeaker)
+ceedingsofthe2023ConferenceonEmpiricalMeth-
+Hoezegje“tijdvooreenbakjekoffie”inhetDuits?
+ods in Natural Language Processing, pages 7915–
+7927.
+#NL→DE(Dutchspeaker)
+Howwouldonesay“tijdvooreenbakjekoffie”inGer-
+man?

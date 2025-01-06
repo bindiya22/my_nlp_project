@@ -1,0 +1,420 @@
+Classification Flower Images Based On Deep
+Learning And Machine Learning
+1st Asia Kamal Mustfa 2nd Salwa Khalid Abdulateef 3rd Qabas Amer Hameed
+dept. Computer Science dept. Computer Science dept. Computer Science
+Computer Science and Mathematics Computer Science and Mathematics Computer Science and Mathematics
+College College College
+Tikrit University Tikrit University Tikrit University
+Tikrit, Iraq Tikrit, Iraq Tikrit, Iraq
+asia.k.mustfa@st.tu.edu.iq Khalid.salwa@tu.edu.iq qabas.a.hameed@tu.edu.iq
+5thZaydoon Al-qaysi
+4th Mohamed Aktham Ahmed
+Department of computer science
+Department of computer science College of Computer Science and
+College of Computer Science and Mathematics
+Mathematics Tikrit University
+Tikrit University Tikrit,,Iraq
+Tikrit,,Iraq zaidoonalqaissi@gmail.com
+mohamed.aktham@tu.edu.iq
+Abstract—Image classification has grown increasingly method that can classify flowers quickly and accurately [8].
+popular due to the growing significance of machine learning and The study of flower categorization holds significant
+deep learning. Flower images may sometimes exhibit importance in the field of botany. Conventional flower
+resemblances in terms of hue, form, and visual characteristics. categorization systems struggle to accurately account for the
+The problem lies in the classification of flowers. This work influence of a bloom's background. This leads to an
+employs a hybrid approach that integrates deep learning and inadequate categorization effect. The development of massive
+machine learning techniques to classify 17 discrete flower data and rapid advancements in Internet technology have led
+species. In order to do this, we utilised the ResNet_50, PCA, and
+to the increased use of deep learning in the field of picture
+SVM architecture to classify several species from the "Oxford-
+categorization research [9]. The flower categorization was
+17" dataset. With this goal in mind, we have made efforts to
+performed using machine learning and deep learning
+improve our model in order to get more accuracy compared to
+methodologies. Machine learning is an artificial intelligence
+similar methods. Prior to inputting our images into our
+technique employed to detect and analyse patterns within
+pretrained model, we resized them, and subsequently fine-tuned
+datasets [10]. Deep learning is a subset of machine learning
+the model. The dataset was partitioned into two distinct sets: a
+[11] that allows computers to autonomously extract data [12]. training set and a testing set. We attained a precision rate of
+95.58% while utilising the "Oxford-17" dataset. Our approach
+This study presents a hybrid method can classify a
+outperformed previous machine learning and deep learning-
+different type of flowers. This approach is based on Residual
+based methods on this dataset.
+Neural Network (ResNet_50) to Feature Extraction (FE),
+Principal Component Analysis (PCA) to Feature Selection
+Keywords— Machine Learning, Deep Learning, Flower
+(FS), and Support Vector Machine (SVM)for Classification.
+Classification, ResNet_50, PCA, SVM.
+The paper is structured as follows: Section 2 presents a
+I. INTRODUCTION
+comprehensive summary of the current methodologies and
+The study of flowers and the skill of recognising them approaches that have been reviewed in the literature. Section
+have captivated humanity for countless years [1]. Flowers, a 3 offers an elaborate elucidation of the suggested
+type of botanical organism, play a crucial role in maintaining methodology, framework, and measurements utilized to attain
+ecological balance. Flowers have the ability to provide the intended results. Section 4 analyzes the outcomes and
+sustenance to a wide range of organisms, including nearly all assesses the proposed methodology. Section 5 encompasses
+insect species on Earth. Additionally, flowers are utilised in the final remarks of the report and outlines the potential areas
+several beneficial ways for humans, particularly in the field of for future work.
+pharmaceuticals. Identifying flowers continues to be a
+difficult task for the majority of individuals. The user's text is II. LITERATURE REVIEW
+"[2]." The main factor for this is the existence of several Many academics are attempting to propose various
+flowers that share similar colour, shape, and appearance. In answers to the challenge of flower images classification
+addition, images of different flowers commonly have modeling using the utilization of machine learning and image
+comparable elements in their surroundings, such as leaves, processing techniques to attain precise and automated
+grass, and other similar objects. There are roughly 250,000 classification. In recent times, scholars have started employing
+identified species of flowering plants, which are classified into deep learning algorithms to yield more precise outcomes. This
+about 350 families[5]. Identifying and categorising these section showcases the most pertinent deep learning-driven
+items requires substantial time and exertion [6]. Manual flower images classification modeling utilizing deep learning
+categorization is a laborious process that can consume a algorithms, which include:
+significant amount of time and may result in mistakes as time
+goes on [7]. Therefore, it is crucial to design a computer-aided
+979-8-3503-5442-3/24/$31.00 ©2024 IEEE
+30275701.4202.11536TISMSI/9011.01
+:IOD
+|
+EEEI
+4202©
+00.13$/42/3-2445-3053-8-979
+| )TISMSI(
+seigolonhceT
+evitavonnI
+dna
+seidutS
+yranilpicsiditluM
+no
+muisopmyS
+lanoitanretnI
+ht8
+4202
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:27:10 UTC from IEEE Xplore. Restrictions apply.In 2019, the researcher utilised Support Vector Machines in categorising certain varieties of flowers. Researchers have
+(SVM) for classification and applied Speeded Up Robust demonstrated that VA-DCNNs may obtain accuracies of up to
+Features (SURF) and Local Binary Patterns (LBP) for feature 85.7% using the publically available Flowers 17 dataset [18].
+extraction. This study seeks to assess the efficacy of feature Ari Peryanto and his colleagues in 2021. It was dependent on
+descriptors in flower classification using the Local Binary this paradigm. Convolutional neural networks (CNNs) are
+Pattern (LBP) and Speeded-Up Robust Features (SURF). The unrivalled in the field of image processing. Manual
+Oxford_17 dataset outperformed other datasets and classification is prone to human fallibility and subjectivity,
+classifiers, with an accuracy of 87.2%[13]. which might result in inconsistent results. Scaling up the
+manual method is difficult, and there is no guarantee that the
+classification results will be accurate or consistent. A
+In accordance with the earlier reference [14], the authors
+collection was created by compiling 1200 random
+presented the Convolutional Neural Network (CNN) model
+photographs using Google Image Search. The Rose category
+for Utilising a reduced dataset for training purposes leads to
+has 400 data units, the Tulip category contains 400 flowers,
+enhanced precision in the model's outcomes. An inquiry into
+and the Aster category also contains 400 flowers. The CNN
+the indigenous floral species of Bangladesh is commenced
+model attained an accuracy of 91.6% in categorising flower
+following a suggestion. Flowers including Chapa, Kadam,
+photos. CNN had a precision rating of 91.6% in the
+Kath Golap, Shapla, Rongon, Radhachura, and Rojonigondha
+categorization of flower photographs. CNN demonstrated a
+are found in the area. We have demonstrated that a
+recall rate of 91.6% in accurately categorising photographs of
+Convolutional Neural Network (CNN) architecture can
+flowers. The F1 Score for identifying floral images using
+achieve an accuracy rate of 85% in classification.
+CNN was 91.6% [19].The primary goal of this research is to
+Isha Patel and her colleagues [15] constructed a deep
+develop a software that can accurately identify various types
+convolutional neural network utilising the Faster R-CNN
+of flowers from photographs utilising pre-trained models such
+framework and the NAS-FPN architecture. Accurately
+as ResNet, MobileNet, DenseNet, and Inception. Two datasets
+identifying, locating, and categorising flower photographs in
+were employed for training the models: the Oxford 17 dataset,
+databases with several categories may be a difficult task,
+which consists of seventeen distinct flower variations, and the
+especially when working in the agricultural industry. The
+flower dataset, which includes five different flower types.
+research employs many dataset classifications. Dataset 1
+Subsequently, the models were evaluated to determine their
+contains a total of 8189 photographs, which depict 102 distinct
+performance. The success of deep learning methods is
+varieties of flowers.When evaluated using the 102-flower
+contingent upon the number of classes in the dataset and the
+class dataset, the NAS-FPN model combined with the Faster
+use of the Adam optimizer. Here is the level of precision
+R-CNN approach got an impressive mean average accuracy
+exhibited by these models: Attained accuracy rates of 93%,
+(mAP) score of 87.6% [15].
+94%, 91%, and 92% on the Oxford_17 dataset [20]. In 2023,
+the Associates of Rini Nuraini were established. This research
+The study employed a Random Forest algorithm to classify tries to identify sunflower photographs using an approach that
+flower photos. The study's classification difficulty is presented extracts first-order features. This technique is employed to
+by the Oxford 102 Flowers dataset, which exhibits significant derive statistical measures such as entropy, variance,
+diversity within each class. The suggested method's efficacy skewness, kurtosis, and mean. Subsequently, these attributes
+is assessed using stratified k-fold cross-validation tests, are entered into the Multiclass SVM identification
+resulting in an accuracy of 88.74%. The text is referenced by programme. The dataset consists of seven sunflower cultivars:
+the number 16. A 2021 study by Rongxin Lv et al. introduced Red Sun, Fiesta Del Sol, Sunny Smile, Teddy Bear, Early
+a technique that integrates saliency detection with the VGG- Russian, Cherry Rose, and Velvet Queen. The model achieved
+16 convolutional neural network. The conventional an average accuracy rate of 79%. The user's input is "[21]".
+convolutional neural networks and other methodologies for
+flower classification include inherent limitations, and the
+III. PROPOSED METHODOLOGY
+objective of our methodology is to rectify such shortcomings. This section introduces the classification model for flower
+The classification results have been unsatisfactory since the images as explained in Figure 1.
+efforts to reduce the impact of the flowery backdrop have been
+ineffective. Experiments conducted on the Oxford flower-102
+dataset [9] demonstrate that the algorithm achieves a 91.9%
+accuracy rate on these datasets. The study examines the
+effectiveness of transfer learning in the task of categorising
+pictures by utilising pre-trained deep learning models such as
+Alex Net [17]. Image classification, a crucial domain in deep
+learning, is the primary subject of the research piece, where
+pretrained models are employed. The data collection is
+organised into five distinct categories: dandelion, sunflower,
+tulip, rose, and chamomile. The Alex Net model attained an
+accuracy of 86.28% after being trained on these datasets. In
+2021, Shuai Cao et al. introduced Visual Attentional-driven
+DCNNs (VA-DCNNs), a technique for guiding attention. The
+classification of flowers is a complex undertaking that
+requires very sophisticated image recognition techniques, and
+researchers focus their efforts on addressing these issues.
+These issues include a lack of sufficient training data,
+similarities across different classes, and inadequate accuracy
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:27:10 UTC from IEEE Xplore. Restrictions apply.Figure 3 illustrates an instance of an image extracted from the
+dataset prior to and subsequent to the preprocessing stage.
+Fig. 3. Preprocessing Stage.
+C. Model
+The recommended models consist of three components:
+Residual Neural Network (ResNet_50) for extracting features,
+Principal Component Analysis (PCA) for selecting features,
+Fig. 1. Study research methodology.
+and Support Vector Machine (SVM) for classifying. The
+A. Dataset
+models have been built in Colab, a comprehensive software
+The study included "Oxford-17"dataset. The Oxford-17 environment.
+dataset includes1,360 images for each of 17 flower class,80 ResNet50 is a convolutional neural network consisting of 50
+image in each class, with varying poses, sizes, and layers that was created using the ImageNet dataset. ResNet
+perspectives [18]. (Fig 1). It was created by Nilsback and architectures incorporate shortcut connections, which
+Zisserman, a flower species seen in England [20]. This dataset
+distinguish them from conventional ESAs. Shortcut
+consists the following flowers (cowslip, tulip, tigerlily, crocus,
+connections do not provide additional parameters or augment
+bluebell, lilyvalley, snowdrop, windflower, sunflower, pansy,
+computational complexity [20]. This work used the
+iris, fritillary, dandelion, daisy, daffodil, colts’ foot, and
+ResNet_50 model to extract features from floral photos
+buttercup) [22].
+obtained from the Oxford_17 dataset. The initial number of
+features was 100352.
+Principal Component Analysis (PCA) is a method employed
+to reduce the number of variables in certain datasets, hence
+decreasing their dimensionality. Improves understanding
+while retaining a substantial amount of the original
+information. This is accomplished by generating novel
+variables that are not influenced by one another. To solve the
+eigenvalue/eigenvectors problem [23], it is important to
+identify the newly added variables, also referred to as the
+major components. This work use Principal Component
+Analysis (PCA) using the ResNet_50 model on the Oxford_17
+dataset to identify and select relevant features. The number of
+features after doing Principal Component Analysis (PCA) is
+572.
+Support Vector Machines (SVM), sometimes referred to as
+Support Vector Networks, are models and methods used in
+supervised learning to analyse data and identify patterns for
+the purpose of classification and regression analysis [24].
+Fig.2. "Oxford-17" dataset sample images SVMs can categorize linear and nonlinear data. SVM
+classifies training data by translating it into multidimensional
+The images of the flowers used in this study were obtained
+space and creating hyperplanes in higher dimensions. SVM is
+from the publicly accessible Kaggle database.
+an optimum hyperplane-based mathematical learning system
+B. Pre-processing [25]. In this study we use SVM after ResNet_50 and PCA on
+Pre-processing is one of the key steps that requires precise Oxford_17 dataset for classify 17 types of flower images.
+attention, as data quality has a direct impact on the efficiency
+D. Model Evaluation
+and precision of the intended results. During this phase,
+To determine the model's performance, an accuracy test
+images are improved for processing and resized to 224x224.
+was done to measure the level of correctness exhibited by the
+This process involves extracting flowers from a given image.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:27:10 UTC from IEEE Xplore. Restrictions apply.model. This test evaluates the classifier's capability to produce imag class
+accurate diagnoses. The accuracy equation is represented by es es
+equation (1). Furthermore, we employed Precision (PREC),
+[20] Mobilenet_v2, Oxford_ 1360 17 93%
+F_Score, and Recall (Rec) as evaluation metrics to gauge the
+17
+effectiveness of our proposed model, as these metrics are
+widely used and effective in assessing model performance. [20] Resnet152v2 Oxford_ 1360 17 92%
+17
+The following equations provide an explanation for these
+measurements [26-28]: [20] Inception_v3 Oxford_ 1360 17 91%
+17
+(cid:1)(cid:2)(cid:2) (cid:3)
+[13] Quadratic SVM Oxford_ 640 8 87.2%
+(cid:5)(cid:6) (cid:7)(cid:5)(cid:8)
+(1) 17
+(cid:5)(cid:6) (cid:7)(cid:5)(cid:8)(cid:7)(cid:9)(cid:8)(cid:7)(cid:9)(cid:6)
+(cid:5)(cid:6) [18] VA-ResNet50 Oxford_ 1360 17 85.7%
+(cid:10)(cid:11)(cid:12)(cid:2) (cid:3) (2) 17
+(cid:5)(cid:6) (cid:7)(cid:9)(cid:6)
+(cid:19) (cid:20) (cid:21)(cid:22)(cid:23)(cid:24)(cid:25)(cid:26)(cid:25)(cid:27)(cid:28)(cid:20) (cid:22)(cid:23)(cid:24)(cid:29)(cid:30)(cid:30) Our ResNet50+PCA+S Oxford_ 1360 17 95.58%
+(cid:13) (cid:14)(cid:15)(cid:16)(cid:17)(cid:18) (cid:3) ( 3)
+propos VM 17
+(cid:21)(cid:22)(cid:23)(cid:24)(cid:25)(cid:26)(cid:25)(cid:27)(cid:28)(cid:20)(cid:22)(cid:23)(cid:24)(cid:29)(cid:30)(cid:30)
+ed
+(cid:11)(cid:18)(cid:15) (cid:3) (cid:5)(cid:6) (4) model
+(cid:5)(cid:6)(cid:7)(cid:9)(cid:8)
+The proposed model is compared to different datasets
+TP represents the count of true positive results (which are
+utilising the same paradigm, such as Flower Recognition. The
+the predicted positive outcomes).
+datasets used include the CNN Keras dataset [17], the Google
+FN stands for the count of false negatives, which are flowers dataset [19], and the Oxford_102 dataset [15]. Figure
+positive outcomes that go against the predictions. 4 provides a summary of the findings obtained by comparing
+our proposed model with different datasets, using the same
+FP represents the number of false positives. (The result is
+model as indicated. Figure 5 displays the confusion matrix
+bad, as expected.)
+representing the test data.
+TN is the number of instances where a prediction. (which
+was anticipated to be positive, actually turned out to be
+negative).
+IV. RESULTS AND DISCUSSION
+The collected findings demonstrate the feasibility of the
+provided concept, which is founded on ResNet_50, PCA, and
+SVM models, its efficiency in classification based on_ flower
+images. Pre-learning models were trained using "Oxford-17"
+dataset.70% of the images using as training and 30% as test
+data.
+The model was trained using the "Oxford_17" dataset,
+resulting in an accuracy of 95.58%. The accuracy was
+determined to be 96%, the recall was 95%, and the F1-score
+was 95. The most significant findings are shown in Table I. Fig. 4.Comparison model accuracies across different datasets.
+TABLE I. MODEL Figure 5 displays the confusion matrix for the test data,
+which is a methodical way of mapping predictions to the
+Model Dataset Accuracy Precisi Recal F1- original classes of the data. It is important to note that
+on l Scor
+confusion matrices are only useful in supervised learning
+e
+frameworks where the output distribution is known. Figure 5
+Special Oxford-17 95.58% 96% 95% 95
+accurately predicts and incorrectly predicts various flowers in
+Model %
+the Oxford_17 dataset. For example, it correctly predicts 19
+(ResNet_50 Snowdrop flowers and incorrectly predicts 1 Snowdrop
+, PCA, SVM)
+flower. Similarly, it correctly predicts 18 Tigerlily flowers and
+incorrectly predicts 0 Tigerlily flowers. The same pattern
+continues for other flowers in the Oxford_17 dataset.
+Furthermore, Figure 6 showcases the evaluation of our
+The proposed model is compared to previous models that proposed model on different datasets used in this study.
+utilise Mobilenet_v2, Resnet152v2, Inception_v3, Quadratic
+SVM, and VA-ResNet50, all of which employ the same
+database. The findings indicate that our model outperforms
+these models in terms of accuracy. Tables II provide a
+summary of the results obtained by comparing our model with
+selected previous models on the Oxford_17 dataset.
+TABLE II. COMPARED TO PREVIOUS STUDIES
+Paper Model Dataset No. No. Accura
+of of cy
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:27:10 UTC from IEEE Xplore. Restrictions apply.[7] ABDULATEEF, Salwa Khalid; AHMED, Saadaldeen Rashid Ahmed;
+SALMAN, Mohanad Dawood. A novel food image segmentation
+based on homogeneity test of K-means clustering. In: IOP Conference
+Series: Materials Science and Engineering. IOP Publishing, 2020. p.
+032059.
+[8] Alipour, N., Tarkhaneh, O., Awrangjeb, M., and Tian, H., Flower
+image classification using deep convolutional neural network, in 2021
+7th International conference on web research (ICWR), 2021, pp. 1-4:
+IEEE, (2021).
+[9] Zuo, R. Lv, Z. Li, J., and Liu, J., Flower classification and recognition
+based on significance test and transfer learning, in 2021 IEEE
+International Conference on Consumer Electronics and Computer
+Engineering (ICCECE), 2021, pp. 649-652: IEEE, (2021).
+[10] Jain., and Yadav, A., Analysis of performance of machine learning
+algorithms in detection of flowers, in 2021 Third International
+Fig.5. Confusion matrix on the test data Conference on Intelligent Communication Technologies and Virtual
+Mobile Networks (ICICV), pp. 706-709: IEEE, (2021).
+[11] Shinde, P. P., and Shah, S., A review of machine learning and deep
+learning applications, in 2018 Fourth international conference on
+computing communication control and automation (ICCUBEA), pp. 1-
+6: IEEE, (2018).
+[12] Chauhan, N. K., and Singh, K., A review on conventional machine
+learning vs deep learning, in 2018 International conference on
+computing, power and communication technologies (GUCON, pp.
+347-352: IEEE), (2018).
+[13] Dhar, P. J. I. J. o. I., Graphics and Processing, S., A new flower
+classification system using LBP and SURF features, vol. 11, no. 5, pp.
+13-20, (2019).
+[14] Islam, S., Foysal, M. F. A. and Jahan, N., A computer vision approach
+to classify local flower using convolutional neural network, in 2020 4th
+International Conference on Intelligent Computing and Control
+Fig. 6. Comparison of model evaluation across all datasets. Systems (ICICCS), pp. 1200-1204: IEEE, (2020).
+V. CONCLUSION
+[15] P lea at re nl i, nI g., mP oat de el,
+l
+fS o.
+r
+J f.
+l
+oI w. J e.
+r
+o c.
+l
+aS s.
+s i
+fa icn ad
+t
+iR one s ue sa ir nc gh ,
+n
+T as. -, fA pnn ao np dt i fm asi tz ee rd
+r
+-d ce ne np
+,
+This study presents a flower categorization model that vol. 9, no. 03, pp. 5308-5318, (2020).
+combines machine learning and deep learning techniques. The [16] Siregar, F. R., and Al Maki, W. F., Hybrid method for flower
+classification in high intra-class variation, in 2020 3rd International
+model was trained on the Oxford-17flower dataset using
+Seminar on Research of Information Technology and Intelligent
+ResNet_50, PCA, and SVM. The classification results Systems (ISRITI), pp. 73-78: IEEE, (2020).
+demonstrated that the suggested strategy was able to get a [17] Cengıl, E., and Çinar, A., Multiple classification of flower images
+satisfactory level of accuracy. For our upcoming study, we using transfer learning, in 2019 International Artificial Intelligence and
+Data Processing Symposium (IDAP, pp. 1-6: IEEE), (2019).
+want to employ an alternative hybrid approach that combines
+[18] Cao, S., Song, B. J. M. B., and Engineering, Visual attentional-driven
+machine learning and deep learning techniques to classify
+deep learning method for flower recognition, vol. 18, no. 3, pp. 1981-
+floral images. In addition, we may apply the suggested
+1991, (2021).
+approach to additional categorization tasks, hence increasing
+[19] Peryanto, A., Yudhana, A., and Umar, R. J. K. I. J. I. K. d. I.,
+its use. Convolutional neural network and support vector machine in
+classification of flower images, vol. 8, no. 1, pp. 1-7, (2022).
+REFERENCES [20] Duman, B., Süzen, A. A. J. I. J. o. A. N., and Applications, A Study on
+[1] Rabindra, C. S. P.: A Review on Flower Image Recognition.
+Deep Learning Based Classification of Flower Images, vol. 14, no. 2,
+pp. 5385-5389, (2022).
+International journal of computer sciece and engineering 7(12), 206-
+216 (2029). [21] Nuraini, R., Destriana, R., Nurnaningsih, D., Daniarti, Y., and
+[2] Toğaçar, M., Ergen, B., and Cömert, Z. J. M. Classification of flower
+Alexander, A. D. J. J. R., Sunflower Image Classification Using
+Multiclass Support Vector Machine Based on Histogram
+species by using features extracted from the intersection of feature
+Characteristics, vol. 7, no. 1, pp. 146-152, (2023).
+selection methods in convolutional neural network models, 158, p.
+107703, (2020). [22] Cıbuk, M., Budak, U., Guo, Y., Ince, M. C., and Sengur, A. J. M.,
+[3] Mete, B. R. and Ensari, T. Flower Classification with Deep CNN and
+Efficient deep features selections and classification for flower species
+recognition, vol. 137, pp. 7-13, (2019).
+Machine Learning Algorithms. 2019 3rd International Symposium on
+Multidisciplinary Studies and Innovative Technologies (ISMSIT), [23] Hasan, B. M. S., Abdulazeez, A. M. J. J. o. S. C., and Mining, D., A
+pp.1-5: IEEE Xplore, Turkey (2019). review of principal component analysis algorithm for dimensionality
+[4] Hai, P. B., Tuan, D. A. and Nam, H. N. Performance evaluation of the
+reduction, vol. 2, no. 1, pp. 20-30, (2021).
+multiclass classification of flowers on diverse datasets. In 2023 3rd [24] Pisner, D. A., and Schnyer, D. M., Support vector machine, in Machine
+International Conference on Electrical, Computer, Communications learning: Elsevier, 101-121, (2020).
+and Mechatronics Engineering (ICECCME), pp. 1-6: IEEE (2023). [25] Chandra, M. A., and Bedi, S. J. I. J. o. I. T., Survey on SVM and their
+[5] Hiary, H., Saadeh, H., and Yaqub, M. J. I. C. V., Flower classification application in image classification, vol. 13, no. 5, pp. 1-11, (2021).
+using deep convolutional neural networks, vol. 12, no. 6, pp. 855-862, [26] Vujović, Ž. J. I. J. o. A. C. S., and Applications, Classification model
+(2018). evaluation metrics, vol. 12, no. 6, pp. 599-606, (2021).
+[6] Chen, C., Yan, Q., M. Li, and Tong J., Classification of blurred flowers [27] Abdulateef, S. K., Ismael, A. N., Salman, M. D., Feature weighting for
+using convolutional neural networks, in Proceedings of the 2019 3rd parkinson's identification using single hidden layer neural network,
+International Conference on Deep Learning Technologies, pp. 71-74, International Journal of Computing, vol. 22, no. 2, pp. 225-230, doi:
+(2019). 10.47839/ijc.22.2.3092, (2022)
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:27:10 UTC from IEEE Xplore. Restrictions apply.

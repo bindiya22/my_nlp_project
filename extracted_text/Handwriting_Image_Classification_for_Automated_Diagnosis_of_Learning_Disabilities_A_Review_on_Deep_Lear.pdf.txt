@@ -1,0 +1,532 @@
+Handwriting Image Classification for Automated
+Diagnosis of Learning Disabilities: A Review on
+Deep Learning Models and Future Directions
+Safura Adeela Sukiman Nor Azura Husin
+College of Computing, Informatics, and Mathematics Department of Computer Science
+Universiti Teknologi MARA (UiTM) Johor Branch, Faculty of Computer Science and Information Technology
+Segamat Campus Universiti Putra Malaysia (UPM)
+Johor, Malaysia Selangor, Malaysia
+safur185@uitm.edu.my n_azura@upm.edu.my
+Hazlina Hamdan Masrah Azrifah Azmi Murad
+Department of Computer Science Department of Computer Science
+Faculty of Computer Science and Information Technology Faculty of Computer Science and Information Technology
+Universiti Putra Malaysia (UPM) Universiti Putra Malaysia (UPM)
+Selangor, Malaysia Selangor, Malaysia
+hazlina@upm.edu.my masrah@upm.edu.my
+Abstract—This study reviews deep learning models used in • Students write backwards some of the letters
+handwriting image classification for the automated diagnosis of leading to incorrect spelling of the words.
+learning disabilities. By addressing handwriting diversity and Character / • The shape of the letters is not clear.
+misclassification challenges, two models were highlighted: Letter level • The size of the letters written are irregular.
+Convolutional Neural Networks (CNNs) and Vision Writing • Students are unable to completely copy the
+Transformers (ViTs). Literature was retrieved from major speed information written on the
+databases including IEEE Xplore, Scopus, Web of Science
+blackboard/whiteboard.
+(WoS), and Google Scholar, with studies on Parkinson’s disease,
+• Students are unable to write down the
+tremor patients, and machine learning excluded. CNNs
+information heard or mentioned by the
+represent a more mature architecture focusing on convolutions,
+teacher.
+pooling, and activation function. Meanwhile, ViTs emerges as a
+• Students cannot compete with their peers in
+promising alternative via its multi-head attention architecture.
+writing ability.
+This review also compares the accuracy of both models,
+specifying the sources of handwriting images, as well as
+On the other hand, handwriting speed and legibility,
+providing future directions relevant to the research field.
+inconsistency between spelling ability and verbal intelligence
+quotient, and pencil grasp have been identified as handwriting
+Keywords—automated diagnosis, deep learning, handwriting
+difficulty contributing characteristics among dysgraphia
+classification, learning disabilities
+students [1]. Also included in Reference [1] are two (2)
+I. INTRODUCTION handwriting samples of students with dysgraphia as shown in
+Fig. 1.
+The term "learning disabilities" encompasses a spectrum
+of neurologically-based disorders that affect learning, with
+varying degrees of severity, including mild, moderate, and
+severe. The manifestation of learning disabilities, particularly
+among dyslexic and dysgraphia students, has been observed
+in the form of clumsiness or difficulties with handwriting. The
+Malaysia Ministry of Education's Dyslexia Checklist
+Instrument has identified a number of specific handwriting
+difficulty characteristics that are commonly observed among Fig. 1. Handwriting Samples of Dysgraphia Students Specified in Reference
+dyslexic students. We further segmented each of the [1]
+handwriting difficulty characteristics based on the sentence
+With the advancement of deep learning, traditional score-
+level as shown in Table I.
+based assessments (by examining the disparity between IQ
+scores and standardised achievement tests, i.e., reading,
+TABLE I. HANDWRITING DIFFICULTY CHARACTERISTICS AMONG
+DYSLEXIC STUDENTS SEGMENTED BASED ON THE SENTENCE LEVEL
+writing, and arithmetic) are being replaced by an automated
+diagnosis of learning disabilities based on handwriting
+Sentence Handwriting Difficulty Characteristics
+features. The deep learning enables the deployment of
+Level
+automated diagnostics because of its ability to learn from data
+Line level • Students write without following the lines.
+and conduct computations using multi-layer neural networks
+• Insufficient / over-sufficient / no space at all
+and processing. The term "deep" alludes to the concept of
+from one word to another.
+multiple levels or stages through which data is processed
+• Non-aligned left margin.
+during the construction of a data-driven model [2].
+Word level • Students mix uppercase and lowercase
+letters. The core challenges in the classification of handwriting
+• Broken links between letters in a word. images among learning disabilities pertains to the diversity of
+patterns and inaccuracies in classification. As a result, the
+979-8-3315-0991-0/24/$31.00 ©2024 IEEE
+54299701.4202.01446PLN-IASi/9011.01
+:IOD
+|
+EEEI
+4202©
+00.13$/42/0-1990-5133-8-979
+|
+)PLN-IASi(
+gnissecorP
+egaugnaL
+larutaN
+dna
+ecnegilletnI
+laicifitrA
+no
+muisopmyS
+tnioJ
+lanoitanretnI
+ht91
+4202
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:30:10 UTC from IEEE Xplore. Restrictions apply.deployment of a deep learning model is of the utmost by frequent erasing, irregular letter and word spacing, as well
+importance to researchers. The overall contribution of this as poor spelling. Dyslexia-dysgraphia refers to a person that
+article is summarized as follows: have difficulty with the act of writing and reading at the same
+time.
+- We investigate how well deep learning models involving
+Convolutional Neural Networks (CNNs) and Vision
+Transformers (ViTs) have accommodated handwriting
+SPECIFIC LEARNING DISORDER 1
+image classification for automated learning disability
+diagnosis. In addition to examining the architectural
+DYSLEXIA-DYSGRAPHIA 2
+enhancements, benefits, and limitations of each model, we
+also examine its accuracy performance.
+DYSLEXIA 5
+- We point out and discuss three (3) potential aspects with
+DYSGRAPHIA 9
+research directions for future improvement of the current
+deep learning-based models.
+0 2 4 6 8 10
+The remaining article is organized as follows: Section II.
+# of articles
+Methods, Section III. Results, Section IV Discussions, and
+Section V. Future Directions and Concluding Remark. The
+Discussions section explores how the CNNs and ViTs model
+Fig. 2. Articles Retrieved According to its Type of Learning Disabilities
+are used in handwriting image classification, along with a
+succinct analysis of their respective performance. Meanwhile, Additionally, the publication timeline spans from 2016 to
+the Future Directions and Concluding Remark section outlines 2024 with significant increase in publications published from
+promising areas of exploration within the scope of our review. 2021 onwards after realizing the need of automated diagnosis
+of learning disabilities utilizing handwriting images rather
+II. METHODS than traditional score-based evaluations, which obviously
+A. Inclusion Criteria
+requires more time and specialized manpower.
+This review utilized three distinct online databases: IEEE IV. DISCUSSIONS
+Xplore, Scopus, and Web of Science (WoS), to retrieve
+The process of automating the diagnosis of learning
+articles from prior research endeavors. Additionally, Google
+disabilities through handwriting image classification can be
+Scholar was used to capture relevant publications not indexed
+delineated into six (6) discrete stages, as depicted in Fig. 3.
+by these databases, ensuring a comprehensive review. The
+search was conducted using keywords related to population
+participants, intervention, and comparison controls. All
+retrieved articles were initially screened based on title and
+abstract, and relevant studies were included for full-text
+review.
+B. Exclusion Criteria
+Exclusion criteria were strictly defined to focus on
+learning disabilities among school students and exclude other
+conditions that may affect handwriting. Studies involving
+patients with Parkinson's disease or tremors were excluded, as Fig. 3. The General Workflow of Handwriting Image Classification for
+these conditions typically occur in older populations (ages 40- Automated Diagnosis of Learning Disabilities
+60), beyond the scope of learning disabilities in educational Image acquisition of handwriting is comparable to data
+settings. Furthermore, this review excluded literature on the collection. Two options are available: the publicly available
+adoption of machine learning models, as the study focused dataset from the Kaggle database, or involves collecting
+solely on the use of deep learning models, which offer handwriting samples on-site from both students with and
+enhanced precision and reduced dependence on manual without learning disabilities. Following the handwriting
+feature engineering. Only studies utilizing deep learning for image acquisition is the pre-processing step. The typical pre-
+handwriting image classification were considered. processing involves rotating and resizing the input
+handwriting images, as well as exchanging the foreground and
+III. RESULTS
+background [5, 6].
+A total of 113 search results were initially retrieved. After
+The development, training, and testing of models are
+applying the inclusion and exclusion criteria, 17 peer-
+intricately interconnected processes that enhance the
+reviewed publications were selected for final review. These
+effectiveness of deep learning. In the process of model
+studies were classified based on their target learning
+development, deep learning is incorporated, while during the
+disabilities and methods as shown in Fig. 2. Students with
+training phase, the labelled dataset is exhaustively leveraged
+dysgraphia have the largest population, while those with
+to discern the underlying patterns of the handwriting images
+dyslexia have the second largest. Previous studies has focused
+and to mitigate the occurrence of misclassification. After
+on these two learning disabilities because they are both
+training, the model is tested with a new set of images, known
+neurological conditions that are often connected. Although
+as the test dataset. The trained model evaluates these unseen
+dyslexia are frequently associated with a reading-specific
+handwriting images, and its performance is systematically
+learning issue, it is also characterized by poor writing and
+assessed, providing critical insights into its ability to
+spelling. Dysgraphia, on the other hand, is frequently
+generalize and accurately classify data in real-world scenarios.
+associated with a learning disability related to writing, as seen
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:30:10 UTC from IEEE Xplore. Restrictions apply.A. Convolutional Neural Networks making an image more interpretable, it can also cause the
+gradient to be too small for successful training.
+The convolutional neural network (CNN) is a prominent
+and extensively employed deep learning model within the CNNs are closely related to tuning of its parameters such
+field of computer vision and image processing. The classic as filter size, learning rate, and optimizers as they can
+CNN architecture comprises of convolutional layers that influence the model’s ability to learn and generalize from the
+incorporate activation functions, succeeded by a pooling data. Researchers often conduct extensive parameter tuning
+layer. This process is iterated for several layers. Subsequently, experiments to find the best combination that maximizes
+the final layer involves a fully connected dense layer with a model accuracy and generalization to unseen data. The best
+SoftMax activation function [3]. Fig. 4. depicts the parameters selected by Reference [4] and [6] are shown in
+architecture of CNN's classic model. Table II.
+TABLE II. PARAMETERS SETTINGS IN THE CNN MODEL PERFORMED
+BY REFERENCE [4] AND [6]
+Parameters Values
+Reference [4] Reference [6]
+Optimizer Stochastic Gradient Stochastic Gradient
+Descent with Descent with
+Momentum Momentum
+(SGDM) (SGDM)
+Fig. 4. Classic Architecture of the CNN Model
+Learning rate 0.01 0.001
+Using the classic CNN architecture as a foundation, Epochs 12 8
+previous studies have introduced several architectural Iteration each Not 1251
+enhancements to further improve the extraction of epoch stated
+handwritten image features and reduce misclassification rates. Frequency 30 iterations
+These enhancements build upon the original design to better
+adapt CNNs to the complexities of handwriting analysis. The Replacement of the Rectified Linear Unit (ReLU) Activation
+key improvements are as follows: Function
+• adding more convolutional and pooling layers to An activation function is a mathematical operation applied
+increase the network's depth and capacity for learning to the output of a neuron in a neural network. Its primary role
+intricate feature hierarchies, allowing for improved is to introduce nonlinearity into the network, enabling it to
+representation of complex handwriting patterns [4-6]. model complex input-output relationships beyond simple
+• replacement of the Rectified Linear Unit (ReLU)
+linear mappings.
+activation function with alternative functions to Reference [7] proposes a CNN architecture composed of
+enhance gradient flow and mitigate issues like dying four convolutional layers, two max-pooling layers, three
+neurons, leading to more robust feature extraction [7]. dense layers, and one dropout layer. Uniquely, the researchers
+substitute the widely used ReLU (Rectified Linear Unit)
+• applying the ‘transfer-learning via fine-tuning’ where
+activation function with Leaky ReLU, an enhanced variant
+a pre-trained CNN is adapted to the task of handwriting
+designed to address specific limitations of ReLU. While
+analysis, significantly reducing training time and
+ReLU is favored for its computational efficiency and
+improving generalization across different handwriting
+effectiveness in mitigating the vanishing gradient problem, it
+styles [8-13].
+can suffer from the “dying ReLU” issue, where neurons can
+• utilization of region proposal network for text areas to become inactive for negative inputs, thereby obstructing
+focus the model's attention on text regions, ensuring effective training. Leaky ReLU counteracts this by
+more accurate localization and classification of introducing a small, non-zero slope for negative values, which
+handwritten characters [14]. keeps neurons active even for negative inputs.
+Mathematically, the Leaky ReLU function is defined as f(x) =
+Adding More Convolutional and Pooling Layers
+max (ax, x), where x is the input to the neuron, and a is a small
+The first architectural enhancement pertains to the constant, typically set to a value like 0.01. When x is positive,
+incorporation of additional convolutional and pooling layers the Leaky ReLU function behaves like the ReLU function,
+within the CNN model. Both layers constitute as the feature returning x. However, when x is negative, the Leaky ReLU
+extractors for the input image. As more convolutional layers function returns a small negative value proportional to the
+are added, the architecture becomes hierarchical with higher input x, preserving some gradient and preventing neuron
+convolutional layers extract more abstract, higher-level deactivation.
+features (patterns) of the input image. The final output is
+This adjustment in activation function yielded improved
+commonly referred to as a feature map. Pooling layers are
+model performance in Reference [7], as reflected in the testing
+often incorporated after convolutional layers in order to
+results: the CNN model with the standard ReLU activation
+reduce the spatial dimensions of the feature map and remove
+achieved a test accuracy of 0.9768 and a test loss of 0.0827,
+extraneous spatial information [15].
+whereas the model incorporating Leaky ReLU attained a
+Reference [5] and [6] utilized 3-layer and 5-layer higher test accuracy of 0.9791 and a reduced test loss of
+convolutional blocks, respectively. While adding more 0.0721. The improvement underscores Leaky ReLU’s
+convolutional blocks can improve the CNN model's advantage in sustaining active neurons and enhancing gradient
+performance by extracting more image features (patterns) and flow, which promotes more effective training and model
+accuracy.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:30:10 UTC from IEEE Xplore. Restrictions apply.Applying the ‘Transfer Learning via Fine-tuning’
+The third architectural enhancement observed is related to
+applying the ‘transfer learning via fine-tuning’ using the pre-
+trained CNN variant models. Transfer learning is the process
+of taking a CNN model that has been trained on a large dataset
+and applying its knowledge to a smaller dataset with a similar
+purpose. This technique provides a better starting point and
+can accomplish tasks at a certain level even without training.
+Furthermore, it saves time and requires less computational Fig. 5. The Architecture of RPN and Three (3) ROI Pooling as Specified in
+Reference [15]
+resources.
+With reference to the RPN architecture, researchers in
+References [8] and [9] chose the MobileNet-v2 (a pre-
+[14] embedded non-discriminatory regularization and multi-
+trained CNN with 53 layers deep) and LeNet-5 (a simpler and
+task loss techniques to address the limitations associated with
+one of the first pre-trained models) models, respectively.
+overfitting. The primary goal of non-discriminatory
+Subsequent fine-tuning were made to the selected pre-trained
+regularization is to take into account all non-discriminative
+models in both studies. Reference [8] eliminated the last
+word analysis, which leads to an effective feature analysis. In
+SoftMax layer of the MobileNet-v2 and replaced with three
+addition, an inclined non-maximum suppression is added in
+(3) hidden layers of ReLU neurons: Layer 1 of 800 neurons,
+the post process, along with both non-discriminatory
+Layer 2 of 400 neurons, and Layer 3 of 200 neurons.
+regularization and multi-task loss techniques.
+Meanwhile, Reference [9] conducted initial experiments on
+LeNet-5, exploring various hyperparameters such as As a conclusion, CNNs are widely used in computer
+activation functions, optimization algorithms, and the vision and image processing tasks due to their advantages,
+placement of batch normalization layers. Subsequently, the including strong inductive bias, hierarchical representation,
+superior performing hyperparameters were chosen and parameter sharing, and end-to-end training. However, it has
+amalgamated to form an improved model. Table III presents significant shortcomings, including high computational
+the optimal performance hyperparameters that have been
+requirements, lengthy training time, particularly for large
+incorporated into the pre-trained LeNet-5 model [9].
+labelled datasets, and susceptibility to overfitting.
+TABLE III. BEST HYPERPARAMETERS INTEGRATED INTO THE LENET-5 B. Vision Transformer
+PRE-TRAINED MODEL
+The Vision Transformer (ViT) is a more recent deep
+Hyperparameter Best Hyperparameter Test Accuracy learning-based model that is backboned by the Transformer's
+self-attention-based architecture [16]. Motivated by its
+Type of Pooling Layer Max-pooling -
+successful application in Natural Language Processing (NLP),
+Position of Batch After every 0.9389 researchers have explored its potential in analyzing the
+Normalization Layers convolutional layer handwriting of pre-school and primary school students to
+determine whether they exhibit symptoms of dysgraphia or
+Optimization Adam optimizer 0.9291
+Algorithm not [17] by following the architecture presented by [18].
+Activation Function Swish function 0.9039 To accommodate 2D input images, the input image x ∈
+RH×W×C must be reshaped into a sequence of flattened 2D
+Dropout Layer Added after the third - patches x RN×((P2).C). Here, (H, W) denotes the resolution of
+convolutional layer p∈
+the original image, C represents the number of channels, (P,
+P) signifies the resolution of each image patch, and N=HW/P2
+Reference [10], on the other hand, chose the ResNet50 as represents the resulting number of patches. This N value also
+its base model due to the benefit of convolutional block serves as the effective input sequence length for the
+attention module (CBAM), which effectively learns the Transformer. Subsequently, the patches are augmented with
+image’s channel and spatial position information resulting in the embedding position to preserve their positional
+an improved robustness and feature extraction capabilities. A information. Fig. 6. presents a comprehensive illustration of
+few changes were made by Reference [10], including the the architecture of ViT.
+addition of the GlobalAveragePooling2D layer and the dense
+layer with activation equal to ReLU. The Adam optimizer and The main components of Transformer encoder are multi-
+category cross entropy loss function are then added to the head attention layer and Multilayer Perceptron (MLP) layer,
+improved ResNet50 during compilation. Unfortunately, it which is commonly referred to as a feed-forward network
+typically needs more memory and processing power and is layer. The technique of layer normalization is implemented
+prone to overfitting, particularly with small datasets. to both the layers individually. Self-attention is the
+mechanism employed in multi-head attention. Self-attention
+Utilization of Region Proposal Network for Text Areas
+involves the utilization of query (Q), key (K), and value (V)
+Instead of employing convolutional sliding windows to as input. The resulting output is obtained by taking the
+extract features from the input image, the Region Proposal weighted sum of the value vector, with the weights being
+Network (RPN) is used to propose candidate text areas (axis- determined through the utilization of the SoftMax function.
+aligned bounding boxes) on a feature map. Then, for each
+The definition of attention is shown in equation (1).
+RPN-generated text region, three (3) ROI pooling of varying
+sizes are applied to observe additional text features [15]. The
+illustration of RPN and ROI pooling are shown in Fig. 5. (cid:2)(cid:3)(cid:3)(cid:4)(cid:5)(cid:3)(cid:6)(cid:7)(cid:5) (cid:9)(cid:10),(cid:12),(cid:13)(cid:14)(cid:15)(cid:16)(cid:7)(cid:17)(cid:3)(cid:18)(cid:19)(cid:20)
+(cid:21)(cid:22)(cid:23)(cid:24)
+(cid:27) (cid:13) (1)
+√(cid:26)
+where d represents the hidden dimensions.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:30:10 UTC from IEEE Xplore. Restrictions apply.Cross
+Entropy
+[9] / Modified • 3-conv layers. Swish / Not 95.34%
+2021 LeNet-5 • 2 max pooling Stated
+layers.
+[6] / CNN • 5-conv layers. ReLU / 87.44%
+2022 • 5 batch Categorical
+normalization Cross
+layers. Entropy
+• 5 max pooling
+layers.
+[10] / Modified • 5 stages each ReLU / 85.00%
+2022 ResNet-50 with Categorical
+convolution Cross
+Fig. 6. The Vision Transformer Architecture
+and identity Entropy
+The efficacy of ViT resides in its self-attention blocks.
+mechanism, which facilitates the establishment of long-range • Each
+convolution
+contextual dependencies among pixels in images.
+and identity
+Consequently, ViT shows the potential to generate output
+block has 3
+values of greater precision when trained on larger datasets [17] conv layers.
+as well as allow faster training and inference [19]. Another • 1 max pooling
+notable advantage of the ViT architecture is its flexibility in layer at the end
+of stage 1.
+handling images of varying sizes and aspect ratios without
+• 1 average
+compromising resolution. This scalability makes it adaptable
+pooling layer
+to diverse datasets and applications, ranging from simple
+at the end of
+object recognition to complex scene understanding [19]. stage 5.
+[16] / CNN • 3-conv layers. ReLU / 79.47%
+C. Performance Analysis 2022 • 3 max pooling Binary
+Table IV and V present the testing accuracy results for layers. Cross
+Entropy
+handwriting image classification related to learning
+disabilities, utilizing both CNN and ViT models. However, it
+TABLE V. THE ACCURACY RESULTS OF HANDWRITING IMAGE
+is important to note that performance results from all previous CLASSIFICATION REPORTED BY PREVIOUS STUDY UTILIZING THE VISION
+studies cannot be provided, as some utilized non- TRANSFORMER (VIT) MODEL
+standardized handwriting image datasets, including self- Paper Deep Architectures / Parameters Testing
+collected primary datasets that are not publicly accessible due / Learning Image Image Dim / Num Acc
+to ethical considerations. The results presented in these tables Year Model Size Patch Depth / of Result
+Size Dropout Attn
+are limited to studies that employed the same publicly
+Rate Heads
+available dyslexia handwriting dataset accessible through
+[16] / ViT 28x28 4x4 128 / 12 8 86.22%
+Kaggle at: 2022 / 0.1
+https://www.kaggle.com/datasets/drizasazanitaisa/dyslexia-
+handwriting-dataset. This dataset comprises handwriting V. FUTURE DIRECTIONS AND CONCLUDING REMARK
+samples from children with and without dyslexia, collected
+The first future research relates to adopting more
+from three different sources: the NIST Special Database 19,
+comprehensive input data by fusing features from both offline
+the Kaggle Database, and dyslexic children from Seberang
+and online handwriting to enhance accuracy. Offline
+Jaya Primary School, totaling 151,433 handwriting images.
+handwriting, also known as image-based handwriting, is
+TABLE IV. THE ACCURACY RESULTS OF HANDWRITING IMAGE
+frequently associated with possessing static features [8]. On
+CLASSIFICATION REPORTED BY PREVIOUS STUDIES UTILIZING THE CNN the other hand, online handwriting, often referred to as digital
+MODEL handwriting, has the capacity to capture the dynamic features
+Architectures of handwriting with the help of recorded trajectory of the
+Paper Deep Conv Layer / Activation Testing digital pen using digitizing tablets [4]. By combining both
+/ Learning Pooling Layer Function / Accuracy features, researchers can perform a more comprehensive
+Year Model Loss Result
+analysis. Current studies rarely fuse these two features,
+Function
+[13] / MobileNet • 3x3 depth- ReLU / Not 99.20% focusing on one or the other. Table VI indicates the
+2023 V2 wise separable Stated complementing handwriting features of offline and online
+conv layers. handwriting.
+• Inverted
+•
+r Ge ls oid bu ala l
+a
+vst er ri ad ge e.
+TABLE VI. OFFLINE VS ONLINE HANDWRITING FEATURES
+pooling layer. Offline (Image) Online (Digital)
+[11] / VGG-16 • 13-conv ReLU / 97.98% Handwriting Features Handwriting Features
+2023 layers. Categorical Static - purely geometric Dynamic - typically
+• 5 max pooling Cross
+characteristics of the written captured while using the
+layers. Entropy
+text [20] digitizing tablets [4, 22]
+[7] / CNN • 4-conv layers. Leaky 97.91%
+2022 • 3 dense layers. ReLU /
+Includes: the writing size, non- Includes: pressure, altitude,
+• 2 max pooling Categorical aligned left-margin, skewed azimuth, pen lifts, temporal
+layers. writing, insufficient space duration of stroke, length of
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:30:10 UTC from IEEE Xplore. Restrictions apply.between words, sharp angles, stroke, length of stroke in [4] J. Skunda, B. Nerusil, and J. Polec, “Method for dysgraphia disorder
+broken links between letters, vertical and horizontal detection using convolutional neural network,” CSRN, 2022.
+doi:10.24132/csrn.3201.19.
+collisions between two letters, directions, on airtime, and
+irregular size of letters, atypical velocity [22] [5] Y. Pratheepan and B. Braj, “Deep Learning Approach to Automated
+Detection of Dyslexia-Dysgraphia,” in 25th IEEE International
+letters, ambiguous letters, and
+Conference on Pattern Recognition, 2020.
+unstable track [19].
+[6] S. A. Ramlan, I. S. Isa, M. K. Osman, A. P. Ismail, and Z. H. Che Soh,
+Next future research in dyslexia classification can benefit “Investigating the impact of CNN layers on dysgraphia handwriting
+image classification performance,” Journal of Electrical &amp;
+from hybrid models that integrate Convolutional Neural
+Electronic Systems Research, vol. 21, no. OCT2022, pp. 73–83, 2022.
+Networks (CNNs) with Vision Transformers (ViTs), doi:10.24191/jeesr.v21i1.010.
+leveraging the strengths of each to address two critical [7] S. Sreekumar and L. A, “Comparative study of CNN models on the
+limitations: overfitting and restricted global feature classification of dyslexic handwriting,” 2022 IEEE Bombay Section
+Signature Conference (IBSSC), 2022.
+comprehension. CNNs’ hierarchical convolutional layers are
+doi:10.1109/ibssc56953.2022.10037428.
+highly effective at capturing localized, fine-grained
+[8] N. S. Mor and K. L. Dardeck, “Applying a Convolutional Neural
+handwriting features but are prone to overfitting, especially
+Network to Screen for Specific Learning Disorder,” Learning
+on expansive datasets with nuanced local variations. ViTs, on Disabilities: A Contemporary Journal, vol. 19, no. 2, pp. 161–169,
+the other hand, utilize multi-head self-attention, establishing 2021.
+expansive interpixel relationships and capturing essential [9] M. S. Rosli, I. S. Isa, S. A. Ramlan, S. N. Sulaiman, and M. I.
+Maruzuki, “Development of CNN transfer learning for dyslexia
+long-range dependencies across handwriting samples. A
+handwriting recognition,” 2021 11th IEEE International Conference
+hybrid model fuses these strengths, balancing CNN-driven on Control System, Computing and Engineering (ICCSCE), 2021.
+local feature recognition with ViTs’ capacity for global doi:10.1109/iccsce52189.2021.9530971.
+context extraction and reducing overfitting in the process. [10] A. Sasidhar, G. K. Kumar, K. Yoshitha, and N. Tulasi, “Dyslexia
+Such an architecture not only refines the accuracy of dyslexia discernment in children based on handwriting images using residual
+neural network,” 2022 6th International Conference on Computation
+classification but establishes a robust framework adaptable to
+System and Information Technology for Sustainable Solutions
+diverse handwriting data. (CSITSS), 2022. doi:10.1109/csitss57437.2022.10026368.
+[11] C. Sharmila et al., “An automated system for the early detection of
+Finally, our literature discovered that existing works are
+dysgraphia using deep learning algorithms,” 2023 International
+still constrained to binary classifications of "at-risk" and "no-
+Conference on Sustainable Computing and Data Communication
+risk" learning disabilities. Because no two (2) students with Systems (ICSCDS), 2023. doi:10.1109/icscds56580.2023.10105022.
+learning disabilities are the same, dividing them into only two [12] H. A. Rashid, T. Malik, I. Siddiqui, N. Bhatti, and A. Samad,
+(2) groups is insufficient to meet their learning needs, “DYSIGN: Towards computational screening of dyslexia and
+dysgraphia based on handwriting quality,” Proceedings of the 22nd
+personalization, and provision of adequate interventions. As
+Annual ACM Interaction Design and Children Conference, 2023.
+a result, we believe that extending the binary classification doi:10.1145/3585088.3593890.
+into multi-classifications based on severity levels (normal, [13] Y. Alkhurayyif and A. R. Sait, “Deep learning-based model for
+mild, moderate, and severe) can provide a more nuanced detecting dyslexia using handwritten images,” Journal of Disability
+understanding of the variations in handwriting patterns and, Research, vol. 2, no. 4, 2023. doi:10.57197/jdr-2023-0059.
+as a result, achieve more detailed diagnoses of learning [14] F. Ghouse, R. Vaithiyanathan, and K. Paranjothi, “Dysgraphia
+classification based on the non-discrimination regularization in
+disabilities, and provide highly beneficial research insights,
+rotational region convolutional neural network,” International Journal
+particularly for learning institutions. of Intelligent Engineering and Systems, vol. 15, no. 1, 2022.
+As a conclusion, an automated diagnosis of learning doi:10.22266/ijies2022.0228.06.
+disabilities using handwriting images is a domain that still [15] Y. Jiang et al., “R2 CNN: Rotational Region CNN for arbitrarily-
+oriented scene text detection,” 2018 24th International Conference on
+have rooms for further research works. Despite its strong
+Pattern Recognition (ICPR), 2018. doi:10.1109/icpr.2018.8545598.
+testing accuracy performance, current models still suffer
+[16] V. Ashish et al., “Attention is All You Need,” 31st Conference on
+from high computational costs, prone to overfitting, and Neural Information Processing Systems, 2017.
+lengthy training time. Thus, more research work should be [17] V. Vilasini, B. Banu Rekha, V. Sandeep, and V. Charan Venkatesh,
+undertaken to achieve greater accuracy in classification while “Deep Learning Techniques to Detect Learning Disabilities Among
+lowering computational costs and shortening training time. children using Handwriting.” 2022 Third International Conference on
+Intelligent Computing Instrumentation and Control Technologies
+(ICICICT), 2022, doi: 10.1109/icicict54557.2022.9917890.
+ACKNOWLEDGEMENT
+[18] D. Alexey et al., “An Image is Worth 16x16 Words: Transformers for
+This work is supported by the Ministry of Higher Education Image Recognition at Scale,” arXiv.org,
+under Grant FRGS FRGS/1/2020/ICT02/UPM/02/2, project https://doi.org/10.48550/arXiv.2010.11929.
+code 08-01-20-2315FR. [19] J. Maurício, I. Domingues, and J. Bernardino, “Comparing vision
+transformers and convolutional neural networks for Image
+REFERENCES Classification: A Literature Review,” Applied Sciences, vol. 13, no. 9,
+p. 5521, Apr. 2023. doi:10.3390/app13095521.
+[1] J. Kunhoth, S. Al-Maadeed, S. Kunhoth, and Y. Akbari, “Automa and [20] T. Gargot et al., “Acquisition of handwriting in children with and
+potentialted Systems for diagnosis of dysgraphia in children: A survey without dysgraphia: A computational approach,” PLOS ONE, vol. 15,
+and novel framework,” arXiv.org, https://arxiv.org/abs/2206.13043 no. 9, 2020. doi:10.1371/journal.pone.0237575.
+(accessed Jun. 14, 2023).
+[21] G. Dimauro, V. Bevilacqua, L. Colizzi, and D. Di Pierro, “Testgraphia,
+[2] I. H. Sarker, Deep learning: A comprehensive overview on techniques, a software system for the early diagnosis of dysgraphia,” IEEE Access,
+taxonomy, applications and Research Directions, 2021. vol. 8, pp. 19564–19575, 2020. doi:10.1109/access.2020.2968367.
+doi:10.20944/preprints202108.0060.v1.
+[22] J. Kunhoth, S. Al Maadeed, M. Saleh, and Y. Akbari, “Machine
+[3] D. Bhatt et al., “CNN variants for Computer Vision: History, learning methods for dysgraphia screening with online handwriting
+architecture, application, challenges and future scope,” Electronics, features,” 2022 International Conference on Computer and
+vol. 10, no. 20, p. 2470, 2021. doi:10.3390/electronics10202470. Applications (ICCA), 2022. doi:10.1109/icca56443.2022.10039584.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:30:10 UTC from IEEE Xplore. Restrictions apply.

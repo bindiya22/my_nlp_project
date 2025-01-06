@@ -1,0 +1,833 @@
+J. Internet Comput. Serv.
+ISSN 1598-0170 (Print) / ISSN 2287-1136 (Online)
+http://www.jics.or.kr
+Copyright ⓒ 2024 KSII
+Multi-dimensional Contextual Conditions-driven
+Mutually Exclusive Learning for Explainable AI
+☆
+in Decision-Making
+Hyun Jung Lee1*
+ABSTRACT
+There are various machine learning techniques such as Reinforcement Learning, Deep Learning, Neural Network Learning, and so
+on. In recent, Large Language Models (LLMs) are popularly used for Generative AI based on Reinforcement Learning. It makes decisions
+with the most optimal rewards through the fine tuning process in a particular situation. Unfortunately, LLMs can not provide any
+explanation for how they reach the goal because the training is based on learning of black-box AI. Reinforcement Learning as
+black-box AI is based on graph-evolving structure for deriving enhanced solution through adjustment by human feedback or reinforced
+data. In this research, for mutually exclusive decision-making, Mutually Exclusive Learning (MEL) is proposed to provide explanations of
+the chosen goals that are achieved by a decision on both ends with specified conditions. In MEL, decision-making process is based
+on the tree-based structure that can provide processes of pruning branches that are used as explanations of how to achieve the
+goals. The goal can be reached by trade-off among mutually exclusive alternatives according to the specific contextual conditions.
+Therefore, the tree-based structure is adopted to provide feasible solutions with the explanations based on the pruning branches. The
+sequence of pruning processes can be used to provide the explanations of the inferences and ways to reach the goals, as Explainable
+AI (XAI). The learning process is based on the pruning branches according to the multi-dimensional contextual conditions. To deep-dive
+the search, they are composed of time window to determine the temporal perspective, depth of phases for lookahead and decision
+criteria to prune branches. The goal depends on the policy of the pruning branches, which can be dynamically changed by
+configured situation with the specific multi-dimensional contextual conditions at a particular moment. The explanation is represented by
+the chosen episode among the decision alternatives according to configured situations. In this research, MEL adopts the tree-based
+learning model to provide explanation for the goal derived with specific conditions. Therefore, as an example of mutually exclusive
+problems, employment process is proposed to demonstrate the decision-making process of how to reach the goal and explanation
+by the pruning branches. Finally, further study is discussed to verify the effectiveness of MEL with experiments.
+☞ keyword : Mutually Exclusive Learning, Multi-dimensional Contextual Conditions, Explainable AI (XAI),
+Mutually Exclusive Decision-Making
+1. Introduction a Large Language Model (LLM) with a transformer model in
+natural language processing and unsupervised learning, which
+operates by considering extensive contexts and analyzing
+In recent years, global big-tech and high-tech companies
+embedded content among words. To improve the accuracy of
+such as Google, Meta, Apple, and NAVER have been
+its outcomes, ChatGPT adopts Reinforcement Learning with
+competitively developing and gradually releasing advanced
+Human Feedback (RLHF) through fine-tuning and
+Generative AI (Artificial Intelligence). As a leader in this
+prompt-tuning based on human feedback [1]. The achieved
+field, ChatGPT, a chatbot using conversational AI, was
+outcomes can be reinforced by probabilistic facts, human
+released by OpenAI in November 2022, leading to a surge
+rewards, and other methods. In Generative AI, it is possible
+in interest in Generative AI. ChatGPT is implemented using
+to reach better and better goals beyond the currently given
+optimized goals because the system improves through
+1Dept. of Economic Research, Goyang City Institute, Goyang,
+updates and adjustments via reinforcement-based fine-tuning.
+10393, South Korea
+* Corresponding author: hjlee5249@gmail.com Generative AIs work well to find solutions, but the
+[Received 31 January 2024, Reviewed 20 February 2024(R2 14 accuracy of ChatGPT 4.0 is 85.5%, according to an
+June 2024, R3 25 July 2024), Accepted 28 July 2024]
+announcement by OpenAI [2]. In addition, they are still
+☆ A preliminary version of this paper was presented at APIC-IST
+2023. struggling with issues such as hallucinations, confirmation
+Journal of Internet Computing and Services(JICS) 2024. Aug.: 25(4): 7-21 7
+http://dx.doi.org/10.7472/jksii.2024.25.4.7Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+bias, fake news, and various types of fraud [3]. It is related works and research motivation are reviewed. Section
+necessary to provide explanations of the achieved solutions 3 addresses the learning structure and problem-solving
+to determine their validity. However, it is not common to process of MEL. In Section 4, the feature and conceptual
+provide explanation of how outputs are achieved in variables for MEL are defined. Section 5 illustrates the
+Generative AIs, since the learning algorithms are based on scenario and verification of the proposed model. Finally,
+black-box AI techniques such as Neural Networks (NN), section 6 presents the conclusions and suggests further
+Convolutional Neural Networks (CNN), and Deep Learning research related to MEL.
+(DL) [4]. AlphaGo, for instance, is also trained using
+black-box AI like CNN. The explainable path might not be 2. Literature Review
+crucial because it is based on probabilistic models that
+assume the existence of unchangeable optimal goals for
+There are many machine learning algorithms such as NN,
+given problems. In mutually exclusive decision-making
+Reinforcement Learning (RL), Natural Language Processing
+problems, it is important to show the paths to the goal as in
+(NLP) that are applied to develop AI models such as
+Explainable AI (XAI) because the goal might be achieved
+ChatGPT, Bard, LLaMA, AlphaGo, and Adaptive AI. One
+by choosing branch among alternatives according to various
+of the most popular AI models is Generative AI, which is
+conditions.
+developed using LLM and NLP in text-based conversational
+DARPA (Defense Advanced Research Projects Agency)
+systems. It can generate tailored answers according to the
+started the XAI program in 2015 [5], as a type of white-box
+user’s prompts.
+AI. Recently, interest in XAI has grown, and it has been
+For the development of more flawless AI, ChatGPT
+applied to critical problem-solving, especially in financial,
+adopted RLHF, which can extract advanced outputs from
+medical, and legal domains [6, 7]. For instance, XAI can be
+rough drafts by fine-tuning based on human feedback. In
+applied to diagnosing disease because it provides more
+addition, ChatGPT 4.0 supports multi-modality for providing
+reliable accuracy in diagnostic tests with interpretability [8,
+advanced Generative AI. This is known as multi-modal AI,
+9]. In addition, it is necessary to provide the explanations
+which interacts with users through conversational systems
+for the paths to reach goals like medical decisions for easier
+using a variety of converged modalities such as visual data
+acceptance. The goal can be achieved by trade-off among
+(images, videos), audio (speech and sound), text, and other
+mutually exclusive alternatives according to the specific
+sensory inputs. As for other Generative AI, Google’s Bard
+contextual conditions.
+was released in march 2023. Bard is based on LaMDA
+In this research, we focused on mutually exclusive
+(Language Model for Dialogue Applications) using LLM
+decision-making that requires explanations to show the path
+and serves as an AI-based search engine service that
+to the goals. To achieve this, we utilized a tree-based
+supports online data surfing from the web. Meta also
+structure to address the problems. The proposed tree-based
+released LLaMA (Large Language Model Meta AI) in
+decision-making process involves choosing and pruning
+February 2023, which is developed for non-commercial use
+branches based on multi-dimensional contextual conditions.
+to assist expert studies, unlike ChatGPT, which is intended
+The goal may dynamically change depending on the chosen
+for public use. NAVER has released HyperCLOVA X,
+contextual conditions and can be achieved at the expense of
+which is specialized at Korean compared to other Generative
+the pruned branches in the tree-based structure. The achieved AIs developed by global AI companies. It has a deep
+goal includes explanations of which branches are selected at understanding of Korean culture and law, as exemplified in
+each stage and why they chosen, considering the contextual the “NAVER knowledge iN” service. It also functions as a
+variables. Therefore, the proposed Mutually Exclusive real-time search service based on a large amount of
+Learning (MEL) is based on tree-based structure to provide knowledge storage. Additionally, Korean companies have
+explanations for the uncertainty-aware problem. developed other models, such as Kakao’s KoGPT, SKT’s A.
+This paper is organized as follows. In section 2, the and LG’s EXAONE. However, the learning process of these
+8 2024. 8Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+AI models is based on black-box AI, so they do not provide customization of its decision-making algorithms without
+any explanations for the goals they reach. human feedback. This AI model employs self-evolving
+In ChatGPT, as a representative black-box AI, the algorithms to interpret and integrate newly acquired data
+learning process is composed of three step: preparing tasks, autonomously [10]. Adaptive AI has diverse applications,
+developing reward model, and applying RL-based on including business problem-solving, fraud detection in
+fine-tuning the LLM. First, preparing tasks involve training financial transactions, improving logistics operations, and
+the model repeatedly using transformers with NLP and identifying patterns in patient symptoms. Its computational
+Supervised Learning (SL) to generate answers for any given model is continuously self-evolving without human
+prompt. Second, reward model is trained using RL-based on intervention, making it suitable for volatile and dynamic
+human preferences. It is derived from the trained language environments.
+model using a ranked data set built from human feedback to Despite their capabilities, the illustrated learnings still
+evaluate the generated outputs from AI models. Finally, have limitations such as generating distorted outcomes due
+RL-based fine-tuning of LLM involves processes to achieve to algorithmic bias, data bias, and system errors. These
+more reliable outputs, such as defining the action space, limitations can perpetuate harmful stereotypes through the
+observation space, and the reward function. Generating continuous supply of incomplete information, leading to
+qualified outcomes for given prompt is crucial. The issues like hallucinations, fake news, and confirmation bias
+observation space includes all possible input token sequences [3, 11]. There are ongoing discussions on addressing the
+from the environment, while the RL algorithm operates on problem of hallucinations. AI-generated content that is not
+all tokens in the model’s vocabulary within the action space. based on truthful sources highlights the need for caution in
+The reward function combines the preference model and over-relying on AI-generated results. In Generative AI, it is
+constraints for the AI-agent’s output. The reward predictor is challenging to determine the accuracy of outcomes due to
+tuned by human feedback within the reward function. The the inexplicable nature of the learning process [5]. If the
+RLHF process involves the RL algorithm, the environment results are related to mutually exclusive decision-making
+and the reward predictor [2]. problems such as employment processes, medical decisions,
+AlphaGo, another type of black-box AI, was developed wastewater discharge status, and business problems requiring
+for the game of Go. To reach the goal, it is necessary to choices, then they become difficult to utilize the derived
+reduce the search space from the enormous number of outcomes without any explanations from black-box AI [2].
+possible cases. Effective prediction of board positions and Recent AI research has focused on explaining achieved
+moves is crucial [4]. To achieve this, AlphaGo adopted a results and correcting inaccurate and unreliable outcomes.
+combination of Deep Neural Networks (DNN) and There is an increasing number of studies on Explainable
+tree-based search engine, integrating Monte-Carlo Tree Artificial Intelligence (XAI) programs [5, 11, 12], also
+Search (MCTS) with policy and value networks [4]. The known as white-box AI. Conversely, since black-box AI
+DNN is trained using a novel combination of SL from models do not provide any explanations, various issues arise
+human expert games and RL from games of self-play [4]. from generated fake news, confirmation bias, and
+Tree-based MCTS engine is applied to reduce the search hallucinations [3]. Consequently, the demand for developing
+space through selected actions by lookahead search. Policy XAI has increased [5], particularly in fields related to critical
+networks are developed for selection move positions, and decision-making problems such as medicine, finance,
+value networks are used to evaluate board positions. The transportation, security, legal, military [5, 13, 14, 15].
+DNN is developed using a combination of SL and RL. SL Providing explanations for the decision-making process is
+is used to train the predictions of human expert moves in essential to achieve these goals.
+policy networks, while RL is used to improve the SL DARPA spent four years on the research progress of the
+positions by self-play positions in value networks [4]. XAI program from 2017 to 2021 [5]. Numerous technical
+Adaptive AI, a recent advancement, focuses on dynamic approaches have been developed as part of DARPA's XAI
+한국 인터넷 정보학회(25권4호) 9Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+program, focusing on extracting explanations from black-box exclusive decision. The proposed MEL (Mutually Exclusive
+AI models like deep learning or hybrid deep learning Learning) is based on tree-based structure, which is applied
+approaches [5]. Ultimately, the explanations would be to prune branches according to contextual conditions at a
+provided to users who need to understand and interact with moment.
+the decision-making process [5]. Furthermore, there is
+ongoing R&D on XAI in various organizations, such as
+Google, IBM, Watson’s openspace, Kyndi (Cognitive search
+platform) [16], AITRICS, and more.
+As discussed, ChatGPT is applied to find incrementally
+reinforced solutions with human feedback at a particular
+moment. AlphaGo is based on tree-based rigid
+problem-solving to find the optimal solutions. Adaptive AI
+is suitable for business problems, acting as a dynamic
+decision-making tool using self-evolving algorithms with
+data. These AI models are based on black-box AI.
+Therefore, there are limitations in providing explanations for
+how they reach their goals, even through DARPA is
+working on developing XAI.
+Specifically, this research focuses on providing
+explanations for the achieved goals in mutually exclusive
+decision-making. Tree-based MEL consists of the processes
+(Figure 1) Graph-based Structure vs. Tree-based
+to reach the goal by pruning branches as alternatives and
+Structure in AI Learning
+providing explanations with the pruning history while
+considering various conditions.
+3.1.1 based evolving AI learning
+3. Mutually Exclusive Learning In Generative AI, the learning process is based on the
+graph structure to drive incrementally reinforced solutions.
+So, it is possible for the currently given solutions to be
+3.1 Tree-based rigid learning vs.
+improved through interaction of training models, reward
+Graph-based evolving learning
+programs, etc. The graph-based problem solving process has
+Solved problems by AI learning might be roughly a evolving architecture. For instance, adaptive AI supports
+classified into graph-based structure and tree-based structure dynamic refinements with fluid data of decision-makings
+as in Figure 1. As black-box AI, reinforcement-driven through the changes in real-world environments. In the
+decision-making has a graph-based evolving structure problems with graph-based evolving structure, it is possible
+because it involves solving problems to extract enhanced to customize result and maximize reward at a particular
+solutions. The learning of AlphaGo is based on planning that situation.
+uses a high-performance tree-based search engine, such as As in Figure 2, in graph-based evolving AI learning,
+MCTS, conjunction with policy and value networks. In the there are various paths to reach the goal between input as
+problem, it is clear that there are optimal solutions under the prompt node and the output as the answer node. In the
+considerable conditions, even though it needs tremendous learning process, it is not important which path is chosen to
+effort to find the optimal moves in the game of Go. reach the goal but rather which better goal is chosen.
+As shown in Figure 1, the decision-making process is Therefore, it does not focus on explaining how the goal was
+classified into two types: reinforced decision and mutually reached.
+10 2024. 8Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+possible to take an optimized result under consideration of
+contextual conditions such as time window as time interval,
+context as lookahead search depth of phase, and decision
+criteria. If they are deployed in an environment to make a
+mutually exclusive decision, then decision-making process
+(Figure 2) Graph-based Evolving Structure in AI becomes more intricate. The achieved goals can be mutually
+Learning excluded at a particular moment.
+3.1.2 based AI learning 3.2 White-box AI vs. Black-box AI
+As in mutually exclusive decision-making, for critical In MEL, the process is based on the sequential reduction
+decision-making, it needs to guarantee finding an optimized of alternatives by pruning branches through the selectively
+solution by pruning branches as alternatives under chosen contextual conditions. Tree-based MEL can provide
+considerable contextual conditions. As illustrated in Figure 3, the pruning histories as explanations in white-box AI. On
+to address mutually exclusive decision-making, tree-based the other hand, RL is based on the improvement of reward
+structure for reasoning is adopted in this research. In to achieve the goal depending on human feedback, reward
+mutually exclusive decision-making, there is no intersection and so on, using graph-evolving structure as black-box AI as
+among branches as paths to reach a goal. To achieve the in Figure 4. There are limitations that can not provide any
+goal, it is necessary to determine the choice of branches explanations how to reach the goal. As black-box learning,
+based on the tree-based structure under consideration of RL is based on probability for providing more reliable and
+contextual conditions. accurate solution through the verification and cross-reference
+with human such as ChatGPT using LLM. RL forced to
+achieve better goals rather than the provision of explanation.
+So, the learning algorithm focuses on identifying a better
+goal regardless of how to reach the goal.
+(Figure 3) Tree-based Structure in AI Learning
+As in Figure 3, the bold lines are chosen paths to reach (Figure 4) Graph-based Structure in Black-box AI
+a goal and the dotted lines are pruned paths. For instance,
+if the reached goal is ‘1’, then the chosen nodes are ‘12,’ In AlphaGo, learning is based on SL and RL. SL is
+and ’121.’ The pruned nodes are ‘2,’ ’11,’ and ‘122.’ The adopted human expert knowledge for position moves. RL is
+chosen paths might be used to provide explanations with adopted for value networks to find optimal position through
+pruned contextual conditions. In the decision-making, evaluating board positions. AlphaGo is also developed as a
+choosing branches to be pruned from the tree-based structure kind of black-box AI, but it assumes that problems have
+can lead to an unrecoverable decision because of exclusive optimal solutions even if there is enormous search space. As
+decision-making problem. So, it is important to provide why the rigid problem, the learning of goal seeking is based on
+the nodes are chosen. To do this, it necessary to consider tree-based structure with lookahead search. The AI-model is
+conditions for pruning the branches at a moment. It is also conceptually based on the assumption of the existence
+한국 인터넷 정보학회(25권4호) 11Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+of an optimal goal regardless of the path to reach the goal. can occur, such as a range of dates. The dates can be
+On the other side, mutually exclusive decision-making composed of yesterday, today and tomorrow. Yesterday
+needs an explanation of why and how the decision is refers to the time before the action or process happens.
+reached, as it involves sacrificing other alternatives. The Tomorrow refers to the time after a particular action or
+explanations can be composed of the paths by deep-diving process that are expected to happen. Today refers to the
+the breadth and depth of the tree through pruning the current time when a particular action or process happens.
+branches depending on considerable conditions as in The state of current is affected by the previously happened
+white-box AI. actions or processes, such as the state of current is affected
+by the state of the phase from yesterday.
+3.3 Conditions and Situations Second, the phase is composed of actions or processes
+based on contextual conditions. Actions are selected in
+3.3.1 conditions
+advance from all possibly considerable states in the
+considered phase, taking into account contextual conditions.
+The reasoning of tree-based MEL is constructed by the
+The lookahead search levels of phase are the deep-dive
+trace of chosen branches of the tree. The reasoning process
+depths of predicted processes or actions depending on
+is based on trade-off with the other choice according to the
+contextual conditions. The actions or processes of the current
+specified conditions. In MEL, contextual conditions are
+phase can propagate to actions or processes of next phase.
+composed of time window to determine the temporal
+The goal can be different according to the multi-dimensional
+perspective, phases as lookahead search spaces at a particular
+contextual conditions such as scope of time window and the
+contexts and decision criteria to prune branches. The
+lookahead search space of phases. For instance, four
+decision-making process might be tailored by the chosen
+different situations are illustrated in Figure 5, each with a
+criteria depending on contextual environments [17]. As the
+distinct and considerable scope of time window and
+contextual conditions to prune branches, time window and
+considered levels of phase.
+phases as a depth of sequence in process are considered to
+Finally, the decision criteria are also used to prune the
+explore deep-dive context to reach an optimal goal. In
+branches to determine the path to make a decision. By the
+addition, decision criteria are also proposed as a type of a
+chosen criteria, the constructed path to reach a goal can be
+constraint for pruning the branches in mutually exclusive
+used to provide explanation for the derived output from the
+decision-making. Depending on which conditions are chosen,
+mutually exclusive learning.
+the outcomes can be differently arison in decision-making
+process.
+3.3.3 figured situation
+3.3.2 Multi-dimensional conditions
+In mutually exclusive decision-making, it is possible to
+reach the different goals depending on the particular
+In MEL, to reach a goal, time window, phase and criteria
+situation. To reach a goal, it is necessary to consider
+are illustrated as multi-dimensional contextual conditions for
+converged contextual conditions, such as the situation 
+mutually exclusive decision-making.
+constructed by the configuration of multi-dimensional time
+First, it requires to consider time window that refers to a
+window, phases and decision criteria. In MEL, the reached
+specific period during which an event can occur or an
+goal might change depending on which multi-dimensional
+activity can be performed. Time window might be
+contextual conditions are chosen as the configured conditions
+considered as the range of time within which a particular
+to construct the situation  as in Figure 5.
+goal must be reached. It could refer to the time frame within
+which a particular process or action is expected to happen.
+For instance, as a multi-dimensional condition, time window
+is a specified time boundary within which an event or action
+12 2024. 8Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+learning, if it is guaranteed to reach accurate and reliable
+outputs, then it is not necessary to find an explanation of
+how to reach the goal. As was discussed, it has still
+limitations, such as adverse reaction stemming from the
+outputs of black-box AI, including hallucinations,
+confirmation bias, and spread of fake news, which highlight
+the need for explainable AI. To mitigate these limitations, it
+is necessary to focus and address on potential issues for
+providing explanation of the decision-making process in AI
+(Figure 5) Time window, Phase and Situation learning.
+For the providing explanations, MEL is proposed by the
+For instance, as shown in Table 1, the configured assistant as multi-dimensional contextual conditions with
+situation 1 is composed of time window at a particular chosen decision criteria to prune the branches of the tree to
+moment  and the considered phase . Situation 2 is obtain the goal. The derived sequential process by pruning
+composed of time window including the previous time step can provide explanation of how to extract the goal in
+-1, current time  and the lookahead time +1 in the phase decision-making. The explanation is based on the sequence
+. In situation 3, phase  and the lookahead state of the of activated actions or processes according to the chosen
+phase +1 are considered at a particular time . Situation 4 situation. If the pruning branches as the action are taken
+is composed of current time  and the lookahead time +1 from the configured situation with multi-dimensional
+under consideration of phase , the lookahead state of the contextual conditions, then the agent ahead the predicted
+phase +1 and state of the phase after the next phase +2. next phase to find optimal policy. The history of the chosen
+processes can be used as an explanation of how to reach the
+(Table 1) The illustrations of Situations with goal.
+Multi-Dimensional Time window and In MEL, it is not possible for multiple actions to occur
+Phase
+simultaneously in mutually exclusive environments. If an
+Multi-dimension action is chosen for the selection of a branch, then the other
+Situation Time Window Phase
+branches will be excepted and pruned by the criteria. The
+Situation 1  
+sequence of decision-making and the considered
+Situation 2 -1, , +1 
+multi-dimensional conditions used to provide explanation of
+Situation 3  , +1
+how to reach the goal.
+Situation 4 , +1 , +1, +2
+4. MEL-based Decision Making
+In MEL, to derive the goal, the situation is configured by
+the multi-dimensional conditions. In MEL, there is no the
+In MEL with tree-based structure, the inference process
+best or better output unlike ChatGPT, but there is the
+for the explanation are composed of the sequence of the
+optimal outcome depending on the considered situation
+chosen branches, which is one of the possibly extracted
+including multi-dimensional conditions at a particular
+episodes with the constructed decision paths depending on
+moment.
+the configured situations composed of multi-dimensional
+contextual conditions.
+3.4 Explanations
+Definition 1 (Multi-dimensional ContextualCondition)
+Multi-dimensional ContextualCondition  is composed
+To solve the given problems, AI processes can be
+of ‘Phase,’ ‘TimeWindow,’ and ‘DecisionCriteria.’
+automatically activated for the decision-making. In AI
+한국 인터넷 정보학회(25권4호) 13Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+ (1)     ≥
+± ±
+  (6)
+ is a finite set of multi-dimensional contextual
+conditions as in Equation (1).
+, where  is time condition, ± is a considerable state
+Definition 2 (Phase)  is phase that is composed of ±
+of time condition (previous, current, lookahead) to construct
+actions. These are propagated by the results derived from the
+timeframe.
+previous phase or multi-dimensional contextual conditions as
+If  is 0, then it refers the current time. If  is 1, then
+in Equation (2).
+it refers to the lookahead time. If  is -1, then it refers to
+   (2) the previous time of the current.
+ 
+Definition 7 (Criteria) Criteria  is a finite set of the
+ , where  is a set of actions of the  phase chosen criteria for MEL. It is represented as in Equation (7).
+
+with multi-dimension.
+  ≥ (7)
+Definition 3 (TimeWindow) TimeWindow  is  
+specified by the time frame within which an event or action
+The criteria are used to prune the branches in MEL.
+can occur, such as a range of time as in Equation (3).
+Definition 8 (Situation) Situation  is composed of
+phases and time. It is represented as in Equation (8).
+    
+ 
+ (3)
+    
+ 
+ (8)
+ , where  is a set of time with multi-dimension.
+
+Definition 4 (DecisionCriteria) DecisionCriteria  is
+ .
+
+used to prune branches for mutually exclusive
+decision-making. It is represented as in Equation (4).
+The phases are used to the paths to reach a goal in
+decision-making process. It is a kind of a map of decision
+  
+  processes from the  phase to the  phase including
+ (4)
+actions depending on the  decision criteria as in Figure 6.
+ , where  is a set of criteria with multi-
+
+dimension.
+, where  is the  decision criteria used in exclusive
+
+decision-making process and comprised of a set of the used (Figure 6) Phase and DecisionCriteria
+criteria to reach a goal.
+Definition 5 (Action) Action  is a finite set of actions Definition 9 (Value function) Value function    has
+or processes propagated depending on contextual conditions the maximum value over all considered situations at the
+to reach a goal. It is simply represented as in Equation (5). moment as in Equation (9).
+   (5)    π π   (9)
+ is a set of actions that occur at a phase to reach the goal. Definition 10 (Episode) Episode  is composed of a
+Definition 6 (Time) Time  is a finite set of time sequence of phases that include actions according to the
+boundaries. It is represented as in Equation (6). multi-dimensional contextual conditions. It is a set of history
+14 2024. 8Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+of chosen phases for making an mutually exclusive decision In Figure 8, for instance, phase  is prunned by the
+as in Equation (10). criteria  . As the result, pahse  is selected.  is pruned
+  
+by criteria  and phase  is selected.  is pruned by
+  
+       (10)
+  criteria  and  is selected. So, the chosen branch 
+ 
+is composed of  and  such as 
+    
+The episode is composed of the sequence of the chosen
+.
+  
+phases.
+Definition 11 (Probability) Probability  is a phase
+transition probability matrix, it is represented as in Equation
+(11).
+ 
+ 
+  =      (11)
+ is the  phase and  is criteria from the  phase
+
+to the  phase. So,  is the  phase  as a next
+ 
+phase. The   is determined by chosen branch   by (Figure 8) Chosen Branch by Pruning
+pruning. Probability is for phase transition as in Figure 7.
+Definition 13 (Pruning function) Pruning function ,
+as a kind of the step function, is defined as in Equation
+(13).
+ 
+ 
+  
+
+     
+
+(13)
+    
+   
+As in Figure 8, the chosen branch  is composed of
+  and  by the pruning function, the selected
+  
+branches are as follows:  
+
+   On the other hand, the
+ 
+pruned branches are as follows:  
+
+(Figure 7) Probability of Phase Transition
+  
+ 
+Definition 14 (Utility function) Utility function  as a
+Definition 12 (ChosenBranch) ChosenBranch  is a
+predicted utility to reach a goal is composed of phases as
+finite set of the chosen branches by pruning as in Figure 8
+alternatives of phase  as in Equation (14).
+and Equation (12). 
+    ∑     (14)
+    (12)
+ ∑  ,  is the  level of phase
+   
+한국 인터넷 정보학회(25권4호) 15Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+and  is the  criteria from the  level of phase to the
+
+ level of phase.
+5. Illustration and Verification
+5.1 Illustration
+There are many illustrations as mutually exclusive
+problems that need exclusive decision-making. One of them
+is the employment process as in Figure 9. In hiring process,
+we can assume that there are two candidates who have
+different strength. To make a decision for hiring only one
+candidate, it is necessary to consider configured situation
+with multi-dimensional contextual conditions including time
+window, lookahead phases and criteria for pruning branches.
+To do this, it is necessary to consider the hiring
+environments for the company. One of the candidates has
+strength for the general computer tasks. Another is
+specialized on AI tasks. Only one employee can be hired. In
+the current environment, the vacancy is opened for the
+position of a computer specialist to process general
+computing tasks. However, in the near future, it is expected
+to hire employee who can handle AI tasks. It is also
+necessary to consider contexts such as the current conditions
+of manpower supply and demand in the company. The
+considerable contexts can be related to the company’s needs
+for either a person who handles general computer tasks or
+an AI specialist.
+(Figure 9) Employment Process as the Mutually
+For the processing of MEL, Figure 9 shows decision tree
+Exclusive Problem
+that has two branches which are completely mutually
+exclusive because there is no intersection between them.
+For the mutually exclusive decision-making, as first phase will be stopped. However, if it is difficult to
+multi-dimensional contextual conditions, it is important to make a decision, then it is necessary to consider more
+determine time window such as ‘current(),’ ‘previous(-1)’ contextual conditions such as the lookahead of the next
+and ‘lookahead(+1).’ In addition, it is necessary to consider phase. So, it is important to determine to what search level
+phases with actions. Phases are composed of lookahead of phase will be chosen in MEL. The actions of the second
+search depths of phases. As in Figure 9, phase with levels phase as lookahead phase will be expected to propagate
+of the tree is composed of the first and second phase such from the first phase. The second phase  is composed
+
+as  and  . As search levels or depths of the tree, of ‘GW,’ ‘SP,’ and ‘pc11’ such as     
+     
+the first phase   is composed of ‘CS’ and ‘AI’ such as ‘GW’ refers to the ‘general workers’ and ‘SP’ refers to the
+    as in Equation (2). ‘AI specialist.’
+  
+For instance, if it is possible to make a decision of who If the company has a demand plan to hire an AI
+will be hired at the moment, then the inference through the specialist in the near future, then time  is composed of
+16 2024. 8Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+‘current()’ and ‘lookahead(+1)’ as multi-dimensional criteria  from  to  . So,  of  as a
+    
+conditions at the first phase  . The ‘current()’ refers to next phase is determined by choosing branch function       
+the current environment of the company and the ‘lookahead
+as in Equation (12). The phase  is pruned by the time
+
+( +1)’ refers to the future environment. As in Equation (3)
+window  ={ ,  } and  ={ }, the lookahead
+    
+and (6), is comprised of  for  and 
+   of the phase  is  with criteria  .
+  
+for  .  can be comprised of ‘current( )’ and
+  As in Equation (13), by the pruning function , the
+‘lookahead( +1)’ time dimension such as  ={ ,  }, selected phases are as follows: 
+where   is time window of phase  , ranging from   . The pruned phases are as follows:
+current time   to the lookahead time   as in Equation (3)  ,  ,  . The
+and (6).
+selected situation is  such as   .
+  
+It is possible to consider ‘current,’ and ‘future’ as the
+The utility function  of the selected situation  is
+
+decision criteria such as    as in
+  composed of selected phases at each level of the inference
+Equation (7). If the company focuses on hiring workers for
+tree as in Equation (14). For instance,  is composed of
+
+the future, then the criteria for the decision can be the
+phases  and  such as     at  . The
+     
+‘future’ for the demand plan. So, the considered both phases
+utility function can be extracted from using the probabilities
+are     and     .
+       as follows:    
+The selected phase is  in  and  is selected in
+ 
+  
+    ,    
+
+
+as AI specialist with strength of job position in     
+Figure 9. It takes into account the time window such as and     .
+ ={ ,  } as ‘current’ and ‘lookahead’ time. For  is composed of phases  ,  and  such
+      
+phase  , the time window is  ={ } with as      at the second level of the
+criteria ‘current’ at the moment. It means that it does not
+employment process. The utilities of
+have to lookahead next phase at the moment. The derived
+    ,
+result can differ when considering only time  versus when
+  
+     , and
+considering both time and  
+    are compared. If
+As in Equation (8), the situation is composed of the   
+considerable phase and time window at a particular moment.     has max value   , then
+A set of situations such as    … can be
+ is
+sel e cte d  a s  o n e  o
+f
+ t h e
+phases. At each
+l eve
+l, the
+
+derived as follows:  =       and more.
+      summation of probabilities of all phases at each level is 1
+Among them, situation    is selected by the max value such as ∑   . The utility function to
+such as as in Equation (9). The selected support the proposed mutually exclusive decision-making
+   is  with criteria  at  and  at can be presented by   as in
+       
+ . Equation (14).
+
+As in Equation (10), episode  is a set of episodes that Finally, AI specialist is employed in the employment
+are comprised of phases extracted from each situation. Each process. It provides an explanation of how to reach the goal
+episode is composed of a sequence of phases selected by by the chosen branch  composed of  as in
+ 
+each situation. The selected episode  is composed of the
+ Equation (12). The sequence of phases used to provide the
+phases of  with phases  and  .
+   explanation why AI specialist is employed for the demand
+Each phase has transition probability as in Equation (11). plan of the company with criteria ‘future’ at  and
+
+For instance, as in        
+
+is the ‘current’ at  .
+phase transition probability from  to  , with
+ 
+한국 인터넷 정보학회(25권4호) 17Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+5.2 Verification explanations of how to reach goals, which are composed of
+sequence of pruning branches by criteria. Therefore, it is
+In tree-based learning MEL, the goal can be reached by
+important to consider how to determine the lookahead search
+pruning branches under consideration of specific conditions
+level for finding feasible or optimal explainable solutions
+such as proposed multi-dimensional contextual conditions at
+effectively under multi-dimensional contextual conditions.
+a particular moment.
+In MEL, tree-based structure is applied to reduce the
+6. Conclusion
+search space from the enormous number of alternative cases.
+MEL can reduce the search space rather than graph-evolving
+The proposed MEL focuses on solving the mutually
+learning that considers all possible states in the entire
+exclusive problem in decision-making. In MEL, according to
+environment to reach the better goal. Tree-based search
+the given multi-dimensional contextual conditions, the
+engine is applied to reduce the search space through selected
+optimized goal at a particular moment will be reached with
+actions by lookahead search as in AlphaGo. Graph-based
+explanations.
+evolving AI learning is based on search space n× matrics
+As briefly discussed, AlphaGo exemplifies a tree-rigid
+learning, but search space of tree-based learning is less than
+model that searches for optimal solutions. ChatGPT as
+n× matrics because it is based on the pruning of branches
+graph-evolving model uses heuristic algorithms that can be
+for mutually exclusive decision-making.
+refined through human feedback and reward. RL based on
+To derive a goal, it is important to determine which
+the reward hypothesis is grounded on fine-tuning as in
+phases should be looked ahead in the tree. The search space
+ChatGPT. RL is training process by the trial and error
+will increase depending on the size of the lookahead search
+through interacting with environments including contexts and
+levels. If the size of level for diving into the search phase
+receiving reward signals. Adaptive AI is emphasizing
+is increased, the search space to achieve the goal will
+autonomous evolution. These differences highlight the
+exponentially expand.
+varying approaches to AI.
+To reduce the search space, it is necessary to prune
+These models focus on finding goals as optimal or
+branches by criteria. The criteria chosen for any search
+enhanced solution with human-guided improvements. In
+process are indeed closely related to the size of the search
+ChatGPT, the goal is consistently reinforced by data and
+space. The effective determination of the criteria affects to
+human reward because it is based on graph-evolving
+the search effort, performance efficiency and the
+structure as a kind of black-box AI. On the other hand,
+optimization of the reached goal. The learning for the
+AlphaGo is assumed that it has a optimal solution, even if
+selection of criteria can be trained from a variety of cases
+it needs a significant amount of efforts to achieve the goal
+such as cumulative results and rewards with contextual
+which is based on probabilistic facts.
+conditions through MEL.
+In this research, mutually exclusive problems are focused
+In MEL, tree-based structure is also applied to provide
+on, which differ from these addresses by the previously
+explanation of how to reach a goal. The sequential pruning
+discussed approaches. In everyday life, the problems we face
+processes under consideration of multi-dimensional
+often require making mutually exclusive decisions. MEL is
+contextual conditions provide the explanation of how to
+proposed to solve the mutually exclusive problem in
+reach a goal such as white-box AI. On the other hand,
+decision-making, which is tree-based structure. The goal can
+graph-evolving learning RL can not provide any explanations
+be reached by trade-off among mutually exclusive
+for the reached goal such as black-box AI.
+alternatives of the tree according to the specific contextual
+The effectiveness and efficiency of MEL are depending
+conditions. So, in MEL, decision-making is based on
+on the finite search spaces that are determined by
+pruning branches under consideration of multi- dimensional
+multi-dimensional conditions. It can reduce the enormous
+contextual conditions to achieve the goal in tree-based
+search space. In addition, tree-based structure MEL provide
+structure. As white-box AI, the pruning process can provide
+18 2024. 8Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+explanation how to reach the goal. prune the branches. The learning process involves how to
+In MEL, the decision-making process needs to prune weight the criteria for pruning branches, which levels are
+mutually exclusive alternatives to reach a goal. To do this, considered as contextual conditions, how to optimally
+multi-dimensional contextual conditions are considered, configure the situation, and other factors according to the
+which are composed of the time window, phase including specified environment at a particular moment. The tree-based
+actions or processes, and decision criteria. For mutually approach makes it possible to provide explanations to reach
+exclusive decision-making, the multi-dimensional contextual the goals. Verification through experimentation is also
+conditions are composed of time window as the temporal needed to assess the effectiveness of the proposed MEL.
+perspective, the significant lookahead levels of phases and
+criteria to choose or prune alternatives.
+References
+As the multi-dimensional contextual conditions, time
+window is comprised of previous, current and lookahead
+[1] Y. Wu, L. Wang, C. Kai, and M. Peng, “Dynamics-
+time. For instance,  is current which is related to at the
+Based Location Prediction and Neural Network
+moment. ≥ refers to previous events, actions, or
+Fine-Tuning for Task Offloading in Vehicular
+processes that have already occurred.  refers to
+Networks,” KSII Transactions on Internet and
+lookahead events, actions, or processes that are yet to
+Information Systems, Vol. 17, No. 12, pp. 3416-
+happen. The phase is composed differently depending on
+3435, 2023.
+how many dimensions are included in the lookahead phase.
+https://dx.doi.org/10.3837/tiis.2023.12.011
+Criteria are selected whenever it is necessary to prune the
+[2] OpenAI, “GPT-4 Technical Report,” Cornell University,
+branches of the tree. The configuration of multi-dimensional
+2023.
+contextual conditions is proposed as the configured situation.
+https://doi.org/10.48550/arXiv.2303.08774
+It shows the specifically finite environment to reach a goal [3] L. Zhou, Y. Duan, and W. Wei, “Research on the
+in the mutually exclusive decision-making at a particular Financial Data Fraud Detection of Chinese Listed
+moment. Depending on the chosen situation, different goals Enterprises by Integrating Audit Opinions,” KSII
+might be reached through mutually exclusive decision- Transactions on Internet and Information Systems,
+making. Vol. 17, No. 12, pp. 3218-3241, 2023.
+MEL adopt the tree-based learning model for providing https://dx.doi.org/10.3837/tiis.2023.12.001
+explanation for the derived goal with specific conditions. [4] D. Silver, A. Huang, C. J. Maddison, A. Guez, L.
+The goal depends on the policy of pruning branches, which Sifre, G. van den Driessche, J. Schrittwieser, I.
+can be dynamically changed by specific multi-dimensional Antonoglou, V. Panneershelvam, M. Lanctot, S.
+contextual conditions at any particular moment. Through the Dieleman, D. Grewe, J. Nham, N. Kalchbrenner, I.
+pruning process, the explanation of how to reach a goal is Sutskever, T. Lillicrap, M. Leach, K. Kavukcuoglu,
+represented by the chosen episode of selected branches. As T. Graepel, and D. Hassabis, “Mastering the Game
+one of the mutually exclusive problems, the illustrated of Go with Deep Neural Networks and Tree Search,”
+employment process demonstrates how to reach the goal in Nature, Vol. 529, pp. 484-489, 2016.
+mutually exclusive decision-making and provides an https://www.nature.com/articles/nature16961
+explanation by pruning branches using MEL. [5] D. Gunning, E. Vorm, J. Y. Wang, and M. Turek,
+Furthermore, it is necessary to implement and experiment “DARPA's explainable AI (XAI) program: A
+with the proposed MEL for mutually exclusive retrospective,” Applied AI Letters, Vol. 2, No. 4,
+decision-making and apply it to solve real-world problems. 2021.
+Through the experiment and interacting with environments, https://www.researchgate.net/publication/356781652_
+it is necessary to train the learning processes with reward DARPA_%27s_explainable_AI_XAI_program_A_retr
+signals such as multi-dimensional conditions and criteria to ospective
+한국 인터넷 정보학회(25권4호) 19Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+[6] J. Wiles, and L. Perri, “Why Adaptive AI Should https://doi.org/10.1145/3514094.3534164
+Matter to Your Business,” Gartner, 2022. [12] V. Belle, and I. Papantonis, “Principles and Practice
+https://www.gartner.com/en/articles/why-adaptive-ai-s of Explainable Machine Learning,” Frontiers in Big
+hould-matter-to-your-business Data, Vol. 4, 2021.
+[7] S. Ali, T. Abuhmed, S. El-Sappagh, K. Muhammad, https://doi.org/10.3389/fdata.2021.688969
+J. M. Alonso-Moral, R. Confalonieri, R. Guidotti, J. [13] H. J. Lee, “Mutually Exclusive Decision-Making
+D. Ser, N. Díaz-Rodríguez, and F. Herrera, Learning of AI based on Contexts,” KSII The 18th
+“Explainable Artificial Intelligence (XAI): What we Asia Pacific International Conference on Information
+know and what is left to attain Trustworthy Artificial Science and Technology(APIC-IST), 2023.
+Intelligence,” Information Fusion, Vol. 99, pp. 1-52, https://www.google.com/url?sa=t&rct=j&q=&esrc=s&
+2023. source=web&cd=&cad=rja&uact=8&ved=2ahUKEwi
+https://doi.org/10.1016/j.inffus.2023.101805 Kpufe9NeGAxXIp1YBHed2DcoQFnoECBkQAQ&url
+[8] H. A. Simon, “Administrative Behavior: A Study of =https%3A%2F%2Fapicist.org%2Fmedia%3Fkey%3
+Decision-making Processes in Administrative Dsite%2Fapicist2023%2FProceedings_of_APIC-IST_
+Organizations,” The Oxford Handbook of Classics in 2023.pdf&usg=AOvVaw3rvPVogs6y_HJK_Up-s93r&
+Public Policy and Administration, pp. 12-21, 2016. opi=89978449
+https://doi.org/10.1093/oxfordhb/9780199646135.013. [14] G. Campitelli,and F. Gobet, “Herbert Simon's
+22 Decision-Making Approach: Investigation of Cognitive
+[9] J. Simonsen, and H. A. Simon, “Administrative Processes in Experts,” Brunel University, 2010.
+Behavior How organizations can be understood in https://journals.sagepub.com/doi/10.1037/a0021256
+terms of decision processes,” Computer Science, [15] V. Harish, F. Morgado, A. D. Stern, and S. Das,
+Roskilde University, 1994. “Artificial Intelligence and Clinical Decision Making:
+https://www.semanticscholar.org/paper/Herbert-A.-Simon The New Nature of Medical Uncertainty,” Academic
+%3A-Administrative-Behavior-how-Can-Simonsen-Si Medicine, Vol. 96, No. 1, pp. 31-36, 2021.
+mon/a78c493ee0e8c9dfe7bd0fbaa2ef0ca2c8aa4562 https://dx.doi.org/10.1097/ACM.0000000000003707
+[10] Gartner, “Information Technology Glossary. Adaptive [16] C. H. Choi, “KYNDI,” Artificial Intelligence Times,
+AI,” Gartner Glossary, 2024. 2021.
+https://www.gartner.com/en/information-technology/gl https://www.aitimes.kr/news/articleView.html?idxno=
+ossary/adaptive-ai 20974
+[11] A. Bertrand, R. Belloum, J. R. Eagan, and W. [17] Y. Li, “Knowledge Recommendation Based on Dual
+Maxwell, “How Cognitive Biases Affect XAI-assisted Channel Hypergraph Convolution,” KSII Transactions
+Decision-making: A Systematic Review,” In Proc. of on Internet and Information Systems, Vol. 17, No.
+the 2022 AAAI/ACM Conference on AI, Ethics, and 11, pp. 2903-2923, 2023.
+Society (AIES), 2022. https://dx.doi.org/10.3837/tiis.2023.11.001
+20 2024. 8Multi-dimensional Contextual Conditions-driven Mutually Exclusive Learning for Explainable AI in Decision-Making
+◐ 저 자 소 개 ◑
+Hyun Jung Lee
+received her Ph. D. degree from the Department of Management Engineering of Korea Advanced
+Institute of Science and Technology (KAIST) in 2004. From 2005 to 2017, she was a Research
+Professor with Sungkyunkwan University, Korea University and Yonsei University. In 2017, she joined
+the Department of Economic Research at Goyang City Institute (formerly Goyang Research Institute) as
+a Senior Research Fellow. Her long-term research theme is modeling and developing Intelligent
+Information Systems (IIS) and Electronic Commerce (EC) within management information systems. Her
+primary research interests are AI-based decision-making, effective information processing to online
+market with rigorous application of a multiple levels-of-analysis perspective, AI-based customized
+product recommendations on online market, developing semantic web service applications in knowledge
+management, delivery and fulfillment issues on ubiquitous computing, cost reduction decision using
+information processing and research methodologies. She published several papers on Decision Support
+Systems, Soft Computing Journal, and so on.
+한국 인터넷 정보학회(25권4호) 21Copyrightof Journalof InternetComputing&Servicesisthepropertyof KoreanSocietyfor
+InternetInformationanditscontentmaynotbecopiedor emailedtomultiplesitesor posted
+toalistservwithoutthecopyrightholder's express writtenpermission.However, users may
+print,download,or emailarticlesfor individualuse.

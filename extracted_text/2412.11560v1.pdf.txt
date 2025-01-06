@@ -1,0 +1,829 @@
+The Role of Natural Language Processing Tasks in Automatic Literary
+Character Network Construction
+ArthurAmalvy VincentLabatut
+LaboratoireInformatiqued’Avignon LaboratoireInformatiqued’Avignon
+arthur.amalvy@univ-avignon.fr vincent.labatut@univ-avignon.fr
+RichardDufour
+LaboratoiredesSciencesduNumériquedeNantes
+richard.dufour@univ-nantes.fr
+Abstract three-phaseautomaticextractionframework. First,
+identify characters present in a text, using tech-
+Theautomaticextractionofcharacternetworks
+niques such as NER and alias resolution. Sec-
+fromliterarytextsisgenerallycarriedoutusing
+ond, detect interactions between characters. One
+naturallanguageprocessing(NLP)cascading
+can consider multiple types of interactions (co-
+pipelines. Whilethisapproachiswidespread,
+nostudyexistsontheimpactoflow-levelNLP occurrence,conversations,actions...),hencethis
+tasksontheirperformance. Inthisarticle,we processdiffersgiventhetargetedtype. Third,given
+conductsuchastudyonaliterarydataset,fo- charactersandtheirinteractions,derivetherelation-
+cusingontheroleofnamedentityrecognition ships between characters and extract a character
+(NER)andcoreferenceresolutionwhenextract-
+network.
+ingco-occurrencenetworks. Tohighlightthe
+Duetotheirstatisticalnatureandthedifficulty
+impact of these tasks’ performance, we start
+withgold-standardannotations,progressively ofthetaskstheyentail,naturallanguageprocessing
+adduniformlydistributederrors,andobserve (NLP)cascadingpipelinesappliedtocharacternet-
+theirimpactintermsofcharacternetworkqual- workextractionareboundtomakeerrors. While
+ity. We demonstrate that NER performance such networks have been leveraged for many ap-
+depends on the tested novel and strongly af-
+plications, the general question of how to better
+fects character detection. We also show that
+extractthemhasbeencomparativelymuchlessex-
+NER-detected mentions alone miss a lot of
+plored,andcertainlynotinasystemicway. Since
+characterco-occurrences,andthatcoreference
+extraction is generally performed using an NLP
+resolution is needed to prevent this. Finally,
+wepresentcomparisonpointswith2methods pipeline, the first step to answering this question
+based on large language models (LLMs), in- is to study the impact of each NLP task on the
+cludingafullyend-to-endone,andshowthat quality of the final network, as understanding it
+thesemodelsareoutperformedbytraditional
+wouldallowthecommunitytoprioritizefuturere-
+NLPpipelinesintermsofrecall.
+search efforts. Therefore, in this article, we pro-
+pose to study that impact in depth, by artificially
+1 Introduction
+adding errors in steps of the extraction pipeline
+Characternetworksaregraphswhoseverticesrep- to observe their influence. We specifically focus
+resent characters, and edges represent the rela- on NER and coreference resolution, with the lat-
+tionships between them. They can be seen as a terremainingachallengingtask. Weperformour
+specialcaseofknowledgegraphs,wherevertices study on Litbank (Bamman et al., 2019, 2020), a
+arerestrictedtobeingcharacters. Suchnetworks standardEnglishliterarycorpus. Tosupportourex-
+havemultipleuses: visualizetherelationshipsbe- periments,weimplementextensionstotherecent
+tweencharactersinanovel,supportliteraryanaly- modularcharacternetworkextractionpipelineRe-
+sis(Rochat,2015;RochatandTriclot,2017;Elson nard(Amalvyetal.,2024). Inordertounderstand
+et al., 2010), or solve downstream tasks such as whether cascading pipelines are still competitive
+recommendation (Lee and Jung, 2019) or genre againstLLM-basedextractionsystemsandtoguide
+classification(Hettingeretal.,2015). Asindicated future research, we compare our pipeline against
+by the survey of Labatut and Bost (2019), many suchsystems. Tofacilitatereproducibility,were-
+authorsworkonautomaticallyextractingthesenet- leaseallourcodeanddataunderafreelicense1.
+works(SparavignaandMarazzato,2015;Dekker
+etal.,2019;Elsonetal.,2010),followingageneric 1https://github.com/CompNet/Splice
+4202
+ceD
+61
+]LC.sc[
+1v06511.2142:viXraOur contributions are as follows. First, we de- 2.2 ErrorAnalysis
+fine new measures to evaluate the quality of ex-
+MostworksinterestedintheeffectofNLPerrors
+tractednetworks. Second,weextendtheexisting
+focusonspecifictasks. FortheNERtask,Stanis-
+Renard extraction pipeline, and evaluate it on a
+laweketal.(2019)findthatdifferentNERmodels
+characternetworkdatasetweadaptfromLitbank.
+make different categories of errors, while Rueda
+Ourmeasures anddatasetare afirst steptowards
+et al. (2024) highlight recurrent errors made by
+a more systematic benchmarking of network ex-
+models,suchasthedifficultyofdetectingmentions
+tractionsystems,somethingthatismissinginthe
+unseeninthetrainingset. Forthecoreferencetask,
+literature. Third,weproposeamodeltosimulate
+MartschatandStrube(2014)focusonrecallerrors,
+errors for two tasks, NER and coreference reso-
+whileChaiandStrube(2023)performananalysis
+lution, in order to understand their impact on a
+onmultilingualcoreferencesystems,andfocuson
+characternetworkextractionpipeline. Finally,we
+two-mentionsentitiesthattheyfindhardtorecall.
+compareourpipelinetoend-to-endLLMmodels,
+Tothebestofourknowledge,onlyDekkeretal.
+inordertounderstandhowmuchcascadingerrors
+(2019)adoptamoreglobalviewandassesstheef-
+aredetrimentaltoasequentialpipeline.
+fectofNERerrorsoncharacternetworks. However,
+Weorganizetherestofthisarticleasfollows. In nostudyexistsontheimpactoftheperformance
+Section 2, we discuss related work by highlight- of the main NLP steps required to extract a char-
+ingexistingcharacternetworkextractionpipelines acternetwork. Ourgoalinthisarticleistofillthis
+andliteratureonNERandcoreferenceresolution existingvoidintheliteraturebyproposingafirst
+erroranalysis. InSection3,wedetailourmethods, impactstudy.
+includingtheextendedRenardcharacternetwork
+3 Methods
+extraction pipeline we use. We describe our ex-
+periments in Section 4, and discuss their results
+3.1 Terminology
+in Section 5. Finally, we review our main contri-
+The terminology from the NER, coreference and
+butions in Section 6 and present the limits of our
+aliasresolutionliteraturedivergeandareconfusing
+workinSection7.
+when used together. This is why, in this section,
+weclarifythetermsthatweuseinthisarticle. We
+use“form”torefertoatextualrepresentationofa
+2 RelatedWork
+character. Aformcanbeapropernoun(“Lianna”),
+a pronoun (“she”), a definite description (“the
+2.1 CharacterNetworkExtractionPipelines
+princess”)...Meanwhile,weuse“mention”tore-
+fertotheoccurrenceofaforminthetext. ANER
+Character network extraction is related to knowl-
+system only extracts a subset of characters’ men-
+edgegraphextraction,butwithverticesrestricted
+tions: for example, it does not extract pronouns.
+to characters. Both share common tasks such as
+We refer to the form of a mention detected by a
+entityrecognitionandlinking,butthefocusonnar-
+NERmodelasanalias,asitstronglyidentifiesa
+rativesandcharactersimpliesspecializedinstances
+character. Meanwhile,acoreferencesystemtypi-
+withspecificchallenges.
+callydetectsallmentions,includingpronounsand
+BookNLP(Bammanetal.,2014)isawell-known othergenericconstructs. Wethereforedistinguish
+NLPpipelinespecializedfornovels,andissome- twotypesofmentions: aliasmentionsandgeneric
+times used in the literature when it comes to ex- mentions.
+tracting character networks (Dekker et al., 2019;
+3.2 ExtractionPipeline
+Piper et al., 2017). Other authors go further and
+proposepipelinesspecificallytailoredtocharacter To extract character networks, we extend the Re-
+network extraction, such as CHAPLIN (Sparavi- nardextractionpipeline(Amalvyetal.,2024). We
+gnaandMarazzato,2015)orCharnetto(Métrailler, designourownpipelinefortheneedsofthisstudy
+2023). Recently, Amalvy et al. (2024) propose andcontributedifferentmodules. Therearemany
+Renard, a modular character network extraction typesofinteractionsthatwecouldextracttopro-
+pipeline written in Python. In this article, we ex- duce character networks. As a first study on the
+tend Renard to conduct a detailed study of each subject,wechoosetofocusonco-occurrencechar-
+extractionmodule. acternetworks: theyareconceptuallysimple,andare the most used type of networks in the litera- more coreference chains, and never appear
+ture(LabatutandBost,2019). Weconsideranin- withouttheotherinotherchains.
+teractionbetweentwocharacterswhentheyappear
+5. When connected aliases have the same last
+close to each other in the text, in a range we call
+namebutadifferentfirstname,wedeleteall
+theco-occurrencewindow. Ourpipelineisdivided
+vertices in the shortest paths between them,
+intofourmainphases: NER,coreferenceresolution
+since they are probably different characters
+(optionalstep),characterunification,andfinallyco-
+from the same family (“John Smith” and
+occurrencedetectionandnetworkextraction.
+“JohnKlint”).
+WeperformflatNERusingthefine-tunedBERT
+model (Devlin et al., 2019) included in Renard, 6. When two aliases have a different inferred
+trainedontheliteraryNERdatasetintroducedby gender,wedeletealltheedgesintheshortest
+Dekkeretal.(2019)andlaterimprovedbyAmalvy pathsbetweenthem(“Mr. Smith”and“Miss
+etal.(2023b). WeonlykeepmentionsofthePER Smith”). Weinfergenderusingthegendered
+class. titlesandpronounsincoreferencechains.
+For coreference resolution, we use the end-to-
+After having applied all these rules, we merge
+end coreference model included in Renard based
+thegraph-connectedcomponents. Usingthealias
+on Lee et al. (2017) and Joshi et al. (2019). The
+groups extracted with this algorithm, we assign
+model predicts links between mentions, but also
+eachmentiondetectedbytheNERorcoreference
+performsmentiondetection: thisisimportantwhen
+stepstoasinglecharacter.
+extracting co-occurrence character networks, as
+Finally, we apply the co-occurrence detection
+genericcharactermentions(suchaspronouns)are
+andnetworkextractionstepofRenard. Thisstepis
+stillcountedasco-occurrences.
+entirelydeterministicandcannotcauseanyerrors
+Characterunificationresemblesaliasresolution.
+errorsbyitself: wesimplyconsiderthattwocharac-
+In the case of our extraction pipeline, we define
+termentionsinthedefinedco-occurrencewindow
+characterunificationasresolvingeachmentionde-
+form an interaction, which results in an edge be-
+tectedbytheNERandcoreferencestepstoasin-
+tween these characters. To take into account the
+gle character. This task could be described as a
+importanceofeachrelationship,weweightedges
+document-levelversionofcoreferenceresolution,
+bythenumberofinteractionsbetweencharacters.
+restrictedtocharacters. Tounifymentions,webase
+ourselves on the work of Vala et al. (2015). We 3.3 PerturbationAnalysis
+constructagraphwhereeachvertexisacharacter ToassesstheimpactofNERandcoreferencereso-
+aliasasdetectedbyNER,andweemployasetof lutionerrorsontheextractednetworks,wepropose
+rulestoconnectordisconnectthesevertices. While to start from a pipeline with gold-standard NER
+rulescanintroduceerrors, theyareoftenusedby andcoreferencepredictions,andtoprogressively
+previous works (Vala et al., 2015; Ardanuy and degrade the performance of these tasks while ob-
+Sporleder,2014),andthusanalyzingtheirfailure servingtheimpactonthequalityoftheextracted
+modesisimportant. Weusethefollowingrules: networks. To degrade task performance, we add
+uniformly distributed perturbations to the predic-
+1. When two aliases have a first or last name
+tions,correspondingtodifferenttypesoferrors.
+incommon,weconnectthem(“Emma”and
+“EmmaWoodhouse”). 3.3.1 NERPerturbations
+As an example, we consider the following gold
+2. Whentwoaliasesarerelatedbyahypocorism
+predictions as a starting point, and consider two
+gazetteer(“John”and“Johnny”),weconnect
+typesofperturbations.
+them.
+3. When one of the two above rules holds for
+twoaliaseswhenremovingtitles,weconnect
+them(“Mr. John”and“Johnny”).
+4. When two aliases are coreferential, we con-
+nectthem. Weconsidertwoaliasestobecoref-
+erentialwhentheyappeartogetherinoneor
+REP One-Eye O looked O at REP Goblin O .
+Add Spurious Alias Mentions: We add false
+positivestotheNERpredictionsbyuniformlysam-
+plinggenericspans(uptoacertainspansize)from
+thetext,toreducePrecision.
+REP One-Eye REP looked O at REP Goblin O .Remove Correct Alias Mentions: We remove
+true positives from the NER predictions by uni-
+formlysamplingfromthepredictedaliasmentions,
+toreduceRecall.
+REP
+gold network. Let each vertex of V and V rep-
+p g
+resent the set of aliases {a ,a ,··· ,a } of the
+1 2 n
+underlyingcharacter. Inordertoknowwhetherthe
+predicted network G correctly contains vertices
+p
+andedgessimilartothegoldnetworkG ,wefirst
+One-Eye O looked O at O Goblin O . g
+need to match their characters, since a vertex in
+3.3.2 CoreferenceResolutionPerturbations V isnotnecessarilypresentinV andviceversa.
+p g
+As an example, we consider the following gold Thus,westartbycomputingamaximumbipartite
+prediction as a starting point, and consider four mappingf V fromthesetofpredictedverticesV pto
+typesofperturbations. V g ∪{v∅}. Thismappingassociatesanypredicted
+vertexu ∈ V toagoldvertexv ∈ V ortothenull
+p g
+1 One-Eye pranced over and took a poke at vertex v∅, meaning u is not associated with any
+2 Goblin,tryingtobreak 2 his concentration. characterinV g. Notethatthenullvertexv∅ repre-
+sentstheemptysetofaliases. Symmetrically,we
+Add Spurious Mentions: We add singletons
+(mentionslinkedtonoothermentions)tothepre-
+constructamappingg
+V
+fromV
+g
+toV p∪{v∅}. We
+leveragethealiassetsrepresentedbythevertices
+dictions consisting of incorrect mentions, by uni-
+tocomputeVertexPrecisionandVertexRecall2:
+formlysamplingnon-mentionspans(uptoacertain
+spansize).
+1 One-Eye pranced over and took a 3 poke at
+Pre = max
+(cid:80)
+u∈Vp1−
+|u−f
+|uV
+|(u)|
+(1)
+2 Goblin,tryingtobreak 2 his concentration. V fV |V p|
+(cid:80)
+Remove Correct Mentions: We remove cor-
+Rec = max
+v∈Vg
+[g V(v)∩v ̸= v∅]
+. (2)
+rectlypredictedmentionsfromthepredictionsby V gV |V g|
+uniformsampling.
+We define Vertex F1 (F1 ) as the harmonic
+V
+One-Eye pranced over and took a poke at meanbetweenVertexPrecisionandVertexRecall.
+2 Goblin,tryingtobreak 2 his concentration. Foredges,weusemappingsf andg tocon-
+V V
+structmappingsf andg , whichmapsimilarly
+AddSpuriousLinks: Weaddincorrectcorefer- E E
+edgesetsE andE :
+encelinksbetweentwomentions,wronglymerging p g
+coreferencechainstogether. Weuniformlysample 
+theincorrectlinksinthesetofallpossibleincorrect 
+{f V(u),f V(v)}, iff V(u) ̸= v∅
+links.
+f E({u,v}) = andf V(v) ̸= v∅
+
+v∅, otherwise.
+2 One-Eye pranced over and took a poke at
+2 Goblin,tryingtobreak 2 his concentration. Basedonf andg ,wecomputeEdgePrecision
+E E
+andEdgeRecall:
+Remove Correct Links: We remove correct
+links between predicted mentions, wrongly split- (cid:12) (cid:12)
+(cid:12){f E(e) : e ∈ E p}∩E g(cid:12)
+tingcoreferencechains. Weuniformlysamplelinks Pre = max (3)
+amongallexistingcorrectcoreferencelinks.
+E fE |E p|
+(cid:12) (cid:12)
+(cid:12)E p∩{g E(e) : e ∈ E g}(cid:12)
+1 One-Eye pranced over and took a poke at Rec E = m gEax |E g| . (4)
+2 Goblin,tryingtobreak 3 his concentration.
+We define Edge F1 (F1 ) as the harmonic mean
+E
+3.4 NetworkQualityMeasures ofEdgePrecisionandEdgeRecall.
+SincewewanttomeasuretheimpactofNLPerrors Wealsointroduceweightedvariantsofthesenet-
+on the extracted network, we need a set of mea- workmeasures(WPre E,WRec E andWF1 E)in
+sures to assess the quality of this network when order to take into account the weights of the net-
+compared to a reference network. We base our workedges,thatcorrespondtothenumberofinter-
+measuresontheworkofValaetal.(2015)onalias actionsbetweenconnectedcharacters. Beforecom-
+resolution. putingthemeasures,wenormalizetheweightsby
+LetG = (V ,E )beapredictedcharacternet-
+p p p 2WeemploytheIversonbracketnotation,where[P]=1
+work, and G g = (V g,E g) be the corresponding ifpropositionP istrue,and0otherwise.dividingbythemaximalnumberofco-occurrences Strube,2016). Wealsoreporttheperformanceof
+inthenetwork. WecomputePrecisionandRecall apipelinewithouttheoptionalcoreferenceresolu-
+asfollows: tion step, in order to assess the usefulness of the
+task. Weconsideraco-occurrencewindowof32
+(cid:80) (cid:12) (cid:12) tokens.
+WPre =max
+e∈Ep1−(cid:12)w(f E(e))−w(e)(cid:12)
+(5)
+E fE |E p| 4.3 LLM-basedApproaches
+(cid:80) (cid:12) (cid:12)
+WRec E =m gEax
+e∈Eg1−(cid:12)w |E(e g) |−w(g E(e))(cid:12)
+, (6) Sincecharacternetworkextractionisusuallyper-
+formedusingcascadingpipelines,errorsmayprop-
+wherew(e)isthefunctionthatcomputesthenor- agateanddegradeperformance. Meanwhile,LLM-
+malizedweightofedgee. w(e)is0whene = e∅. based approaches are less modular and explain-
+Weightedmeasuresevaluatethequalityofthedis- able, but are not subject to cascading errors by
+tributionofweightsinthepredictednetwork,and design. Therefore,inspiredbytherecentadvances
+arealwayslessthanorequaltotheirunweighted inLLMs,wesurveytheircapabilitytobeusedas
+counterparts. characternetworkextractors,andcomparethemto
+ourcascadingRenardpipeline. Weintroducetwo
+4 Experiments
+differentLLMextractionmethods:
+4.1 LiteraryCorpus
+LLM-Coref Weremarkthatthelastnetworkex-
+We perform all of our experiments on the NER tractionstep,co-occurrencedetection,cannotcause
+andcoreferencelayersoftheLitbankliterarycor- errors on its own: we simply create an edge be-
+pus (Bamman et al., 2019, 2020). Since it is de- tweentwocharactersifsomeoftheirmentionsare
+signedfornestedNERwhiletheRenardNERstep inthesameco-occurrencewindow. Therefore,in
+performsflatNER,weflattentheLitbankannota- thecaseofaco-occurrencenetwork,wecandefine
+tions using an algorithm we implement (see Ap- the extraction problem as span extraction, where
+pendixBfordetails). Weusecoreferencechainsof each extracted span must be assigned to the cor-
+PERmentionsasthegroundtruthforthecharacter rectcharacter. Thisproblemdefinitioncouldalso
+unification step, since coreference resolution on be viewed as coreference resolution restricted to
+charactersisequivalenttocharacterunification. As charactersonly. Totackletheproblemthisway,we
+thenetworkextractionstepcannotcauseerrorson prompt LLMs to mark character mentions in the
+itsown,weextractgoldcharacternetworksusing textwithauniquecharacterID.
+theseannotationsonly.
+LLM-E2E Given an input text, we simply
+Litbankiscomposedofexcerptsfrom100novels
+promptLLMstoproducethecorrespondingchar-
+of approximately 2,000 tokens each. Since these
+acternetworkinasimplifiedversionoftheXML-
+excerpts can be short, we restrict our analysis to
+basedGraphmlformat.
+the30novelsinvolvingatleast10characters. This
+SeeAppendixAfortheexactprompts. Weuse
+prevents high deviation of network quality mea-
+few-shotpromptingbyprovidingexamplesofthe
+sureswhenavertexoranedgeismodifiedinthe
+task to the model. For both methods, we make
+prediction. Weusetheremaining70novelexcerpts
+an effort to parse the LLM output in order to fix
+totraincoreferenceresolutionmodels: weuse63
+slightly incorrect output format. We survey two
+ofthese70novels(90%)asatrainingset,andthe
+proprietary models, GPT3.5 Turbo (Brown et al.,
+remaining7asadevelopmentset.
+2020)3 and GPT4o4, and a recent open weights
+4.2 PipelinePerformance model,Llama3-8b-instruct(Touvronetal.,2023).
+Weapplyourcharacternetworkextractionpipeline
+5 Results
+to the 30 excerpts we select for analysis. Since
+multiplecoreferenceresolutionmeasuresexistand 5.1 PipelinePerformance
+noneoftheseareentirelysatisfyingormeasurethe
+Table 1 shows the NER and coreference resolu-
+same thing, we report a large set of measures in-
+tionperformanceofourextendedRenardpipeline.
+cludingMUC(Vilainetal.,1995),B3 (Baggaand
+Baldwin,1998),CEAF(Luo,2005),BLANC(Re- 3GPT3.5checkpoint:gpt-3.5-turbo-0125
+casens and Hovy, 2011) and LEA (Moosavi and 4GPT4ocheckpoint:gpt-4o-2024-05-13NER performance is below the reported state-of- Measure w/coref w/ocoref
+the-art on datasets from other domains such as F1 57.64 70.39
+V
+CoNLL-2003(TjongKimSangandDeMeulder, F1 40.19 44.93
+E
+2003) where the best systems obtain F1 scores WF1 33.53 30.55
+E
+higher than 90. While part of this lack of perfor- Pre 59.32 68.99
+V
+mance may be due to the way we transform the Pre 48.07 62.07
+E
+nested Litbank dataset to a flat NER dataset, we WPre 38.40 39.91
+E
+observeahighdisparityofperformancebetween Rec 57.77 74.00
+V
+novels,withF1rangingfrom51.16to97.30. This Rec 39.37 37.81
+E
+matchestheobservationsfromDekkeretal.(2019) WRec 33.17 26.18
+E
+and Amalvy et al. (2023a), indicating challenges
+Table2: performanceofourpipelineonnetworkextrac-
+that are specific to some novels. Meanwhile, the
+tionwithorwithoutthecoreferenceresolutionstep.
+performanceofcoreferenceresolutionislowerthan
+whatBammanetal.(2020)reportsonLitbank(for
+example, we report 78.45 MUC while Bamman 5.1.1 CoreferenceResolutionPerformance
+etal.(2020)reports84.3). Thismaybeduetothe
+Giventhenegativeimpactthatcoreferenceresolu-
+lowernumberofexcerptsinourtrainingset(63vs.
+tion can have, as seen in Table 2, a question that
+80),whichisrequiredforouranalysis.
+naturallyarisesiswhetherthistaskisusefulwhen
+extractingcharacternetworks. Co-occurrencenet-
+Task Measure Mean Min Max
+works extracted with alias mentions might only
+NER F1 79.58 51.16 97.30
+beasufficientlygoodapproximationofanetwork
+Coref MUC 78.45 64.31 88.75
+extractedwithallmentions. Inthatcase,perform-
+B3 54.87 41.53 70.40
+ing a coreference resolution to extract additional
+CEAF 47.04 34.31 59.75
+mentionswouldnotbecritical.
+BLANC 60.82 40.64 79.82
+LEA 28.84 19.44 43.95 Measure Rec WPre WRec
+E E E
+Value 54.39 63.20 35.66
+Table1: PerformanceofourpipelineonNERandcoref-
+erenceresolution. WecomputetheMean,MinandMax Table3: Networkqualitymeasuresforgoldnetworks
+valuesontheseriesformedbythemeasuresofthe30 extractedbyignoringcoreferencementions. Onlyaf-
+novelexcerptsofouranalysisset. fectedmeasuresarepresented.
+Table2showstheperformanceofourpipeline To understand whether this is the case, we ex-
+on our test corpus of 30 excerpts, depending on tract gold networks from Litbank with and with-
+whether we add the optional coreference step or outcoreference-extractedmentions,andcompute
+not. VertexandedgeF1arehigherwhenomitting networkqualitymeasuresbyconsideringnetworks
+coreferenceinformation,likelybecausetheperfor- withcoreferencementionsasthereference. Results
+mance of the coreference resolution algorithm is can be found in Table 3. While only some mea-
+nothighenough,leadingtothedetectionofspuri- sures are affected (Edge Recall, Weighted Edge
+ous mentions, which misleads both the character Precision, and Weighted Edge Recall), ignoring
+unificationandco-occurrencedetectionsteps. We coreference mentions proves to severely impact
+discussthequestionoftheutilityofcoreferenceres- performance. This shows that coreference men-
+olutioninmoredetailinSection5.1.1. Ingeneral, tions are a crucial part of relationships extracted
+EdgeRecallisquitelow,meaningmanycharacter usingco-occurrence.
+interactionsaremissed. Totryandunderstandtheminimalperformance
+Meanwhile, using coreference information neededforcoreferenceresolutiontobeuseful,we
+provestobeimportanttoincreaseedgerecallmea- perform an experiment where we inject the gold
+sures. Even though coreference resolution leads coreferenceinformationinthepipeline,andslowly
+toacompromisednetworkstructureoverall,ital- degrade performance. To do so, we combine all
+lowsthepipelinetodetectmorecharactermentions, thecoreferenceperturbationswedescribedinSec-
+leadingtoabetterestimationoftherelativestrength tion 3.3.2, by uniformly sampling a degradation
+oftheirinteractions. andapplyingit. WerepeatthisprocessforafixedCorefAll addressedbyfutureresearch.
+1.0 B3F1
+BlancF1
+5.1.3 CoreferenceResolutionPerturbation
+0.8 CEAFF1
+PreE Analysis
+0.6 RecE
+LEAF1 Figure3showsthecoreferenceresolutionpertur-
+0.4 MUCF1
+PreV bationsresults.
+0.2 RecV
+WPreE
+0.0 WRecE Add Spurious Mentions Adding spurious sin-
+0 200 400 600 800 1000 gletons does not affect our character unification
+DegradationSteps
+algorithm,andthereforehasnoimpactonthequal-
+Figure1: Networkextractionperformancewhenapply-
+ityoftheextractednetwork.
+ingthecoreferenceperturbationsfromSection3.3.2.
+Remove Correct Mentions Removing correct
+mentions mainly affects edge measures: charac-
+number of steps and observe the effects in terms
+ters are still recognized correctly, but some co-
+ofcoreferenceandnetworkqualitymeasures. The
+occurrenceinteractionsarelostduetomissingchar-
+resultsofthisexperimentcanbefoundinFigure1.
+actermentions,leadingtofeweredges.
+When applying perturbations, overall perfor-
+mance for all measures starts to decrease until a AddSpuriousLinks Addingwrongcoreference
+certainpoint,afterwhichitstartsreachingaplateau linkssharplydecreasesallnetworkextractionper-
+(except for edge recall measures). This effect oc- formancemeasures: charactersarehardertorecog-
+cursbecauseafterthispoint,coreferenceresolution nize, and interactions are missing. This is driven
+recallonaliasmentionsstartsbeingsolowthatit by rules 4 and 6 of our character unification step
+doesnotaffectthecharacterunificationalgorithm (Section3.2),thatarebothfedwronginformation.
+anymore,andotherrulesbasedoncharacteraliases Whileitwouldbepossibletonotapplytheserules,
+starttohavemoreinfluence. Meanwhile,thereisa rule4istheonlyonethatallowslinkingtwomen-
+bigdiscrepancybetweenvertexandedgemeasures: tionswithcompletelydifferentforms.
+whilevertexmeasurescanstayclosetotheirorig-
+RemoveCorrectLinks Networkedgemeasures
+inalvalueswhencoreferenceresolutionishighly
+areaffectedthemostbycoreferencelinksremoval,
+degraded, this is not the case for edge measures.
+whilevertexmeasuresstaysomewhatstable.
+This is because coreference resolution is crucial
+whendetectingco-occurrence,asitistheonlyway Not all coreference resolution errors prove to
+todetectgenericmentions. be equal in terms of impact on network quality.
+Adding spurious links is the most harmful error,
+5.1.2 NERPerturbationAnalysis
+whileaddingspurioussingletonsdoesnotaffectour
+Figure2showstheNERperturbationresults. characterunificationalgorithm. Meanwhile,other
+errorsmainlyimpactedgeextractionperformance.
+AddSpuriousAliasMentions Unsurprisingly,
+Therefore,ifone’sconcernistoextractcharacters
+reducingNERPrecisionhasadirecteffectonVer-
+only,aconservativecoreferencealgorithmwithlow
+texPrecision,whichplummetsasmoreNERfalse
+linkingrecall,buthighlinkingprecisionmightgive
+positives are added. Edge Precision also sharply
+sufficientperformance. However,whenextracting
+decreasesasaresult,whileVertexandEdgeRecall
+edgesbetweencharacters,bothhighprecisionand
+slowlydecreasedowntoaplateau.
+recallarenecessary,intermsofmentiondetection
+RemoveCorrectAliasMentions Allrecallmea- aswellaslinking.
+suressharplydecreasewhenremovingcorrectalias
+5.2 LLM-basedApproaches
+mentions. Precision measures become unstable
+and finallyundefined, asno vertices oredges are Results of our LLM-based extraction methods
+predictedwhenNERRecallreaches0. LLM-Coref andLLM-E2EcanbefoundinTable4.
+Unsurprisingly,NERperformancehasahighim- LLM-Coref If we observe F1 scores, GPT4o
+pactonnetworkquality. SinceNERperformance performs the best amongst the LLMs we sur-
+varies greatly depending on the novels (as seen vey,followedbyLlama3-8b-instructandGPT-3.5
+in Table 1), enhancing performance for challeng- Turbo. LLMsparticularlystrugglewithrecall,with
+ingnovelsisanimportantconcernthatshouldbe GPT3.5 Turbo and Llama3-8b-instruct missing aAddspuriousnermention Removecorrectnermention
+1.00 1.00 PreE
+RecE
+0.75 0.75 PreV
+RecV
+0.50 0.50 Precision
+Recall
+0.25 0.25
+WPreE
+0.00 0.00 WRecE
+0 200 400 600 800 1000 0 20 40 60 80 100
+DegradationSteps DegradationSteps
+Figure 2: Network quality measures versus number of degradation steps for “add spurious alias mention” and
+“removecorrectaliasmention”perturbations.
+AddSpuriousMention AddSpuriousLink
+1.0 1.00
+B3F1
+0.75 BlancF1
+0.8 CEAFF1
+0.50
+PreE
+0.6 0.25
+RecE
+LEAF1
+0.00 MUCF1
+0 50 100 150 0 100 200 300 400 500 PreV
+DegradationSteps DegradationSteps RecV
+WPreE
+RemoveCorrectMention RemoveCorrectLink
+WRecE
+1.00 1.00
+0.75 0.75
+0.50 0.50
+0.25
+0.25
+0.00
+0 200 400 600 800 1000 0 200 400 600 800 1000
+DegradationSteps DegradationSteps
+Figure3: Networkqualitymeasuresversusthenumberofcoreferenceresolutiondegradationsteps.
+lot of character occurrences. Qualitatively, both recallstilllagsbehindRenard.
+of these models either miss a lot of mentions, or
+6 Conclusion
+start hallucinating a lot of mentions before con-
+tinuing that way through the output, influenced
+Inthisarticle,wepresentedastudyontheimpact
+bytheirpreviouspredictions. Llama3-8b-instruct
+ofNLPtasksoncharacternetworkextraction. We
+alsohastroublerespectingtheoutputformat,some-
+showthatNERperformanceiscrucialtodetecting
+times generating invalid output. GPT4o is much
+characters,butthatitdependsheavilyontheconsid-
+moreconsistent,althoughitstillmissesmanymen-
+erednovel: therefore,futureresearchshouldfocus
+tions. When compared against our extended Re-
+on improving the low NER performance on diffi-
+nard pipeline, LLMs results are generally lower,
+cultnovels. Additionally,weshowthatnottackling
+except for Edge Precision and for weighted edge
+thechallengingcoreferenceresolutiontaskimplies
+measureswhereGPT4otradesprecisionforrecall.
+missingco-occurrencerelationshipsbetweenchar-
+acters. This task is important to extract correct
+LLM-E2E Resultsaregenerallyhigherthanwith co-occurrenceedges,particularlywhenitcomesto
+LLM-Coref,highlightingtheimportanceoftaskfor- edgeweights. Sinceitremainsdifficultingeneral,
+mulation. IfwefocusonF1scores,weobservethe ourextractionpipelineexhibitsrelativelylowedge
+samerankingbetweenLLMs,withGPT4obeating extractionperformance. Wealsoshowthatnotall
+Llama3-8b-instructandGPT3.5Turbo. Generally, coreference errors have the same impact: adding
+LLMsdisplayhighvertexandedgeprecision,even spuriouscoreferencelinksbetweenmentionshas
+surpassingourpipelinesometimes. However,their the strongest negative impact of all the errors weLLM-Coref LLM-E2E Renard
+Measure Llama3 GPT-3.5T GPT4o Llama3 GPT-3.5T GPT4o
+F1 37.93 28.99 52.32 56.87 44.26 62.98 70.39
+V
+F1 23.20 16.96 38.85 29.35 20.91 30.42 44.93
+E
+WF1 15.17 11.39 32.72 20.17 14.33 24.35 30.55
+E
+Pre 42.86 52.50 68.78 67.96 61.04 77.96 68.99
+V
+Pre 57.85 65.78 62.62 59.01 64.39 65.76 62.07
+E
+WPre 34.69 37.25 51.46 40.56 44.75 53.97 39.91
+E
+Rec 25.12 22.15 32.28 53.18 37.87 34.24 70.39
+V
+Rec 10.34 9.18 23.38 21.32 13.24 13.12 37.81
+E
+WRec 6.86 6.34 19.77 14.86 9.14 10.44 26.18
+E
+Table 4: Comparison between the network extraction performance of LLM-based extraction methods and our
+Renardpipeline. Llama3standsforLlama3-8b-instruct,GPT-3.5T forGPT-3.5Turbo.
+surveyed. Developing systems able to make con- modelmayyieldbetterresults. However,the
+servativepredictionswhenitcomestocoreference excerpts on which we perform analysis are
+linkingmightbeagoodresearchdirectiontocreate short(approximately2,000tokens)compared
+better character network extraction systems. Un- tofull-scalenovels: theperformanceofLLMs
+fortunately,developingcoreferencemodelsatthe inthatsettingmaynotbeashighastheresults
+scaleofanovelremainsdifficultduetothelackof wereportinourstudy.
+fully annotated ones for training and benchmark-
+ing, which prompts the development of datasets
+withlongdocuments.
+References
+Even though errors propagate in cascading
+pipelines, our pipeline generally outperformed A.Amalvy,V.Labatut,andR.Dufour.2023a. Learning
+to rank context for named entity recognition using
+LLM-based approaches. However, the perfor-
+asyntheticdataset. In2023ConferenceonEmpiri-
+manceoftheseapproachesisencouraginggiventhe
+calMethodsinNaturalLanguageProcessing,pages
+fact that we only evaluated the few-shot prompt- 10372–10382.
+ing setting. Fine-tuning LLMs on character net-
+A.Amalvy,V.Labatut,andR.Dufour.2023b. Therole
+workextractionisthereforeapromisingdirection
+ofglobalandlocalcontextinnamedentityrecogni-
+of research, even though pipelines remain more tion. In61stAnnualMeetingoftheAssociationfor
+interpretable. ComputationalLinguistics,page714–722.
+7 Limitations A.Amalvy,V.Labatut,andR.Dufour.2024. Renard:A
+ModularPipelineforExtractingCharacterNetworks
+fromNarrativeTexts. HAL.
+• While the character network extraction
+pipeline we use is inspired by the generic
+M.C.ArdanuyandC.Sporleder.2014. Structure-based
+framework outlined by Labatut and Bost clusteringofnovels. In3rdWorkshoponComputa-
+(2019),westillhadtomakeimplementation tionalLinguisticsforLiterature,pages31–39.
+choices. Other pipelines may behave dif-
+A.BaggaandB.Baldwin.1998. Algorithmsforscoring
+ferently regarding task errors, although we coreferencechains. In1stInternationalConference
+hypothesizethatsimilararchitecturesshould on Language Resources and Evaluation Workshop
+yieldsimilarresults. onLinguisticsCoreference,pages563–566.
+D. Bamman, O. Lewke, and A. Mansoor. 2020. An
+• Ourperturbationanalysismethodologymay
+annotated dataset of coreference in English litera-
+notreflectthedistributionoferrorsfromex- ture. In 12th Language Resources and Evaluation
+istingmodels. However,itallowsconsidering Conference,pages44–54.
+thedifferenttypesofpossibleerrors.
+D.Bamman,S.Popat,andS.Shen.2019. Anannotated
+datasetofliteraryentities. InConferenceoftheNorth
+• For end-to-end extraction using LLMs, we
+AmericanChapteroftheAssociationforComputa-
+only survey the few-shot prompting setting
+tionalLinguistics: HumanLanguageTechnologies,
+due to resource limitations. Fine-tuning a volume1,pages2138–2144.D.Bamman,T.Underwood,andN.A.Smith.2014. A X.Luo.2005. Oncoreferenceresolutionperformance
+bayesian mixed effects model of literary character. metrics. InHumanLanguageTechnologyConference
+In52ndAnnualMeetingoftheAssociationforCom- and Conference on Empirical Methods in Natural
+putationalLinguistics,volume1,pages370–379. LanguageProcessing,pages25–32.
+T.Brown,B.Mann,N.Ryder,M.Subbiah,J.D.Kaplan, S.MartschatandM.Strube.2014. Recallerroranalysis
+P. Dhariwal, A. Neelakantan, P. Shyam, G. Sastry, forcoreferenceresolution. In2014Conferenceon
+A.Askell,S.Agarwal,A.Herbert-Voss,G.Krueger, EmpiricalMethodsinNaturalLanguageProcessing,
+T.Henighan,R.Child,A.Ramesh,D.Ziegler,J.Wu, pages2070–2081.
+C.Winter,C.Hesse,M.Chen,E.Sigler,M.Litwin,
+S.Gray,B.Chess,J.Clark,C.Berner,S.McCandlish, N. S. Moosavi and M. Strube. 2016. Which corefer-
+A.Radford,I.Sutskever,andD.Amodei.2020. Lan- enceevaluationmetricdoyoutrust? aproposalfora
+guagemodelsarefew-shotlearners. InAdvancesin link-basedentityawaremetric. In54thAnnualMeet-
+NeuralInformationProcessingSystems,volume33, ingoftheAssociationforComputationalLinguistics
+pages1877–1901. (Volume1: LongPapers),pages632–642.
+H.ChaiandM.Strube.2023. Investigatingmultilingual C.Métrailler.2023. Charnetto.
+coreferenceresolutionbyuniversalannotations. In
+FindingsoftheAssociationforComputationalLin- A. Piper, M. Algee-Hewitt, K. Sinha, D. Ruths, and
+guistics: EMNLP2023,pages10010–10024. H.Vala.2017. Studyingliterarycharactersandchar-
+acternetwork. InDigitalHumanities.
+N. Dekker, T. Kuhn, and M. van Erp. 2019. Evalu-
+ating named entity recognition tools for extracting M.RecasensandE.Hovy.2011. BLANC:Implement-
+social networks from novels. PeerJComputer Sci- ingtherandindexforcoreferenceevaluation. Natu-
+ence,5:e189. ralLanguageEngineering,17:485–510.
+J.Devlin,M.Chang,K.Lee,andK.Toutanova.2019. Y.Rochat.2015. CharacternetworkanalysisofÉmile
+BERT:Pre-trainingofdeepbidirectionaltransform- Zola’sLesRougon-Macquart. InDigitalHumanities
+ers for language understanding. In Conference of 2015.
+theNorthAmericanChapteroftheAssociationfor
+ComputationalLinguistics: HumanLanguageTech- Y. Rochat and M. Triclot. 2017. Les réseaux de per-
+nologies,volume1,pages4171–4186. sonnagesdescience-fiction: échantillonsdelectures
+intermédiaires. ReSFuturae,10:1183.
+D. Elson, N. Dames, and K. McKeown. 2010. Ex-
+tractingsocialnetworksfromliteraryfiction. In48th A. Rueda, E. Alvarez-Mellado, and C. Lignos. 2024.
+AnnualMeetingoftheAssociationforComputational CoNLL#:Fine-grainederroranalysisandacorrected
+Linguistics,pages138–147. test set for CoNLL-03 English. In 2024 Joint In-
+ternational Conference on Computational Linguis-
+L. Hettinger, M. Becker, I. Reger, F. Jannidis, and tics, Language Resources and Evaluation (LREC-
+A.Hotho.2015. Genreclassificationongermannov- COLING2024),pages3718–3728.
+els. In 26th International Workshop on Database
+andExpertSystemsApplications(DEXA),pages249– A.C.SparavignaandR.Marazzato.2015. Analysisof
+253. aplaybymeansofchaplin,thecharactersandplaces
+interactionnetworksoftware. InternationalJournal
+M.Joshi,O.Levy,L.Zettlemoyer,andD.Weld.2019. ofSciences,4(3):60–68.
+BERTforcoreferenceresolution: Baselinesandanal-
+ysis. InConferenceonEmpiricalMethodsinNatural T.Stanislawek,A.Wróblewska,A.Wójcicka,D.Ziem-
+LanguageProcessingandthe9thInternationalJoint bicki,andP.Biecek.2019. Namedentityrecognition
+ConferenceonNaturalLanguageProcessing,pages - is there a glass ceiling? In 23rd Conference on
+5803–5808. ComputationalNaturalLanguageLearning, pages
+624–633.
+V.LabatutandX.Bost.2019. Extractionandanalysis
+of fictional character networks : A survey. ACM E.F.TjongKimSangandF.DeMeulder.2003. Intro-
+ComputingSurveys,52:89. ductiontotheCoNLL-2003sharedtask: Language-
+independentnamedentityrecognition. In7thConfer-
+K. Lee, L. He, M. Lewis, and L. Zettlemoyer. 2017. enceonNaturalLanguageLearning,pages142–147.
+End-to-end neural coreference resolution. In Con-
+ferenceonEmpiricalMethodsinNaturalLanguage H. Touvron, T. Lavril, G. Izacard, X. Martinet,
+Processing,pages188–197. M. Lachaux, T. Lacroix, B. Rozière, N. Goyal,
+E. Hambro, F. Azhar, A. Rodriguez, A. Joulin,
+O.-J.LeeandJ.J.Jung.2019. Modelingaffectivechar- E. Grave, and G. Lample. 2023. Llama: Open
+acternetworkforstoryanalytics. FutureGeneration and efficient foundation language models. arXiv,
+ComputerSystems,92:458–478. cs.CL:2302.13971.H.Vala,D.Jurgens,A.Piper,andD.Ruths.2015. Mr.
+SYSTEMPROMPTYouareanexpertinlitera-
+bennet,hiscoachman,andthearchbishopwalkinto
+tureandnaturallanguageprocessing.
+abarbutonlyoneofthemgetsrecognized: Onthe
+USERPROMPTGivenatext,youmustextract
+difficultyofdetectingcharactersinliterarytexts. In aco-occurrencecharacternetworkwherevertices
+Conference on Empirical Methods in Natural Lan- representcharactersandedgesrepresenttheir
+guageProcessing,pages769–774. relationships. Eachedgemusthaveaweightcor-
+respondingtothenumberofinteractionsbetween
+twocharacters. Twocharacterswithoutanyin-
+teractionsdonotshareanedge. Aninteraction
+betweentwocharactersoccurswhentwooftheir
+mentionsoccurwithinadistanceof32tokens.
+YouranswermustbeinasimplifiedGraphml-like
+format. Verticesmusthavean’alias’attribute
+withthelistofaliasesofacharacter,separatedby
+M. Vilain, J. Burger, J. Aberdeen, D. Connolly, and semicolons.
+L.Hirschman.1995. Amodel-theoreticcoreference
+scoringscheme. In6thMessageUnderstandingCon- Herearesomeexamplesofthistask:
+ference. Example1:
+Input: Elricwasridinghishorse. Alongside
+Moonglum,theprinceofruinswaslookingfor
+hisdarksword.
+Output:
+<graph>
+<node id="n0"
+aliases="Elric ;prince of ruins">
+</node>
+<node id="n1" aliases="Moonglum">
+A LargeLanguageModelsPrompt
+</node>
+<edge id="e0" source="n0"
+target="n1"
+weight="2">
+</edge>
+</graph>
+We use the following prompt for our LLM-Coref
+andLLM-E2Eextractionmethodsrespectively:
+Example2:
+Input: PrincessLianafeltsad,becauseZarthArn
+wasgone. Lianadecidedsheshouldsleep.
+Output:
+<graph>
+SYSTEMPROMPTYouareanexpertinlitera- <node id="n0"
+tureandnaturallanguageprocessing. aliases="Princess Liana;Liana">
+USERPROMPTGivenatext,youmustex- </node>
+tractcharactersandtheirmentions. Youran- <node id="n1" aliases="Zarth Arn">
+swermustbetheoriginaltext,wherecharac- </node>
+termentionsaretaggedwiththefollowingfor- <edge id="e0" source="n0" target="n1"
+mat: [CHARACTER_ID]CHARACTERMEN- weight="2">
+TION[/CHARACTER_ID].Youmusttagcharac- </node>
+termentionsonly. </graph>
+Herearesomeexamplesofthistask:
+Example1:
+B AdaptingLitbanktoFlatNER
+Input: Elricwasridinghishorse. Alongside
+Moonglum,theprinceofruinswaslookingfor
+hisdarksword. In the main body of this article, we perform our
+Output: [0]Elric[/0]wasriding[0]his[/0]horse
+experimentsontheLitbankdataset(Bammanetal.,
+. Alongside[1]Moonglum[/1],the[0]princeof
+ruins[/0]waslookingfor[0]his[/0]darksword. 2019). However, Litbank NER annotations are
+nested, while the Renard NER step we employ
+Example2: performs flat NER. Annotations guidelines are
+Input: PrincessLianafeltsad,becauseZarthArn
+also different between Litbank and the original
+wasgone. Theprincessdecidedsheshouldsleep
+. NER dataset on which the Renard NER step is
+Output: [0]PrincessLiana[/0]feltsad,because
+trained (Amalvy et al., 2023b). In particular, Lit-
+[1]ZarthArn[/1]wasgone. [0]Theprincess
+bank annotates many generic mentions (such as
+[/0]decided[0]she[/0]shouldsleep.
+“anhonourableman”)asaliasmentions. Wethere-foreflattenLitbankannotationsusinganalgorithm
+weimplement,whiletryingtorespecttheoriginal
+annotationguidelinesasmuchaspossible.
+Litbankannotationsconsistsof4layersofnest-
+ing, where annotated alias mentions can overlap.
+Ourflatteningalgorithmworksasfollows: first,we
+trytocutannotatedmentionstoaformthatwould
+be accepted as an alias mention in the dataset of
+Amalvyetal.(2023b). Wedosobyremovinglead-
+ingdeterminers(“the”)andcuttingthecontentof
+a mention after the first comma. Afterward, we
+filter mentions that are still deemed generic, by
+checkingiftheirconstitutingtokensarecapitalized
+(except for some stopwords). If some alias men-
+tions are still overlapping at this point, we select
+theoutermostones.
+Togiveanexample,theannotatedmention“the
+LordHighChancellor”wouldhavebeenshortened
+as“LordHighChancellor”,andthenacceptedas
+an alias mention since all of its tokens are capi-
+talized(provideditdoesnotoverlapwithalarger
+mention). By contrast, the generic mention “an
+honourableman”wouldhavebeendiscardedsince
+itstokensarenotcapitalized.

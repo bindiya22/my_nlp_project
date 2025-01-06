@@ -1,0 +1,1524 @@
+JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 1
+A Review of Multimodal Explainable Artificial
+Intelligence: Past, Present and Future
+Shilin Sun ,Wenbin An ,Feng Tian Senior Member, IEEE, Fang Nan , Qidong Liu , Jun Liu Senior Member,
+IEEE, Nazaraf Shah and Ping Chen
+Abstract—Artificial intelligence (AI) has rapidly developed I. INTRODUCTION
+through advancements in computational power and the growth
+of massive datasets. However, this progress has also heightened ADVANCEMENTS in AI have significantly impacted
+challenges in interpreting the “black-box” nature of AI models.
+computer science, with works like Transformer [1],
+To address these concerns, eXplainable AI (XAI) has emerged
+BLIP-2 [2] and ChatGPT [3] excelling in natural language
+with a focus on transparency and interpretability to enhance
+human understanding and trust in AI decision-making pro- processing (NLP), computer vision, and multimodal tasks by
+cesses. In the context of multimodal data fusion and complex integrating diverse data types. The development of related
+reasoning scenarios, the proposal of Multimodal eXplainable technologies has driven the advancement of specific applica-
+AI (MXAI) integrates multiple modalities for prediction and
+tions. For example, in autonomous driving, systems need to
+explanation tasks. Meanwhile, the advent of Large Language
+integrate data from various sensors, including vision, radar,
+Models (LLMs) has led to remarkable breakthroughs in natural
+languageprocessing,yettheircomplexityhasfurtherexacerbated and LiDAR, to ensure safe operation in complex road envi-
+the issue of MXAI. To gain key insights into the development of ronments [4]. Similarly, health assistants require transparency
+MXAI methods and provide crucial guidance for building more and trustworthiness to be easily understood and verified
+transparent, fair, and trustworthy AI systems, we review the
+by both doctors and patients [5]. Understanding how these
+MXAImethodsfromahistoricalperspectiveandcategorizethem
+models combine and interpret different modalities is crucial
+across four eras: traditional machine learning, deep learning,
+discriminative foundation models, and generative LLMs. We for enhancing model credibility and user trust. Moreover,
+also review evaluation metrics and datasets used in MXAI increasing model scales pose challenges in computational
+research, concluding with a discussion of future challenges and cost, interpretability, and fairness, driving the demand for
+directions. A project related to this review has been created at
+Explainable AI (XAI) [6]. As models, including generative
+https://github.com/ShilinSun/mxai review.
+LLMs, become increasingly complex and data modalities
+. more diverse, single-modal XAI methods can no longer meet
+Index Terms—large language models (LLMs), multimodal userdemands.Therefore,MultimodaleXplainableAI(MXAI)
+explainable artificial intelligence (MXAI), historical perspective,
+addresses these challenges by utilizing multimodal data in
+generative.
+eitherthemodel’spredictionorexplanationtasks,asshownin
+Fig.1.WecategorizeMXAIintothreetypesbasedonthedata
+This work was supported by National Science and Technology Major
+Project (2022ZD0117102), National Natural Science Foundation of China processing sequence: data explainability (pre-model), model
+(62293551, 62177038, 62277042, 62137002, 61937001,62377038). Project explainability (in-model), and post-hoc explainability (post-
+of China Knowledge Centre for Engineering Science and Technology,
+model). In multimodal prediction tasks, the model processes
+“LENOVO-XJTU”IntelligentIndustryJointLaboratoryProject.Wesincerely
+thankChenyangWang,YuqiSun,XinyueShen,ZhenzhenXuan,KexuanLi, multiple data modalities, such as text, images, and audio. In
+Jiayuan Li, Haonan Miao, Zengyi Chen, Yan Li and Zhihao Jiang for their multimodal explanation tasks, various modalities are used to
+help with literature organization and data collection. We also appreciate the
+explaintheresults,offeringamorecomprehensiveexplanation
+assistanceofDiZhangandZhiZenginreviewingthecontent.(Corresponding
+author:FengTian). of the final output.
+Shilin Sun and Feng Tian are with the School of Computer Science To review the history of MXAI and anticipate its develop-
+and Technology, Xi’an Jiaotong University, Xi’an, 710049, China, and also
+ment,wefirstcategorizeddifferentperiodsandretrospectively
+with the Ministry of Education Key Laboratory of Intelligent Networks and
+Network Security, Xi’an Jiaotong University, Xi’an, 710049, China (e-mail: examined various models from a historical perspective (as il-
+shilinsun@stu.xjtu.edu.cn;fengtian@mail.xjtu.edu.cn). lustratedinFig.2).Duringthetraditionalmachinelearningera
+Wenbin An, Fang Nan, and Qidong Liu are with the Faculty of
+(2000-2009),theavailabilityoflimitedstructureddatafavored
+Electronic and Information Engineering, Xi’an Jiaotong University, Xi’an,
+710049, China, and also with the Shaanxi Province Key Laboratory of Big interpretable models like decision trees. In the deep learning
+Data Knowledge Engineering, Xi’an Jiaotong University, Xi’an, 710049, era (2010-2016), the advent of large annotated datasets, such
+China (e-mail: wenbinan@stu.xjtu.edu.cn; nanfangalan@gmail.com; liuqi-
+asImageNet[7],coupledwithincreasedcomputationalpower,
+dong@stu.xjtu.edu.cn).
+Jun Liu is with the School of Computer Science and Technology, Xi’an led to the rise of complex models and explainable studies, in-
+JiaotongUniversity,Xi’an,710049,China,andalsowiththeShaanxiProvince cludingvisualizingneuralnetworkkernels[8].Inthediscrim-
+KeyLaboratoryofBigDataKnowledgeEngineering,Xi’anJiaotongUniver-
+inative foundation models era (2017-2021), the emergence of
+sity,Xi’an,710049,China(email:liukeen@xjtu.edu.cn)
+NazarafShahiswiththeInstituteforFutureTransportandCities,Coventry Transformer models, leveraging large-scale text data and self-
+University, Priory Street, Coventry, CV1 5FB, United Kingdom (e-mail: supervised learning, revolutionized NLP. This shift sparked
+aa0699@coventry.ac.uk).
+significantresearchintointerpretingattentionmechanisms[1],
+Ping Chen is with the Department of Engineering, University of Mas-
+sachusettsBoston,Boston,MA02125USA(e-mail:Ping.Chen@umb.edu) [9]–[11]. In the generative large language models era (2022-
+4202
+ceD
+81
+]VC.sc[
+1v65041.2142:viXraJOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 2
+(a) Data Explainability (b) Model Explainability (c) Post-hoc Explainability • We analyze methods across eras, covering data, model,
+Data Collection and post-hoc explainability, along with relevant datasets,
+Structural Explanation evaluation metrics, future challenges and directions.
+Data Analysis Visual Explanation • We review existing methods, summarize current ap-
+Input Output proaches,andofferinsightsintofuturedevelopmentsand
+Result Textual Explanation a systematic and comprehensive perspective from the
+Data Clean …
+Model Others standpoint of historical evolution.
+Behavioral Explanation
+II. PRELIMINARIES
+Figure 1. Illustrative diagram of Multimodal Explainable Artificial Intelli- A. MXAI Method Taxonomy
+gence.
+We categorize Artificial Intelligence (AI) into four eras
+based on key technological milestones: the release of the
+LLaMA3 Gemini
+Lambda GPT-4o ImageNet dataset in 2009 [7], marking deep learning’s rise
+ChatGPT GPT-4 Sora
+over traditional machine learning, the introduction of the
+C sol uo rse ce- d Machine Learning based AlphaCodePaLM-E EMU2 Transformer model in 2017 [1], distinguishing deep learning
+GTD r eN a nN n ers b f aoa tirs vme ed e Lr
+L
+b Mas se d
+based
+T5-11BGPT-W 3u D Laa Mo2 D.0 A VM isuin ag lGpt P- D4 TF Ala Lm LLin -L Eg ao VM Ra AM G1 -6C L 4h L Bi an Mch Ailla f 2r 0o 2m
+2
+[d 3i ]s ,cr ui sm hi en ra inti gve inm tho ede el rs a, a on fd get nh ee raa td ivv een lat rgo ef mCh oa dt eG lsP .T in
+10 B
+tn u o C r e te m a r a
+P
+1 B WG orA dN 2VeD cQ DN eViSS Eeq2 InS ceV eq pG tG ioN n-e vt 4-19B Big eG rtA TN rA am nG soP fe o AT b r- cma2 tS N
+B
+ew X re EL -tit B Rc G ih Tg PT VTr i-a sV2A un i as Sl Lf p lmo BBhr a Ea Em lF Rl Re o Tr Tld CL 2 AL UiT LI nP IiC GA L NTM L 5Li .s 1Bat .r V V 1Ea A -A i Rl BT- L- T7
+a
+D-3 LB G s-B eeEa / nV 1 X s4B A eLC CL V LW LI Q IP IPu P-- F V2 -Du LAay ao PN Eu r o- g-3E 8 2 ie. nx B 0 tT C N C- L uG LA m IP PP CT LIP • T 2 b w ci0 yh h s0 iie om9 c nh) aE : n ter ruI n ea n a s el u so t rfh e af ei nas t dtT ru ar e r bna r e asad sp, ei iat cn rMi go e vnin X in t sa eA ul ie anI r ltiM ien zm rg aa pe tc r iat e oh h n t ni o adn bd te is or lu oitL la lye sre -e ba [ f1 uar c 6 rn s th e ]i h,an d erg [ ra 1sc y s7t( us ]e2 .t pr e0 i pDmz0 oe0 es rd- - t,
+interpretability, with evaluations, focused on accuracy
+100 M
+AdaBoost.MH DBN BP-MLL MKLAlexN Ret
+esNet-50
+ZFNet GATHetGNN
+ViT
+GTNsViLT DistilBERTT5-Small
+and human-centered metrics [18], [19]. Despite their
+CTC RPCiForest AdaBoost.MRDCCA InfoGAN gLSTMMV-LSTM GCN Transformer SLIPTinyBERTDeIT-TinyACM-GNN advantages, these methods are limited by scalability and
+Random ForestLSTM MMP CCA WASIBEGoogLeNet SqueezeNet DenseNet Swin-T HGT CRESPR ViG MMCL-GCN
+flexibility issues due to small datasets and modality
+20T 0r 0aditional Machine Learnin 20g 10 Deep Learning Di 2s 0cr 1i 7minative Foundation Models 2G 02e 2nerative Large Language Models constraints, thus setting the stage for the development of
+AI development
+more advanced MXAI methods in subsequent years.
+Figure2. AsAIadvances,increasingcomputationalpowerhasledtolarger • TheEraofDeepLearning(2010-2016):MXAImethods
+modelparametercountsandagrowingnumberofmultimodalmodels. leverage deep neural networks to process and interpret
+multimodal data. Key characteristics include integrating
+different data types, developing multimodal architectures
+2024), the integration of vast multimodal data is driving the
+that combine Convolutional Neural Networks (CNNs)
+development of generative Large Language Models (LLMs),
+and Recurrent Neural Networks (RNNs), and focusing
+suchasChatGPT[3],andmultimodalfusiontechniques.These
+on joint representation learning [20], [21]. This era lays
+advancementsprovidecomprehensiveexplanations,enhancing
+the groundwork for modern MXAI by advancing data
+model transparency and trust. This evolution has led to a
+integration and interpretability techniques.
+focusonMXAI,whichinterpretsmodelshandlingdiversedata
+• The Era of Discriminative Foundation Models (2017-
+types [6].
+2021): This era is characterized by the development and
+However, recent reviews on XAI often overlook historical
+widespread adoption of models like Transformer [1],
+developments and focus mainly on unimodal approaches. For
+CLIP [22], and their variants. During this era, MXAI
+example, while [6] categorizes MXAI methods by modality
+methods focus on enhancing the interpretability of these
+count,explanationstages,andmethodtypes,itmissesexplain-
+models by leveraging multimodal data, such as text,
+ability techniques for LLMs. Although Ali et al. [12] propose
+images, and audio. Researchers aim to explain model
+a comprehensive four-axis taxonomy, it lacks multimodal and
+decisions through techniques like attention visualization,
+LLMs related summaries. However, reviews like [13], [14],
+feature attribution, and gradient-based methods. This era
+and [15] focus solely on explainability for LLMs. Our study
+featuresadvancementsinmultimodalinputswithfounda-
+addressestheseshortagesbyofferingahistorical perspective
+tion models, providing comprehensive explanations and
+of MXAI. And we categorize MXAI methods into four eras
+improving the trustworthiness of models.
+(traditional machine learning, deep learning, discriminative
+• TheEraofGenerativeLargeLanguageModels(2022-
+foundationmodels,andgenerativelargelanguagemodels),and
+2024): In this era, MXAI methods evolve to address the
+each is divided into three categories (data, model, and post-
+distinct challenges and opportunities presented by gen-
+hoc explainability). The key novel contributions of this paper
+erative LLMs like ChatGPT [3]. Unlike the more trans-
+are concluded as follows:
+parent Transformer-based discriminative models, LLMs
+• We offer a historical summary and analysis of MXAI often restrict direct access, necessitating innovative in-
+methods,includingbothtraditionalmachinelearningand terpretability methods. These techniques leverage the
+current MXAI methods based on LLMs. interactivity of LLMs to enhance adaptive explanations,JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 3
+manage the complexity of multimodal data and outputs, methods (See Section VII). In Section VIII, we discuss the
+and address ethical concerns such as biases. The focus is future challenges and directions in MXAI and conclude with
+on developing sophisticated, ethical, and user-responsive a summary.
+MXAI methods to elucidate the intricate reasoning and
+decision-making processes of these models. III. THEERAOFTRADITIONALMACHINELEARNING
+In each era, we categorize MXAI methods into three
+As shown inTable II, data explainability in thisera focuses
+main categories: data, model, and post-hoc explainability.
+primarily on data dimensionality reduction, including feature
+As shown in Fig. 1, data explainability provides insights
+selectionandextractionmethods.Modelexplainabilitymainly
+by summarizing and analyzing data, facilitating feature en-
+involves shallow machine learning models, such as decision
+gineering and standardization, such as data collection, data
+treesandBayesianmodels.Post-hocexplainabilitytechniques
+analysis and data clean. For example, Principal Component
+mainly are model-agnostic and model-specific approaches.
+Analysis (PCA) [23] can be used to reduce dimensionality
+These methods lay a crucial foundation for multimodal ex-
+and orthogonalize features across multiple modalities, such
+plainability research, with their techniques and insights ex-
+as text, images, and audio. Model explainability reveals the
+tended to multimodal contexts.
+internal structure and algorithms by structural explanation,
+behavioral explanation and so on. For example, CLIP [22]
+A. Data explainability
+canprovideexplainabilitythroughattentionmaps,whichshow
+how different modalities (e.g., text and images) contribute With advancements in technology, the proliferation of data
+to the model’s decision-making process by highlighting key generation has led to the emergence of high dimensionality
+features from each modality. Post-hoc explainability refers issues, commonly referred to as dimensional catastrophe. To
+to methods used to explain the model’s predictions after the address this, explainability methods based on dimensional-
+model has been trained. For example, Grad-CAM++ [24] re- ity reduction aim to reduce redundancy and computational
+fines Grad-CAM by offering more precise visual explanations load. Among these methods, feature selection retains original
+for models like trained CLIP. It enhances the localization of features and interpretability by selecting relevant subsets.
+imageregionsassociatedwithspecifictextforclearerinsights In contrast, feature extraction creates new features through
+into multimodal alignment. mathematicaltransformations,enhancingprocessingefficiency
+but potentially reducing interpretability.
+Feature selection methods are used to choose important
+B. Comparison with Previous Surveys
+featuresfromadatasetandarecategorizedintofilter,wrapper,
+Based on [12], we present the latest and most comprehen-
+and embedded methods. Filter methods, like those based
+sive comparison of XAI-related reviews from the past four
+on mutual information, assess each feature’s relevance in-
+years XAI-related reviews in the last four years as Table I.
+dependently of learning algorithms [16]. Wrapper methods,
+Despite numerous XAI reviews published over the last five
+exemplified by Recursive Feature Elimination (RFE) [56],
+years (see Table I), some are mostly limited to specific time
+evaluate subsets based on model performance degradation.
+eras or focused on XAI applications for particular technolo-
+Embedded methods, integrated into training processes like
+gies.Forexample,recentXAIresearchs[30],[31]havelargely
+tree-based models, determine feature importance, improving
+concentrated on summarizing developments after Transformer
+transparency in model decision-making [59].
+and has predominantly focused on unimodal explainability.
+Feature extraction methods transform original data into a
+There is a notable gap in exploring the interpretability of
+low-dimensional feature space, compressing data complex-
+LLMs from a historical and developmental perspective, as
+ity. Unlike feature selection methods, it creates new fea-
+well as leveraging multimodal information. While Rodis et
+tures rather than selecting existing ones. Principal Compo-
+al. [25] review MXAI methods in terms of both models and
+nent Analysis (PCA) [23] determines principal components
+post-hocinterpretability,itprimarilyaddressesworkpost-2016
+by eigenvectors of the data’s covariance matrix, enabling
+excluding LLMs and does not cover the explainability of
+dimensionalityreductionanddatastructurevisualization.Lin-
+Transformer and their variants.
+ear Discriminant Analysis (LDA) [71] maximizes inter-class
+Insummary,asshowninTableI,XAImethodshaveevolved
+distance and minimizes intra-class variance, enhancing data
+with advancements in artificial intelligence, with Transformer
+interpretability. t-SNE [73] preserves local structure between
+and large model interpretability emerging from this progres-
+data points in high-dimensional space to handle modal dif-
+sion. As multimodal data becomes more prominent, MXAI
+ferences. UKDR [84] extends kernel dimensionality reduction
+methods are gaining increasing attention [25]. This paper
+for unsupervised learning, offering superior low-dimensional
+addresses shortages in existing reviews by offering a com-
+embeddings compared to t-SNE and PCA.
+prehensive historical overview of MXAI methods, segmented
+into four eras: traditional machine learning (See Section III),
+B. Model explainability
+deep learning (See Section IV), discriminative foundation
+models(SeeSectionV),andgenerativelargelanguagemodels Logistic Regression (LR) is used for binary classification,
+(See Section VI). Each era is examined with respect to data, while Linear Regression is its counterpart for continuous
+models, and post-hoc explainability, and we also summarize outcomes. Both models assume linear relationships between
+relevant datasets and evaluation metrics for assessing MXAI predictors and outcomes, limiting flexibility but ensuringJOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 4
+TableI
+FOUR-YEARXAISURVEYSUMMARYANDCOMPARISON
+.feR
+raeY
+dehsilbuP
+egnar
+egarevoc
+erutaretiL
+dezylana
+era
+syevrus
+gnitsixE
+ygolodohtem
+IAXM
+ytilibanialpxe
+remrofsnarT
+ytilibanialpxe
+sMLL
+evitcepsrep
+lacirotsiH
+ytilibanialpxe
+ataD
+ytilibanialpxe
+ledoM
+ytilibanialpxe
+coh-tsoP
+sdohtem
+noitaulavE
+Main theme
+Ours 2024 2000-2024 ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✓ Historical perspective MXAI
+[25] 2023 2016-2023 ✓ ✓ ✓ ✓ MXAI methodology
+[26] 2024 2016-2024 ✓ ✓ ✓ Explainable Generative AI
+[14] 2024 2017-2024 ✓ ✓ ✓ ✓ LLM explainability strategies
+[27] 2024 2017-2024 ✓ ✓ ✓ ✓ LLMs explainability
+[13] 2024 2017-2024 ✓ ✓ ✓ ✓ LLMs explainability
+[15] 2024 2016-2023 ✓ ✓ ✓ LLMs explainability
+[28] 2023 2008-2022 ✓ ✓ ✓ User and their concerns
+[29] 2023 2018-2022 ✓ ✓ XAI applications
+[30] 2023 2016-2023 ✓ ✓ ✓ ✓ Vision Transformer explainability
+[31] 2023 2016-2023 ✓ ✓ ✓ ✓ Vision Transformer explainability
+[32] 2023 2018-2022 ✓ ✓ ✓ ✓ Human-centered XAI
+[33] 2023 2017-2021 ✓ ✓ ✓ ✓ Challenges and trends in XAI
+[12] 2022 2016-2022 ✓ ✓ ✓ ✓ ✓ Model’s trustworthiness
+[34] 2022 2006-2021 ✓ ✓ Natural Language Explanations
+[35] 2022 2015-2020 Knowledge based XAI
+[36] 2022 2016-2021 ✓ ✓ Introduction to XAI
+[37] 2022 2017-2022 ✓ ✓ ✓ Counterfactual explanations
+[38] 2022 2018-2022 ✓ ✓ ✓ XAI for time series
+[5] 2022 2018-2021 ✓ ✓ XAI in healthcare
+[39] 2021 1991-2020 ✓ ✓ ✓ ✓ Contrastive and Counterfactual XAI
+[40] 2021 2015-2020 ✓ ✓ Evaluation approaches of XAI
+[41] 2021 2017-2020 Black-box issue
+[42] 2021 2016-2020 ✓ ML interpretability methods
+[43] 2021 2016-2020 ✓ ✓ XAI methods classification
+[44] 2021 2014-2020 ✓ Argumentation enabling XAI
+[45] 2021 2015-2020 ✓ ✓ ✓ XAI methods classification
+[46] 2021 2016-2020 Necessity of explainability
+[47] 2021 2017-2020 User and their concerns
+[48] 2021 2016-2020 ✓ ✓ ✓ XAI methods classification
+TableII
+SUMMARYOFMXAIMETHODSINTHETRADITIONALMACHINELEARNINGERA
+Filter [16],[49]–[54]
+Featureselectionmethods Wrapper [55]–[58]
+Dataexplainability
+Embedded [59]–[66]
+Featureextractionmethods [23],[67]–[84]
+Linear/logisticregression [85]–[88]
+DecisionTree [18],[19],[89]–[92]
+TheEraofTraditional Modelexplainability K-NearestNeighbors [93],[94]
+MachineLearning(2000-2010) Rule-basedlearning [17],[95],[96]
+Bayesianmodels [97]–[100]
+CausalExplanation [101]–[104]
+Model-agnostictechniques CausalPrediction [105]–[108]
+Post-hocexplainability CausalIntervention [109]–[114]
+Treeensemble [19],[59],[89]–[92],[115]–[125]
+Model-specifictechniques
+Supportvectormachines [126]–[132]JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 5
+transparency. Most authors agree on the robustness of using rectangular rule extraction [129], and multi-constraint opti-
+different techniques to analyze and express LR [85]–[87]. mizationtechniques[130].Lastly,multi-kernelSVMmethods,
+Techniques from other disciplines, like visualization, effec- like those proposed by [131] and [132], employ multi-kernel
+tively interpret and present regression model results to non- approaches for feature selection and rule extraction or define
+statistical users [88]. Apart from this transparent models are linear rules using a growing SVC in Voronoi tessellation
+Decision Trees [18], K-Nearest Neighbors [93], [94], Rule- space. These methods differ in complexity and the degree of
+based learning [95], [96], Bayesian models [97]–[100], etc. interpretability they provide.
+IV. THEERAOFDEEPLEARNING
+C. Post-hoc explainability
+Model-agnostic approaches, such as causal inference meth- As shown in Table III, in this era, the shift from tradi-
+ods, have emerged as leading post-hoc explanation techniques tional machine learning—centered on manual feature engi-
+in this era due to their model independence, focus on causal neering—to deep neural networks brings new challenges in
+relationships, data-driven nature, improvements to decision- interpretability. MXAI focuses on making the “black box”
+making processes, and robust theoretical foundation. Causal nature of deep models more transparent. Key efforts include
+inferenceexplanation,amodel-agnosticpost-hocmethod,elu- balancing model performance with interpretability and devel-
+cidates causal relationships between input features and model oping both local and global explanation techniques to provide
+outputs, regardless of the model’s architecture. It includes insights into model decisions and overall behavior, enhancing
+causal explanations, which clarify mechanisms and path- the trustworthiness of systems.
+ways [102], causal prediction, which forecasts future events
+based on established relationships [105] and causal interven-
+tion, which manipulates variables to observe effects [111],
+A. Data explainability
+[112], supported by tools like structural causal models [114].
+Model-specific approaches predominantly include Tree En- 1) Data quality analysis: Data quality analysis evaluates
+semble and Support Vector Machines in this era. Tree En- and interprets data from various sources to ensure integrity,
+semble approaches, provide interpretability through feature consistency,andreliability,therebyimprovingtheperformance
+importanceanddecisionpaths[19].Incontrast,SupportVector of deep learning models [134], [135]. Traditional approaches,
+Machines (SVMs) often require more intricate techniques, such as additive noise models with Bayesian or maximum
+including rule extraction from support vectors and integra- likelihood estimation, often overlook data correlations, lim-
+tion of training data with support vectors, to elucidate their iting the effectiveness of fusion algorithms [136]. To enhance
+decision-making processes [127]. They reflect the complexity data handling, methods like optimally weighted averages are
+and interpretability of different machine learning models. employed for specific datasets, such as weather models [137].
+Tree ensemble-based explanation methods can be cat- However, challenges like conflicts and inconsistencies in mul-
+egorized into path-based, feature-importance-based, and timodaldatapersist[138].Toaddresstheseissues,information
+visualization-based approaches, each addressing distinct in- theory-based approaches dynamically reconfigure systems to
+terpretability needs. Path-based explanations analyze classi- manage sensor data inconsistencies [139]. Additionally, first-
+fication decisions by tracing paths from root to leaf nodes. order optimization techniques in weighted least squares are
+VFDT [19] enables real-time tree construction for high-speed used to capture underlying data structures and reconstruct
+datastreams,andROCR[89]providesvisualizationslikeROC missing values, thereby enhancing the robustness of data
+curvesforperformanceassessment.Enhancementsby[90]op- integrationmethods[140].Thesecombinedstrategiesimprove
+timizedecisiontreeinductionforcomplexdatasets,improving theoverallreliabilityandperformanceofdeeplearningmodels
+the method’s effectiveness. Feature-importance explanations by ensuring high-quality data.
+evaluate feature significance through metrics such as split 2) Data interaction analysis: Data interaction analysis is
+frequency or information gain. Random Forests [59] aggre- dedicated to understanding and explaining the interactions
+gate predictions to enhance performance and reveal feature between different types and sources of data. Such analyses
+dependencies. DET (Density Estimation Tree) [118] extends not only help to improve the performance of models but also
+decision trees for density estimation, offering improved in- enhance their transparency and trust. To enhance the accuracy
+terpretability. Visualization methods include decision path and coherence of generated descriptions, Vinyals et al. [141]
+and feature importance visualizations. Tools like Painting- model the correspondence between images and text using an
+Class [133] offer interactive tree construction and real-time encoder-decoder structure with an attention mechanism. Chen
+adjustments [125] to understand complex models. et al. [142] synchronize text, audio, and video features by
+Variouspost-hocexplainabilitytechniqueshavebeendevel- timestamp, utilizing the temporal relationships in multimodal
+oped to enhance the interpretability of SVM models. Some data. Venugopalan et al. [143] explain the model’s decision-
+methods involve integrating support vectors and hyperplanes, making by learning feature representations between video
+such as [127], which constructs hyper-rectangles from their and text, employing attention mechanisms and feature fusion.
+intersections. Another category combines training data with Sun et al. [144] address sequence alignment by proposing an
+support vectors, including clustering approaches [128], hyper- efficient strategy based on sampling multiple video clips.JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 6
+TableIII
+SUMMARYOFMXAIMETHODSINTHEDEEPLEARNINGERA
+Dataqualityanalysis [134]–[140]
+Dataexplainability
+Datainteractionanalysis [141]–[144]
+Inherentlyinterpretablemodels [145]–[149]
+Decomposability [8],[150],[151]
+Deepneuralnetworkinterpretability
+Algorithmictransparency [152]–[159]
+Modelexplainability
+Attention-basednetworks [1],[160]–[162]
+TheEraofDeepLearning Explainthetrainingprocess Disentangledrepresentations [20],[21],[163]
+(2011-2016) Generateexplanations [164]–[167]
+Modelsimplification [168],[169]
+Multi-layerneuralnetworks
+Feature-relatedexplanations [170]–[173]
+Understanddecision-makingprocesses [152],[153],[174]
+Post-hocexplainability ConvolutionalNeuralNetworks
+Investigatemodulefunction [154],[175]–[177]
+Feature-relatedexplanations [178],[179]
+RecurrentNeuralNetworks
+Localexplanations [180],[181]
+B. Model explainability simulating human attention to evaluate models by replicating
+1) Intrinsic interpretable models : These methods involve human cognitive processes.
+Disentangled representations improve interpretability by
+selecting from a predefined set of inherently interpretable
+isolating individual causal factors within data. Variational
+(white box) techniques [12]. For example, Ustun et al. [145]
+autoencoders(VAEs)optimizemodelstomatchinputdistribu-
+introduce supersparse linear integer models for optimizing
+tions using information-theoretic metrics [20], [21], while In-
+medical scoring systems, providing a clear, interpretable
+foGAN[163]reducesfeatureentanglementthroughgenerative
+framework for healthcare professionals. Similarly, Lakkaraju
+adversarialnetworks.Specializedlossfunctionsinfeedforward
+et al. [146] propose interpretable decision sets that combine
+networks further facilitate feature disentanglement.
+description and prediction, enhancing model transparency. In
+Additionally, deep networks can be trained to generate
+contrast, Jung et al. [147] develop simple rule-based ap-
+human-understandable explanations. Systems for tasks like
+proaches for complex decisions, ensuring understandability
+visual question answering [164] and fine-grained image clas-
+even in intricate scenarios. Furthermore, Alonso et al. [148]
+sification [165] integrate explanation generation, providing
+review current trends in the interpretability of fuzzy systems,
+multimodal outputs such as attention maps and textual inter-
+highlighting their intuitive rule-based structure. Lastly, Lou
+pretations [166]. Some methods adopt attention mechanisms
+et al. [149] present accurate intelligible models with pairwise
+toalignnetworkbehaviorwiththedesiredexplanations[167].
+interactions,achievinghighperformancewhilemaintainingin-
+terpretabilitythroughvisualizedfeatureinteractions.Together,
+theseworksunderscoretheimportanceofmodelinterpretabil-
+ity across various applications. C. Post-hoc explainability
+2) Deep neural network interpretability : Given the com- 1) Multi-layer neural networks: Multi-layer neural net-
+plexity of deep models, interpretation efforts focus primarily works(MLPs),recognizedfortheircapacitytomodelcomplex
+on decomposability and algorithmic transparency. relationships, have driven advancements in interpretability
+Fordecomposability,methodsfordeepmodeldataprocess- techniques such as model simplification, feature relevance
+ing include unit response visualization [8], deconvolutional estimation, text and local interpretation, and model visu-
+networks [150], and CNN-specific neuron preference [151]. alization [182]. For instance, [168] introduces interpretable
+For algorithmic transparency, approaches involve guiding mimic learning, a knowledge-distillation method that uses
+modelstructurerevisionsthroughinterpretability[152],[153], gradient boosting trees to create interpretable models with
+abstraction analysis of deep image representations [154]– performance comparable to deep learning models. Similarly,
+[156],andconvergencestudiesonfeaturelearningindeepnet- Che et al. [169] present Treeview to enhance interpretability
+works[157].Additionally,Kohetal.[158]assesshowtraining by partitioning the feature space with a tree structure. Fea-
+data affects models by evaluating the influence of individual ture relevance methods are employed to streamline complex
+data points without retraining. Shwartz-Ziv et al. [159] use an models, thereby improving efficiency, robustness, and trust in
+information-theoretic framework to analyze deep network be- predictions [170], [171]. Additionally, theoretical validation
+havior, offering insights into internal representation evolution efforts for multilayer neural networks have made progress in
+and improving training efficiency during diffusion phases. modelsimplification,nonlinearfeaturecorrelation,andhidden
+3) Explain the training process: Attention-based networks layer interpretation [172], [173].
+effectively direct information flow by weighting inputs or 2) Convolutional Neural Networks: Research on CNNs
+internal features, excelling in tasks like non-sequential nat- interpretabilityprimarilyfocusesontwomethods:mappingin-
+ural language translation [1], fine-grained image classifica- putstooutputstoelucidatedecision-makingprocessesandex-
+tion [160], and visual question answering [161]. While at- amining how intermediate layers perceive the external world.
+tention units are not explicitly designed for human-readable The first approach involves reconstructing feature maps
+explanations, they provide insights into information traversal from selected layers to understand activation effects. For in-
+within the network. And Das et al. [162] adopt datasets stance,Zeileretal.[152]reconstructhighactivationstorevealJOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 7
+whichpartsofanimagetriggerspecificresponses,withfurther algorithms, balancing question types and revealing strengths
+visualization provided by [153]. Bach et al. [174] employ andweaknesses.Intacklinghigh-dimensionalandmultimodal
+heatmaps and Layer-wise Relevance Propagation (LRP) to data complexity, annotations are focused on rather than raw
+illustratethecontributionofeachpixeltopredictionoutcomes, input data [186]. Tools for analyzing multimodal datasets and
+using Taylor series expansion around the prediction point for understanding annotations are proposed [187]–[189]. Addi-
+better accuracy. tionally, some methods [190], [191] address dataset noise and
+Another approach focuses on intermediate layer interpreta- bias issues. Unsupervised methods [192]–[194] are employed
+tions. Mahendran et al. [154] develop a framework to recon- toimprovepredictionperformancebyidentifyingkeyfeatures
+structimageswithinCNNs,showingthatvariouslayersmain- and simplifying semantic interpretation.
+tain distinct levels of geometric and photometric consistency. 2) Structural relationship construction: Narasimhan et
+Nguyen et al. [151] introduce a Deep Generator Network al. [195] and Zhang et al. [196] leverage graph convolutional
+(DGN) to generate images that best represent specific output networks for factual visual question answering, focusing on
+neuronsinaCNN.LIME[175]fitssimple,interpretablemod- inferring object relationships in images to answer questions
+els to approximate the behavior of target models near specific accurately. Building on this, Zhuo et al. [197] extend the
+data points, providing local interpretations. CAM [176] and approach by constructing scene graphs for individual video
+GradCAM [177] visualize activation positions for different frames and linking them into a spatio-temporal graph through
+classes to understand the model’s decision-making process. object tracking. This method facilitates the interpretation of
+3) Recurrent Neural Networks: CNNs’ limitations in han- action sequences by aligning them with human logical rea-
+dling long-term dependencies in sequential data have led to soning. In parallel, Sun et al [198] propose a hypergraph-
+the development of RNNs, which utilize their own outputs as inducedmultimodal-multitask(HIMM)networktoenhancese-
+subsequentinputs,makingthemwell-suitedforsequentialdata mantic understanding, integrating unimodal, multimodal, and
+processing. Research on RNN interpretability can be divided multitask hypergraph networks. This approach complements
+into feature-related and local explanations. the graph-based methods by addressing complex semantic
+For feature-related explanations, Arras et al. [178] clarify relationships. Additionally, Lully et al. [199] explore the use
+thepredictiveprocessesofRNNsinspecifictasks,highlighting ofknowledgegraphstoimproverecommendationexplainabil-
+theimportanceofvariousfeatures.Buildingonthis,Karpathy ity through unstructured textual descriptions, addressing the
+et al. [179] offer methods to visualize and understand the challenge of making recommendations more interpretable and
+roles of these features within the network, thus deepening our contextually relevant.
+comprehension of RNN internal mechanisms.
+In terms of local explanations, Wisdom et al. [180] en- B. Model explainability
+hanceRNNinterpretabilitythroughsequentialsparserecovery, 1) Behavioralexplanation: Intherealmofmodelbehavior
+which focuseson sparseactivations overtime to achievelocal explanations, methods are divided into architecture-dependent
+interpretability. Additionally, Krakovna et al. [181] improve and architecture-independent categories. Architecture-
+RNN interpretability by integrating Hidden Markov Models dependent methods analyze the internal mechanisms and
+(HMMs), providing a structured framework for sequential structure of the model, while architecture-independent
+interpretation. Together, these approaches advance our under- methods focus on the relationship between inputs and
+standing of RNNs by combining local interpretability tech- outputs. For example, DIME [234] enables precise analysis
+niques with structured sequential models. of multimodal models by breaking them down into unimodal
+contributions (UCs) and multimodal interactions (MIs), and
+V. THEERAOFDISCRIMINATIVEFOUNDATIONMODELS is adaptable across various modalities and architectures.
+Grad-CAM++ [24] provides fine-grained visual explanations
+This era emphasizes large-scale pre-trained models based
+by highlighting relevant input regions, and LIFT-CAM [235]
+on Transformer as concluded in Table IV. These models
+combines layer-wise relevance propagation with feature map
+are trained by unsupervised or self-supervised methods and
+activations for improved interpretability across different
+leverage transfer learning to excel across various tasks with
+models. Additionally, some unimodal approaches can be
+minimal task-specific data. They mark a shift from earlier
+extended to multimodal scenarios, maintaining independence
+advancements in neural network architectures and supervised
+from specific architectures [236]–[239]. For architecture-
+learning that characterized the previous Deep Learning era
+dependent approaches, we focus primarily on methods related
+(2010-2016).
+to Transformer and CLIP models.
+Transformer models have significantly advanced NLP by
+A. Data explainability
+identifying patterns in large datasets, but their internal work-
+1) Analyse multimodal datasets: Srinivasan et al. [183] ingsremainopaque.Variousinterpretationmethodshavebeen
+propose a multimodal interaction approach that integrates developed,eachwithdistinctadvantagesandlimitations.Prob-
+direct manipulation, natural language, and flexible unit vi- ing tasks provide a straightforward means to evaluate specific
+sualizations to enhance visual data exploration. Noroozi et knowledgewithinTransformers.Forinstance,Caoetal.[200]
+al.[184]simplifycomplexdatathrougheffectivevisualization useprobingtaskstoassesspatternslearnedduringpre-training,
+and analysis. To address limitations in VQA datasets, Kafle while Hendricks et al. [201] apply these tasks to image-
+et al. [185] introduce the TDIUC dataset to evaluate VQA language Transformers using detailed image-sentence pairs.JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 8
+TableIV
+SUMMARYOFMXAIMETHODSINTHEDISCRIMINATIVEFOUNDATIONMODELSERA
+Analysemultimodaldatasets [183]–[194]
+Dataexplainability
+Structuralrelationshipconstruction [195]–[199]
+Architecture-independent [200]–[203]
+Behavioralexplanation Transformerbased [9]–[11],[204]
+CLIPbased [205]–[208]
+Modelexplainability GNN-based [195],[196],[209]
+TheEraofDiscriminative KnowledgeGraph-based [210]–[213]
+Structuraltransparency
+FoundationModels(2017-2021) Causal-based [214]–[216]
+Others [217]–[219]
+Counterfactualbased [216],[220]–[226]
+Biasmitigation [227]–[230]
+Post-hocexplainability Multimodalrepresentation [198],[231]
+Multimodallearningprocessexplanation Multimodalreasoning [210],[216]
+Visualization [232],[233]
+Although effective, probing tasks often lack the granularity data,suchastextandimages,andturninganalogicalreasoning
+needed for deeper insights. Ablation studies offer a more fo- to link prediction tasks [210]. These techniques have been
+cusedanalysis.Forexample,Chenetal.[202]employthemto effectively applied in recommender systems. For instance,
+determine optimal pre-training setups, enhancing Transformer DKN [211] integrates knowledge graphs into news recom-
+performance. Frank et al. [203] introduce cross-modal input mendations, while other works [212] combine collaborative
+ablation to evaluate how well Transformers integrate diverse filteringwithknowledgegraphsforproductrecommendations.
+datasources.However,thesestudiesmaynotfullyclarifyindi- Additionally, Bellini et al. [213] merge the advantages of
+vidualpredictions.Tokenattributionmethods,suchas[9],help knowledgegraphsandself-encoderstodeliveraccurateandin-
+detailthecontributionsofinputtokenstofinalpredictions,aid- terpretablerecommendationresults.Theseapproachesenhance
+ing in understanding task-specific decisions. Attention weight transparency by providing clear insights into the reasoning
+analysis, as explored by [10], reveals how Transformers inter- behind recommendations and predictions. Researchers have
+pret cross-modal data, highlighting the importance of specific proposedanewcausal-basedframeworkforevent-levelVisual
+input regions. However, these methods may not consistently Question Answering (VQA) tasks. This approach uses causal
+explaintherationalebehindindividualpredictions.LTX[204] intervention operations to reveal the intricate causal structures
+generates interpretable maps of key input regions using an linking visual and linguistic modalities [214].
+interpretermodeltoemphasizeinfluentialareasinTransformer On the other hand, analyzing outputs from problem-
+predictions. This visual approach enhances the understanding branching networks and the master model helps users under-
+of decision-making processes, though its applicability across standmultimodalinformationfusionandunimodalbias[217].
+various tasks and models requires further exploration. Conversely, Cao et al. [218] adopt a dependency tree to
+In the context of multimodal models like CLIP, which enhance interpretability in VQA. TextLighT and VTCAM are
+integrates image and text data, methods often focus on an- proposed to reduce costs and improve transparency [219].
+alyzingthealignmentbetweenmodalities.Techniquessuchas
+visualizationandinputperturbationhelprevealhowthemodel C. Post-hoc explainability
+processes tasks. CLIP Surgery [205] addresses issues like 1) Counterfactual reasoning: Counterfactuals aim to infer
+erroneous visualizations and noisy activations using structural the causes of predictions and their relationships under input
+surgery and feature surgery, respectively. TagCLIP [206], on distortions. To enhance VQA model interpretability, Agarwal
+the other hand, employs a “local-to-global” framework to et al. [215] reveal and reduce spurious associations using
+enhance interpretability and classification capabilities. Addi- invariant and covariant editing, providing causal explanations
+tionally, Gandelsman et al. [207] investigate spatial localiza- and enhancing model transparency and reliability. Chen et
+tion in CLIP, analyzing its ability to identify specific objects al. [221] assess and improve model robustness by generating
+within images. This work improves CLIP’s robustness by and analyzing counterfactual samples. Niu et al. [216] adopt
+removing irrelevant features and enhancing zero-shot image counterfactuals for causal inference to analyze and explain
+segmentation capabilities. Lastly, Guo et al. [208] focus on languagebias.Panetal.[222]providecounterfactualexamples
+adapting vision-language models with limited data by si- allowuserstoinvestigateandunderstandhowtheVQAmodel
+multaneously enhancing textual prompts and image feature produces its results and the underlying causes. In visual
+adaptation, improving performance across various tasks. captioning, counterfactual interpretations emphasize observa-
+2) Structural transparency: Recent methods leveraging tions leading to certain outcomes [223], [224]. Counterfactual
+GNNs and knowledge graphs have made significant strides. reasoningisalsoappliedinreinforcementlearningsettingsfor
+Han et al. [209] adopt GNN-based techniques to capture hi- non-autoregressive image captioning [225] and scene-graph
+erarchical structures in various modalities, revealing complex representation [226].
+correlationswithinimagesandheterogeneousinterconnections 2) Bias mitigation: Unbalanced datasets or inappropriate
+amongthem.Knowledgegraph-basedapproachesofferhighly featureselectioncancompromiseinputdataqualityandaffect
+interpretable reasoning processes by integrating multimodal model fairness. Pena et al. [227] identify sources of bias inJOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 9
+TableV
+SUMMARYOFMXAIMETHODSINTHEGENERATIVELARGELANGUAGEMODELSERA
+Explainingdatasets [13],[241]–[246]
+Dataexplainability Dataselection [247]–[250]
+Graphmodeling [251]–[253]
+Explainmultimodal-ICL [254]–[260]
+Processexplanation
+Explainingmultimodal-CoT [261]–[264]
+Robustnessenhancement [265]–[267]
+Explainabledataaugmentation
+Smallmodelstraining [268]–[270]
+Modelexplainability
+Image-Textunderstanding [2],[271],[272]
+TheEraofGenerativeLarge
+Video-Textunderstanding [273],[274]
+LanguageModels Inherentinterpretability
+Audio-Textunderstanding [275],[276]
+(2022-2024)
+Multimodal-Textunderstanding [277]–[281]
+Classifier-based [282]–[285]
+Probing-basedexplanation
+Parameter-free [286]–[288]
+Modulardesign-based [289],[290]
+Post-hocexplainability Reasoning-basedexplanation Externalworldknowledge-based [286],[287],[291]
+Feedback-based [292]–[294]
+Counterfactualexamples [286],[295]–[299]
+Example-basedexplanation
+Adversarialexamples [300],[301]
+multimodalsystemsthroughpost-hocanalysesandexplainable A. Data explainability
+tools, offering improvements to mitigate these biases. Some 1) Explaining datasets: LLMs can effectively explain
+methods[228]–[230]analyzemodelbehaviorandperformance
+datasets through interactive visualization and data analysis.
+with multimodal data, identify biases and suggest improve-
+LIDA [241] generates grammar-agnostic visualizations and
+ments using visualization tools and other methods.
+infographics to understand the semantics of the data, enu-
+3) Multimodal learning process explanation: We classify merate the relevant visualization goals, and generate visual-
+MXAI applications in the multimodal learning process into izationspecifications.Othermethods[242]–[245]enhancethe
+three categories: explainable multimodal representation, mul- explainability of the datasets by analyzing the datasets.
+timodal reasoning, and visualization. Bycombiningmultimodalinformationandpowerfulnatural
+In the category of explainable multimodal representation, language processing capabilities, LLMs can provide com-
+Sun et al. [198] propose hypergraph networks to manage prehensive, in-depth, customized, and efficient explanations
+higher-order relationships within and between modalities and of data [13]. Bordt et al. [246] explore the capabilities of
+tasks in unimodal, multimodal, and multitasking scenarios. LLMsinunderstandingandinteractingwithglass-boxmodels,
+Liang et al. [231] introduce a method to quantify multimodal identifying unexpected behaviors, and suggesting repairs or
+interactions,highlightinghowintermodalinteractionsenhance improvements. The focus is on leveraging multimodal data
+signal fusion. interpretability to enhance these processes.
+For multimodal reasoning, Niu et al. [216] present CF- 2) Data selection: Data selection is crucial in this era.
+VQA, the first framework to treat linguistic bias in VQA It improves model performance and accuracy, reduces bias,
+as a causal effect, offering a causality-based explanation for enhancesgeneralization,savestrainingtimeandresources,and
+VQA debiasing methods. Zhang et al. [210] transform the boosts interpretability, making decision-making more trans-
+multimodal analogy reasoning task into a link prediction task. parent and aiding in model improvement [302]. Multimodal
+In the visualization category, Liang et al. [232] employ C4 [247] enhances dataset quality and diversity by integrat-
+MULTIVIZ, a four-step process to visualize and explain mul- ing multiple sentence-image pairs and implementing rigorous
+timodal model behavior. VL-InterpreT [233] offers interactive image filtering, excluding small, improperly proportioned im-
+visualizationstointerpretattentionandhiddenrepresentations. ages and those containing faces. This approach underscores
+text-image correlations, bolstering the robustness and inter-
+pretabilityofmultimodalmodeltraining.AnewgenerativeAI
+paradigm based on heuristic hybrid data filtering is proposed
+VI. THEERAOFGENERATIVELARGELANGUAGE
+to enhance user immersion and increase interaction levels
+MODELS
+between video generation models and language tools (e.g.,
+Thiserafocusesonadvancinggenerativetasksbythefoun- ChatGPT [3]) [248]. It enables the generation of interactive
+dations established by Discriminative Models (2017-2021). environments from individual text or image prompts.
+Unliketheirpredecessors,thesemodels,suchasGPT-4[240], In addition to the above, some works aim to improve the
+BLIP-2 [2] and their successors, generate coherent, contex- robustness of the model to distributional variations and out-
+tually relevant text, enhancing explainability by providing of-distribution data [249], [250].
+natural language explanations for outputs. This advancement 3) Graph modeling: While MLLMs can process and in-
+bridges the gap between human understanding and machine tegrate data from different modalities, they typically capture
+decision-making, enabling more nuanced interactions and in- relationships implicitly. In contrast, graph modeling explicitly
+sights into model behavior. We have concluded those works represents data nodes (e.g., objects in images, concepts in
+in Table V. text)andtheirrelationships(e.g.,semanticassociations,spatialJOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 10
+relationships). This explicit representation facilitates a more For video-text understanding, unlike images, videos incor-
+intuitive understanding of complex data relationships. Some poratetemporaldimensions,requiringmodelstoprocessstatic
+methods [251]–[253] combine graph structures with LLMs frames and understand dynamic relationships between them.
+to improve both performance in complex tasks and model This adds complexity to multimodal models but also offers
+interpretability through multimodal integration. richersemanticinformationandbroaderapplicationscenarios.
+VideoChat [273] constructs a video-centric instruction dataset
+emphasizing spatio-temporal reasoning and causal relation-
+B. Model explainability
+ships. This dataset enhances spatio-temporal reasoning, event
+1) Processexplanation: Inthisera,theprocessexplanation localization, and causal inference, integrating video and text
+of MXAI emphasizes multimodal in-context learning (ICL) to improve model accuracy and robustness. Dolphins [274]
+and multimodal Chain of Thought (CoT). The prominence combines visual and language data to interpret the driving
+of ICL comes from its ability to avoid extensive updates to environment and interact naturally with the driver. It provides
+numerous model parameters by using human-comprehensible clear,contextuallyrelevantinstructions,generatesexplanations
+natural language instructions [303]. Emu2 [254] enhances for its suggestions, and continuously learns from new experi-
+task-independent ICL by extending multimodal model gen- ences to adapt to changing driving conditions.
+eration. Link context learning (LCL) [304] focuses on causal Foraudio-textunderstanding,audiodata,withitstime-series
+reasoning to improve learning in Multimodal Large Language nature,necessitatesmodelsthatcanparseandunderstandtem-
+Models (MLLMs). A comprehensive framework for multi- poral dynamics. This extends the capabilities of multimodal
+modal ICL (M-ICL) is proposed by [255] in models like understanding. Salmonn [275] integrates a pre-trained text-
+DEFICS[256]andOpenFlamingo[257],encompassingawide based LLM with speech and audio encoders into a unified
+range of multimodal tasks. MM-Narrator [258] utilizes GPT- multimodal framework. This setup allows LLMs to process
+4 [240] and multimodal ICL for generating audio descriptions and comprehend general audio inputs directly, enhancing
+(AD). Further advancements in ICL and new multimodal ICL multimodal interpretability and providing insights into the
+variants are explored by [259]. MSIER [260] uses a neural relationshipbetweentextandaudiodata.Despiteitsstrengths,
+network to select instances that enhance the efficiency of Salmonn faces limitations in achieving comprehensive audio
+multimodal context learning. understanding. In contrast, Qwen-audio [276] advances this
+Multimodal CoT addresses the limitations of single- field by developing large-scale audio-language models. By
+modality models in complex tasks where relying solely on leveraging extensive audio and text datasets, Qwen-audio
+text or images fails to capture comprehensive information. improves the model’s ability to process and interpret diverse
+Text lacks visual cues, and images miss detailed descriptions, auditory inputs, thus pushing the boundaries of multimodal
+limitingthemodel’sreasoningabilities[305].MultimodalCoT comprehension and delivering robust performance across var-
+integrates and reasons across multiple data types, such as ious audio-related tasks.
+text and images [261]–[264]. For instance, image recognition In multimodal-text understanding, models integrate and
+can be broken down into a step-by-step cognitive process, correlate information from various modalities (e.g., image,
+constructing a chain of networks that generate visual biases, video, audio) with text. This involves comprehending each
+whichareaddedtoinputwordembeddingsateachstep[261]. modality’sfeaturesandaligningthemeffectively.Forexample,
+Zhang et al. [262] first generate rationales from visual and Flamingo [277] merges diverse inputs to understand cross-
+language inputs, then combine these with the original inputs modal correlations, addressing aspects such as temporal or-
+for reasoning. Hybrid rationales [306] use textual rationale to dering and semantic consistency. However, it struggles with
+guide visual rationale, merging features to provide a coherent dense visual data and maintaining accuracy across modalities.
+and transparent justification for answers. To overcome these challenges, MM-REACT [278] introduces
+2) Inherent interpretability: In this subsection, we explore anovelpromptdesignthatrepresentstextdescriptions,spatial
+the intrinsic interpretability of Multimodal Large Language coordinates, and filenames for visual signals like images and
+Models (MLLMs), focusing on two main categories of tasks: videos.Thisdesignfacilitatesseamlessmultimodalintegration
+multimodal understanding and multimodal generation [307]. and improves collaboration between text and vision models.
+Tasks for multimodal understanding include image-text, Despite the strong zero-shot performance, MM-REACT may
+video-text, audio-text, and multimodal-text understanding. In facedifficultieswithnewvisualcontextswithoutfurthertrain-
+image-textunderstanding,BLIP-2[2]enhancesinterpretability ing. Building on Flamingo and MM-REACT, models such as
+by aligning visual and textual data through a two-stage pre- X-LLM[279],X-InstructBLIP[280],andAnyMAL[281]aim
+training process, which improves the coherence and relevance toadvancemultimodalunderstandingandresponsegeneration.
+of image descriptions. LLaVA [308] generates instruction- By enhancing multimodal integration, these models strive to
+following data by converting image-text pairs into formats process and interpret complex real-world information with
+compatible with GPT-4 [240], linking CLIP’s visual encoder greater accuracy and versatility.
+with LLaMA’s language decoder, and fine-tuning them on 3) Explainable data augmentation: Limited data availabil-
+visual language instruction datasets. Variants such as LLaVA- ity often constrains model performance, making explainable
+MoLE [309], LLaVA-NeXT [271], and LLaVA-Med [272] data augmentation a viable solution. This section explores
+build on this foundation, with enhancements tailored to spe- using LLMs to generate explanatory synthetic data. These
+cific domains and tasks. methodsfallintotwomaincategories:robustnessenhancementJOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 11
+and guidance for training smaller models. robots, using feedback mechanisms to enhance reasoning ca-
+Toenhancerobustness,dataaugmentationhelpscreatemod- pabilities[313].Thismodularityallowsforeffectivecollabora-
+els less sensitive to specific features. Counterfactual data has tionbetweencomponentslikelanguage,perception,andaction
+beenusedinaugmentationtoimprovemodelrobustness[310]. planning, improving system adaptability and performance.
+LLMs can generate examples representing abnormal or rare Reasoning with external world knowledge involves inte-
+situations, aiding smaller models in better generalizing to grating new evidence with existing knowledge. Conan [289],
+unseen data [265], [266]. Counterfactual thinking, a cogni- aninteractiveenvironment,evaluatesactivereasoningthrough
+tive process where humans consider alternative realities, is multi-round abductive inference, similar to Minecraft. It chal-
+employed in the Self-taught Data Augmentation (SelTDA) lengesagentstoidentifythenecessaryinformationforaccurate
+framework to generate pseudo-labels from unlabelled images, answers.Toenhancereasoningaccuracy,RECKONING[290]
+improving performance and robustness in Visual Question updates model parameters with contextual knowledge before
+Answering (VQA) tasks [267]. questioning. Building on this, Statler [291] employs state-
+For training small models, explainable data augmentation maintaining language models to improve interpretation in
+also provides crucial guidance. Collecting high-quality Chain dynamicsettings,allowingforbettercontextualunderstanding.
+of Thought (CoT) rationale is time-consuming and costly, Reasoning with feedback emphasizes continuous model
+but approaches like T-SciQ [268] generate high-quality CoT adaptation based on environmental input [293]. Inner Mono-
+reasoning as teaching signals, training smaller models for logue [292] allows models to iteratively plan actions and
+CoT reasoning in multimodal tasks. Whitehouse et al. [269] update internal states, enhancing reasoning. The training-free
+utilize LLMs, including ChatGPT [3] and GPT-4 [240], to DKA[294]frameworkutilizesfeedbackfromLLMstospecify
+augment datasets, demonstrating the effectiveness of fine- the required knowledge. These advancements highlight the
+tuning smaller multilingual models like mBERT and XLM-R importanceoffeedbackandcontextualadaptationinenhancing
+with the synthesized data. model reasoning and overall performance.
+3) Example-based explanations: Counterfactual explana-
+tions demonstrate the necessary changes to examples to sig-
+C. Post-hoc explainability
+nificantly alter their predictions, providing insights into the
+1) Probing based: Probing-based explanations assess the model’s decision-making process and helping explain indi-
+internalrepresentationalcapabilitiesofMLLMsbyprobingor vidual predictions. For instance, counterfactual mechanisms
+testingthem.Thesemethodscanbecategorizedintoclassifier- have been used to reduce hallucinations and improve model
+dependent and parameter-free probing methods. trustworthiness [295]. Additionally, counterfactual reasoning
+Classifier-dependent probing methods evaluate a model’s in driving scenarios has been explored to enhance decision-
+handling of global and local semantic representations using making and understanding [286]. By designing multimodal
+classifiers. For instance, Tao et al. [282] assess the model’s counterfactual tasks, researchers evaluate language models’
+capability with semantic representations through classifier reasoning capabilities and limitations, conclude that models
+analysis. Similarly, Verma et al. [283] examine the roles of oftenstrugglewithcomplexreasoningtasks,particularlywhen
+modules in modelling visual attributes via classifiers. Prompt integrating text and image information [296]–[299]. This un-
+probing, involving visual, textual, and external information derscores the need for better multimodal explainability.
+prompts, is crucial for understanding MLLMs’ limitations in Adversarialexamplesrevealmodels’vulnerabilitiesthrough
+visual reasoning [284]. This probing indicates that nonverbal minorperturbations,potentiallyleadingtomispredictions.For
+prompts may lead to catastrophicforgetting in MLLMs [285], instance, a novel stop-reasoning attack has been introduced
+diminishing their reasoning abilities. to bypass Chain of Thought (CoT) robustness, and the study
+In contrast, parameter-free probing methods do not use also examines how CoT reasoning shifts when multimodal
+additional classifiers. DriveSim [286] simulates various driv- large language models (MLLMs) encounter adversarial im-
+ing scenarios to evaluate MLLMs’ performance in complex, ages, providing insights into their reasoning under such con-
+dynamicenvironments.Additionally,themodel’squestionan- ditions [300]. Additionally, the response of large multimodal
+sweringabilityacrossdifferentcontextsisassessedbyaltering models to crafted perturbations has been investigated, reveal-
+page contexts without additional training [287]. ing that while these models are generally robust, they remain
+2) Reasoningbased: Weidentifythreeprimarymethodolo- vulnerable to adversarial attacks [301]. This highlights the
+giesforreasoningaboutarchitectures:reasoningwithseparate need for improved interpretative techniques.
+components, reasoning with external world knowledge, and
+reasoning with feedback.
+VII. EVALUATIONDATASETSANDMETRICS
+Reasoning with separate components is crucial for ad-
+vancing complex AI and robotic systems. Zeng et al. [311] Afterreviewingthedata,model,andpost-hocexplainability
+introduce Socratic models, which use independent modules of MXAI in various eras, we have organized the datasets and
+for zero-shot multimodal reasoning, enhancing transparency. evaluation metrics in recent years as shown in Table VI, with
+LM-Nav[312]integrateslargepre-trainedmodelsoflanguage, descriptions of the types of modalities, types of explanations,
+vision,andactionthroughmodularprocessing,achievinghigh and so on, that they involve. We first categorize the relevant
+performance and interpretability. Similarly, embodied reason- datasetsbasedondifferenttasksintosixtypes.Andevaluation
+ing is explored by enabling language models to interact with metrics are primarily classified into text explanation metrics,JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 12
+TableVI
+SUMMARYOFEVALUATIONDATASETSANDMETRICS
+Task Dataset Modalities Metrics Tags Year
+VQA-X[315] Image,Text BLEU-4,METEOR,ROUGE,CIDEr,SPICE,Humaneval Textualexplanation 2018
+TextVQA-X[318] Image,Text IntersectionoverUnion(IoU),BLEU-4,METEOR,ROUGE,CIDEr Textualandvisualexplanation 2021
+DocVQA[320] Image,Text AverageNormalizedLevenshteinSimilarity(ANLS),Accuracy Textualexplanation 2021
+VQA
+SCIENCEQA[321] Image,Text BLEU-1/4,ROUGE-L,and(sentence)Similarity,Humaneval Textualexplanation 2022
+LoRA[322] Image,Text Accuracy Textualexplanation 2023
+PCA-Eval[323] Image,Text PerceptionScore,CognitionScore,ActionScore Textualexplanation 2024
+ActivityRecognition ACT-X[315] Image,Text BLEU-4,METEOR,ROUGE,CIDEr,SPICE,Humaneval Textualexplanation 2018
+BDD-X[324] Text,Video BLEU-4,METEOR,CIDEr-D,Humaneval Textualexplanation 2018
+VideoCaption Rank2Tell[4] Text,Video BLEU-4,METEOR,ROGUE,CIDER Textualexplanation 2024
+VAST[325] Text,Video,Aideo CIDER Textualexplanation 2024
+VCR[326] Image,Text Accuracy Textualexplanation 2019
+VisualCommonsenseReasoning
+DD-VQA[327] Image,Text BLUE,CIDEr,ROUGE,METEOR,SPICE Textualexplanation 2024
+ExpFashion[328] Image,Text ROUGE,BLEU Textualexplanation 2021
+Recommendationtasks REASONER[329] Text,Video ROUGE,BLEU Textualexplanation 2023
+Yanetal.[317] Image,Text BLEU,METEOR,NIST,Dinstinct,CLIP-Score,BERT-Score Textualandvisualexplanation 2023
+CUVA[319] Text,Video MMEval Textualandvisualexplanation 2024
+Videoanomalyunderstanding UCA[330] Text,Video BLEU,METEOR,ROUGE-L,CIDER Textualexplanation 2024
+HAWK[314] Text,Video BLEU,GPT-Guidedeval(Reasonability,Detail,Consistency) Textualexplanation 2024
+visual explanation metrics, and multimodal explanation met- VIII. FUTURECHALLENGESANDDIRECTIONS
+rics.
+A. Eliminating the MLLMs hallucination with MXAI
+Current methods for mitigating hallucinations mainly in-
+For text explanation metrics in multimodal settings, met-
+volve recognizing patterns and penalizing overconfident to-
+rics like BLEU-4, METEOR, ROUGE, CIDEr, and SPICE
+kens using counterfactual samples [295], [296], [298], [331].
+are commonly used. BLEU-4 measures n-gram precision,
+Although promising, these approaches have significant limita-
+while METEOR focuses on word alignment, and ROUGE
+tions, including challenges in automating sample generation,
+emphasizes recall. CIDEr and SPICE, in contrast, prioritize
+ensuring transparency in explanations, generalizing across
+consensus and semantic matching, respectively. Additionally,
+different contexts, achieving computational efficiency, and
+GPT-Guided metrics [314] are used to evaluate responses by
+incorporating user feedback. Addressing these issues is vital
+LLMs to assess the quality of answers. Moreover, human
+for further progress.
+evaluation metrics provide an additional layer of credibility
+by offering reliable assessments of explanation quality and
+B. Visual Challenges in MLLMs
+relevance[315],[316].Additionally,theNIST(NationalInsti-
+tuteofStandardsandTechnology)metric[317]refinesn-gram MLLMslikeGPT-4o[332]encountersignificantchallenges
+precision by accounting for the information gain of rarer n- with high-dimensional visual data, including content under-
+grams, making it more sensitive to meaningful word choices. standing,detailrecognition,andvisualreasoning[333],[334].
+The Distinct metric [317] promotes diversity in generated text These models often miss critical visual details, leading to bi-
+by measuring the ratio of unique n-grams, ensuring that the asedorincompleteoutputs.Improvingtheprocessingofvisual
+outputs are varied and less repetitive. data,advancingcross-modalfusiontechniques,andenhancing
+interpretability are crucial steps toward overcoming these
+challenges. Additionally, robust user feedback mechanisms
+For visual explanation metrics, Intersection over Union
+can guide ongoing refinements, ensuring that MLLMs evolve
+(IoU) is a widely used metric for evaluating visual explain-
+to better meet user needs. Despite recent advancements in
+ability, especially in image segmentation and object detection
+MLLMs, challenges like interpretability, computational power
+tasks [318]. It calculates the ratio of the intersection to the
+and inference speed across diverse contexts persist [335].
+union of the predicted and ground-truth regions. A higher
+Addressing these issues will significantly improve the capa-
+IoUscorereflectsbetteralignmentbetweenthemodel’svisual
+bilities, reliability, and practicality of MLLMs, making them
+explanationandtheactualtarget,makingitaneffectivemetric
+more effective across a wide range of applications.
+for assessing the precision of visual interpretations. It can
+combine with textual explanation metrics to eval multimodal
+explanation. C. Alignment with human cognition
+Aligning MLMs with human cognition is essential for
+For multimodal explanation metrics, CLIP Score [317] is a improving interpretability, transparency, and credibility. Since
+metric used to evaluate the alignment between generated im- language primarily functions as a communication tool rather
+agesandtheircorrespondingtextpromptsororiginalimagesin than a thought process, integrating multimodal information
+text-to-image or image-to-image tasks. It measures how well is crucial for enhancing model reasoning capabilities [336].
+the generated output matches the input in terms of seman- Future research will focus on refining multimodal fusion, de-
+tic relevance. MMEval [319] aligns with human preferences veloping explanations that mirror human cognitive processes,
+for assessing Causation Understanding of Video Anomalies and ensuring MLMs’ effectiveness in real-world scenarios.
+(CUVA) and facilitates the evaluation of LLMs’ ability to Models that are more robust, comprehensible, and effective
+comprehend the causes and effects of video anomalies. in addressing complex challenges will be proposed.JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 13
+D. MXAI without ground truths [11] Chefer,HilaandGur,ShirandWolf,Lior,“Transformerinterpretability
+beyondattentionvisualization,”inProc.ofCVPR,2021,pp.782–791.
+MLLMs encounter significant interpretability challenges,
+[12] S. Ali, T. Abuhmed, S. El-Sappagh, K. Muhammad, J. M. Alonso-
+particularlywithgroundtruths.Thecomplexityofmultimodal Moral, R. Confalonieri, R. Guidotti, J. Del Ser, N. D´ıaz-Rodr´ıguez,
+data complicates the establishment of ground truths due to andF.Herrera,“Explainableartificialintelligence(xai):Whatweknow
+andwhatislefttoattaintrustworthyartificialintelligence,”Information
+varying expressions, structures, and semantics. Ground truths
+Fusion,2023.
+are often subjective and costly to define, with human anno- [13] C.Singh,J.P.Inala,M.Galley,R.Caruana,andJ.Gao,“Rethinking
+tation inconsistencies adding to the challenge. Additionally, interpretability in the era of large language models,” arXiv preprint
+arXiv:2402.01761,2024.
+theopaquenatureofdeeplearningmodelsfurthercomplicates
+[14] X.Wu,H.Zhao,Y.Zhu,Y.Shi,F.Yang,T.Liu,X.Zhai,W.Yao,J.Li,
+aligningoutputswithgroundtruths.Forexample,cross-modal andM.Du,“Usablexai:10strategiestowardsexploitingexplainability
+reasoning, crucial for tasks like visual question answering, inthellmera,”arXivpreprintarXiv:2403.08946,2024.
+[15] H. Luo and L. Specia, “From understanding to utilization: A sur-
+requires integrating information from multiple modalities,
+vey on explainability for large language models,” arXiv preprint
+makingvalidationofgroundtruthsevenmorecomplex.Evalu- arXiv:2401.12874,2024.
+ating MLLMs in dynamic environments, such as autonomous [16] H. Peng, F. Long, and C. Ding, “Feature selection based on mu-
+tualinformationcriteriaofmax-dependency,max-relevance,andmin-
+driving, introduces further difficulties as models must accu-
+redundancy,” IEEE Transactions on pattern analysis and machine
+ratelyprocessandinterpretrapidlychanginginformation.Ad- intelligence,pp.1226–1238,2005.
+dressing these challenges demands standardized datasets and [17] H.Nu´n˜ez,C.Angulo,andA.Catala,“Rule-basedlearningsystemsfor
+supportvectormachines,”NeuralProcessingLetters,pp.1–18,2006.
+benchmarks, improved model transparency, advanced cross- [18] H. NEFESL˙IOG˘LU, E. Sezer, C. GO¨KC¸EOG˘LU, A. BOZKIR, and
+modal fusion techniques, and focused research on MLLMs T.Duman,“Assessmentoflandslidesusceptibilitybydecisiontreesin
+interpretability relative to ground truths. the metropolitan area of istanbul, turkey,” Mathematical Problems in
+Engineering,2010.
+[19] P.DomingosandG.Hulten,“Mininghigh-speeddatastreams,”inProc.
+IX. CONCLUSION ofKDD,2000,pp.71–80.
+[20] D.P.KingmaandM.Welling,“Auto-encodingvariationalbayes,”arXiv
+This paper categorizes Multimodal Explainable AI (MXAI)
+preprintarXiv:1312.6114,2013.
+methods across four historical eras: traditional machine learn- [21] I. Higgins, L. Matthey, A. Pal, C. P. Burgess, X. Glorot, M. M.
+ing, deep learning, discriminative foundation models, and Botvinick,S.Mohamed,andA.Lerchner,“beta-vae:Learningbasicvi-
+sualconceptswithaconstrainedvariationalframework.”ICLR(Poster),
+generative large language models. We analyze MXAI’s evo-
+2017.
+lution in terms of data, model, and post-hoc explainability, [22] A.Radford,J.W.Kim,C.Hallacy,A.Ramesh,G.Goh,S.Agarwal,
+and review relevant evaluation metrics and datasets. Looking G.Sastry,A.Askell,P.Mishkin,J.Clarketal.,“Learningtransferable
+visual models from natural language supervision,” in Proc. of ICML,
+ahead, key challenges include scaling explainability tech-
+2021,pp.8748–8763.
+niques, balancing model accuracy with interpretability, and [23] I. T. Jolliffe, Principal component analysis for special types of data.
+addressing ethical concerns. The ongoing advancement of Springer,2002.
+[24] A.Chattopadhay,A.Sarkar,P.Howlader,andV.N.Balasubramanian,
+MXAI is crucial for ensuring AI systems are transparent, fair,
+“Grad-cam++:Generalizedgradient-basedvisualexplanationsfordeep
+and trustworthy. convolutionalnetworks,”inProc.ofWACV,2018,pp.839–847.
+[25] N.Rodis,C.Sardianos,G.T.Papadopoulos,P.Radoglou-Grammatikis,
+REFERENCES P. Sarigiannidis, and I. Varlamis, “Multimodal explainable artificial
+intelligence:Acomprehensivereviewofmethodologicaladvancesand
+[1] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. futureresearchdirections,”arXivpreprintarXiv:2306.05731,2023.
+Gomez,Ł.Kaiser,andI.Polosukhin,“Attentionisallyouneed,”Proc. [26] J.Schneider,“Explainablegenerativeai(genxai):Asurvey,conceptual-
+ofNeurIPS,2017. ization,andresearchagenda,”arXivpreprintarXiv:2404.09554,2024.
+[2] J.Li,D.Li,S.Savarese,andS.Hoi,“Blip-2:Bootstrappinglanguage- [27] H.Zhao,H.Chen,F.Yang,N.Liu,H.Deng,H.Cai,S.Wang,D.Yin,
+image pre-training with frozen image encoders and large language andM.Du,“Explainabilityforlargelanguagemodels:Asurvey,”ACM
+models,”inProc.ofICML,2023,pp.19730–19742. TransactionsonIntelligentSystemsandTechnology,pp.1–38,2024.
+[3] OpenAI,“Chatgpt:Getinstantanswers,findcreativeinspiration,learn [28] A.K.M.B.Haque,A.K.M.N.Islam,andP.Mikalef,“Explainable
+somethingnew,”2022. artificialintelligence(xai)fromauserperspective:Asynthesisofprior
+[4] E. Sachdeva, N. Agarwal, S. Chundi, S. Roelofs, J. Li, M. Kochen- literatureandproblematizingavenuesforfutureresearch,”Technolog-
+derfer, C. Choi, and B. Dariush, “Rank2tell: A multimodal driving icalForecastingandSocialChange,2023.
+datasetforjointimportancerankingandreasoning,”inProceedingsof [29] S.AandS.R,“Asystematicreviewofexplainableartificialintelligence
+theIEEE/CVFWinterConferenceonApplicationsofComputerVision models and applications: Recent developments and future trends,”
+(WACV),2024,pp.7513–7522. DecisionAnalyticsJournal,2023.
+[5] G. Yang, Q. Ye, and J. Xia, “Unbox the black-box for the medical [30] R. Kashefi, L. Barekatain, M. Sabokrou, and F. Aghaeipoor, “Ex-
+explainable ai via multi-modal and multi-centre data fusion: A mini- plainability of vision transformers: A comprehensive review and new
+review, two showcases and beyond,” Information Fusion, pp. 29–52, perspectives,”arXivpreprintarXiv:2311.06786,2023.
+2022. [31] S. Stassin, V. Corduant, S. A. Mahmoudi, and X. Siebert, “Explain-
+[6] N.Rodis,C.Sardianos,G.T.Papadopoulos,P.Radoglou-Grammatikis, abilityandevaluationofvisiontransformers:Anin-depthexperimental
+P. Sarigiannidis, and I. Varlamis, “Multimodal explainable artificial study,”Electronics,2023.
+intelligence:Acomprehensivereviewofmethodologicaladvancesand [32] Y.Rong,T.Leemann,T.-T.Nguyen,L.Fiedler,P.Qian,V.Unhelkar,
+futureresearchdirections,”arXivpreprintarXiv:2306.05731,2023. T. Seidel, G. Kasneci, and E. Kasneci, “Towards human-centered
+[7] J.Deng,W.Dong,R.Socher,L.-J.Li,K.Li,andL.Fei-Fei,“Imagenet: explainableai:Asurveyofuserstudiesformodelexplanations,”IEEE
+A large-scale hierarchical image database,” in Proc. of CVPR, 2009, transactionsonpatternanalysisandmachineintelligence,2023.
+pp.248–255. [33] W. Saeed and C. Omlin, “Explainable ai (xai): A systematic meta-
+[8] D.Erhan,Y.Bengio,A.Courville,andP.Vincent,“Visualizinghigher- survey of current challenges and future opportunities,” Knowledge-
+layerfeaturesofadeepnetwork,”UniversityofMontreal,p.1,2009. BasedSystems,2023.
+[9] J. Chen, X. Li, L. Yu, D. Dou, and H. Xiong, “Beyond intuition: [34] E. Cambria, L. Malandri, F. Mercorio, M. Mezzanzanica, and
+Rethinkingtokenattributionsinsidetransformers,”TMLR,2022. N. Nobani, “A survey on xai and natural language explanations,”
+[10] H.Chefer,S.Gur,andL.Wolf,“Genericattention-modelexplainability InformationProcessing&Management,p.103111,2023.
+forinterpretingbi-modalandencoder-decodertransformers,”inProc. [35] I.TiddiandS.Schlobach,“Knowledgegraphsastoolsforexplainable
+ofICCV,2021,pp.397–406. machinelearning:Asurvey,”ArtificialIntelligence,p.103627,2022.JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 14
+[36] A. Holzinger, A. Saranti, C. Molnar, P. Biecek, and W. Samek, [60] K.-M. Osei-Bryson, K. Giles, and B. Kositanurit, “Exploration of
+“Explainableaimethods-abriefoverview,”inInternationalworkshop a hybrid feature selection algorithm,” Journal of the Operational
+onextendingexplainableAIbeyonddeepmodelsandclassifiers,2022, ResearchSociety,pp.790–797,2003.
+pp.13–38. [61] Z. Yan and C. Yuan, “Ant colony optimization for feature selection
+[37] R. Guidotti, “Counterfactual explanations and how to find them: in face recognition,” in Biometric Authentication: First International
+literature review and benchmarking,” Data Mining and Knowledge Conference, ICBA 2004, Hong Kong, China, July 15-17, 2004. Pro-
+Discovery,pp.1–55,2022. ceedings,2004,pp.221–226.
+[38] A. Theissler, F. Spinnato, U. Schlegel, and R. Guidotti, “Explainable [62] K. M. Shazzad and J. S. Park, “Optimization of intrusion detection
+ai for time series classification: a review, taxonomy and research throughfasthybridfeatureselection,”inSixthInternationalConference
+directions,”IeeeAccess,pp.100700–100724,2022. onParallelandDistributedComputingApplicationsandTechnologies
+[39] I. Stepin, J. M. Alonso, A. Catala, and M. Pereira-Farin˜a, “A survey (PDCAT’05),2005,pp.264–267.
+of contrastive and counterfactual explanation generation methods for [63] J. Huang, Y. Cai, and X. Xu, “A wrapper for feature selection based
+explainable artificial intelligence,” IEEE Access, pp. 11974–12001, onmutualinformation,”inProc.ofICPR,2006,pp.618–621.
+2021. [64] F.Tan,X.Fu,H.Wang,Y.Zhang,andA.Bourgeois,“Ahybridfeature
+[40] G. Vilone and L. Longo, “Notions of explainability and evaluation selectionapproachformicroarraygeneexpressiondata,”inComputa-
+approachesforexplainableartificialintelligence,”InformationFusion, tionalScience–ICCS2006:6thInternationalConference,Reading,UK,
+pp.89–106,2021. May28-31,2006.Proceedings,PartII6,2006,pp.678–685.
+[41] C. Meske, E. Bunde, J. Schneider, and M. Gersch, “Explainable [65] M.Fatourechi,G.E.Birch,andR.K.Ward,“Applicationofahybrid
+artificial intelligence: objectives, stakeholders, and future research wavelet feature selection method in the design of a self-paced brain
+opportunities,”InformationSystemsManagement,pp.53–63,2022. interfacesystem,”Journalofneuroengineeringandrehabilitation,pp.
+[42] P. Linardatos, V. Papastefanopoulos, and S. Kotsiantis, “Explainable 1–13,2007.
+ai: A review of machine learning interpretability methods,” Entropy, [66] I. A. Gheyas and L. S. Smith, “Feature subset selection in large
+p.18,2020. dimensionalitydomains,”Patternrecognition,pp.5–13,2010.
+[43] S. R. Islam, W. Eberle, S. K. Ghafoor, and M. Ahmed, “Ex- [67] A.Hyva¨rinenandE.Oja,“Independentcomponentanalysis:algorithms
+plainable artificial intelligence approaches: A survey,” arXiv preprint andapplications,”Neuralnetworks,pp.411–430,2000.
+arXiv:2101.09429,2021. [68] J.B.Tenenbaum,V.d.Silva,andJ.C.Langford,“Aglobalgeometric
+[44] A.Vassiliades,N.Bassiliades,andT.Patkos,“Argumentationandex- frameworkfornonlineardimensionalityreduction,”science,pp.2319–
+plainableartificialintelligence:asurvey,”TheKnowledgeEngineering 2323,2000.
+Review,p.e5,2021. [69] S.T.RoweisandL.K.Saul,“Nonlineardimensionalityreductionby
+[45] N.BurkartandM.F.Huber,“Asurveyontheexplainabilityofsuper- locallylinearembedding,”science,pp.2323–2326,2000.
+vised machine learning,” Journal of Artificial Intelligence Research, [70] A. M. Martinez and A. C. Kak, “Pca versus lda,” IEEE transactions
+pp.245–317,2021. onpatternanalysisandmachineintelligence,pp.228–233,2001.
+[46] J. Gerlings, A. Shollo, and I. Constantiou, “Reviewing the need for [71] J. Ye, R. Janardan, and Q. Li, “Two-dimensional linear discriminant
+explainable artificial intelligence (xai),” in Proceedings of the 54th analysis,”Proc.ofNeurIPS,2004.
+HawaiiInternationalConferenceonSystemSciences(HICSS),2021. [72] P.Sanguansat,W.Asdornwised,S.Jitapunkul,andS.Marukatat,“Two-
+[47] F. Hussain, R. Hussain, and E. Hossain, “Explainable artifi- dimensionallineardiscriminantanalysisofprinciplecomponentvectors
+cial intelligence (xai): An engineering perspective,” arXiv preprint forfacerecognition,”IEICEtransactionsoninformationandsystems,
+arXiv:2101.03613,2021. pp.2164–2170,2006.
+[48] X. Li, H. Xiong, X. Li, X. Wu, X. Zhang, J. Liu, J. Bian, and [73] L. Van der Maaten and G. Hinton, “Visualizing data using t-sne.”
+D. Dou, “Interpretable deep learning: Interpretation, interpretability, Journalofmachinelearningresearch,2008.
+trustworthiness,andbeyond,”KnowledgeandInformationSystems,pp. [74] Z. Liang, Y. Li, and P. Shi, “A note on two-dimensional linear
+3197–3234,2022. discriminant analysis,” Pattern Recognition Letters, pp. 2122–2128,
+[49] C. Ding and H. Peng, “Minimum redundancy feature selection from 2008.
+microarraygeneexpressiondata,”Journalofbioinformaticsandcom- [75] R. Zhi and Q. Ruan, “Two-dimensional direct and weighted linear
+putationalbiology,pp.185–205,2005. discriminantanalysisforfacerecognition,”Neurocomputing,pp.3607–
+[50] J. Biesiada and W. Duch, “Feature selection for high-dimensional 3611,2008.
+data—a pearson redundancy based filter,” in Computer recognition [76] A. Janecek, W. Gansterer, M. Demel, and G. Ecker, “On the re-
+systems2,2008,pp.242–249. lationship between feature selection and classification accuracy,” in
+[51] R. Horlings, D. Datcu, and L. J. Rothkrantz, “Emotion recognition New challenges for feature selection in data mining and knowledge
+usingbrainactivity,”inProceedingsofthe9thinternationalconference discovery,2008,pp.90–105.
+oncomputersystemsandtechnologiesandworkshopforPhDstudents [77] M.Ringne´r,“Whatisprincipalcomponentanalysis?”Naturebiotech-
+incomputing,2008,pp.II–1. nology,pp.303–304,2008.
+[52] P.A.Este´vez,M.Tesmer,C.A.Perez,andJ.M.Zurada,“Normalized [78] W.-S.Zheng,J.-H.Lai,andS.Z.Li,“1d-ldavs.2d-lda:Whenisvector-
+mutual information feature selection,” IEEE Transactions on neural based linear discriminant analysis better than matrix-based?” Pattern
+networks,pp.189–201,2009. Recognition,pp.2156–2172,2008.
+[53] G.-B. Huang, X. Ding, and H. Zhou, “Optimization method based [79] S. Ji and J. Ye, “Generalized linear discriminant analysis: a unified
+extremelearningmachineforclassification,”Neurocomputing,pp.155– frameworkandefficientmodelselection,”IEEETransactionsonNeural
+163,2010. Networks,pp.1768–1782,2008.
+[54] A. Bulling, J. A. Ward, H. Gellersen, and G. Tro¨ster, “Eye move- [80] H.Lu,K.N.Plataniotis,andA.N.Venetsanopoulos,“Mpca:Multilin-
+mentanalysisforactivityrecognitionusingelectrooculography,”IEEE earprincipalcomponentanalysisoftensorobjects,”IEEEtransactions
+transactions on pattern analysis and machine intelligence, pp. 741– onNeuralNetworks,pp.18–39,2008.
+753,2010. [81] J.Wright,A.Ganesh,S.Rao,Y.Peng,andY.Ma,“Robustprincipal
+[55] S.F.Cotter,K.Kreutz-Delgado,andB.D.Rao,“Backwardsequential componentanalysis:Exactrecoveryofcorruptedlow-rankmatricesvia
+eliminationforsparsevectorsubsetselection,”SignalProcessing,pp. convexoptimization,”Proc.ofNeurIPS,2009.
+1849–1864,2001. [82] R. Jenatton, G. Obozinski, and F. Bach, “Structured sparse principal
+[56] I. Guyon, J. Weston, S. Barnhill, and V. Vapnik, “Gene selection for componentanalysis,”inProc.ofAISTATS,2010,pp.366–373.
+cancerclassificationusingsupportvectormachines,”Machinelearning, [83] L.Zhang,W.Dong,D.Zhang,andG.Shi,“Two-stageimagedenoising
+pp.389–422,2002. by principal component analysis with local pixel grouping,” Pattern
+[57] S. Colak and C. Isik, “Feature subset selection for blood pressure recognition,pp.1531–1549,2010.
+classificationusingorthogonalforwardselection,”in2003IEEE29th [84] M. Wang, F. Sha, and M. Jordan, “Unsupervised kernel dimension
+AnnualProceedingsofBioengineeringConference,2003,pp.122–123. reduction,”Proc.ofNeurIPS,2010.
+[58] M. Bensch, M. Schro¨der, M. Bogdan, and W. Rosenstiel, “Feature [85] J.Jaccard,Interactioneffectsinlogisticregression. Sage,2001.
+selection for high-dimensional industrial data.” in ESANN, 2005, pp. [86] Z. Bursac, C. H. Gauss, D. K. Williams, and D. W. Hosmer, “Pur-
+375–380. poseful selection of variables in logistic regression,” Source code for
+[59] L.Breiman,“Randomforests,”Machinelearning,pp.5–32,2001. biologyandmedicine,pp.1–8,2008.JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 15
+[87] C.-Y. J. Peng, K. L. Lee, and G. M. Ingersoll, “An introduction to [116] Y.Chen,Y.Li,X.-Q.Cheng,andL.Guo,“Buildingefficientintrusion
+logisticregressionanalysisandreporting,”Thejournalofeducational detectionmodelbasedonprincipalcomponentanalysisandc4.5,”in
+research,pp.3–14,2002. 2006 International Conference on Communication Technology, 2006,
+[88] C.Mood,“Logisticregression:Whywecannotdowhatwethinkwe pp.1–4.
+cando,andwhatwecandoaboutit,”Europeansociologicalreview, [117] V. Eruhimov, V. Martyanov, and A. Polovinkin, “Transferring knowl-
+pp.67–82,2010. edge by prior feature sampling,” in New Challenges for Feature
+[89] T.Sing,O.Sander,N.Beerenwinkel,andT.Lengauer,“Rocr:visualiz- Selection in Data Mining and Knowledge Discovery, 2008, pp. 135–
+ingclassifierperformanceinr,”Bioinformatics,pp.3940–3941,2005. 147.
+[90] G. Ramos-Jime´nez, J. del Campo-A´vila, and R. Morales-Bueno, “In- [118] P.RamandA.G.Gray,“Densityestimationtrees,”inProc.ofKDD,
+duction of decision trees using an internal control of induction,” in 2011,pp.627–635.
+International Work-Conference on Artificial Neural Networks, 2005, [119] M.Ankerst,M.Ester,andH.-P.Kriegel,“Towardsaneffectivecooper-
+pp.795–803. ationoftheuserandthecomputerforclassification,”inProc.ofKDD,
+[91] S. H. Ryu, F. Casati, H. Skogsrud, B. Benatallah, and R. Saint-Paul, 2000,pp.179–188.
+“Supportingthedynamicevolutionofwebserviceprotocolsinservice- [120] N. Lavracˇ, M. Bohanec, A. Pur, B. Cestnik, M. Debeljak, and
+oriented architectures,” ACM Transactions on the Web (TWEB), pp. A. Kobler, “Data mining and visualization for decision support and
+1–46,2008. modeling of public health-care resources,” Journal of biomedical
+[92] A. Rajesh and S. Srivatsa, “Learning to match xml schemas-a deci- informatics,pp.438–447,2007.
+sion tree based approach,” International Journal of Recent Trends in [121] M. Sandri and P. Zuccolotto, “A bias correction algorithm for the
+Engineering,p.58,2009. gini variable importance measure in classification trees,” Journal of
+[93] G.Guo,H.Wang,D.Bell,Y.Bi,andK.Greer,“Anknnmodel-based ComputationalandGraphicalStatistics,pp.611–628,2008.
+approachanditsapplicationintextcategorization,”inComputational [122] B. H. Menze, B. M. Kelm, R. Masuch, U. Himmelreich, P. Bachert,
+Linguistics and Intelligent Text Processing: 5th International Confer- W.Petrich,andF.A.Hamprecht,“Acomparisonofrandomforestand
+ence,CICLing2004Seoul,Korea,February15-21,2004Proceedings itsginiimportancewithstandardchemometricmethodsforthefeature
+5,2004,pp.559–570. selectionandclassificationofspectraldata,”BMCbioinformatics,pp.
+[94] L. Li, D. M. Umbach, P. Terry, and J. A. Taylor, “Application of the 1–16,2009.
+ga/knn method to seldi proteomics data,” Bioinformatics, pp. 1638– [123] T.D.NguyenandT.Ho,“Visualizationmethodandtoolforinteractive
+1640,2004. learning of large decision trees,” in Data Mining and Knowledge
+[95] U. Johansson, R. Ko¨nig, and L. Niklasson, “The truth is in there- Discovery:Theory,Tools,andTechnologyIV,2002,pp.34–42.
+rule extraction from opaque models using genetic programming.” in [124] M. Sandri and P. Zuccolotto, “Analysis and correction of bias in
+FLAIRS,2004,pp.658–663. total decrease in node impurity measures for tree-based algorithms,”
+[96] H. Nu´n˜ez, C. Angulo, and A. Catala`, “Rule extraction from support StatisticsandComputing,pp.393–407,2010.
+vectormachines.”inEsann,2002,pp.107–112. [125] M.Ankerst,C.Elsen,M.Ester,andH.-P.Kriegel,“Visualclassifica-
+[97] T. L Griffiths, C. Kemp, and J. B Tenenbaum, “Bayesian models of tion:aninteractiveapproachtodecisiontreeconstruction,”inProc.of
+cognition,”2008. KDD,1999,pp.392–396.
+[98] B. H. Neelon, A. J. O’Malley, and S.-L. T. Normand, “A bayesian [126] N. Barakat and J. Diederich, “Eclectic rule-extraction from support
+modelforrepeatedmeasureszero-inflatedcountdatawithapplication vectormachines,”InternationalJournalofComputerandInformation
+to outpatient psychiatric service use,” Statistical modelling, pp. 421– Engineering,pp.1672–1675,2008.
+439,2010. [127] X. Fu, C. Ong, S. Keerthi, G. G. Hung, and L. Goh, “Extracting the
+[99] S.-K. Min, D. Simonis, and A. Hense, “Probabilistic climate change knowledgeembeddedinsupportvectormachines,”inProc.ofIJCNN,
+predictionsapplyingbayesianmodelaveraging,”PhilosophicalTrans- 2004,pp.291–296.
+actionsoftheRoyalSocietyA:Mathematical,PhysicalandEngineer- [128] H. Nu´n˜ez, C. Angulo, and A. Catala`, “Support vector machines
+ingSciences,pp.2103–2116,2007. with symbolic interpretation,” in VII Brazilian Symposium on Neural
+[100] G. Koop, D. Poirier, and J. Tobias, “Bayesian econometric methods Networks,2002.SBRN2002.Proceedings.,2002,pp.142–147.
+cambridge,uk:Cambridgeuniv,”Press357,2007. [129] Y. Zhang, H. Su, T. Jia, and J. Chu, “Rule extraction from trained
+[101] Gefen, Karahanna, and Straub, “Trust and tam in online shopping: supportvectormachines,”inProc.ofKDD,2005,pp.61–70.
+An integrated model,” MIS Quarterly, p. 51, Jan 2003. [Online]. [130] G. Fung, S. Sandilya, and R. B. Rao, “Rule extraction from linear
+Available:http://dx.doi.org/10.2307/30036519 supportvectormachines,”inProc.ofKDD,2005,pp.32–40.
+[102] J.Woodward,Makingthingshappen:Atheoryofcausalexplanation. [131] Z.Chen,J.Li,andL.Wei,“Amultiplekernelsupportvectormachine
+Oxforduniversitypress,2005. schemeforfeatureselectionandruleextractionfromgeneexpression
+[103] F.C.Keil,“Explanationandunderstanding,”Annu.Rev.Psychol.,pp. dataofcancertissue,”Artificialintelligenceinmedicine,pp.161–175,
+227–254,2006. 2007.
+[104] J.Pearl,“Causalinferenceinstatistics:Anoverview,”2009. [132] A.Navia-Va´zquezandE.Parrado-Herna´ndez,“Supportvectormachine
+[105] R. A. Berk et al., Statistical learning from a regression perspective. interpretation,”Neurocomputing,pp.1754–1759,2006.
+Springer,2008. [133] S. T. Teoh and K.-L. Ma, “Paintingclass: interactive construction,
+[106] G. Shmueli and O. R. Koppius, “Predictive analytics in information visualizationandexplorationofdecisiontrees,”inProc.ofKDD,2003,
+systemsresearch,”MISquarterly,pp.553–572,2011. pp.667–672.
+[107] J. Van Maanen, J. B. Sørensen, and T. R. Mitchell, “The interplay [134] A. R. Groves, C. F. Beckmann, S. M. Smith, and M. W. Woolrich,
+between theory and method,” Academy of management review, pp. “Linkedindependentcomponentanalysisformultimodaldatafusion,”
+1145–1154,2007. Neuroimage,pp.2198–2217,2011.
+[108] G.Shmueli,“Toexplainortopredict?”2010. [135] T. F. Wilderjans, E. Ceulemans, I. Van Mechelen, and R. A. Van
+[109] A. P. Dawid, “Causal inference without counterfactuals,” Journal of Den Berg, “Simultaneous analysis of coupled data matrices subject
+theAmericanstatisticalAssociation,pp.407–424,2000. to different amounts of noise,” British Journal of Mathematical and
+[110] C. G. Victora, J.-P. Habicht, and J. Bryce, “Evidence-based public StatisticalPsychology,pp.277–290,2011.
+health:movingbeyondrandomizedtrials,”Americanjournalofpublic [136] B.Khaleghi,A.Khamis,F.O.Karray,andS.N.Razavi,“Multisensor
+health,pp.400–405,2004. data fusion: A review of the state-of-the-art,” Information fusion, pp.
+[111] K. B. Korb, L. R. Hope, A. E. Nicholson, and K. Axnick, “Varieties 28–44,2013.
+ofcausalintervention,”inProc.ofPRICAI,2004,pp.322–331. [137] Y. Liberman, R. Samuels, P. Alpert, and H. Messer, “New algorithm
+[112] Y. Hagmayer, S. A. Sloman, D. A. Lagnado, and M. R. Waldmann, forintegrationbetweenwirelessmicrowavesensornetworkandradar
+“Causalreasoningthroughintervention,”Causallearning:Psychology, for improved rainfall measurement and mapping,” Atmospheric Mea-
+philosophy,andcomputation,pp.86–100,2007. surementTechniques,pp.3549–3563,2014.
+[113] M. G. Hudgens and M. E. Halloran, “Toward causal inference with [138] D.Lahat,T.Adali,andC.Jutten,“Multimodaldatafusion:anoverview
+interference,”JournaloftheAmericanStatisticalAssociation,pp.832– ofmethods,challenges,andprospects,”ProceedingsoftheIEEE,pp.
+842,2008. 1449–1477,2015.
+[114] J.Pearl,Causality. Cambridgeuniversitypress,2009. [139] N. A. Tmazirte, M. E. El Najjar, C. Smaili, and D. Pomorski,
+[115] S. Chebrolu, A. Abraham, and J. P. Thomas, “Feature deduction and “Dynamical reconfiguration strategy of a multi sensor data fusion
+ensembledesignofintrusiondetectionsystems,”Computers&security, algorithm based on information theory,” in 2013 IEEE intelligent
+pp.295–307,2005. vehiclessymposium(IV),2013,pp.896–901.JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 16
+[140] E. Acar, D. M. Dunlavy, T. G. Kolda, and M. Mørup, “Scalable ten- [166] A. Fukui, D. H. Park, D. Yang, A. Rohrbach, T. Darrell,
+sor factorizations for incomplete data,” Chemometrics and Intelligent and M. Rohrbach, “Multimodal compact bilinear pooling for vi-
+LaboratorySystems,pp.41–56,2011. sual question answering and visual grounding,” arXiv preprint
+[141] O. Vinyals, A. Toshev, S. Bengio, and D. Erhan, “Show and tell: A arXiv:1606.01847,2016.
+neural image caption generator,” in Proc. of CVPR, 2015, pp. 3156– [167] A. S. Ross, M. C. Hughes, and F. Doshi-Velez, “Right for the right
+3164. reasons:Trainingdifferentiablemodelsbyconstrainingtheirexplana-
+[142] M. Chen, S. Wang, P. P. Liang, T. Baltrusˇaitis, A. Zadeh, and L.-P. tions,”arXivpreprintarXiv:1703.03717,2017.
+Morency, “Multimodal sentiment analysis with word-level fusion and [168] Z. Che, S. Purushotham, R. Khemani, and Y. Liu, “Interpretable
+reinforcementlearning,”inProceedingsofthe19thACMinternational deepmodelsforicuoutcomeprediction,”inAMIAannualsymposium
+conferenceonmultimodalinteraction,2017,pp.163–171. proceedings,2016,p.371.
+[143] S.Venugopalan,M.Rohrbach,J.Donahue,R.Mooney,T.Darrell,and [169] J. J. Thiagarajan, B. Kailkhura, P. Sattigeri, and K. N. Ramamurthy,
+K. Saenko, “Sequence to sequence-video to text,” in Proc. of ICCV, “Treeview:Peekingintodeepneuralnetworksviafeature-spaceparti-
+2015,pp.4534–4542. tioning,”arXivpreprintarXiv:1611.07429,2016.
+[144] L.Sun,K.Jia,D.-Y.Yeung,andB.E.Shi,“Humanactionrecognition [170] G.Montavon,S.Lapuschkin,A.Binder,W.Samek,andK.-R.Mu¨ller,
+using factorized spatio-temporal convolutional networks,” in Proc. of “Explainingnonlinearclassificationdecisionswithdeeptaylordecom-
+ICCV,2015,pp.4597–4605. position,”Patternrecognition,pp.211–222,2017.
+[145] B. Ustun and C. Rudin, “Supersparse linear integer models for op- [171] A.Shrikumar,P.Greenside,A.Shcherbina,andA.Kundaje,“Notjusta
+timized medical scoring systems,” Machine Learning, pp. 349–391, blackbox:Learningimportantfeaturesthroughpropagatingactivation
+2016. differences,”arXivpreprintarXiv:1605.01713,2016.
+[146] H.Lakkaraju,S.H.Bach,andJ.Leskovec,“Interpretabledecisionsets: [172] M.Sundararajan,A.Taly,andQ.Yan,“Axiomaticattributionfordeep
+A joint framework for description and prediction,” in Proc. of KDD, networks,”inProc.ofICML,2017,pp.3319–3328.
+2016,pp.1675–1684.
+[173] P.-J. Kindermans, K. T. Schu¨tt, M. Alber, K.-R. Mu¨ller, D. Erhan,
+[147] J.Jung,C.Concannon,R.Shroff,S.Goel,andD.G.Goldstein,“Sim-
+B. Kim, and S. Da¨hne, “Learning how to explain neural networks:
+ple rules for complex decisions,” arXiv preprint arXiv:1702.04690,
+Patternnet and patternattribution,” arXiv preprint arXiv:1705.05598,
+2017.
+2017.
+[148] J. M. Alonso, C. Castiello, and C. Mencar, “Interpretability of fuzzy
+[174] S. Bach, A. Binder, G. Montavon, F. Klauschen, K.-R. Mu¨ller, and
+systems:Currentresearchtrendsandprospects,”Springerhandbookof
+W. Samek, “On pixel-wise explanations for non-linear classifier de-
+computationalintelligence,pp.219–237,2015.
+cisions by layer-wise relevance propagation,” PloS one, p. e0130140,
+[149] Y.Lou,R. Caruana,J.Gehrke,andG. Hooker,“Accurateintelligible
+2015.
+models with pairwise interactions,” in Proc. of KDD, 2013, pp. 623–
+[175] M.T.Ribeiro,S.Singh,andC.Guestrin,“”whyshoulditrustyou?”
+631.
+explaining the predictions of any classifier,” in Proc. of KDD, 2016,
+[150] K. Simonyan, A. Vedaldi, and A. Zisserman, “Deep inside convolu-
+pp.1135–1144.
+tional networks: Visualising image classification models and saliency
+[176] B.Zhou,A.Khosla,A.Lapedriza,A.Oliva,andA.Torralba,“Learning
+maps,”arXivpreprintarXiv:1312.6034,2013.
+deepfeaturesfordiscriminativelocalization,”inProc.ofCVPR,2016,
+[151] A. Nguyen, A. Dosovitskiy, J. Yosinski, T. Brox, and J. Clune,
+pp.2921–2929.
+“Synthesizingthepreferredinputsforneuronsinneuralnetworksvia
+[177] R. R. Selvaraju, M. Cogswell, A. Das, R. Vedantam, D. Parikh, and
+deepgeneratornetworks,”Proc.ofNeurIPS,2016.
+D. Batra, “Grad-cam: Visual explanations from deep networks via
+[152] M.D.Zeiler,G.W.Taylor,andR.Fergus,“Adaptivedeconvolutional
+gradient-basedlocalization,”inProc.ofICCV,2017,pp.618–626.
+networks for mid and high level feature learning,” in Proc. of ICCV,
+[178] L. Arras, G. Montavon, K.-R. Mu¨ller, and W. Samek, “Explaining
+2011,pp.2018–2025.
+recurrent neural network predictions in sentiment analysis,” arXiv
+[153] M.D.ZeilerandR.Fergus,“Visualizingandunderstandingconvolu-
+preprintarXiv:1706.07206,2017.
+tionalnetworks,”inProc.ofECCV,2014,pp.818–833.
+[179] A.Karpathy,J.Johnson,andL.Fei-Fei,“Visualizingandunderstanding
+[154] A. Mahendran and A. Vedaldi, “Understanding deep image represen-
+recurrentnetworks,”arXivpreprintarXiv:1506.02078,2015.
+tationsbyinvertingthem,”inProc.ofCVPR,2015,pp.5188–5196.
+[155] J. Yosinski, J. Clune, A. Nguyen, T. Fuchs, and H. Lipson, “Under- [180] S.Wisdom,T.Powers,J.Pitton,andL.Atlas,“Interpretablerecurrent
+standing neural networks through deep visualization,” arXiv preprint neural networks using sequential sparse recovery,” arXiv preprint
+arXiv:1506.06579,2015. arXiv:1611.07252,2016.
+[156] A.Nguyen,J.Yosinski,andJ.Clune,“Multifacetedfeaturevisualiza- [181] V. Krakovna and F. Doshi-Velez, “Increasing the interpretability of
+tion:Uncoveringthedifferenttypesoffeatureslearnedbyeachneuron recurrentneuralnetworksusinghiddenmarkovmodels,”arXivpreprint
+indeepneuralnetworks,”arXivpreprintarXiv:1602.03616,2016. arXiv:1606.05320,2016.
+[157] Y.Li,J.Yosinski,J.Clune,H.Lipson,andJ.Hopcroft,“Convergent [182] A. B. Arrieta, N. D´ıaz-Rodr´ıguez, J. Del Ser, A. Bennetot, S. Tabik,
+learning:Dodifferentneuralnetworkslearnthesamerepresentations?” A. Barbado, S. Garc´ıa, S. Gil-Lo´pez, D. Molina, and R. Benjamins,
+arXivpreprintarXiv:1511.07543,2015. “Explainableartificialintelligence(xai):Concepts,taxonomies,oppor-
+[158] P. W. Koh and P. Liang, “Understanding black-box predictions via tunitiesandchallengestowardresponsibleai,”Informationfusion,pp.
+influencefunctions,”inProc.ofICML,2017,pp.1885–1894. 82–115,2020.
+[159] R.Shwartz-ZivandN.Tishby,“Openingtheblackboxofdeepneural [183] A. Srinivasan, B. Lee, and J. Stasko, “Interweaving multimodal in-
+networksviainformation,”arXivpreprintarXiv:1703.00810,2017. teraction with flexible unit visualizations for data exploration,” IEEE
+[160] T. Xiao, Y. Xu, K. Yang, J. Zhang, Y. Peng, and Z. Zhang, “The TransactionsonVisualizationandComputerGraphics,pp.3519–3533,
+applicationoftwo-levelattentionmodelsindeepconvolutionalneural 2020.
+networkforfine-grainedimageclassification,”inProc.ofCVPR,2015, [184] O. Noroozi, I. Alikhani, S. Ja¨rvela¨, P. A. Kirschner, I. Juuso, and
+pp.842–850. T.Seppa¨nen,“Multimodaldatatodesignvisuallearninganalyticsfor
+[161] J.Lu,J.Yang,D.Batra,andD.Parikh,“Hierarchicalquestion-image understandingregulationoflearning,”ComputersinHumanBehavior,
+co-attentionforvisualquestionanswering,”Proc.ofNeurIPS,2016. pp.298–304,2019.
+[162] A. Das, H. Agrawal, L. Zitnick, D. Parikh, and D. Batra, “Human [185] K. Kafle and C. Kanan, “An analysis of visual question answering
+attentioninvisualquestionanswering:Dohumansanddeepnetworks algorithms,”inProc.ofICCV,2017,pp.1965–1973.
+lookatthesameregions?”ComputerVisionandImageUnderstanding, [186] K. Cortin˜as-Lorenzo and G. Lacey, “Toward explainable affective
+pp.90–100,2017. computing: A review,” IEEE Transactions on Neural Networks and
+[163] X. Chen, Y. Duan, R. Houthooft, J. Schulman, I. Sutskever, and LearningSystems,2023.
+P.Abbeel,“Infogan:Interpretablerepresentationlearningbyinforma- [187] H. Zeng, X. Wang, A. Wu, Y. Wang, Q. Li, A. Endert, and H. Qu,
+tionmaximizinggenerativeadversarialnets,”Proc.ofNeurIPS,2016. “Emoco:Visualanalysisofemotioncoherenceinpresentationvideos,”
+[164] S.Antol,A.Agrawal,J.Lu,M.Mitchell,D.Batra,C.L.Zitnick,and IEEE transactions on visualization and computer graphics, pp. 927–
+D.Parikh,“Vqa:Visualquestionanswering,”inProc.ofICCV,2015, 937,2019.
+pp.2425–2433. [188] H.Zeng,X.Shu,Y.Wang,Y.Wang,L.Zhang,T.-C.Pong,andH.Qu,
+[165] L.A.Hendricks,Z.Akata,M.Rohrbach,J.Donahue,B.Schiele,and “Emotioncues: Emotion-oriented visual summarization of classroom
+T.Darrell,“Generatingvisualexplanations,”inProc.ofECCV,2016, videos,” IEEE transactions on visualization and computer graphics,
+pp.3–19. pp.3168–3181,2020.JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 17
+[189] X. Wang, Y. Ming, T. Wu, H. Zeng, Y. Wang, and H. Qu, “Dehu- [211] H. Wang, F. Zhang, X. Xie, and M. Guo, “Dkn: Deep knowledge-
+mor:Visualanalyticsfordecomposinghumor,”IEEETransactionson aware network for news recommendation,” in Proc. of WWW, 2018,
+VisualizationandComputerGraphics,pp.4609–4623,2021. pp.1835–1844.
+[190] C.Wang,P.Lopes,T.Pun,andG.Chanel,“Towardsabettergoldstan- [212] Q. Ai, V. Azizi, X. Chen, and Y. Zhang, “Learning heterogeneous
+dard:Denoisingandmodellingcontinuousemotionannotationsbased knowledge base embeddings for explainable recommendation,” Algo-
+onfeatureagglomerationandoutlierregularisation,”inProceedingsof rithms,p.137,2018.
+the2018onAudio/visualEmotionChallengeandWorkshop,2018,pp. [213] V. Bellini, A. Schiavone, T. Di Noia, A. Ragone, and E. Di Sci-
+73–81. ascio, “Knowledge-aware autoencoders for explainable recommender
+[191] H. J. Escalante, H. Kaya, A. A. Salah, S. Escalera, Y. Gu¨c¸lu¨tu¨rk, systems,” in Proceedings of the 3rd workshop on deep learning for
+U. Gu¨c¸lu¨, X. Baro´, I. Guyon, J. C. J. Junior, M. Madadi et al., recommendersystems,2018,pp.24–31.
+“Modeling, recognizing, and explaining apparent personality from [214] Y.Liu,G.Li,andL.Lin,“Cross-modalcausalrelationalreasoningfor
+videos,” IEEE Transactions on Affective Computing, pp. 894–911, event-levelvisualquestionanswering,”IEEETransactionsonPattern
+2020. AnalysisandMachineIntelligence,2023.
+[192] S. Khan,L. Chen,and H.Yan, “Co-clusteringto reveal salient facial [215] V.Agarwal,R.Shetty,andM.Fritz,“Towardscausalvqa:Revealing
+features for expression recognition,” IEEE Transactions on Affective andreducingspuriouscorrelationsbyinvariantandcovariantsemantic
+Computing,pp.348–360,2017. editing,”inProc.ofCVPR,2020,pp.9690–9698.
+[193] I. Siegert, R. Bo¨ck, and A. Wendemuth, “Using a pca-based dataset [216] Y. Niu, K. Tang, H. Zhang, Z. Lu, X.-S. Hua, and J.-R. Wen,
+similaritymeasuretoimprovecross-corpusemotionrecognition,”Com- “Counterfactualvqa:Acause-effectlookatlanguagebias,”inProc.of
+puterSpeech&Language,pp.1–23,2018. CVPR,2021,pp.12700–12710.
+[194] S. Kang, D. Kim, and Y. Kim, “A visual-physiology multimodal [217] R. Cadene, C. Dancette, M. Cord, D. Parikh et al., “Rubi: Reducing
+system for detecting outlier behavior of participants in a reality unimodal biases for visual question answering,” Proc. of NeurIPS,
+tv show,” International Journal of Distributed Sensor Networks, p. 2019.
+1550147719864886,2019. [218] Q. Cao, X. Liang, B. Li, and L. Lin, “Interpretable visual question
+[195] M. Narasimhan, S. Lazebnik, and A. Schwing, “Out of the box: answering by reasoning on dependency trees,” IEEE transactions on
+Reasoning with graph convolution nets for factual visual question patternanalysisandmachineintelligence,pp.887–901,2019.
+answering,”Proc.ofNeurIPS,2018. [219] Q. Wang, H. Deng, X. Wu, Z. Yang, Y. Liu, Y. Wang, and G. Hao,
+[196] Y.Zhang,A.Jia,B.Wang,P.Zhang,D.Zhao,P.Li,Y.Hou,X.Jin, “Lcm-captioner: A lightweight text-based image captioning method
+D. Song, and J. Qin, “M3gat: A multi-modal, multi-task interactive with collaborative mechanism between vision and text,” Neural Net-
+graph attention network for conversational sentiment analysis and
+works,pp.318–329,2023.
+emotionrecognition,”ACMTransactionsonInformationSystems,pp. [220] S.Uppal,S.Bhagat,D.Hazarika,N.Majumder,S.Poria,R.Zimmer-
+1–32,2023. mann, and A. Zadeh, “Multimodal research in vision and language:
+A review of current and emerging trends,” Information Fusion, pp.
+[197] T.Zhuo,Z.Cheng,P.Zhang,Y.Wong,andM.Kankanhalli,“Explain-
+149–171,2022.
+ablevideoactionreasoningviapriorknowledgeandstatetransitions,”
+inProc.ofACMMM,2019,pp.521–529. [221] L.Chen,X.Yan,J.Xiao,H.Zhang,S.Pu,andY.Zhuang,“Counter-
+factualsamplessynthesizingforrobustvisualquestionanswering,”in
+[198] X. Sun, F. Yao, and C. Ding, “Modeling high-order relationships:
+Proc.ofCVPR,2020,pp.10800–10809.
+Brain-inspired hypergraph-induced multimodal-multitask framework
+[222] J. Pan, Y. Goyal, and S. Lee, “Question-conditioned counterfactual
+forsemanticcomprehension,”IEEETransactionsonNeuralNetworks
+imagegenerationforvqa,”arXivpreprintarXiv:1911.06352,2019.
+andLearningSystems,2023.
+[223] A. Kanehira, K. Takemoto, S. Inayoshi, and T. Harada, “Multimodal
+[199] V.Lully,P.Laublet,M.Stankovic,andF.Radulovic,“Enhancingex-
+explanations by predicting counterfactuality in videos,” in Proc. of
+planationsinrecommendersystemswithknowledgegraphs,”Procedia
+CVPR,2019,pp.8594–8602.
+ComputerScience,pp.211–222,2018.
+[224] L. A. Hendricks, R. Hu, T. Darrell, and Z. Akata, “Generating
+[200] J. Cao, Z. Gan, Y. Cheng, L. Yu, Y.-C. Chen, and J. Liu, “Behind
+counterfactual explanations with natural language,” arXiv preprint
+the scene: Revealing the secrets of pre-trained vision-and-language
+arXiv:1806.09809,2018.
+models,”inProc.ofECCV,2020,pp.565–580.
+[225] L.Guo,J.Liu,X.Zhu,X.He,J.Jiang,andH.Lu,“Non-autoregressive
+[201] L.A.HendricksandA.Nematzadeh,“Probingimage-languagetrans-
+image captioning with counterfactuals-critical multi-agent learning,”
+formers for verb understanding,” arXiv preprint arXiv:2106.09141,
+arXivpreprintarXiv:2005.04690,2020.
+2021.
+[226] L.Chen,H.Zhang,J.Xiao,X.He,S.Pu,andS.-F.Chang,“Counter-
+[202] Y.-C.Chen,L.Li,L.Yu,A.ElKholy,F.Ahmed,Z.Gan,Y.Cheng,
+factualcriticmulti-agenttrainingforscenegraphgeneration,”inProc.
+and J. Liu, “Uniter: Universal image-text representation learning,” in
+ofICCV,2019,pp.4613–4623.
+Proc.ofECCV,2020,pp.104–120.
+[227] A.Pena,I.Serna,A.Morales,andJ.Fierrez,“Biasinmultimodalai:
+[203] S.Frank,E.Bugliarello,andD.Elliott,“Vision-and-languageorvision-
+Testbed for fair automatic recruitment,” in Proc. of CVPR, 2020, pp.
+for-language? on cross-modal influence in multimodal transformers,”
+28–29.
+arXivpreprintarXiv:2109.04448,2021.
+[228] V. Manjunatha, N. Saini, and L. S. Davis, “Explicit bias discovery
+[204] O.Barkan,Y.Asher,A.Eshel,Y.Elisha,andN.Koenigstein,“Learning in visual question answering models,” in Proc. of CVPR, 2019, pp.
+to explain: A model-agnostic framework for explaining black box 9562–9571.
+models,”inProc.ofICDM,2023,pp.944–949.
+[229] L. A. Hendricks, K. Burns, K. Saenko, T. Darrell, and A. Rohrbach,
+[205] Y.Li,H.Wang,Y.Duan,andX.Li,“Clipsurgeryforbetterexplain- “Women also snowboard: Overcoming bias in captioning models,” in
+ability with enhancement in open-vocabulary tasks,” arXiv preprint Proc.ofECCV,2018,pp.771–787.
+arXiv:2304.05653,2023. [230] S. Ramakrishnan, A. Agrawal, and S. Lee, “Overcoming language
+[206] Y. Lin, M. Chen, K. Zhang, H. Li, M. Li, Z. Yang, D. Lv, B. Lin, priors in visual question answering with adversarial regularization,”
+H.Liu,andD.Cai,“Tagclip:Alocal-to-globalframeworktoenhance Proc.ofNeurIPS,2018.
+open-vocabularymulti-labelclassificationofclipwithouttraining,”in [231] P. P. Liang, Y. Cheng, R. Salakhutdinov, and L.-P. Morency, “Mul-
+Proc.ofAAAI,2024,pp.3513–3521. timodal fusion interactions: A study of human and automatic quan-
+[207] Y. Gandelsman, A. A. Efros, and J. Steinhardt, “Interpreting clip’s tification,” in Proceedings of the 25th International Conference on
+image representation via text-based decomposition,” arXiv preprint MultimodalInteraction,2023,pp.425–435.
+arXiv:2310.05916,2023. [232] P. P. Liang, Y. Lyu, G. Chhablani, N. Jain, Z. Deng, X. Wang, L.-P.
+[208] Z.Guo,Y.Wei,M.Liu,Z.Ji,J.Bai,Y.Guo,andW.Zuo,“Black-box Morency, and R. Salakhutdinov, “Multiviz: Towards visualizing and
+tuning of vision-language models with effective gradient approxima- understanding multimodal models,” arXiv preprint arXiv:2207.00056,
+tion,”arXivpreprintarXiv:2312.15901,2023. 2022.
+[209] L.Han,X.Zhang,L.Zhang,M.Lu,F.Huang,andY.Liu,“Unveiling [233] E. Aflalo, M. Du, S.-Y. Tseng, Y. Liu, C. Wu, N. Duan, and V. Lal,
+hierarchical relationships for social image representation learning,” “Vl-interpret:Aninteractivevisualizationtoolforinterpretingvision-
+AppliedSoftComputing,p.110792,2023. languagetransformers,”inProc.ofCVPR,2022,pp.21406–21415.
+[210] N. Zhang, L. Li, X. Chen, X. Liang, S. Deng, and H. Chen, “Multi- [234] Y. Lyu, P. P. Liang, Z. Deng, R. Salakhutdinov, and L.-P. Morency,
+modalanalogicalreasoningoverknowledgegraphs,”inProc.ofICLR, “Dime: Fine-grained interpretations of multimodal models via disen-
+2022. tangledlocalexplanations,”inProc.ofAAAI,2022,pp.455–467.JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 18
+[235] H. Jung and Y. Oh, “Towards better explanations of class activation models with in-context learning,” arXiv preprint arXiv:2310.00647,
+mapping,”inProc.ofICCV,2021,pp.1336–1344. 2023.
+[236] P.K.Mudrakarta,A.Taly,M.Sundararajan,andK.Dhamdhere,“Did [260] Y. Luo, Z. Zheng, Z. Zhu, and Y. You, “How does the textual
+themodelunderstandthequestion?”arXivpreprintarXiv:1805.05492, information affect the retrieval of multimodal in-context learning?”
+2018. arXivpreprintarXiv:2404.12866,2024.
+[237] S.M.Hofmann,F.Beyer,S.Lapuschkin,O.Goltermann,M.Loeffler, [261] J. Ge, H. Luo, S. Qian, Y. Gan, J. Fu, and S. Zhang, “Chain of
+K.-R.Mu¨ller,A.Villringer,W.Samek,andA.V.Witte,“Towardsthe thought prompt tuning in vision language models,” arXiv preprint
+interpretability of deep learning models for multi-modal neuroimag- arXiv:2304.07919,2023.
+ing: Finding structural changes of the ageing brain,” NeuroImage, p. [262] Z. Zhang, A. Zhang, M. Li, H. Zhao, G. Karypis, and A. Smola,
+119504,2022. “Multimodal chain-of-thought reasoning in language models,” arXiv
+[238] A.R.Asokan,N.Kumar,A.V.Ragam,andS.Shylaja,“Interpretability preprintarXiv:2302.00923,2023.
+formultimodalemotionrecognitionusingconceptactivationvectors,” [263] D. Rose, V. Himakunthala, A. Ouyang, R. He, A. Mei, Y. Lu,
+inProc.ofIJCNN,2022,pp.01–08. M. Saxon, C. Sonar, D. Mirza, and W. Y. Wang, “Visual chain
+[239] V. Petsiuk, A. Das, and K. Saenko, “Rise: Randomized input of thought: bridging logical gaps with multimodal infillings,” arXiv
+sampling for explanation of black-box models,” arXiv preprint preprintarXiv:2305.02317,2023.
+arXiv:1806.07421,2018. [264] V.Himakunthala,A.Ouyang,D.Rose,R.He,A.Mei,Y.Lu,C.Sonar,
+[240] OpenAI,“Gpt-4technicalreport,”Tech.Rep.,2023. M.Saxon,andW.Y.Wang,“Let’sthinkframebyframewithvip:A
+[241] V.Dibia,“Lida:Atoolforautomaticgenerationofgrammar-agnostic video infilling and prediction dataset for evaluating video chain-of-
+visualizations and infographics using large language models,” arXiv thought,”arXivpreprintarXiv:2305.13903,2023.
+preprintarXiv:2303.02927,2023. [265] A. Xu, X. Ren, and R. Jia, “Contrastive novelty-augmented learning:
+[242] A. Narayan, I. Chami, L. Orr, S. Arora, and C. Re´, “Can foundation Anticipating outliers with large language models,” arXiv preprint
+modelswrangleyourdata?”arXivpreprintarXiv:2205.09911,2022. arXiv:2211.15718,2022.
+[243] Q.Huang,J.Vora,P.Liang,andJ.Leskovec,“Benchmarkinglargelan- [266] R.Tang,X.Han,X.Jiang,andX.Hu,“Doessyntheticdatageneration
+guagemodelsasairesearchagents,”arXivpreprintarXiv:2310.03302, of llms help clinical text mining?” arXiv preprint arXiv:2303.04360,
+2023. 2023.
+[267] Z. Khan, V. K. BG, S. Schulter, X. Yu, Y. Fu, and M. Chandraker,
+[244] P.Li,Y.He,D.Yashar,W.Cui,S.Ge,H.Zhang,D.RifinskiFainman,
+“Q:Howtospecializelargevision-languagemodelstodata-scarcevqa
+D. Zhang, and S. Chaudhuri, “Table-gpt: Table fine-tuned gpt for
+tasks?a:Self-trainonunlabeledimages!”inProc.ofCVPR,2023,pp.
+diversetabletasks,”ProceedingsoftheACMonManagementofData,
+15005–15015.
+pp.1–28,2024.
+[268] L.Wang,Y.Hu,J.He,X.Xu,N.Liu,H.Liu,andH.T.Shen,“T-sciq:
+[245] T. Zhang, S. Wang, S. Yan, J. Li, and Q. Liu, “Generative table
+Teaching multimodal chain-of-thought reasoning via large language
+pre-training empowers models for tabular prediction,” arXiv preprint
+modelsignalsforsciencequestionanswering,”inProc.ofAAAI,2024,
+arXiv:2305.09696,2023.
+pp.19162–19170.
+[246] S.Bordt,B.Lengerich,H.Nori,andR.Caruana,“Datasciencewith
+[269] C. Whitehouse, M. Choudhury, and A. F. Aji, “Llm-powered data
+llmsandinterpretablemodels,”arXivpreprintarXiv:2402.14474,2024.
+augmentationforenhancedcross-lingualperformance,”arXivpreprint
+[247] W.Zhu,J.Hessel,A.Awadalla,S.Y.Gadre,J.Dodge,A.Fang,Y.Yu,
+arXiv:2305.14288,2023.
+L. Schmidt, W. Y. Wang, and Y. Choi, “Multimodal c4: An open,
+[270] W. An, W. Shi, F. Tian, H. Lin, Q. Wang, Y. Wu, M. Cai, L. Wang,
+billion-scalecorpusofimagesinterleavedwithtext,”Proc.ofNeurIPS,
+Y. Chen, H. Zhu et al., “Generalized category discovery with large
+2024.
+languagemodelsintheloop,”arXivpreprintarXiv:2312.10897,2023.
+[248] J. Bruce, M. D. Dennis, A. Edwards, J. Parker-Holder, Y. Shi,
+[271] H.Liu,C.Li,Y.Li,B.Li,Y.Zhang,S.Shen,andY.J.Lee,“Llava-
+E. Hughes, M. Lai, A. Mavalankar, R. Steigerwald, C. Apps et al.,
+next:Improvedreasoning,ocr,andworldknowledge,”2024.
+“Genie:Generativeinteractiveenvironments,”inProc.ofICML,2024.
+[272] C.Li,C.Wong,S.Zhang,N.Usuyama,H.Liu,J.Yang,T.Naumann,
+[249] T.Nguyen,G.Ilharco,M.Wortsman,S.Oh,andL.Schmidt,“Quality
+H.Poon,andJ.Gao,“Llava-med:Trainingalargelanguage-and-vision
+notquantity:Ontheinteractionbetweendatasetdesignandrobustness
+assistantforbiomedicineinoneday,”Proc.ofNeurIPS,2024.
+ofclip,”Proc.ofNeurIPS,pp.21455–21469,2022.
+[273] K.Li,Y.He,Y.Wang,Y.Li,W.Wang,P.Luo,Y.Wang,L.Wang,and
+[250] Y. Deng, Y. Yang, B. Mirzasoleiman, and Q. Gu, “Robust learning
+Y.Qiao,“Videochat:Chat-centricvideounderstanding,”arXivpreprint
+withprogressivedataexpansionagainstspuriouscorrelation,”Proc.of
+arXiv:2305.06355,2023.
+NeurIPS,2024.
+[274] Y.Ma,Y.Cao,J.Sun,M.Pavone,andC.Xiao,“Dolphins:Multimodal
+[251] Y. Wei, S. Fu, W. Jiang, J. T. Kwok, and Y. Zhang, “Rendering languagemodelfordriving,”arXivpreprintarXiv:2312.00438,2023.
+graphs for graph reasoning in multimodal large language models,” [275] C. Tang, W. Yu, G. Sun, X. Chen, T. Tan, W. Li, L. Lu, Z. Ma,
+arXivpreprintarXiv:2402.02130,2024.
+and C. Zhang, “Salmonn: Towards generic hearing abilities for large
+[252] J. Xu, Z. Wu, M. Lin, X. Zhang, and S. Wang, “Llm and gnn are languagemodels,”arXivpreprintarXiv:2310.13289,2023.
+complementary: Distilling llm for multimodal graph learning,” arXiv [276] Y. Chu, J. Xu, X. Zhou, Q. Yang, S. Zhang, Z. Yan, C. Zhou,
+preprintarXiv:2406.01032,2024. and J. Zhou, “Qwen-audio: Advancing universal audio understand-
+[253] Y. Huang, W. Zhang, L. Feng, X. Wu, and K. C. Tan, “How mul- ing via unified large-scale audio-language models,” arXiv preprint
+timodal integration boost the performance of llm for optimization: arXiv:2311.07919,2023.
+Case study on capacitated vehicle routing problems,” arXiv preprint [277] J.-B. Alayrac, J. Donahue, P. Luc, A. Miech, I. Barr, Y. Hasson,
+arXiv:2403.01757,2024. K. Lenc, A. Mensch, K. Millican, M. Reynolds et al., “Flamingo: a
+[254] Q.Sun,Y.Cui,X.Zhang,F.Zhang,Q.Yu,Y.Wang,Y.Rao,J.Liu, visual language model for few-shot learning,” Proc. of NeurIPS, pp.
+T.Huang,andX.Wang,“Generativemultimodalmodelsarein-context 23716–23736,2022.
+learners,”inProc.ofCVPR,2024,pp.14398–14409. [278] Z. Yang, L. Li, J. Wang, K. Lin, E. Azarnasab, F. Ahmed, Z. Liu,
+[255] F.B.Baldassini,M.Shukor,M.Cord,L.Soulier,andB.Piwowarski, C. Liu, M. Zeng, and L. Wang, “Mm-react: Prompting chatgpt for
+“Whatmakesmultimodalin-contextlearningwork?”inProc.ofCVPR, multimodal reasoning and action,” arXiv preprint arXiv:2303.11381,
+2024,pp.1539–1550. 2023.
+[256] H. Laurenc¸on, L. Saulnier, L. Tronchon, S. Bekman, A. Singh, [279] F. Chen, M. Han, H. Zhao, Q. Zhang, J. Shi, S. Xu, and B. Xu, “X-
+A. Lozhkov, T. Wang, S. Karamcheti, A. Rush, D. Kiela et al., llm:Bootstrappingadvancedlargelanguagemodelsbytreatingmulti-
+“Obelics:Anopenweb-scalefiltereddatasetofinterleavedimage-text modalities as foreign languages,” arXiv preprint arXiv:2305.04160,
+documents,”Proc.ofNeurIPS,2024. 2023.
+[257] A. Awadalla, I. Gao, J. Gardner, J. Hessel, Y. Hanafy, W. Zhu, [280] A. Panagopoulou, L. Xue, N. Yu, J. Li, D. Li, S. Joty, R. Xu,
+K. Marathe, Y. Bitton, S. Gadre, S. Sagawa et al., “Openflamingo: S.Savarese,C.Xiong,andJ.C.Niebles,“X-instructblip:Aframework
+An open-source framework for training large autoregressive vision- for aligning x-modal instruction-aware representations to llms and
+languagemodels,”arXivpreprintarXiv:2308.01390,2023. emergent cross-modal reasoning,” arXiv preprint arXiv:2311.18799,
+[258] C. Zhang, K. Lin, Z. Yang, J. Wang, L. Li, C.-C. Lin, Z. Liu, and 2023.
+L.Wang,“Mm-narrator:Narratinglong-formvideoswithmultimodal [281] S. Moon, A. Madotto, Z. Lin, T. Nagarajan, M. Smith, S. Jain, C.-F.
+in-contextlearning,”inProc.ofCVPR,2024,pp.13647–13657. Yeh, P. Murugesan, P. Heidari, Y. Liu et al., “Anymal: An efficient
+[259] M. Shukor, A. Rame, C. Dancette, and M. Cord, “Beyond task andscalableany-modalityaugmentedlanguagemodel,”arXivpreprint
+performance: Evaluating and reducing the flaws of large multimodal arXiv:2309.16058,2023.JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 19
+[282] M.Tao,Q.Huang,K.Xu,L.Chen,Y.Feng,andD.Zhao,“Probing [305] T. Bai, H. Liang, B. Wan, L. Yang, B. Li, Y. Wang, B. Cui, C. He,
+multimodal large language models for global and local semantic B.Yuan,andW.Zhang,“Asurveyofmultimodallargelanguagemodel
+representation,”arXivpreprintarXiv:2402.17304,2024. from a data-centric perspective,” arXiv preprint arXiv:2405.16640,
+[283] G. Verma, M. Choi, K. Sharma, J. Watson-Daniels, S. Oh, and 2024.
+S. Kumar, “Mysterious projections: Multimodal llms gain domain- [306] Q. Zhou, R. Zhou, Z. Hu, P. Lu, S. Gao, and Y. Zhang, “Image-of-
+specific visual capabilities without richer cross-modal projections,” thoughtpromptingforvisualreasoningrefinementinmultimodallarge
+arXivpreprintarXiv:2402.16832,2024. languagemodels,”arXivpreprintarXiv:2405.13872,2024.
+[284] S. Qi, Z. Cao, J. Rao, L. Wang, J. Xiao, and X. Wang, “What is the [307] D.Zhang,Y.Yu,C.Li,J.Dong,D.Su,C.Chu,andD.Yu,“Mm-llms:
+limitation of multimodal llms? a deeper look into multimodal llms Recentadvancesinmultimodallargelanguagemodels,”arXivpreprint
+through prompt probing,” Information Processing & Management, p. arXiv:2401.13601,2024.
+103510,2023. [308] H.Liu,C.Li,Q.Wu,andY.J.Lee,“Visualinstructiontuning,”Proc.
+[285] K.Li,A.K.Hopkins,D.Bau,F.Vie´gas,H.Pfister,andM.Wattenberg, ofNeurIPS,2024.
+“Emergentworldrepresentations:Exploringasequencemodeltrained [309] S.Chen,Z.Jie,andL.Ma,“Llava-mole:Sparsemixtureofloraexperts
+onasynthetictask,”arXivpreprintarXiv:2210.13382,2022. for mitigating data conflicts in instruction finetuning mllms,” arXiv
+[286] S. Sreeram, T.-H. Wang, A. Maalouf, G. Rosman, S. Karaman, and preprintarXiv:2401.16160,2024.
+D.Rus,“Probingmultimodalllmsasworldmodelsfordriving,”arXiv [310] Z. Wang and A. Culotta, “Robustness to spurious correlations in text
+preprintarXiv:2405.05956,2024. classificationviaautomaticallygeneratedcounterfactuals,”inProc.of
+[287] Y. Lu, X. Li, T.-J. Fu, M. Eckstein, and W. Y. Wang, “From text to AAAI,2021,pp.14024–14031.
+pixel:Advancinglong-contextunderstandinginmllms,”arXivpreprint [311] A.Zeng,M.Attarian,B.Ichter,K.Choromanski,A.Wong,S.Welker,
+arXiv:2405.14213,2024. F. Tombari, A. Purohit, M. Ryoo, V. Sindhwani et al., “Socratic
+[288] W.An,F.Tian,S.Leng,J.Nie,H.Lin,Q.Wang,G.Dai,P.Chen,and models: Composing zero-shot multimodal reasoning with language,”
+S.Lu,“Agla:Mitigatingobjecthallucinationsinlargevision-language arXivpreprintarXiv:2204.00598,2022.
+models with assembly of global and local attention,” arXiv preprint [312] D.Shah,B.Osin´ski,S.Levineetal.,“Lm-nav:Roboticnavigationwith
+arXiv:2406.12718,2024. largepre-trainedmodelsoflanguage,vision,andaction,”inConference
+[289] M.Xu,G.Jiang,W.Liang,C.Zhang,andY.Zhu,“Activereasoning onrobotlearning,2023,pp.492–504.
+inanopen-worldenvironment,”Proc.ofNeurIPS,2024. [313] I.Dasgupta,C.Kaeser-Chen,K.Marino,A.Ahuja,S.Babayan,F.Hill,
+[290] Z. Chen, G. Weiss, E. Mitchell, A. Celikyilmaz, and A. Bosselut, and R. Fergus, “Collaborating with language models for embodied
+“Reckoning: reasoning through dynamic knowledge encoding,” Proc. reasoning,”arXivpreprintarXiv:2302.00763,2023.
+ofNeurIPS,2024. [314] J.Tang,H.Lu,R.Wu,X.Xu,K.Ma,C.Fang,B.Guo,J.Lu,Q.Chen,
+[291] T.Yoneda,J.Fang,P.Li,H.Zhang,T.Jiang,S.Lin,B.Picker,D.Yu- and Y.-C. Chen, “Hawk: Learning to understand open-world video
+nis, H. Mei, and M. R. Walter, “Statler: State-maintaining language anomalies,”arXivpreprintarXiv:2405.16886,2024.
+models for embodied reasoning,” arXiv preprint arXiv:2306.17840, [315] D. H. Park, L. A. Hendricks, Z. Akata, A. Rohrbach, B. Schiele,
+2023. T. Darrell, and M. Rohrbach, “Multimodal explanations: Justifying
+[292] W. Huang, F. Xia, T. Xiao, H. Chan, J. Liang, P. Florence, A. Zeng, decisionsandpointingtotheevidence,”inProc.ofCVPR,2018,pp.
+J. Tompson, I. Mordatch, Y. Chebotar et al., “Inner monologue: 8779–8788.
+Embodied reasoning through planning with language models,” arXiv [316] H.Hagras,“Towardhuman-understandable,explainableai,”Computer,
+preprintarXiv:2207.05608,2022. pp.28–36,2018.
+[293] Z.Wang,S.Cai,G.Chen,A.Liu,X.S.Ma,andY.Liang,“Describe, [317] A.Yan,Z.He,J.Li,T.Zhang,andJ.McAuley,“Personalizedshow-
+explain,planandselect:interactiveplanningwithllmsenablesopen- cases:Generatingmulti-modalexplanationsforrecommendations,”in
+worldmulti-taskagents,”Proc.ofNeurIPS,2024. Proc.ofSIGIR,2023,pp.2251–2255.
+[294] W. An, F. Tian, J. Nie, W. Shi, H. Lin, Y. Chen, Q. Wang, Y. Wu, [318] V.N.Rao,X.Zhen,K.Hovsepian,andM.Shen,“Afirstlook:Towards
+G. Dai, and P. Chen, “Knowledge acquisition disentanglement for explainabletextvqamodelsviavisualandtextualexplanations,”arXiv
+knowledge-basedvisualquestionansweringwithlargelanguagemod- preprintarXiv:2105.02626,2021.
+els,”arXivpreprintarXiv:2407.15346,2024. [319] H. Du, S. Zhang, B. Xie, G. Nan, J. Zhang, J. Xu, H. Liu, S. Leng,
+[295] J.Kim,Y.J.Kim,andY.M.Ro,“Whatif...?:Counterfactualinception J.Liu,H.Fanetal.,“Uncoveringwhatwhyandhow:Acomprehensive
+to mitigate hallucination effects in large multimodal models,” arXiv benchmarkforcausationunderstandingofvideoanomaly,”inProc.of
+preprintarXiv:2403.13513,2024. CVPR,2024,pp.18793–18803.
+[296] Y.Li,W.Tian,Y.Jiao,J.Chen,andY.-G.Jiang,“Eyescandeceive: [320] M. Mathew, D. Karatzas, and C. Jawahar, “Docvqa: A dataset for
+Benchmarking counterfactual reasoning abilities of multi-modal large vqa on document images,” in Proceedings of the IEEE/CVF winter
+languagemodels,”arXivpreprintarXiv:2404.12966,2024. conferenceonapplicationsofcomputervision,2021,pp.2200–2209.
+[297] Z. Wu, L. Qiu, A. Ross, E. Akyu¨rek, B. Chen, B. Wang, N. Kim, [321] P.Lu,S.Mishra,T.Xia,L.Qiu,K.-W.Chang,S.-C.Zhu,O.Tafjord,
+J.Andreas,andY.Kim,“Reasoningorreciting?exploringthecapabil- P.Clark,andA.Kalyan,“Learntoexplain:Multimodalreasoningvia
+itiesandlimitationsoflanguagemodelsthroughcounterfactualtasks,” thoughtchainsforsciencequestionanswering,”Proc.ofNeurIPS,pp.
+arXivpreprintarXiv:2307.02477,2023. 2507–2521,2022.
+[298] L.Zhang,X.Zhai,Z.Zhao,Y.Zong,X.Wen,andB.Zhao,“Whatif [322] J.Gao,Q.Wu,A.Blair,andM.Pagnucco,“Lora:Alogicalreasoning
+thetvwasoff?examiningcounterfactualreasoningabilitiesofmulti- augmenteddatasetforvisualquestionanswering,”inProc.ofNeurIPS,
+modallanguagemodels,”inProc.ofCVPR,2024,pp.21853–21862. 2023,pp.30579–30591.
+[299] M.LewisandM.Mitchell,“Usingcounterfactualtaskstoevaluatethe [323] L.Chen,Y.Zhang,S.Ren,H.Zhao,Z.Cai,Y.Wang,P.Wang,T.Liu,
+generality of analogical reasoning in large language models,” arXiv and B. Chang, “Towards end-to-end embodied decision making via
+preprintarXiv:2402.08955,2024. multi-modallargelanguagemodel:Explorationswithgpt4-visionand
+[300] Z. Wang, Z. Han, S. Chen, F. Xue, Z. Ding, X. Xiao, V. Tresp, beyond,”arXivpreprintarXiv:2310.02071,2023.
+P. Torr, and J. Gu, “Stop reasoning! when multimodal llms with [324] J. Kim, A. Rohrbach, T. Darrell, J. Canny, and Z. Akata, “Textual
+chain-of-thought reasoning meets adversarial images,” arXiv preprint explanations for self-driving vehicles,” in Proc. of ECCV, 2018, pp.
+arXiv:2402.14899,2024. 563–578.
+[301] X.Cui,A.Aparcedo,Y.K.Jang,andS.-N.Lim,“Ontherobustnessof [325] S. Chen, H. Li, Q. Wang, Z. Zhao, M. Sun, X. Zhu, and J. Liu,
+large multimodal models against image adversarial attacks,” in Proc. “Vast: A vision-audio-subtitle-text omni-modality foundation model
+ofCVPR,2024,pp.24625–24634. anddataset,”Proc.ofNeurIPS,2024.
+[302] A.Albalak,Y.Elazar,S.M.Xie,S.Longpre,N.Lambert,X.Wang, [326] R. Zellers, Y. Bisk, A. Farhadi, and Y. Choi, “From recognition to
+N. Muennighoff, B. Hou, L. Pan, H. Jeong, C. Raffel, S. Chang, cognition: Visual commonsense reasoning,” in Proc. of CVPR, 2019,
+T. Hashimoto, and W. Y. Wang, “A survey on data selection for pp.6720–6731.
+languagemodels,”2024. [327] Y.Zhang,B.Colman,A.Shahriyari,andG.Bharaj,“Commonsense
+[303] L. Wang, L. Li, D. Dai, D. Chen, H. Zhou, F. Meng, J. Zhou, and reasoning for deep fake detection,” arXiv preprint arXiv:2402.00126,
+X.Sun,“Labelwordsareanchors:Aninformationflowperspectivefor 2024.
+understanding in-context learning,” arXiv preprint arXiv:2305.14160, [328] Y.Lin,P.Ren,Z.Chen,Z.Ren,J.Ma,andM.DeRijke,“Explainable
+2023. outfitrecommendationwithjointoutfitmatchingandcommentgener-
+[304] Y. Tai, W. Fan, Z. Zhang, and Z. Liu, “Link-context learning for ation,” IEEE Transactions on Knowledge and Data Engineering, pp.
+multimodalllms,”inProc.ofCVPR,2024,pp.27176–27185. 1502–1516,2019.JOURNALOFLATEXCLASSFILES,VOL.14,NO.8,AUGUST2021 20
+[329] X. Chen, J. Zhang, L. Wang, Q. Dai, Z. Dong, R. Tang, R. Zhang,
+L.Chen,X.Zhao,andJ.-R.Wen,“Reasoner:Anexplainablerecom-
+mendation dataset with comprehensive labeling ground truths,” Proc.
+ofNeurIPS,2024.
+[330] T. Yuan, X. Zhang, K. Liu, B. Liu, C. Chen, J. Jin, and Z. Jiao,
+“Towardssurveillancevideo-and-languageunderstanding:Newdataset
+baselinesandchallenges,”inProc.ofCVPR,2024,pp.22052–22061.
+[331] Z.Bai,P.Wang,T.Xiao,T.He,Z.Han,Z.Zhang,andM.Z.Shou,
+“Hallucinationofmultimodallargelanguagemodels:Asurvey,”arXiv
+preprintarXiv:2404.18930,2024.
+[332] OpenAI,“Hellogpt-4o,”2024.
+[333] S. Tong, Z. Liu, Y. Zhai, Y. Ma, Y. LeCun, and S. Xie, “Eyes wide
+shut?exploringthevisualshortcomingsofmultimodalllms,”2024.
+[334] P.WuandS.Xie,“V?:Guidedvisualsearchasacoremechanismin
+multimodalllms,”inProc.ofCVPR,2024,pp.13084–13094.
+[335] T.Kang,W.Ding,andP.Chen,“Crespr:Modularsparsificationofdnns
+to improve pruning performance and model interpretability,” Neural
+Networks,p.106067,2024.
+[336] E. Fedorenko, S. T. Piantadosi, and E. A. Gibson, “Language is
+primarily a tool for communication rather than thought,” Nature, pp.
+575–586,2024.

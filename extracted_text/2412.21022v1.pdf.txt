@@ -1,0 +1,526 @@
+Text Classification: Neural Networks VS Machine Learning
+Models VS Pre-trained Models
+ChristosPetridis
+christos.petridis@temple.edu
+TempleUniversity
+Philadelphia,Pennsylvania,USA
+Abstract byachievinglevelsoffluency,comprehension,andcontextualun-
+Textclassificationisaverycommontasknowadaysandthereare derstandinglikeneverbefore.LLMshavetransformedthefield
+manyefficientmethodsandalgorithmsthatwecanemploytoac- ofNLPwiththeirabilitytolearnpatternsintextfrommassive
+complishit.Transformershaverevolutionizedthefieldofdeep datasets.Wehaveseenresultsthatwerenotpossiblewithearlier
+learning,particularlyinNaturalLanguageProcessing(NLP)and rule-basedmodels.LLMscangeneratehuman-liketext,understand
+haverapidlyexpandedtootherdomainssuchascomputervision complexqueries,andevenperformtasksonwhichtheywerenot
+[6][19],time-seriesanalysis[1],andmore.Thetransformermodel explicitlytrained,thankstotheirpre-trainedandtransferlearning
+wasfirstlyintroducedinthecontextofmachinetranslationand capabilities.
+itsarchitecturereliesonself-attentionmechanisms[22]tocapture Computers and, of course, AI models understand and gener-
+complexrelationshipswithindatasequences.Itisabletohandle atehumanlanguagethroughtheuseofembeddings.Embeddings
+long-rangedependenciesmoreeffectivelythantraditionalneural inNLPrefer todensevectorrepresentationsofwords, phrases,
+networks(suchasRecurrentNeuralNetworksandMultilayerPer- orevenentiresentencesthatcapturesemanticmeaningandcon-
+ceptrons).Inthiswork,wepresentacomparisonbetweendifferent textualrelationshipswithinanumericalformatthatmodelscan
+techniquestoperformtextclassification.Wetakeintoconsideration understand.Unliketraditionalone-hotencodingmethods,which
+sevenpre-trainedmodels,threestandardneuralnetworksandthree areverysparseandfailtoconveyanyinformationabouthowwords
+machinelearningmodels.Forstandardneuralnetworksandma- relatetoeachother,embeddingsencodewordsintocontinuous,
+chinelearningmodelswealsocomparetwoembeddingtechniques: low-dimensionalspaces.Thisallowsmodelstomapsemantically
+TF-IDFandGloVe,withthelatterconsistentlyoutperformingthe similarwordsclosetoeachotherinthisspace.Forexample,the
+former.Finally,wedemonstratetheresultsfromourexperiments words"king"and"queen"mayappearclosertoeachotherinthe
+wherepre-trainedmodelssuchasBERTandDistilBERTalways vectorspacethan"king"and"car"becauseoftheirsemanticand
+performbetterthanstandardmodels/algorithms. contextualsimilarities.Embeddingsarelearnedbymodelsbasedon
+largecorporaoftext,makingthemeffectiveatcapturingintricate
+Keywords relationships,patterns,andlinguisticproperties.Famousembed-
+ding techniques such as Word2Vec, GloVe (Global Vectors) and
+TextClassification,Transformers,Pre-TrainedModels,NaturalLan-
+contextualembeddingsfromtransformer-basedmodelsrepresenta
+guageProcessing,Embeddings
+wordincontext,consideringthesurroundingwordsinasentence.
+ReferenceFormat: Thismeansthattheword"bank"wouldhavedifferentembeddings
+ChristosPetridis.2024.TextClassification:NeuralNetworksVSMachine
+dependingonwhetheritisusedinthecontextofariverbankora
+LearningModelsVSPre-trainedModels. CIS5525NeuralComputation@
+financialinstitution.Itisclearthatthoseembeddingsofferbetter
+TempleUniversity,Philadelphia,PA,USA
+resultsinNLPtasksthanolderstaticembeddingssuchasTF-IDF
+1 Introduction (TermFrequency-InverseDocumentFrequency).
+Inthiswork,wepresentaperformancecomparisonbetween
+NLPhasbeenarapidlygrowingareaduetoitsimpactonhow
+pre-trainedmodelsandstandardmodelsonaclassificationtask.
+humansinteractwithtechnology.Wehaveseenmanyapplications
+We have developed three neural networks for our experiments
+rangingfromvoice-activatedassistantsandchatbotstoinformation
+includingMLP,RNN,andTransformerEncodermodelsandwerefer
+retrieval,textsummarization,andsentimentanalysis.Itsrelevance
+tothemasstandardmodels.Wewillalsopresenttheperformanceof
+continuestoexpandwithadvancesinGenAI(GenerativeAI),mak-
+somemachinelearningmodels(SupportVectorMachines,Random
+ingitafieldwithvastresearchpotentialandnumerouspractical
+ForestandLogisticRegression)andwerefertothemasmachine
+applications.NLPcontinuestoexpandduetoitsgreatcapabilities
+learningmodels.Wewillshowtheperformanceofboththestandard
+inunderstanding,generating,andtransforminghumanlanguage.
+andmachinelearningmodelsemployingdifferentembeddings(TF-
+SomepopularexamplesarethegreatadvancesinLargeLanguage
+IDF and GloVe). Regarding the pre-trained models, we will use
+Models(LLMs)likeChatGPT(models:GPT-3.5,GPT-4o,GPT-4o
+their corresponding embeddings since each model has its own
+mini,GPT-4Turbo,GPT-4etc.),LLaMA(models:Llama3.1,Llama
+predefinedembeddings.Thestructureofthisworkisasfollows:
+3.2etc.)andothers.Thesemodelshaverevolutionizedthefield
+Section2reviewsrelevantworks,establishingthecontextforour
+ThispaperisNOTpublished.ItistheFinalProjectReportfortheCIS5525Neural work.Section3introducestheembeddingtechniquesused,Section
+Computation@TempleUniversity.Instructor:Prof.HongchangGao 4describesthedatasetandSection5outlinesdatapre-processing
+CIS5525NeuralComputation,Fall2024,Philadelphia,PA,USA
+steps.Sections6and7covertheneuralnetworkarchitecturesand
+©2024Copyrightheldbytheowner/author.
+machinelearningmodelsapplied.Section8highlightstheuseof
+4202
+ceD
+03
+]GL.sc[
+1v22012.2142:viXraCIS5525NeuralComputation,Fall2024,Philadelphia,PA,USA Petridisetal.
+transferlearningtoenhanceperformance.Resultsarepresentedin fse/glove-wiki-gigaword-100dataset,whichprovides100-dvec-
+Section9,followedbyadiscussioninSection10andaconclusion torstrainedonWikipediaandGigaworddata.Theseembeddings
+withkeyfindingsinSection11. encoderichsemanticandsyntacticrelationships,suchasanalogies
+andwordsimilarities.WhileTF-IDFemphasizestermimportance
+2 RelatedWork inindividualdocuments,GloVecapturesbroadersemanticrelation-
+Wehaveseenmanysurveysinthepastregardingtextclassification shipsfromtheentirecorpus.
+methods.In[10]awidesurveyispresentedondifferentclassifica-
+4 Dataset
+tionalgorithmsandembeddings.Theypresentresultsfromother
+paperswithnoexplicitcomparisonbetweenembeddingsandmod- The dataset we used to implement the experiments is a news
+els.In[14]authorsdemonstrateadeeplearning-basedreviewwhere datasetswhichcontains10917examples/articles,11featuresand2
+theyexperimentwithvarioustextdatasetssuchasAGNews,20 classesforeachexample(13columnsintotal).Table1demonstrates
+Newsgroups,Reutersnewsandmanymore.Moreover,[5]showsa somedetailsregardingthedatasetandbrielydescribeseachcolumn.
+comparisonofBERT,DistilBERT,RoBERTa,XLNETandELECTRA However,identification(suchasdata_idandid),timestampsand
+foremotionrecognitionwheretheyusedBERTastheirbaseline temporalinformationdonothelpasmuchasthecontentitself
+modelandcompareditwiththefouradditionaltransformer-based whentryingtoclassifyarticlesintocategories.Therefore,wewill
+models(DistillBERT,RoBERTa,XLNet,andELECTRA).Exceptfor useonly4features:source, title, contentandauthor.
+theELECTRAmodel,whichhadtheworstF1-score(.33),theother
+modelshadverysimilarresults.RoBERTaachievedthebestF1-score Table1:Theinitialdataset
+(.49),followedbyDistillBERT(.48),XLNet(.48),andthenBERT
+(.46).Inspiredbyalltheseworks,wearepresentingacomparison
+ColumnName Description
+betweenvariouspre-trainedmodels,neuralnetworksandstandard
+modelsemployingtwodifferenttechniquesforembeddings(TF-IDF data_id Uniqueidentifiernumberforthearticle.
+andGloVe). id source+date+article
+date Dateassociatedwiththeentry.
+3 Embeddings source Sourceofthearticle.
+title Titleofthearticle.
+Embeddings are a crucial aspect of how computers understand
+content Maincontentofthearticle.
+andgeneratehumanlanguage.Theyrepresentwordsorphrasesas
+author Authorofthearticle.
+vectorsinahigh-dimensionalspace,capturingsemanticrelation-
+url URLlinktothearticle.
+shipsandcontextualmeanings.Inthissection,wewillexploretwo
+published Dateandtimeofpublication.
+techniquesforgeneratingembeddings:TF-IDF[8]andGloVe[15].
+published_utc Theunixtimestampofthepublication.
+TermFrequency-InverseDocumentFrequency(TF-IDF)isasta-
+collection_utc Theunixtimestampofthetimetheinci-
+tistical method used to evaluate the importance of a word in a
+dentrecorded.
+documentrelativetoacollectionofdocuments(corpus).Itiscalcu-
+category_level_1 Level-1category.
+latedastheproductoftwocomponents:TermFrequency(TF)and
+category_level_2 Level-2category.
+InverseDocumentFrequency(IDF).Thetermfrequencyisdefined
+as:
+𝑓
+𝑡,𝑑
+TF(𝑡,𝑑)= , (1)
+(cid:205) 𝑓 4.1 Distributionofclasses
+𝑡′∈𝑑 𝑡′,𝑑
+where 𝑓 𝑡,𝑑 isthefrequencyofterm𝑡 indocument𝑑,andthede- ThedistributionofclassesinthedatasetisshowninFigure1.We
+nominatoristhetotalnumberoftermsin𝑑. have17level-1categoriesand109level-2categories.Undereach
+Theinversedocumentfrequencyisdefinedas: level-1 category we have approximately 100 instances for each
+|𝐷| level-2category.Broadlyspeaking,wecansaythatitisabalanced
+IDF(𝑡,𝐷)=log |{𝑑 ∈𝐷 :𝑡 ∈𝑑}| (2) datasetbecausewealwayshave100instancesforacombinationof
+level-1andlevel-2categories.
+where |𝐷| is the total number of documents in the corpus, and
+|{𝑑 ∈𝐷 :𝑡 ∈𝑑}|isthenumberofdocumentscontainingterm𝑡.
+5 Datapre-processing
+TheTF-IDFscoreisthencomputedas:
+ThisstepisverycrucialintasksthatinvolveNLP.Thegoalisto
+TF-IDF(𝑡,𝑑,𝐷)=TF(𝑡,𝑑)·IDF(𝑡,𝐷) (3) transformrawtextdataintoaformatthatcanbeusedby(ma-
+TF-IDFfocusesoncapturingtheimportanceoftermsbypenal- chine/deeplearning)models[17],[20].
+izingfrequentlyoccurringtermsacrossthecorpus,ensuringthat
+5.1 MergetheFeatures
+commonwordslike"the"or"and"arenotoveremphasized.
+GlobalVectorsforWordRepresentation(GloVe)isapopular InNLPwehavetomergealltheinformation(e.g.,features)we
+unsupervisedlearningalgorithmforgeneratingwordembeddings. haveintoonefeature/column.Therefore,beforetheactualdata
+UnlikeTF-IDF,GloVecapturesthesemanticrelationshipsbetween preprocessingwehavetomergesource, title, contentand
+wordsbyanalyzingwordco-occurrencestatisticsinacorpus.In authorintoonecolumn.Therefore,thefinaldatasethas3columns:
+this work, we use the pre-trained GloVe embeddings from the theinformationofeacharticle,level-1andlevel-2categories.TextClassification:NeuralNetworksVSMachineLearningModelsVSPre-trainedModels CIS5525NeuralComputation,Fall2024,Philadelphia,PA,USA
+inasinglevectorrepresentation.Afterthat,thesinglevector
+ispassedthroughafullyconnectedlayertopredicttheclass
+probabilitiesforthespecifiednumberofclasses(17or109).
+Wealsohaveapplieddropout(20%)duringembeddingand
+withintheTransformerlayerstoreduceoverfitting.
+• RNN:Arecurrentneuralnetwork[13]whichincludesan
+RNNlayerwith64hiddenunitsand1layer,followedby
+afullyconnectedlayertomapthelasthiddenstatetothe
+outputdimension(17or109).Duringtheforwardpass,the
+inputsequenceisreshapedtomatchtheexpecteddimen-
+sions,andonlytheoutputfromthefinaltimestepispassed
+tothefullyconnectedlayer.
+6.1 TrainingPhase
+Figure1:Distributionoftheclassesinourdataset.Itisalso For the training phase we employ the Adam optimizer and
+evident how many level-2 categories we have under each CrossEntropy loss function over 150 epochs. We apply the
+level-1category. torch.optim.lr_scheduler.ReduceLROnPlateauasthelearningrate
+scheduler,whichdynamicallyadjuststhelearningratebasedonthe
+model’sperformanceonthetestset,promotingstableconvergence.
+5.2 DataCleaningandTokenization
+WestartwithLR=0.001anditdecreasesbasedontheperformance
+Havingalltheinformationinasinglefeature,thefirstthingthat (minimumLR=1e-5).Dependingonavailability,weuseeitherGPU
+weneedtodoistoconvertalltexttolowercaseforconsistency, or CPU, with the best model state saved for further evaluation.
+sowordswithdifferentcasesaretreatedthesame.Then,wehave Inourcase,wewerefortunateenoughtohaveaccessinaTesla
+toremovenumbers,URLs,specialcharactersandpunctuationthat V100-SXM2-16GBGPU.
+addnoisetothedataanddonotcontributetoourtask.
+6.2 NeuralNetworksResults
+5.3 LemmatizationandStopwordsRemoval
+Aftereachepoch,themodelisbeingevaluatedonunseendata
+This step transforms words into their base or dictionary forms, fromthetestset,whereitspredictionsarecomparedtotheactual
+whichhelpsgroupsimilarwordstogetherandreducestheoverall labelstocalculateaccuracy.Boththetraininglossandtestaccuracy
+vocabularysize.Forexample,differentformsofawordlike"going" arerecordedtomonitorthemodel’sprogress.Thefiguresbelow
+or"went"arereducedtotheirrootform"go".Additionally,com- (Figure2,3,4and5)showthetrainingprocessandtheperformance
+monlyusedwords,knownasstopwords(suchas"the","a","and", oftheemployedneuralnetworksandTable2showstheirfinal
+"is"),areremovedsincetheydonotusuallycontributesignificant test accuracy for both TF-IDF and GloVe. Discussion regarding
+meaningtothecontext.Alloftheaboveareperformedusingfunc- theresultswilltakeplacelater,withalltheavailableresultsbeing
+tions such as WordNetLemmatizer and the stopwords from the presented.
+NLTKlibrary.Afterthisstage,wearereadyfortokenizationor
+embeddings.
+6 NeuralNetworks
+Sinceweareusingthe100-dvectorsforGloVeembeddingsand
+also100formaxfeaturesinTF-IDFembeddings,theinputvector
+fortheneuralnetworksisgoingtobe100.
+• MLP:Afeedforwardneuralnetwork[21]whichconsistsof
+twohiddenlayers(256andthen128neurons)withReLU
+activationfunctions,eachfollowedbyadropoutlayerto
+reduceoverfittingbyrandomlysetting20%ofactivationsto
+zeroduringtraining.Thefinallayeroutputspredictionsfor
+17(level-1category)or109(level-2category)classesusinga
+Figure2:TrainingLoss(ontheleft)andTestAccuracy(on
+lineartransformation.
+theright)employingGloVeforlevel-1category.
+• Transformer:Atransformer-basedarchitecture[22]which
+begins by applying a linear embedding to the input data
+tomapittoa64-dspace.The64-ddataisthenprocessed
+7 MachineLearningModels
+throughastackofTransformerEncoderlayers,whichuse
+self-attentionmechanismstocapturerelationshipsbetween ItwouldbeveryhelpfultohaveresultsfromsomeMachineLearn-
+inputfeatures.Afterthat,theoutputisbeingprocessedby ing(ML)modelsandthereforewedecidedtoemploysomeofthem.
+takingthemeanacrossthesequencedimensions,resulting WearepresentingtheperformanceofthreeMLmodels:SupportCIS5525NeuralComputation,Fall2024,Philadelphia,PA,USA Petridisetal.
+VectorMachine(SVM),RandomForestClassifierandLogisticRe-
+gression.
+7.1 Hyperparametertuning
+Hyperparametertuninginvolvesoptimizingtheparametersofthese
+threemachinelearningmodelstomaximizetheirperformance(clas-
+sificationaccuracy)[16].Agridsearchmethodologyisemployed,
+systematicallyevaluatingvariousparametercombinationstoiden-
+tifytheoptimalconfiguration.Wedonotexplicitlymentionthe
+parametersthatbeingtestedhere,butfurtherdetailscanbefound
+inthedeliveredsourcecode(pythonnotebooks).Instead,inTable
+3weonlypresentthebesthyperparametersidentifiedforeach
+Figure3:TrainingLoss(ontheleft)andTestAccuracy(on
+model.Duringtheprocessofhyperparametertuning,theperfor-
+theright)employingTF-IDFforlevel-1category.
+manceforeverymodelisassessedusing3-foldcross-validation,
+ensuringreliableparameterselection.
+7.2 K-Foldcrossvalidation
+K-Foldcrossvalidationisatechniqueusedtoassesstheperfor-
+manceofamachinelearningmodelbydividingthedatasetinto
+ksubsetsor"folds."Themodelistrainedandevaluatedktimes,
+eachtimeusingadifferentfoldasthetestingsetandtheremain-
+ingk-1foldsfortraining.Thisprocesshelpsensureamorerobust
+evaluationofthemodel’sperformance,asitconsidersmultiple
+combinationsoftrainingandtestingdata.Inourcase,thefinalac-
+curacyistheaverageoftheaccuraciescomputedineachiteration,
+providingamorereliableestimateofthemodel’sgeneralization
+Figure4:TrainingLoss(ontheleft)andTestAccuracy(on ability[2].
+theright)employingGloVeforlevel-2category.
+7.3 MachineLearningResults
+Havingthebestparametersforeachmodel,weapply5-foldcross-
+validationtobetterestimatetheirperformance.Table4andTable5
+showthemeanaccuracyfromthe5-foldcrossvalidationforeach
+model(thestandarddeviationineveryexperimentisalmost0.005).
+Discussionregardingtheresultswilltakeplacelater,withallthe
+availableresultsbeingpresented.
+Table4:5-FoldCross-ValidationResultsforGloVe
+Classifier MeanAccuracy
+level-1 level-2
+Figure5:TrainingLoss(ontheleft)andTestAccuracy(on
+SVMClassifier 0.7211 0.5570
+theright)employingTF-IDFforlevel-2category.
+RandomForestClassifier 0.6948 0.5072
+LogisticRegressionClassifier 0.6824 0.5585
+Table2:TestAccuracyforbothTF-IDFandGloVeaftertrain-
+ing
+Classifier TF-IDF GloVe
+Table5:5-FoldCross-ValidationResultsforTF-IDF
+level-1 level-2 level-1 level-2
+MLP 0.4945 0.3077 0.7138 0.4977 Classifier MeanAccuracy
+RNN 0.4675 0.2729 0.6841 0.4940 level-1 level-2
+TransformerEncoder 0.4867 0.2990 0.7239 0.5302
+SVMClassifier 0.5008 0.3133
+RandomForestClassifier 0.4934 0.2918
+LogisticRegressionClassifier 0.4640 0.2916TextClassification:NeuralNetworksVSMachineLearningModelsVSPre-trainedModels CIS5525NeuralComputation,Fall2024,Philadelphia,PA,USA
+Table3:BestHyperparametersforEachModelAcrossCategoriesandMethodsafterGridSearch
+TFIDF-Category1 GloVe-Category1
+LogisticRegression:{C:1,max_iter:100,solver:lbfgs} LogisticRegression:{C:1,max_iter:100,solver:liblinear}
+RandomForest:{max_depth:None,min_samples_split:2,n_estimators:300} RandomForest:{max_depth:20,min_samples_split:2,n_estimators:300}
+SVM:{C:1,gamma:scale,kernel:rbf} SVM:{C:10,gamma:scale,kernel:rbf}
+TFIDF-Category2 GloVe-Category2
+LogisticRegression:{C:1,max_iter:100,solver:lbfgs} LogisticRegression:{C:10,max_iter:100,solver:lbfgs}
+RandomForest:{max_depth:None,min_samples_split:5,n_estimators:300} RandomForest:{max_depth:None,min_samples_split:2,n_estimators:300}
+SVM:{C:1,gamma:scale,kernel:rbf} SVM:{C:10,gamma:scale,kernel:rbf}
+8 TransferLearning ELECTRA has to predict which token is an original and
+Transferlearningisamachinelearningtechniquewhereamodel whichonehasbeenreplaced.
+which is trained on one task is adapted to a different but quite (6) TinyBERT [7]: A model which is 7.5x smaller and 9.4x
+similartask.Themainideaistoapplytheknowledgegainedfroma fasteroninferencethanBERT-baseandachievescompetitive
+taskwithalotofdatatoataskthathaslimiteddata.Forinstance,a performancesinthetasksofnaturallanguageunderstanding.
+modeltrainedonalargedatasetofgeneralimagescanbefine-tuned Itperformsanoveltransformerdistillationatboththepre-
+toidentifyspecifictypesofobjectswithonlyasmallamountof trainingandtask-specificlearningstages.
+labeleddata.Mostofthetime,oralways,thisapproachleadsto (7) ALBERT[11]:AlightweightversionofBERTwithparam-
+betterresultscomparedtotrainingamodelfromscratch.Inthe eterreductiontechniqueslikefactorizedembeddings,opti-
+contextofNLP,transferlearninghasrevolutionizedthefield.Pre- mizedforscalabilitywithoutsacrificingaccuracy.
+trainedlanguagemodels,suchasBERTandGPT,arefirsttrained
+Pre-trained tokenizers are an essential component of
+onmassivecorporatolearngenerallanguagerepresentationsin
+transformer-based language models and they are responsible
+ordertocapturethestructureofthehumanlanguage.Thesemodels
+forconvertingrawtextintonumericalrepresentationsthatcan
+arethenfine-tunedonspecifictasks,likesentimentanalysis,text
+be processed by the model. These tokenizers are specifically
+classification,orquestionanswering,usingmuchsmallerdatasets.
+trained to align with the vocabulary and tokenization strategy
+of their corresponding models, ensuring optimal performance
+8.1 Pre-TrainedModels
+and compatibility. Table 6 shows the models we used for our
+Nowadays,therearemanyefficientlanguagemodelsavailablefor experiments,theircorrespondingtokenizersandtheinformation
+use.Inparticularwetesttheefficacyof7differentmodels:a)XLM- forthepre-trainedmodelweights.
+RoBERTa,b)DistilBERT,c)RoBERTa,d)BERT,e)ELECTRA,f)
+TinyBERTandg)ALBERT.Eachofthesemodelscanbeloadedwith 8.2 PyTorchDataFormat
+theirpre-trainedweights,allowinguserstoapplytheircapabilities
+Wesplitthedatasetintotrainingandtestingsetsandprocesses
+out-of-the-boxforavarietyofNLPtasks:
+themintoDataLoaderobjects,whichareessentialforefficientbatch
+(1) XLM-RoBERTa[4]:Amultilingualmodeltrainedon100 processingduringtrainingandevaluation.Weconverttheinput
+differentlanguages.UnlikesomeXLMmultilingualmodels,it dataandlabelsintoPyTorchtensors,thenwegenerateattention
+doesnotrequirelangtensorstounderstandwhichlanguage maskstoindicatenon-paddingtokens,andcreateTensorDataset
+isused,andshouldbeabletodeterminethecorrectlanguage objects.ThesedatasetsarethenwrappedintoDataLoaderswith
+fromtheinputids. specifiedbatchsizes(32),ensuringcompatibilitywithtransformer
+(2) DistilBERT[18]:Asmall,fast,cheapandlightTransformer models. This function also shuffles the training data for better
+modeltrainedbydistillingBERTbase.Ithas40%lessparam- generalization and keeps the test data in order for a consistent
+etersthangoogle-bert/bert-base-uncased,runs60%faster evaluation.Figure6demonstratesthewholeprocessinourpipeline.
+whilepreservingover95%ofBERT’sperformances
+(3) RoBERTa [12]: An optimized variant of BERT, which
+modifieskeyhyperparameters,removingthenext-sentence
+pre-trainingobjectiveandtrainingwithmuchlargermini-
+batchesandlearningrates.
+(4) BERT[9]:Thefamousbidirectionaltransformerpre-trained
+usingacombinationofmaskedlanguagemodelingobjective
+andnextsentencepredictiononalargecorpuscomprising
+theTorontoBookCorpusandWikipedia.
+(5) ELECTRA[3]:Apre-trainedtransformermodelwiththe
+useofanother(small)maskedlanguagemodel.Theinputs
+Figure6:Pipelineforpreparingthedataforclassifiers(neural
+arecorruptedbythatlanguagemodel,whichtakesaninput
+networks).
+textthatisrandomlymaskedandoutputsatextinwhichCIS5525NeuralComputation,Fall2024,Philadelphia,PA,USA Petridisetal.
+Table6:Theemployedpre-trainedmodelsandtokenizers
+Model Tokenizer pre-trainedfrom
+AlbertForSequenceClassification AlbertTokenizer albert-base-v2
+AutoModelForSequenceClassification AutoTokenizer huawei-noah/TinyBERT_General_4L_312D
+ElectraForSequenceClassification ElectraTokenizer google/electra-small-discriminator
+BertForSequenceClassification BertTokenizer bert-base-uncased
+RobertaForSequenceClassification RobertaTokenizer roberta-base
+DistilBertForSequenceClassification DistilBertTokenizer distilbert-base-uncased
+XLMRobertaForSequenceClassification XLMRobertaTokenizer xlm-roberta-base
+8.3 Fine-tuning
+Oncethedataarereadyandtokenized,weproceedtofine-tunethe
+pre-trainedmodelsonourspecificdataset.Fine-tuninginvolves
+adaptingthepre-trainedweightstothetargettaskthroughaddi-
+tionaltraining.Ourtraininglooprunsforafixednumberofsix
+epochs,whichwefoundtobesufficientforconvergenceinourex-
+periments.Duringeachepoch,thefunctiontracksthetrainingloss
+andevaluatesthemodel’sperformanceonaseparate(unseen)test
+dataset,calculatingaccuracy.Ifthemodelachievesasignificantly
+betteraccuracyduringtraining,itsweightsaresavedandwecan
+restorethem.Attheendoftraining,thefunctionrestoresthese
+bestweightsforafinalevaluation,ensuringthatthemodel’sper-
+formanceisbasedonthemostoptimalparameters.Wealsorecord
+thetimetakenfortheentiretrainingprocess.Thisisespecially
+usefulforcomparingtheperformanceofdifferentmodelsduring
+experiments.Figure7andFigure8demonstratetheperformance Figure8:Testaccuracyduringtraining(6epochs).
+duringtraining(6epochs)foreachmodelforthetwodifferentcate-
+gories-traininglossisavailableinthedeliveredpythonnotebook.
+Itisclearthatbythethirdorfourthepoch,theperformanceof
+mostmodelsstabilizes,indicatingthatadditionaltraininggivesus
+minimalornotevenbetterresults.Thishighlightstheefficiency 8.4 PerformanceforPre-TrainedModels
+andreliabilityofpre-trainedtransformermodelsfordownstream
+WetrainthemodelusingtheAdamWoptimizerandCrossEntropy
+tasks.
+lossfunction,calculatetheaveragetrainingloss,andevaluateper-
+formance(accuracy)onthetest(unseen)datasetaftereachepoch.
+Alearningrateof5e-5ischosen,whichisacommonpracticein
+fine-tuning,asitensuresgradualupdatestomodelweightswith-
+outsignificantlychangingthepre-trainedparametersduringthe
+6epochsoftraining.The6epochsthatweapplyaresufficientfor
+fine-tuningasthemodelsarepre-trainedonlargedatasets,allow-
+ingthemtolearngenerallanguagerepresentationsthatrequire
+minimaladjustmentforthespecifictask.Wesavethemodel’sstate
+wheneverasignificantimprovementisobserved.Aftertraining,
+thebestmodelweightsarerestored,ensuringoptimalperformance.
+ThefinalaccuraciesaftertrainingareshowninTable7andTable
+8 along with the size of each model (it terms of the number of
+parameters)andtimetakenfor6epochsoffinetuning.
+9 Results
+Wealreadypresentedhowwetrainedandevaluatedallthemodels
+Figure7:Testaccuracyduringtraining(6epochs). and in this section we are presenting the final performance (in
+termsofaccuracy)ofeachmodelthatweexperimentedwith.Table
+9andTable10clearlydemonstratetheresultsforbothlevel-1and
+level-2categories.Later,inSection10wediscussabouttheresults.TextClassification:NeuralNetworksVSMachineLearningModelsVSPre-trainedModels CIS5525NeuralComputation,Fall2024,Philadelphia,PA,USA
+Table7:PerformanceofPre-trainedModelsafterTraining Table10:FinalResultsforLevel-2Category
+forlevel-1category
+Model Accuracy
+No.of Final Fine-Tuning
+Model XLM-RoBERTa 0.7042
+Parameters Accuracy Time(min)
+DistilBERT 0.7381
+XLM-RoBERTa 278,056,721 0.8214 5m17s RoBERTa 0.7244
+DistilBERT 66,966,545 0.8324 2m28s BERT 0.7321
+RoBERTa 124,658,705 0.8457 4m56s ELECTRA 0.6236
+BERT 109,495,313 0.8516 4m53s TinyBERT 0.6081
+ELECTRA 13,553,169 0.8205 1m28s ALBERT 0.010
+TinyBERT 14,355,569 0.8155 0m46s
+Accuracy(TFIDF) Accuracy(GloVe)
+ALBERT 11,696,657 0.8031 5m10s
+MLP 0.3077 0.4977
+RNN 0.2729 0.4940
+Table8:PerformanceofPre-trainedModelsafterTraining TransformerEncoder 0.2990 0.5302
+forLevel-2Category
+SVM 0.3133 0.5570
+RandomForest 0.2918 0.5072
+No.of Final Fine-Tuning LogisticRegression 0.2916 0.5585
+Model
+Parameters Accuracy Time(min)
+XLM-RoBERTa 278,127,469 0.7042 5m17s
+DistilBERT 67,037,293 0.7381 2m28s
+RoBERTa 124,729,453 0.7244 4m56s DistilBERTshowedcomparableperformance,achievingaccura-
+BERT 109,566,061 0.7321 4m53s ciesof0.7321and0.7381,respectively.Comparedtootherneural
+ELECTRA 13,576,813 0.6236 1m27s networksandmachinelearningmodels,theseresultshighlightthe
+TinyBERT 14,384,365 0.6081 0m45s robustnessofpre-trainedmodelsinhandlingsuchclassification
+ALBERT 11,767,405 0.0105 5m8s tasks.
+However,weobserveaperformancegapbetweenlevel-1and
+level-2tasksforallmodels,withloweraccuracyinthelatter.Cer-
+Table9:FinalResultsforLevel-1Category
+trainly, this is because of the increased complexity (107 classes
+insteadof17inlevel-1),whichmeansthatthisisamoredifficult
+Model Accuracy challengeforbothpre-trainedandtraditionalmodels.
+Traditionalmachinelearningmodelsshowedreasonableperfor-
+XLM-RoBERTa 0.8214
+mancewhenpairedwithTFIDFandGloVeembeddings.Notably,
+DistilBERT 0.8324
+thecombinationofGloVeembeddingswiththesemodelsresultedin
+RoBERTa 0.8457
+improvedaccuracies,suggestingthatpre-trainedwordembeddings
+BERT 0.8516
+canenhancetheeffectivenessoftraditionalmodels.Forexample,
+ELECTRA 0.8205
+SVMachievedaccuracy=0.7211onlevel-1taskswithGloVeem-
+TinyBERT 0.8155
+beddings,significantlyhigherthanitsperformancewithTF-IDF
+ALBERT 0.8031
+whereitachievedaccuracy=0.5008.However,thesemodelsconsis-
+Accuracy(TFIDF) Accuracy(GloVe) tentlyunderperformedcomparedtothepre-trainedones,showing
+thelimitationsoftraditionalapproaches.Weobservedaverybad
+MLP 0.4945 0.7138
+performancefromtheALBERTmodelinlevel-2categorywhereit
+RNN 0.4675 0.6841
+achievedjust0.01accuracywhichissomethingverystrangetaking
+TransformerEncoder 0.4867 0.7239
+intoconsiderationitsperformanceinlevel-1category.Onepossible
+SVM 0.5008 0.7211 reasonisthatitprobablyneedsmoreepochsduringfine-tuning.
+RandomForest 0.4934 0.6948 However,wedidn’thavetheGPUcapacitytoexperimentmoreon
+LogisticRegression 0.4640 0.6824 thisandwekepteverythingconsistentat6epochs.
+10.1 KeyObservations
+10 Discussion
+• NumberofParametersforPre-trainedModels:While
+Theresultsindicatethatpre-trainedtransformermodelsoutper- modelslikeTinyBERTandALBERTofferefficiencydueto
+formtraditionalmodelsacrossbothcategories.Amongpre-trained theirsmallersizes,theirperformancewaslowercomparedto
+models,BERTachievedthehighestaccuracy(0.8516)inthelevel-1 largermodelssuchasBERTandRoBERTa.Thishighlightsa
+categoryanddemonstratesitsstrongcapabilitytocapturecon- trade-offbetweenmodelsizeandperformance,particularly
+textualinformation.Similarly,inthelevel-2category,BERTand incomplexclassificationtasks(suchaslevel-2category).CIS5525NeuralComputation,Fall2024,Philadelphia,PA,USA Petridisetal.
+• EmbeddingChoiceMatters:TheresultsforTFIDFand [17] NiharRanjan,KaushalMundada,KunalPhaltane,andSaimAhmad.2016. A
+GloVeembeddingsshowtheimportanceoffeaturerepresen- SurveyonTechniquesinNLP.InternationalJournalofComputerApplications
+134,8(2016),6–9.
+tationintraditionalmodels.GloVeembeddings,withtheir
+[18] VSanh.2019.DistilBERT,adistilledversionofBERT:smaller,faster,cheaper
+pre-trainedinformation,consistentlyoutperformedTFIDF andlighter.arXivpreprintarXiv:1910.01108(2019).
+acrossbothlevel-1andlevel-2categories. [19] AndreasSteiner,AndréSusanoPinto,MichaelTschannen,DanielKeysers,Xiao
+Wang,YonatanBitton,AlexeyGritsenko,MatthiasMinderer,AnthonySherbondy,
+ShangbangLong,etal.2024. PaliGemma2:AFamilyofVersatileVLMsfor
+11 Conclusions Transfer.arXivpreprintarXiv:2412.03555(2024).
+[20] XiaobingSun,XiangyueLiu,JiajunHu,andJunwuZhu.2014.Empiricalstudies
+Inthiswork,weevaluatedtheperformanceofpre-trainedtrans- onthenlptechniquesforsourcecodedatapreprocessing.InProceedingsofthe
+formermodelsandtraditionalmachinelearningapproacheson 20143rdinternationalworkshoponevidentialassessmentofsoftwaretechnologies.
+32–39.
+twoclassificationtasks(level-1andlevel-2).Ourfindingsdemon- [21] HindTaudandJean-FranccoisMas.2018.Multilayerperceptron(MLP).Geomatic
+stratethatpre-trainedmodels,suchasBERTandRoBERTa,con- approachesformodelinglandchangescenarios(2018),451–455.
+[22] AVaswani.2017. Attentionisallyouneed. AdvancesinNeuralInformation
+sistentlyoutperformtraditionalmodels.However,weobserveda
+ProcessingSystems(2017).
+performance decrease for all models on the more complex task
+(level-2).Additionally,traditionalmodelspairedwithGloVe(pre-
+trained)embeddingsshowedcompetitiveperformanceinsimpler
+tasks,pointingouttheimportanceofembeddingqualityinfeature-
+basedapproaches.Itisalsonoteworthytosay,thatifwedonot
+careaboutaccuracyandcorrectpredictionsingeneralandwehave
+computationallimitations,itisbettertogowithastandardma-
+chinelearningmodel(withGloVe)whichissignificantlysmaller
+andeasiertodeploycomparedtopre-trainedones.Overall,thefind-
+ingsemphasizethedominanceofpre-trainedtransformer-based
+architecturesfortextclassificationtasks.
+References
+[1] SabeenAhmed,IanENielsen,AakashTripathi,ShamoonSiddiqui,RaviPRa-
+machandran,andGhulamRasool.2023.Transformersintime-seriesanalysis:A
+tutorial.Circuits,Systems,andSignalProcessing42,12(2023),7433–7466.
+[2] D.Anguita,LucaGhelardoni,AlessandroGhio,L.Oneto,andSandroRidella.
+2012.The’K’inK-foldCrossValidation.InTheEuropeanSymposiumonArtificial
+NeuralNetworks.
+[3] KClark.2020.Electra:Pre-trainingtextencodersasdiscriminatorsratherthan
+generators.arXivpreprintarXiv:2003.10555(2020).
+[4] AConneau.2019.Unsupervisedcross-lingualrepresentationlearningatscale.
+arXivpreprintarXiv:1911.02116(2019).
+[5] DiogoCortiz.2022.ExploringTransformersmodelsforEmotionRecognition:a
+comparisionofBERT,DistilBERT,RoBERTa,XLNETandELECTRA.InProceed-
+ingsofthe20223rdInternationalConferenceonControl,RoboticsandIntelligent
+System(VirtualEvent,China)(CCRIS’22).AssociationforComputingMachinery,
+NewYork,NY,USA,230–234. https://doi.org/10.1145/3562007.3562051
+[6] SonainJamil,MdJalilPiran,andOh-JinKwon.2023.Acomprehensivesurveyof
+transformersforcomputervision.Drones7,5(2023),287.
+[7] XiaoqiJiao,YichunYin,LifengShang,XinJiang,XiaoChen,LinlinLi,FangWang,
+andQunLiu.2019.Tinybert:Distillingbertfornaturallanguageunderstanding.
+arXivpreprintarXiv:1909.10351(2019).
+[8] ThorstenJoachimsetal.1997.AprobabilisticanalysisoftheRocchioalgorithm
+withTFIDFfortextcategorization.InICML,Vol.97.Citeseer,143–151.
+[9] JacobDevlinMing-WeiChangKentonandLeeKristinaToutanova.2019.Bert:
+Pre-trainingofdeepbidirectionaltransformersforlanguageunderstanding.In
+ProceedingsofnaacL-HLT,Vol.1.Minneapolis,Minnesota,2.
+[10] KamranKowsari,KianaJafariMeimandi,MojtabaHeidarysafa,SanjanaMendu,
+LauraBarnes,andDonaldBrown.2019.Textclassificationalgorithms:Asurvey.
+Information10,4(2019),150.
+[11] ZLan.2019.Albert:Alitebertforself-supervisedlearningoflanguagerepresen-
+tations.arXivpreprintarXiv:1909.11942(2019).
+[12] YinhanLiu.2019.Roberta:Arobustlyoptimizedbertpretrainingapproach.arXiv
+preprintarXiv:1907.11692364(2019).
+[13] LarryRMedsker,LakhmiJain,etal.2001.Recurrentneuralnetworks.Design
+andApplications5,64-67(2001),2.
+[14] Shervin Minaee, Nal Kalchbrenner, Erik Cambria, Narjes Nikzad, Meysam
+Chenaghlu,andJianfengGao.2021. Deeplearning–basedtextclassification:
+acomprehensivereview.ACMcomputingsurveys(CSUR)54,3(2021),1–40.
+[15] JeffreyPennington,RichardSocher,andChristopherDManning.2014.Glove:
+Globalvectorsforwordrepresentation.InProceedingsofthe2014conferenceon
+empiricalmethodsinnaturallanguageprocessing(EMNLP).1532–1543.
+[16] PhilippProbst,Anne-LaureBoulesteix,andBerndBischl.2019.Tunability:Im-
+portanceofhyperparametersofmachinelearningalgorithms.JournalofMachine
+LearningResearch20,53(2019),1–32.

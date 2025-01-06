@@ -1,0 +1,428 @@
+International Journal on ISSN 2077-3528
+“Technical and Physical Problems of Engineering” IJTPE Journal
+(IJTPE) www.iotpe.com
+Published by International Organization of IOTPE ijtpe@iotpe.com
+December 2024 Issue 61 Volume 16 Number 4 Pages 1-6
+INTEGRATING NATURAL LANGUAGE PROCESSING TECHNIQUES OF
+TEXT MINING INTO FINANCIAL SYSTEM: APPLICATIONS AND
+LIMITATIONS
+D. Millo B. Vika N. Baci
+Statistics and Applied Informatics Department, Faculty of Economy, University of Tirana, Tirana, Albania
+denisa.millo@unitir.edu.al, blerina.vika@unitir.edu.al, nevila.baci@unitir.edu.al
+Abstract- The financial sector, a pivotal force in economic For the scope of this research paper, we refer to the Finance
+development, increasingly uses the intelligent field as the Financial System (FS) as it encompasses
+technologies such as natural language processing to various components such as; public finance, international
+enhance data processing and insight extraction. This finance, corporate finance, derivatives, risk management,
+research paper through a review process of the time span portfolio theory, asset pricing (AP), and financial
+of 2018-2023 explores the use of text mining as natural economics [1].
+language processing techniques in various components of A detailed view of the search methods and machine
+the financial system including asset pricing, corporate learning tools in language processing, including classifiers
+finance, derivatives, risk management, and public finance and sequence models, techniques like decision trees (DT),
+and highlights the need to address the specific problems in support vector machines (SVM), and cross-validation is
+the discussion section. We notice that most of the research essential for evaluating NLP systems [2]. We will give
+materials combined probabilistic with vector-space examples of the use of NLP techniques in the next sections
+models, and text-data with numerical ones. The most used
+in this research, enhancing their understanding by
+technique regarding information processing is the
+delivering the research questions as following:
+information classification technique and the most used
+Q1: What are the NLP models and techniques used for
+algorithms include the long-short term memory and
+analyzing FS components in the time span of 2018-2023?
+bidirectional encoder models. The research noticed that
+Q2: What are the challenges and limitations in the
+new specific algorithms are developed and the focus of the
+applications of NLP to the FS regarding text-mining
+financial system is mainly on asset pricing component. The
+applications on the engineering perspective of data
+research also proposes a path from engineering perspective
+processing?
+for researchers who need to analyze financial text. The
+challenges regarding text mining perspective such as data
+2. THE APPLICATIONS OF NLP MODELS AND
+quality, context-adaption and model interpretability need
+TECHNIQUES IN FINANCIAL SYSTEM
+to be solved so to integrate advanced natural language
+Going deeper into example cases, we discover an
+processing models and techniques in enhancing financial
+ongoing trend that is growing fast. To analyze the subject-
+analysis and prediction.
+matter we go through a time span of 2018-2023.
+Keywords: Financial System (FS), Natural Language
+2.1. Materials and Methods
+Processing (NLP), Software and Text Engineering,
+The path used to answer to Q1 is built on the
+Probabilistic, Vector-Space, Models, Techniques, Text-
+methodology of filtering in the Google Scholar search
+Data, Financial Analysis.
+engine. There are included citations and patents with the
+1. INTRODUCTION query as follows: (NLP OR “Natural Language
+The financial sector is an important and a driving force Processing”) AND “*FS element mentioned in chapter
+of the worldwide economic development and it is having a 1”AND text mining AND forecasting AND prediction
+rapid development due to the use of the latest intelligent AND models. To give answer to our research questions we
+technologies such as Natural Language Processing (NLP). explored around 250 scientific materials, from which 35 of
+The period of 2018-2023 covered in this research paper them books and the rest papers and articles. After selecting
+implies an important one, where NLPs have seen an the scientific materials filtered, we reached to a total of
+exponential growth with the Large Language Models around one hundred and nine (109) papers, articles, books
+(LLMs) projects like ChatGPTs, Gemini, Bard and Bing and similar. For the scope of this research paper, we
+exploration and models deeper specifications. classified and analyzed around sixty (60) study materials.
+Registered: 240529 Article Info: 1891 Accepted: 241118
+Reserved: 240907 Available: 241231
+1International Journal on “Technical and Physical Problems of Engineering” (IJTPE), Iss. 61, Vol. 16, No. 4, Dec. 2024
+2.2. Results A textual analysis of China's financial markets is
+Figure 1 shows that the focus of most studies relies on conducted with sentiment analysis [6]. The work of [30]
+AP, (especially on stock prediction), while having the used transformers for sentiment analysis on
+corporate finances as the second most studied component Environmental, Social, and Governance (ESG) news.
+of FS. Datasets on the international finance FS component are of
+various data sources, as they help to create an international
+point of view on the topic.
+30
+As for the portfolio theory application of NLPs, we can
+25
+elaborate works that underpin the interconnection of the
+20
+fields of FS and NLP. An important work [7] applies
+15
+financial Bidirectional Encoder Representations from
+10
+Transformers (FinBERT), Monte Carlo, and Black and
+5
+Litterman model for portfolio optimization on Milano
+0
+Finanza data. Whereas, [28] investigated the importance of
+financial sentiment in portfolio management using RF,
+Multi-Layer Perceptron (MLP), and LSTM on data from
+Quandl and StockFluence APIs. Here we have to mention
+even the use of datasets from other sectors for training
+models, which can be sub-optimal, highlighting the need
+No.of NLP scientific materials for more sector-specific annotated datasets [8,9,10]. The
+diverse number of techniques used, show of a versatile
+Figure 1. Histogram of scientific materials extracted and classified
+sub-field, where data and information are not absent, but
+according to Financial System Components for the years 2018-2023
+needs more attention in the future, for taking proper
+From the actual database of scientific materials, we financial decisions and predictions to the investors.
+also noticed that most of NLP models were a combination The public finance component is elaborated in some
+of probabilistic and vector-based ones. Whereas, regarding works below though, there is a need to be further
+the classification on NLP techniques evidenced, we can investigated. Work of [11] applied machine learning to
+refer to Figure 2. As we can see, the information budget speech statements. The article of [12] examined tax
+classification techniques and the combination of the all compliance behavior using Bidirectional Encoder
+three ones, has most of the works used during the time span Representations from Transformers (BERT) on survey
+study. responses. A bank financial risk prediction model is
+developed using big data from commercial banks,
+40 employing Least Absolute Shrinkage and Selection
+Operator (Lasso) and SVM [29]. The SVM techniques [13]
+30
+and hybrid deep learning models [14] show their global use
+20 in different fields, we can mention the healthcare one.
+Whereas the finance field is evolving, the need for
+10 intelligent methods is rising, as it is a crucial point when
+taking financial decisions, and is applied thoroughly in
+0
+Information Information Information Combination every other component presented above.
+Retreaval Classification Extraction Through our work we saw that the stock predictions
+No.of scientific materials according to information proccessing NLP remain the most studied topic, in the AP component of the
+techniques FS, and that the AP component of the FS is the most
+studied topic compared to other components. There might
+Figure 2. Histogram of scientific materials extracted and classified
+according to information processing NLP techniques, years 2018-2023, be different reasons, but what we can deduce is that there
+are more open databases that allow the latter topic to be
+We noticed a growing number of articles which studied and also, it is a very fast needed information. An
+combined both probabilistic with VSM, and also combined investor has to have an accurate and timely information on
+text-data with numerical ones. A systematic and critical stocks or in AP, in order to take proper decision. There is
+review of deep learning in financial economics is provided evidenced a variety of datasets utilized, including financial
+by using hybrid variants of methods [3]. The work [4] news databases. stock returns data, corporate financial
+forecasted economic trends using sentiment analysis, reports (e.g., 10-K filings), and social media data (e.g.,
+AutoRegressive with eXogenous inputs (ARX) and Lasso StockTwits, Weibo).
+on data from articles from six newspapers showing varying The most used common specific techniques, as
+levels of accuracy. The Numeric Hierarchical Transformer presented in Figure 3. include BERT types, Long Short-
+Model (NumHTML) for financial forecasting using Term Memory (LSTM) and Logistic Regression (LR),
+earning conference calls data was introduced in the year of whereas Lasso, Bag of Words (Bow), NEUS, K-Nearest
+2022 [5]. As these studies remain near the financial Neighbors (KNN), Deep Neural Network (DNN), Deep
+economics area, they also might have infusions of other Learning (DL), Generalized Autoregressive Conditional
+topics, showing at least, a low interest on the matter. Heteroskedasticity (GARCH) and Autoregressive
+2International Journal on “Technical and Physical Problems of Engineering” (IJTPE), Iss. 61, Vol. 16, No. 4, Dec. 2024
+Integrated Moving Average (ARIMA) are to be of models to real-time data remain challenging,
+mentioned. Other types of techniques, which are a particularly in evolving financial markets [24]. Even the
+combination of above and new techniques proposed e.g. expert annotations based on prior beliefs can be incorrect,
+NumHTML, AdaBoost, compose a share of 47 % in emphasizing need for context-based annotations [25]. The
+overall scientific material of 60 papers used for the purpose infancy of text analysis in finance requires comprehensive
+of this section. The frequently used evaluation parameters research to fully understand its potential [4].
+were Accuracy, F1-score, Precision, Recall, and R2. Additionally, the use of datasets from other sectors for
+training models can be sub-optimal, highlighting the need
+for more sector-specific annotated datasets [10]. Future
+research should take into consideration market frictions
+and transaction costs in trading strategies [26]. While some
+[15] challenges are mentioned above, the other ones such
+restriction to confidential data, need of club inter-domain
+results, highly un-structured and redundant data, sarcasm
+and vernacular language and the new ones we presented
+above resonate a need to address them as quickly as
+possible. Lastly, we can state that advanced NLP models
+show promise but require further investigation to address
+their current limitations and optimize their use in financial
+Figure 3. Histogram of scientific materials extracted and classified
+predictions [27].
+according to specific NLP techniques, years 2018-2023, Source:
+Authors
+Table 1. Challenges and Limitations in the application of NLP to FS, the
+3. DISCUSSION x symbol means that the problem persists and needs to be addressed
+This research highlighted several limitations on the text Challenges and Limitations in the application of
+Gupta, et al. This
+engineering perspective in the application of NLP to FSs NLP to FSs regarding text mining engineering
+[15] research
+perspective
+in order to answer to Q2. It leverages the past works’ [15]
+restriction to confidential data x solved
+limitations and challenges (restriction to confidential data,
+absence of well-defined financial
+absence of well-defined financial lexicon lists, lack of lexicon lists x x
+dynamic texts analysis models, need of club inter-domain partially
+x
+results, highly un-structured and redundant data, sarcasm lack of dynamic texts analysis models resolved
+need of club inter-domain results x x
+and vernacular language) are not fully appointed yet. Let
+highly un-structured and redundant data x x
+us point out the evolution of the challenges from the time
+sarcasm and vernacular language x x
+of the study’s [15] analysis to the end of the year 2023. A data shift between training corpora
+x
+significant issue is the data shift between training corpora and real-world corpora
+and real estate headlines, leading to poor performance in overfitting problems of traditional model x
+limited interpretability of advanced models x
+event extraction [16]. Traditional models like the Fama-
+time-varying distributions x
+French 5-factor model (FF5) face overfitting problems,
+low signal-to-noise ratios x
+highlighting superiority of newer models like Generalized fail to capture the financial context adequately
+x
+News-based Sentiment Analysis (GNUS) [17]. due to reliance on general lexicons
+Whereas even the latter like deep learning models data quality and causality issues x
+matter of scalability and adaptability of models
+encounter challenges with Non-Independent and x
+to real-time data
+Identically Distributed (non-IID) samples, time-varying
+incorrect expert annotations based on prior
+distributions, and low signal-to-noise ratios, complicating beliefs x
+stock return predictions such as in [18]. Refs. [17, 18]
+indicate a partially addressed issue of Gupta, et al. [15] As per conclusion of this chapter, we propose a path to
+challenges to the lack of dynamic text analysis models. be followed when having to do research on the finance
+There is a limited interpretability of advanced models like field combined with NLP models and techniques of text
+BERT and Word2Vec that restricts their application, mining. Figures 4 and 5 explain visually the steps as per
+particularly when not trained on domain-specific texts [19, follows.
+20]. The sentiment analysis models often fail to capture
+After determining the where we will delve in while
+financial context adequately due to reliance on general
+following the Figure 4, we follow the text analyzing steps
+lexicons [21], a challenge not yet solved since the research
+mentioned in Jurafsky and Martin 2020 [2]. Figure 5
+paper [15] reference on absence of well-defined financial
+explains in detail the broader panorama of analyzing
+lexicon lists.
+financial text in the language context and the specific
+Further, data quality and causality issues persist,
+limitations encountered from our work in the research
+making it difficult to establish reliable links between
+papers analyzed. In the right side of each step, there are
+sentiment indicators and outcomes [22]. The overreliance
+mentioned the most encountered limitations. These
+on numerical data in models overlooks qualitative factors
+limitations should be taken into account when dealing with
+like managerial experience, which could enhance
+problems of the same field as this research paper handles.
+predictions [23]. The matter of scalability and adaptability
+3
+%2
+%01
+%3 %2 %2 %2 %2 %5 %2
+%01 %21
+%3
+%74International Journal on “Technical and Physical Problems of Engineering” (IJTPE), Iss. 61, Vol. 16, No. 4, Dec. 2024
+Financial texts remain difficult to understand as they
+have a specific domain language. The models and Lexical Analysis, Structure and Meaning of the words
+limitations discussed in this research paper tend to make
+easier the first stage of a research, the state of the art. After absence of well-defined financial lexicon lists, fail to capture the
+financial context adequately due to reliance on general lexicons
+choosing the FS component field, NLP model and
+techniques, the language analysis and having into account
+the proper limitations as expressed in Figure 5, the data
+preparation should begin.
+Syntactic Analysis,Ogranization of the words into sentences
+Asset Pricing Information Classification, LSTM
+•S&P, Bloomberg, Dow Jones etc. lack of dynamic texts analysis models
+Corporate
+Combination, Other
+finance
+•10-K and 10-Q reports, etc.
+Semantic Analysis, Meaning of words and sentences
+Derivatives Combination, Other limited interpretability of advanced models, time-varying
+•Thomson Reuters etc. distributions, low signal-to-noise ratios
+Risk
+Combination, Other
+Managment
+•Industries annual reports etc. Discourse Analysis, Meaning of Sentences in Documents
+data shift between training corpora and real-world corpora, need of
+International club inter-domain results, highly un-structured and redundant data
+Information Classification, Other
+Finance
+•News articles, International Banks data etc.
+Portfolio Theory Information Classification, Other Pragmatic Analysis, Understanding/interpreting language in
+•Wall Street, Dow Jones etc. context
+sarcasm and vernacular language, incorrect expert annotations
+Financial based on prior beliefs, matter of scalability and adaptability of
+Economics Information Classification, Other models to real-time data, data quality and causality issues,
+•World Bank, Yahoo Finance etc. overfitting problems of traditional model, restriction to
+confidentialdata
+Public Finance Information Retrieval, BERTs
+•Budget speeches etc.
+Return to the any previous stage, if the following is not
+Figure 4. The first step is to determine the FS component to work on accomplished, otherwise go to the model results.
+with and the NLP technique regarding information processing and
+model algorithms. In the left side FS components, in the right side the
+most used NLP techniques for each component. In the bottom the most
+Figure 5. Second step is to determine the problem on language terms
+probable data source. “Other” and “Combination” have the same
+and in which phase of language analysis it will go on to. For each
+meaning as mentioned in Figures 1 and 2. In this Figure there are
+double headed sub diagram, there is the step analysis on top and
+mentioned the most used NLP techniques and models
+limitations in the bottom. Source: Martin and Jura sky (2020) with the
+limitations from the authors
+4. CONCLUSIONS
+Despite the limitations, NLP holds substantial promise for
+Advancements in transfer learning and domain
+enhancing the FS. Their mixed applications can
+adaptation are promising for addressing data shift issues,
+significantly improve the accuracy of predictions, such as
+thereby improving model robustness and generalization.
+stock prices and asset returns, by taking large amounts of
+As the field progresses, developing more interpretable AI
+textual data from news articles, social media, and financial
+models will enhance transparency and trust, making NLP
+reports. Advanced models like BERT and LSTM, and their
+an indispensable tool for financial analysts and
+modified models, have demonstrated superior
+researchers.
+performance in capturing the nuances of financial
+The FS components of AP and corporate finance
+language and predicting market movements. Integrating
+remain amongst most elaborated with NLP techniques,
+deep learning techniques into financial models not only
+while the other components have a small number of
+enhances prediction accuracy but also helps uncover
+studies. Amongst NLP models, the most used remain the
+underlying economic mechanisms, offering deeper
+probabilistic and VSM models, whereas the most used
+empirical insights into AP. Furthermore, NLP can
+techniques remain the information classification and
+facilitate better sentiment analysis, crucial for gauging
+hybrid techniques. Overall, while advanced NLP and deep
+market sentiment and making informed investment
+learning models show great promise for financial
+decisions.
+4International Journal on “Technical and Physical Problems of Engineering” (IJTPE), Iss. 61, Vol. 16, No. 4, Dec. 2024
+applications, ongoing research must address these Data (Big Data), pp. 3274-3283, Orlando, FL, USA,
+limitations to enhance their accuracy, interpretability, and December 2021.
+applicability. Future research should focus on refining [12] I. Florina, C. Stefana, C. Codruta, “Is Trust a Valid
+models to account for local market dynamics, improving Indicator of Tax Compliance Behavior? A Study on
+data quality and annotation methods, and developing more Taxpayers’ Public Perception Using Sentiment Analysis
+sophisticated algorithms capable of handling the complex Tools”, A.M. Dima, M. Kelemen, (Eds.), “Digitalization
+and dynamic nature of financial data. and Big Data for Resilience and Economic Intelligence”,
+Springer Proceedings in Business and Economics.
+ACKNOWLEDGEMENTS Springer, Cham, Switzerland, 2022.
+The author(s) appreciate the assistance of the finance [13] V. Jain, B. Jha, S. Joshi, S. Miglani, A. Singal, S.
+student Savina Shtaka for supporting in material search. Babbar, M. Demirci, M.C. Taplamacioglu, “Human
+Disease Detection Using Artificial Intelligence”,
+REFERENCES International Journal on Technical and Physical Problems
+[1] T. Hens, M.O. Rieger, “Financial Economics”, of Engineering (IJTPE), Issue 55, Vol. 15, No. 2, pp. 125-
+Springer Texts in Business and Economics, Springer 133, June 2023.
+Berlin Heidelberg, pp. 5-6, Heidelberg, Berlin, Germany, [14] H.S. Rahli, N. Benamrane, “Intelligent Breast Cancer
+2016. Screening Based on Deep Neural Networks”, International
+[2] J. Martin, D. Jurafsky, “Speech and Language Journal on Technical and Physical Problems of
+Processing an Introduction to Natural Language Engineering (IJTPE), Issue 57, Vol. 15, No. 4, pp. 404-
+Processing”, Computational Linguistics, and Speech 409, December 2023.
+Recognition, 3rd ed., pp. 3-263, 2020. [15] A. Gupta, V. Dengre, H.A. Kheruwala, M. Shah,
+[3] Y. Zheng, Z. Xu, A. Xiao, “Deep Learning in “Comprehensive Review of Text-Mining Applications in
+Economics: A Systematic and Critical Review”, Arif. Finance”, Financ Innov, Vol. 6, p. 39, December 2020.
+Intell. Rev., Vol. 56, pp. 9497-9539, September 2023. [16] J. Huang, R. Xing, Q. Li, “Asset Pricing Via Deep
+[4] L. Barbaglia, S. Consoli, S. Manzan, “Forecasting with Graph Learning to Incorporate Heterogeneous Predictors”,
+Economic News”, Journal of Business and Economic Int J. of Intelligent Sys., Vol. 37, pp. 8462-8489,
+Statistics, Vol. 41, pp. 708-719, July 2023. November 2022.
+[5] L. Yang, J. Li, R. Dong, Y. Zhang, B. Smyth, [17] L. Zhu, H. Wu, M.T. Wells, “A News-Based Machine
+“NumHTML: NumericOriented Hierarchical Transformer Learning Model for Adaptive Asset Pricing”, Arxiv
+Model for Multi-Task Financial Forecasting”, AAAI, Vol. Preprint Arxiv:2106.07103, 2021.
+36, pp. 11604-11612, June 2022. [18] C. Zhang, “Asset Pricing and Deep Learning”,
+[6] A. Huang, W. Wu, T. Yu, “Textual Analysis for arXiv:2209.12014, Vol. 24, [q-fin.ST], September 2022.
+China’s Financial Markets: a Review and [19] R. Liu, F. Mai, Z. Shan, Y. Wu, “Predicting
+Discussion”, China Finance Review International, Vol. 10, Shareholder Litigation on Insider Trading from Financial
+No. 1, pp. 1-15, 2020. Text: An Interpretable Deep Learning Approach”,
+[7] F. Colasanto, L. Grilli, D. Santoro, G. Villani, “BERT’s Information and Management, Vol. 57, p. 103387,
+Sentiment Score for Portfolio Optimization: A Fine-Tuned December 2020.
+View in Black and Litterman Model”, Neural Comput. and [20] S. Gholizadeh, N. Zhou, “Model Explainability in
+Applic., Vol. 34, pp. 17507-17521, October 2022. Deep Learning Based Natural Language Processing”,
+[8] M. Wujec, “Analysis of the Financial Information arXiv:2106.07410 [cs], June 2021.
+Contained in the Texts of Current Reports: A Deep [21] L. Malandri, F.Z. Xing, C. Orsenigo, C. Vercellis, E.
+Learning Approach”, JRFM, Vol. 14, p. 582, December Cambria, “Public Mood-Driven Asset Allocation: The
+2021. Importance of Financial Sentiment in Portfolio
+[9] C. Chen, S. Xiao, B. Zhao, “Machine Learning Meets Management”, Cong Compute, Vol. 10, pp. 1167-1176,
+the Journal of Public Budgeting and Finance: Topics and December 2018.
+Trends Over 40 Years”, Public Budgeting and Finance, [22] C.K. Soo, “Quantifying Sentiment with News Media
+Vol. 43, pp. 3-23, December 2023. Across Local Housing Markets”, The Review of Financial
+[10] T.I. Theodorou, A. Zamichos, M. Skoumperdis, A. Studies, Vol. 31, pp. 3689-3719, October 2018.
+Kougioumtzidou, K. Tsolaki, D. Papadopoulos, T. Patsios, [23] S.B. Jabeur, C. Gharib, S. Mefteh Wali, W.B. Arfi,
+G. Papanikolaou, A. Konstantinidis, A. Drosou, D. “CatBoost Model and Artificial Intelligence Techniques
+Tzovaras, “An AI-Enabled Stock Prediction Platform for Corporate Failure Prediction”, Technological
+Combining News and Social Sensing with Financial Forecasting and Social Change, Vol. 166, pp. 120-658,
+Statements”, Future Internet, Vol. 13, p. 138, May 2021. May 2021.
+[11] C. Vuppalapati, A. Ilapakurti, S. Vissapragada, V. [24] J.Z.G. Hiew, X. Huang, H. Mou, D. Li, Q. Wu, Y. Xu,
+Mamaidi, S. Kedari, R. Vuppalapati, S. Kedari, J. “BERT-Based Financial Sentiment Index and LSTM-
+Vuppalapati, “Application of Machine Learning and Based Stock Return Predictability”, Arxiv:1906.09024 [q-
+Government Finance Statistics for Macroeconomic Signal fin.ST], July 2022.
+Mining to Analyze Recessionary Trends and Score Policy [25] M. Sedinkina, N. Breitkopf, H. Schutze, “Automatic
+Effectiveness”, IEEE International Conference on Big Domain Adaptation Outperforms Manual Domain
+Adaptation for Predicting Financial Outcomes”, The 57th
+5International Journal on “Technical and Physical Problems of Engineering” (IJTPE), Iss. 61, Vol. 16, No. 4, Dec. 2024
+Annual Meeting of the Association for Computational Research Interests: Natural Language Processing in
+Linguistics, pp. 346-359, 2019. Finance and Media
+[26] B. Fazlija, P. Harder, “Using Financial News Scientific Publications: 8 Papers, 2 Projects
+Sentiment for Stock Price Direction Prediction”, Scientific Memberships: UNINOVIS Alumni
+Mathematics, Vol. 10, pp. 21-56, June 2022.
+[27] A. Zaremba, E. Demir, “ChatGPT: Unlocking the Name: Blerina
+Future of NLP in Finance”, SSRN Journal, Modern Surname: Vika
+Finance, 2023, Vol. 1, No. 1, pp. 93-98, 2023. Birthday: 27.06.1984
+[28] L. Malandri, F.Z. Xing, C. Orsenigo, C. Vercellis, E. Birthplace: Tirana, Albania
+Cambria, “Public Mood–Driven Asset Allocation: The Education: Informatics, Department of
+Importance of Financial Sentiment in Portfolio Informatics, Faculty of Natural Sciences,
+Management”, Cong Compute, Vol. 10, pp. 1167-1176, University of Tirana, Tirana, Albania,
+December 2018. 2007
+[29] H. Peng, Y. Lin, M. Wu, “Bank Financial Risk Master: Advanced Informatics, Department of
+Prediction Model Based on Big Data”, Scientific Informatics, Faculty of Natural Sciences, University of
+Programming, Vol. 20, No. 22, pp. 1-9, February 2022. Tirana, Tirana, Albania, 2011
+[30] B. Sandwidi, S. Pallitharammal Mukkolakal, Doctorate: Information Systems, Department of Statistics
+“Transformers-Based Approach for a Sustainability Term- and Applied Informatics, Faculty of Natural Sciences,
+Based Sentiment Analysis (STBSA)”, The Second University of Tirana, Tirana, Albania, 2010
+Workshop on NLP for Positive Impact (NLP4PI), (Abu The Last Scientific Position: Assoc. Prof., Department of
+Dhabi, United Arab Emirates (Hybrid)), pp. 157-170, Statistics and Applied Informatics, Faculty of Economy,
+Association for Computational Linguistics, 2022. University of Tirana, Tirana, Albania, 2024
+Research Interests: Artificial Intelligences Machine
+BIOGRAPHIES Learning, Forecasting Models
+Scientific Publications: 20 Papers, 2 Books, 4 Projects
+Name: Denisa
+Surname: Millo Name: Nevila
+Birthday: 19.11.1990 Surname: Baci
+Birthplace: Elbasan, Albania Birthday: 15.05.1965
+Bachelor: Business Informatics, Birthplace: Tirana, Albania
+Department of Statistics and Applied Bachelor: Economics, Department of
+Informatics, Faculty of Economy, Economics, Faculty of Economy,
+University of Tirana, Tirana, Albania, 2012 University of Tirana, Tirana, Albania,
+Master: Operational Research in Management, 1987
+Department of Statistics and Applied Informatics, Faculty Doctorate: E-government, Faculty of Economy,
+of Economy, University of Tirana, Tirana, Albania, 2014 University of Tirana, Tirana, Albania, 2005
+Doctorate: Student, Information Systems in Economy, The Last Scientific Position: Prof., Department of
+Department of Statistics and Applied Informatics, Faculty Statistics and Applied Informatics, Faculty of Economy,
+of Economy, University of Tirana, Tirana, Albania, Since University of Tirana, Tirana, Albania, 2022
+2022 Research Interests: Informatics, Information Systems, E-
+The Last Scientific Position: Lecturer, Department of Commerce
+Statistics and Applied Informatics, Faculty of Economy, Scientific Publications: 25 Papers, 1 Books, 5 Projects
+University of Tirana, Tirana, Albania, Since 2016 Scientific Memberships: Academy of Science, Albania
+6

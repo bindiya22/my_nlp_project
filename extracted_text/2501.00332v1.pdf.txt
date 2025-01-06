@@ -1,0 +1,1101 @@
+MAIN-RAG: Multi-Agent Filtering Retrieval-Augmented Generation
+Chia-YuanChang ZhimengJiang VineethRakesh MenghaiPan Chin-ChiaMichaelYeh
+TexasA&MUniversity VisaResearch VisaResearch VisaResearch VisaResearch
+cychang@tamu.edu zhimjian@visa.com vinemoha@visa.com mengpan@visa.com miyeh@visa.com
+GuanchuWang MingzhiHu ZhichaoXu YanZheng MahashwetaDas NaZou
+VisaResearch WorcesterPolytechnicInstitute UniversityofUtah VisaResearch VisaResearch UniversityofHouston
+guanwang@visa.com mhu3@wpi.edu zhichao.xu@utah.edu yazheng@visa.com mahadas@visa.com nzou2@central.uh.edu
+Abstract introduces critical limitations, including the gen-
+erationofoutdatedorfactuallyincorrectinforma-
+LargeLanguageModels(LLMs)arebecoming
+tion—aphenomenonreferredtohallucination(Ji
+essentialtoolsforvariousnaturallanguagepro-
+et al., 2023; Zhang et al., 2023). This issue be-
+cessingtasksbutoftensufferfromgenerating
+outdated or incorrect information. Retrieval- comesparticularlypronouncedinapplicationsre-
+AugmentedGeneration(RAG)addressesthis quiringaccurate,up-to-date,andcontextuallyrele-
+issue by incorporating external, real-time in- vantresponses,suchashealthcare,legalsystems,
+formationretrievaltogroundLLMresponses. andreal-timecustomersupport(Bommasanietal.,
+However,theexistingRAGsystemsfrequently
+2021;Zellersetal.,2019;Linetal.,2022b).
+strugglewiththequalityofretrievaldocuments,
+Retrieval-augmented generation (RAG) has
+asirrelevantornoisydocumentsdegradeper-
+formance, increase computational overhead, emergedasapromisingsolutiontomitigatethese
+andundermineresponsereliability. Totackle challenges by integrating real-time document re-
+thisproblem,weproposeMulti-AgentFiltering trievaltogroundLLMoutputsinreliableexternal
+Retrieval-AugmentedGeneration(MAIN-RAG),
+knowledge (Lewis et al., 2020; Guu et al., 2020;
+atraining-freeRAGframeworkthatleverages
+Karpukhinetal.,2020;Rametal.,2023;Lietal.,
+multiple LLM agents to collaboratively fil-
+2023b; Wang et al., 2023). Training-based meth-
+ter and score retrieved documents. Specifi-
+ods(Guuetal.,2020;Karpukhinetal.,2020;Wang
+cally, MAIN-RAG introduces an adaptive filter-
+ing mechanism that dynamically adjusts the etal.,2023)havedemonstratedstrongperformance
+relevancefilteringthresholdbasedonscoredis- but require substantial computational resources
+tributions,effectivelyminimizingnoisewhile and training time. In contrast, training-free ap-
+maintaininghighrecallofrelevantdocuments. proaches(Rametal.,2023;Lietal.,2023b;Jiang
+The proposed approach leverages inter-agent
+et al., 2023b), while simpler and more efficient
+consensustoensurerobustdocumentselection
+asplug-and-playmethods,stillhingeonthequal-
+without requiring additional training data or
+ityofretrieveddocuments(Chenetal.,2024;Yu
+fine-tuning. Experimental results across four
+QA benchmarks demonstrate that MAIN-RAG et al., 2024). The presence of irrelevant or noisy
+consistentlyoutperformstraditionalRAGap- documentsnotonlyreducesresponseaccuracybut
+proaches,achievinga2–11%improvementin also increases computational overhead and com-
+answer accuracy while reducing the number promisessystemreliability. Thesechallengesun-
+of irrelevant retrieved documents. Quantita-
+derscoretheurgentneedforrobustmechanismsto
+tiveanalysisfurtherrevealsthatourapproach
+effectivelyfilterandrankretrievedcontent.
+achievessuperiorresponseconsistencyandan-
+swer accuracy over baseline methods, offer- Toaddressthesechallenges,weproposeMulti-
+ing a competitive and practical alternative to AgentFIlteriNgRetrieval-AugmentedGeneration
+training-basedsolutions. (MAIN-RAG), a novel training-free framework de-
+signedtoenhancetheperformanceandreliability
+1 Introduction
+of RAG systems. Unlike existing methods that
+LargeLanguageModels(LLMs)haverevolution- often rely on computationally intensive training
+izednaturallanguageprocessing(NLP),achieving or fine-tuning, MAIN-RAG leverages a collabora-
+state-of-the-art performance across diverse tasks, tive multi-agent approach where multiple LLM
+such as question answering, summarization, and agents filter and score retrieved documents. This
+text generation (Vaswani, 2017; Brown, 2020). consensus-driven strategy ensures that only the
+However, their reliance on pre-trained static data mostrelevantandhigh-qualitydocumentsareuti-
+4202
+ceD
+13
+]LC.sc[
+1v23300.1052:viXraDocument Retrieval Filter out Noise Documents
+Query 1 Ans 1 Filtering
+Retriever Private Doc 1 Scoring 0.2 Ordering 0.6
+Database Query 1 Ans 2 Doc 1 Doc 3
+Doc 2 Doc 2 -0.4 0.2
+Doc 2
+Query 1 Doc 1 LLM Agent-1 Doc 3Query 1 Ans 3 LLM Agent-2 0.6 Doc 1
+Doc 3 (Predictor) (Judge) Doc 3
+Triplet Doc-Q-A
+0.6 0.2
+ü Training-free
+ü Stable document ordering Answer Based on Query 1 Fin. Answer
+ü Adaptive judge bar Relative Documents Doc 3 Doc 1
+LLM Agent-3
+(Final-Predictor)
+Figure1: AnoverviewoftheproposedframeworkMAIN-RAG,consistingofthreeLLMagentstoidentifynoisy
+retrieveddocumentsforfiltering(seeSection3.1). Aftertheretrieval,Agent-1 "Predictor"infersanswersfor
+each query; then, Agent-2 "Judge" takes Doc-Q-A Triplet to judge if a document is supportive for LLMs to
+answerthequery. "Judge"providesrelevantscoresforeachdocumentforfilteringandordering. Finally,Agent-3
+"Final-Predictor"answersthequerywiththegivendocumentlist.
+lized for generation, significantly reducing noise proaches,achievinga2-11%improvementin
+withoutsacrificingrecall. answeraccuracywhilereducingtheinclusion
+MAIN-RAGintroducesanadaptivefilteringmech- ofirrelevantdocuments.
+anismthatdynamicallyadjuststherelevancethresh-
+Byaddressingtheinherentchallengesofnoisein
+oldbasedonthescoredistributionofretrieveddoc-
+documentretrievalandprovidingatraining-freeso-
+uments. This adaptability allows the framework
+lution,MAIN-RAGrepresentsasignificantadvance-
+to handle diverse queries effectively and ensures
+mentinthefieldofretrieval-augmentedgeneration.
+robustperformanceacrossdiversetasks. Further-
+Thisworkdetailsthedesign,implementation,and
+more, thetraining-freenatureofMAIN-RAGelimi-
+evaluationofMAIN-RAG,highlightingitspotential
+natestheneedforadditionallabeleddataormodel
+toimproveresponseaccuracy,consistency,andre-
+fine-tuning,makingitascalableandversatilesolu-
+liabilityindiverseNLPapplications.
+tionforreal-worldapplications.
+Ourcontributionsareasfollows:
+2 Preliminaries
+• Training-FreeMulti-AgentFiltering: Wein- 2.1 NotationsandObjectives
+troduceanoveltraining-freeframeworkthat
+We consider an RAG system designed to filter
+employs multiple LLM agents to collabora-
+noisy retrieved documents and improve response
+tivelyfilterandrankretrieveddocuments,im-
+accuracy. Each query q ∈ Q retrieves a set of
+provingretrievalprecisionandRAGreliabil-
+documents D = {d ,d ,...,d } using a re-
+q 1 2 N
+itywithouttheneedforadditionaltraining.
+trievermodel. Eachdocumentd isassociatedwith
+i
+a relevance score r , which quantifies its useful-
+• Dynamic and Adaptive Filtering Mecha- i
+ness for the query and is determined by Agent-2
+nism: MAIN-RAG incorporates an adaptive
+(Judge) as described in Section 3.2. Let R =
+thresholdmechanismthatdynamicallyadjusts
+[r ,r ,...,r ]representtherelevancescoresfor
+toquery-specificscoredistributions,ensuring 1 2 N
+theretrieveddocuments. Thesescoresareusedto
+effective noise reduction while maintaining
+rankthedocuments,forminganorderedlistDrank,
+highrecallofrelevantdocuments. q
+where documents with higher scores are deemed
+• Empirical Validation Across Multiple morerelevant. Basedonthesescores,anadaptive
+Benchmarks: Our experimental results judge bar τ is computed for each query to filter
+q
+on four QA benchmarks demonstrate that outnoisydocuments(seeSection3.3). Documents
+MAIN-RAG outperforms baseline RAG ap- withscoresr ≥ τ areretained,creatingafiltered
+i qsetDfiltered ⊆ Drank. For1 ≤ i ≤ N,r represents Training-free RAG. Training-free RAG ap-
+q q i
+the relevance score for document d . The adap- proaches integrate pre-trained language models
+i
+tivejudgebarτ dynamicallyadjustsbasedonthe with retrieval components, avoiding extensive re-
+q
+distributionofR, ensuringrobustfilteringfordi- training.Rametal.(2023)performin-contextre-
+versequeries. Forexample,consideraqueryq that trieval,allowinglanguagemodelstodynamically
+retrievesD = {d ,d ,d }withrelevancescores access external data. Li et al. (2023b) propose
+q 1 2 3
+R = [3.8,2.5,4.2]. TherankedlistDrank becomes a framework where LLMs verify retrieved doc-
+q
+{d ,d ,d }. If the adaptive judge bar τ = 3.0, uments to ensure their relevance to queries, but
+3 1 2 q
+thefilteredsetDfiltered = {d ,d }retainsonlythe this method is highly sensitive to input prompts.
+q 3 1
+mostrelevantdocuments. Tothisend,ourworkfo- Similarly,Jiangetal.(2023b)introduceastrategy
+cusesoneffectivelyidentifyingandfilteringnoisy to actively determine when and what to retrieve
+documents, thereby enhancing the accuracy and duringgeneration,butitalsosuffersfromprompt
+reliabilityofRAGsystemsinapost-hocmanner. sensitivity. Whileefficient,training-freeRAGap-
+proachesstrugglewithnoiserobustnessduetotheir
+2.2 ImpactofNoisyRetrievalDocuments relianceonstaticpre-traineddata.
+Challenge of noise robustness in RAG. Ensur-
+In RAG, irrelevant or noisy documents retrieved
+ingnoiserobustnessiscriticalforthereliabilityof
+during the retrieval stage can mislead the LLMs
+RAGsystems.Chenet al. (2024)conductacom-
+during the inference stage, often resulting in in-
+prehensive analysis of RAG’s effects on LLMs,
+correct answers. The presence of such noise in-
+focusingontheirresiliencetonoiseandotherfun-
+formation poses a significant challenge to the re-
+damental capabilities. Yu et al. (2024) present a
+liability of LLMs and RAG, especially when ap-
+framework that strengthens LLMs’ RAG perfor-
+pliedtotasksthatrequirepreciseinformation,such
+mancebyguidingthemincontextrankingandan-
+as question answering. As observed in existing
+swergeneration. Section3.2,"Trade-offofPicking
+studies(Chenetal.,2024;Yuetal.,2024),LLMs
+Top-k Contexts," underscores the significance of
+exhibitvulnerabilitiesinnoiserobustnessandof-
+selectingrelevantcontextstobalanceeffectiveness
+tenfailtorejectirrelevantcontent,resultinginde-
+andcomputationalcost. Thesefindingsemphasize
+creasedperformance. Therefore,improvingnoise
+thenecessityoffilteringoutnoisydocumentstoup-
+filtering after the retrieval process is vital to en-
+holdtheaccuracyandrobustnessofRAGsystems.
+hanceRAGsystems’reliabilityandrobustness.
+3 Multi-AgentFilteringRAG(MAIN-RAG)
+2.3 RelatedWorks
+ThissectionreviewsRAGmethodologies,focusing Thissectionpresentsacomprehensiveoverviewof
+ontraining-basedandtraining-freeapproaches,and ourproposedMAIN-RAGframework,asdepictedin
+discussesthechallengeofnoiserobustnessinRAG. Figure1. BasedonthetraditionalRAGworkflow,
+Training-basedRAG.Training-basedRAGinte- MAIN-RAG focuses on reducing noisy documents
+gratesretrievalmechanismsintothetrainingofthe aftertheretrievalstage. Specifically,MAIN-RAGis
+languagemodel,allowingaccesstoexternalinfor- atraining-freeframework,involvingthreeagents
+mationduringgeneration. Forinstance,Lewisetal. toidentifyandfilteroutnoisydocumentsafterre-
+(2020)combineparametricandnonparametricpre- trieval. The specific roles of the three agents are
+trainedmemoryforlanguagegeneration,achieving defined in Section 3.1. Section 3.2 illustrates the
+state-of-the-artresultsonopen-domainQAtasks. processofsupportivedocumentjudgmentforfilter-
+Similarly, Guu et al. (2020) introduce REALM, ingoutmisleadingorirrelevantones. Section3.3
+a framework that augments language model pre- proposesanadaptivejudgebartoadjustthejudge
+training with a latent knowledge retriever, allow- criteriaaccordingtogivenretrieveddocuments.
+ing retrieval and attention to large corpora like
+3.1 DefinitionofLLMAgentsinMAIN-RAG
+Wikipedia. Self-RAG (Asai et al., 2024b) pro-
+posestoadaptivelyretrievepassagesandcritique The proposed framework MAIN-RAG to iden-
+thegenerationssoastoimproveoutputqualityand tify noisy retrieved documents for filtering out,
+factuality. Albeiteffective,thesemethodsrequire consisting of three LLM agents: Agent-1
+dedicated training procedures and corresponding (Predictor), Agent-2 (Judge), and Agent-3
+hardware,hinderingtheirapplicability. (Final-Predictor).Score 1
+Log prob. “Yes”
+Score 2
+Log prob. “No”
+LLM Agent-2
+Score N
+(Judge)
+…
+Query 1 Ans 1
+Doc 1 System 0.2
+Instruction Scoring
+Query 1 Ans 2 Doc 1
+Doc 2 -0.4
+Doc 2
+Query 1 Ans 3 LLM Agent-2
+0.6
+Doc 3 (Judge)
+Doc 3
+Triplet Doc-Q-A Figure 3: Impacts of document ordering on variance
+inRAGperformance,whereNoiseDocst/umeanst
+Figure2: Quantificationofdocumentrelevantscore. noisydocumentsoutofuretrieveddocuments.
+Agent-1 (Predictor). Afterthedocumentre- ratiocondition. Theresults,illustratedinFigure3,
+trievalstage,wehaveseveralcandidatedocuments revealthatdocumentorderhasasignificanteffect
+foreachquery. Then,forasinglequery,Agent-1 on performance. Notably, the maximum perfor-
+(Predictor)istoinferanswerstothequerygiven mancesaresubstantiallyhigherthantheminimum
+eachdocument. Then,wecanformtheDocument- ones,suggestingthatcertaindocumentorderscan
+Query-Answer Triplet (Doc-Q-A), which is pre- provide stable and optimal results. This observa-
+pared for Agent-2 (Judge) to evaluate the rele- tionleadsustoproposeajudgmentquantification
+vantinformationamongDoc-Q-Atriplet,asshown tomakedocumentssortable.
+inFigure1. Toquantifythenaturallanguageoutputs"Yes"
+Agent-2 (Judge). Given a Doc-Q-A triplet, and "No," we propose computing the difference
+Agent-2 (Judge)istoevaluatewhetherthedoc- betweenthelogprobabilitiesofthecorresponding
+umentprovidesrelevantinformationtothequery tokens, as shown in Figure 2, where the system
+andanswer. Agent-2ispromptedtoanswer"Yes" instructionisprovidedinAppendixC.Sincethese
+or"No"foreachDoc-Q-Atriplet,treatingtherele- arelogprobabilities,thisdifferenceeffectivelyrep-
+vancejudgmentasaTrue-or-Falsequestion. This resentsthelogarithmoftheratiooftheprobabilities
+simplification helps to further quantify the judg- ofthe"Yes"tokentothe"No"token. Bysubtract-
+mentasrelevantscoresofdocuments, whichcan ingthelogprobabilitiesofthetwotokens,Agent-2
+be used for filtering and ordering. The details of simplifies the judgment by consolidating the two
+Agent-2refertoSection3.2andSection3.3. factorsintoasinglescore. Thisrelevantscorethen
+Agent-3 (Final-Predictor). AfterAgent-2 servesasthesolecriterionfordocumentfiltering.
+filtersoutnoisydocumentsandorderstheremain-
+ingdocumentlistbytheirrelevantscores,Agent-3 3.3 AdaptiveJudgeBarτ
+q
+(Final-Predictor) is prompted to answer the
+Afterweobtainrelevantscoresforeachdocument,
+querywiththedocumentlist.
+anotherchallengeishowtodeterminetheoptimal
+judgebarforfilteringoutnoisydocuments. Here,
+3.2 RelevanceJudgmentQuantification
+theoptimaljudgebaristhescorethatperfectlyfil-
+Previousresearchhasobservedthatwhenprocess-
+tersoutallnoisydocumentswhileretainingallrel-
+inglongcontextinputs,LLMstendtooverlookin-
+evantones. Considerexample1inFigure4,where
+formationinthemiddle,placinggreateremphasis
+onthebeginningandendofthecontext(Liuetal.,
+2024). ThissuggeststhatinRAG,theorderingof
+documentsmayinfluencepredictionperformance.
+To investigate the impact of document order in
+RAG,weconductedanexperimentonthebench-
+markRGB(Chenetal.,2024),wheretheretrieved
+documentswererandomlyshuffledandevaluated.
+Thisprocesswasrepeatedtentimesforeachnoise Figure4: ExamplesofOptimalJudgeBar(OJB).Score Distributions (Related Docs.) Score Distributions (Noisy Docs.)
+Document Score Document Score
+Figure5:Optimaljudgebarsfordifferentnoiseratiosin
+differentqueries,whereNoiseDocst/umeanstnoisy
+documentsoutofuretrieveddocuments.
+a query retrieves a higher number of noisy docu-
+ments;theoptimaljudgebarinthiscaseisapprox-
+imately3.7. Inexample2inFigure4,wheremore
+relevant documents are retrieved for a query, the
+optimaljudgebarincreasestoaround4.4. These
+examplesillustratethattheoptimaljudgebarvaries
+withthedocumentdistributionamongqueries. We
+also observe significant variations in the optimal
+judgebarsacrossdifferentqueriesinRGBbench-
+mark (Chen et al., 2024), as shown in Figure 5.
+Thisobservationleadsustothinkabouthowcan
+weadaptivelydetermineoptimaljudgebars.
+Analyzing the relevant score distributions for
+bothrelatedandnoisydocumentsonRGBbench-
+mark(Chenetal.,2024),weobservethatthescores
+ofrelateddocumentsareskewedhighwithasmall
+standarddeviation,asshowninFigure6. Thisin-
+dicatesthattheLLM(hereisMistral-7B)ismore
+confidentaboutthesedocuments. Incontrast,the
+scoresofnoisydocumentsaremoreuniformlydis-
+tributedwithalargerstandarddeviation,suggesting
+thattheLLMislessconfidentandmaymisjudge
+them. Based on this biased LLM behavior, we
+proposeusingtheaveragerelevantscoreforeach
+queryasanadaptivejudgebar. InFigure6,thered
+linerepresentstheaveragescoreofalldocuments.
+Documentstotherightoftheredline(theredarea)
+areretained,whilethosetotheleftarefilteredout.
+Whentheaveragescoreishigh—indicatingmany
+relevant documents—we can filter out most low-
+scoringoutliers,whicharelikelynoise. Conversely,
+when the average score is low—indicating many
+noisydocuments—weaimtoreducethenumberof
+documentswhilemaintainingahighrecallratefor
+relevantdocumentsbystillusingtheaveragescore
+tofilteroutapproximatelyhalfofthedocuments.
+Tointroduceflexibilityintothisframework,wead-
+justtheadaptivejudgebarτ byaddingntimesthe
+q
+standarddeviationσ ofeachcandidatedocument
+set,τ −n·σ,allowingrelaxτ whenneeded,as
+q q
+ycneuqerF
+120 200
+100 175
+150
+80
+125
+60 100
+40 75
+50
+20 25
+0 0
+-5.0 -2.5 0.0 2.5 5.0 7.5 10.012.515.0 -10.0 -5.0 0.0 5.0 10.0 15.0
+Figure6: Scoredistributionofrelatedandnoisydocu-
+mentswithadaptivejudgebar.
+shownbythegreenareainFigure6. Notably,nis
+theonlyhyperparameterinMAIN-RAG.
+4 Experiments
+Inthissection,weconductexperimentstoevaluate
+the performance of MAIN-RAG, aiming to answer
+thefollowingthreeresearchquestions: RQ1: How
+does MAIN-RAG perform leveraging LLM agents
+as noisy document filter? RQ2: How to utilize
+adaptive judge bar τ for filtering and ranking?
+q
+RQ3: Howdoesτ influenceperformance?
+q
+4.1 TasksandDatasets
+WeevaluateourMAIN-RAGmodelandvariousbase-
+linesacrossarangeofdownstreamtasks,assessing
+theoutputsforoverallcorrectness. Allevaluations
+areconductedinazero-shotsetting,wherewepro-
+videtaskinstructionswithoutfew-shotdemonstra-
+tions(Sanhetal.,2022;Weietal.,2021).
+Closed-set Task. We evaluate MAIN-RAG on the
+ARC-Challenge dataset (Clark et al., 2018), a
+multiple-choice reasoning dataset collected from
+scientificexams. Weuseaccuracyastheevaluation
+metricandreportresultsonthetestingset.
+Open-DomainQuestionAnsweringTasks. We
+evaluate MAIN-RAG on two open-domain QA
+datasets: TriviaQA-unfiltered (Joshi et al., 2017)
+andPopQA(Mallenetal.,2022),bothofwhichre-
+quireLLMstoanswerarbitraryquestionsaboutfac-
+tualknowledge. SincethetestingsetofTriviaQA-
+unfilteredisnotpubliclyavailable,weusetheval-
+idation and testing sets provided by an existing
+work(Asaietal.,2024b),comprising11,313test-
+ingqueriesforevaluation. ForPopQA,weutilize
+the long-tail subset, consisting of 1,399 rare en-
+tity queries with monthly Wikipedia page views
+of less than 100. Following prior works (Mallen
+etal.,2022;Schicketal.,2024),weevaluatetask
+performance based on whether the gold answers
+areincludedinthemodel’sgenerationsinsteadof
+strictlyrequiringexactmatches.(a) TriviaQA (b) PopQA (c) ARC-Challenge
+Figure7: PerformancecomparisonamongMAIN-RAGanditsvariantbaselinesonthreeQAbenchmarks,whereall
+threeLLMagentsarepre-trainedMistral . ComparisonbasedonLlama3 agentsisillustratedinAppendixB.
+7B 8B
+Long-formGenerationTasks. Weconductresults ods simply prepend the top retrieved documents
+onthelong-formQAtaskALCE-ASQA(Gaoetal., to the query before passing them to a pre-trained
+2023;Stelmakhetal.,2022)toevaluateMAIN-RAG. LLM(e.g.,Llama2 ,Alpaca ,Llama3 ,
+7B,13B 7B,13B 8B
+Werelyontheofficialmetrics,includingcorrect- Mistral ), usingthesameretrieverasinoursys-
+7B
+ness(str-emandrouge),andfluencymeasuredby tem. We also consider two variants of MAIN-RAG:
+MAUVE(mau)(Pillutlaetal.,2021). NaïveMulti-agentRAG:ThisMAIN-RAGvariant
+replacesAgent-2’srolewithasimplenaturallan-
+4.2 Baselines
+guagejudgmentof"Yes"or"No";MAIN-RAG(Ran-
+Baselines without retrievals. We assess a dom): In this variant, after scoring and filtering,
+range of publicly available, powerful pre- theordersofremainingdocumentsarerandomized.
+trained LLMs, including Llama2 (Tou-
+7B,13B
+4.3 ExperimentalSettings
+vron et al., 2023), Llama3 (Dubey et al.,
+8B
+2024), and Mistral (Jiang et al., 2023a), Asatraining-freeRAGframework,thethreeagents
+7B
+as well as instruction-tuned models like in MAIN-RAG can be instantiated by different pre-
+Alpaca (Dubois et al., 2024). We also trained LLMs. As default settings, we instanti-
+7B,13B
+compare our framework with a model trained ateallthreeagentsbypre-trainedMistral (Jiang
+7B
+andenhancedusingprivatedata,Llama2-chat . et al., 2023a) and Llama3 without further tun-
+13B 8B
+Whenever possible, we use the official sys- ing. We employ the pre-trained Contriever-MS
+tem prompts or instruction formats that were MARCO (Izacard et al., 2021) as the default re-
+applied during the training process of these trievermodel, retrievinguptotwentydocuments
+instruction-tunedmodels. from each query for MAIN-RAG to filter. We use
+Baselines with retrievals. We evaluate models greedygenerationforallourexperiments.
+that incorporate retrieval, either during inference
+4.4 QuantitativeAnalysis(RQ1)
+orthroughoutthetrainingprocess. Inthefirstcat-
+egory, we include three fine-tuned models. The We evaluated the performance of our proposed
+first is Self-RAG (Asai et al., 2024b), a variant MAIN-RAG framework and baselines across four
+ofLlama2 trainedtoretrievedocuments,gener- well-known QA benchmarks, where MAIN-RAG
+7B
+ateoutputs,andcriticallyexaminebothretrieved (Decs.) refers to our method that orders docu-
+passagesanditsownresponses,expandingitsvo- ments in descending order after scoring and fil-
+cabulary with additional reflection tokens. The tering,asillustratedinFigure7,Table1,andAp-
+second is Llama2-FT , which is Llama2 fine- pendixB.OurresultsdemonstratethatMAIN-RAG
+7B 7B
+tunedonthesamedatasetusedbySelf-RAG,but outperformsalltraining-freeandwithoutretrieval
+withoutthereflectiontokensorretrievedpassages. baselinesbymarginsupto6.1%(withMistral )
+7B
+Wealsoincluderesultsfromaretrieval-augmented and12.0%(withLlama3 )inallfourbenchmarks,
+8B
+baseline,Ret-Llama2-chat ,whichistrainedon as shown in Table 1. Notably, the questions in
+13B
+private data collected in Self-RAG and performs PopQAheavilyrelyonexternalknowledgetoen-
+inferencewithretrieveddocuments. Inthesecond able pre-trained LLMs to generate accurate an-
+category,weconsiderstandardRAGbaselinesthat swers. In this case, MAIN-RAG exhibits a signif-
+do not require additional training. These meth- icant advantage over the baselines, because theTable1: Overallexperimentalresultsonfourtasks. Boldnumbersrefertothebestperformanceamongbaselines
+withoutretrievalandtraining-freebaselines,andunderlinenumbersrefertothesecond-bestperformance. Gray
+boldnumbersrefertothebestperformanceamongproprietarymodelsandtraining-basedbaselines. ∗ indicates
+concurrentresultsconductedbyrecentworksororiginalpapers. Forthemetrics, acc, em, rg, andmaudenote
+accuracy,str-em,rouge,andMAUVE,respectively.
+TriviaQA PopQA ARC-C ASQA
+(acc) (acc) (acc) (em) (rg) (mau)
+LMswithproprietarydata
+Llama2-chat ∗ 59.3 20.0 38.4 22.4 29.6 28.6
+13B
+Ret-Llama2-chat ∗ 59.8 51.8 37.9 32.8 34.8 43.8
+13B
+Baselineswithretrieval(training-based)
+Llama2-FT ∗ 57.3 48.7 65.8 31.0 35.8 51.2
+7B
+Self-RAG ∗ 66.4 54.9 67.3 30.0 35.7 74.3
+7B
+Baselineswithoutretrieval
+Llama2 ∗ 30.5 14.7 21.8 7.9 15.3 19.0
+7B
+Alpaca ∗ 54.5 23.6 45.0 18.8 29.4 61.7
+7B
+Llama2 ∗ 38.5 14.7 29.4 7.2 12.4 16.0
+13B
+Alpaca ∗ 61.3 24.4 54.9 22.9 32.0 70.6
+13B
+Mistral 54.8 26.2 55.5 11.2 18.1 27.6
+7B
+Llama3 68.4 29.2 58.8 19.4 30.3 54.3
+8B
+Baselineswithretrieval(training-free)
+Llama2 68.9 50.9 51.0 16.2 23.4 33.1
+7B
+Alpaca ∗ 64.1 46.7 48.0 30.9 33.3 57.9
+7B
+Llama2 ∗ 47.0 45.7 26.0 16.3 20.5 24.7
+13B
+Alpaca ∗ 66.9 46.1 57.6 34.8 36.7 56.6
+13B
+Mistral 69.4 55.5 57.1 32.4 34.8 54.3
+7B
+Llama3 73.1 61.8 55.6 37.1 36.5 63.0
+8B
+MAIN-RAG-Mistral 71.0 58.9 58.9 35.7 36.2 60.0
+7B
+MAIN-RAG-Llama3 74.1 64.0 61.9 39.2 42.0 70.6
+8B
+retriever is not fine-tuned on the target question τ generally performs well in filtering noisy doc-
+q
+setsandmayretrievealargenumberofnoisycan- uments. As shown in Table 2, while the adjusted
+didatedocuments. Comparedwithtraining-based variantsrandomlyachievebetterperformance,the
+baselines, our training-free MAIN-RAG framework default τ consistently ranks at least second-best
+q
+can bridge the performance gap in TriviaQA and across three benchmarks and two different pre-
+PopQA datasets. We also found that on the met- trainedLLMs,indicatingitspracticality.
+ricsforrough(rg),MAIN-RAG-Mistral 7B occasion- Afterfilteringoutirrelevantornoisydocuments,
+allyoutperformsthetwotraining-basedbaselines, theremainingcandidatedocumentscanbesorted
+Self-RAG 7BandLlama2-FT 7B,showingthepoten- ineitherdescendingorascendingorder. Asshown
+tialofimprovingpre-trainedLLMstooutperform in Table 2, MAIN-RAG defaults to descending or-
+resource-consumingfine-tuningmethods. der,consistentlyachievingbetterperformancecom-
+pared to ascending order. This result aligns with
+4.5 AblationStudiesonAdaptiveJudgeBar findings from prior work, which suggests that
+τ forFilteringandRanking(RQ2) LLMs tend to prioritize information presented at
+q
+thebeginningoftheinput(Liuetal.,2024).
+We assess the effectiveness of the adaptive judg-
+mentbarτ bycomparingthedefaultτ withvaria-
+q q 4.6 CaseStudiesofDifferentAdaptiveJudge
+tionsadjustedbydifferentscalesofstandarddevia-
+Barτ (RQ3)
+q
+tion,τ −n·σ. AsmentionedinSection3.3,the
+q
+purposeoftheseadjustmentsistorelaxthefilter- MAIN-RAGinvolvesadaptivejudgebarτ toapprox-
+q
+ingthresholdwhentherecallrateofrelevantdocu- imateoptimaljudgebarsofeachquerybyaverag-
+mentsislow,potentiallypreventingtheomission ing relevant scores over retrieved documents for
+ofcriticalexternalinformationrequiredtosupport a query. This approach is inspired by our obser-
+LLMsinquestionanswering. Despiteitsflexibil- vation of distinct score distributions between the
+ity, our experiments demonstrate that the default mostrelevantdocumentsetandtheleastrelevantCaseStudy1
+Question:InwhatcitywasMontxuMirandaborn?
+AdaptiveJudgeBarτ :9.575
+q
+FilteredandOrderedDocuments:MontxuMirandaMontxuMirandaDíez(born27December1976inSanturce)
+isaSpanishpolevaulter.Hispersonalbestof5.81metres,achievedinSeptember2000inBarcelona,isstillthe
+standingSpanishnationalrecord....HestudiedattheColegioSanCalixto,thenlaterpursuedacareerinPolitical
+SciencesattheHigherUniversityofSanAndrésinLaPaz.
+GroundTruth:"Santurtzi","Santurce"
+LLMAnswer:MontxuMirandawasborninSanturce.(correct)
+CaseStudy2
+Question:WhatisthecapitalofGminaCzorsztyn?
+AdaptiveJudgeBarτ :-8.425
+q
+FilteredandOrderedDocuments:GminaWolsztynisanurban-ruralgmina(administrativedistrict)inWolsztyn
+County,... SromowceWyz˙neisavillageintheadministrativedistrictofGminaCzorsztyn,withinNowyTarg
+County,LesserPolandVoivodeship,insouthernPoland,closetotheborderwithSlovakia.Itliesapproximately8
+kmsouth-eastofManiowy,25kmeastofNowyTarg,...
+GroundTruth:"Maniowy"
+LLMAnswer:ThecapitalofGminaCzorsztynisManiowy.(correct)
+CaseStudy3
+Question:WhatisArcangeloGhisleri’soccupation?
+AdaptiveJudgeBarτ :0.4875
+q
+FilteredandOrderedDocuments:S.MicheleArcangelo,archangelinJewish,Christian,andIslamicteachings;
+AndreadiCioneArcangelo(1308–1368),Italianpainter,sculptor,andarchitectactiveinFlorence;Antoniodi
+Arcangelo,Italianpainter,activeinFlorenceinaRenaissancestyle,between1520and1538;ArcangeloCalifano
+(1730–1750),baroquecomposerandcellist...
+GroundTruth:"journalist","journo","journalists"
+LLMAnswer:ArcangeloGhisleriwasanItaliangeographer,writer,andSocialistpolitician.(wrong)
+Figure8: CaseStudy: AdaptiveJudgeBarτ (Dataset: PopQA;LLM Agents: Mistral )
+q 7B
+Table2: Ablationstudiesofτ q anddocumentordering. accuracy of Agent-3, regardless of whether τ q is
+Bold numbers indicate the best result, and underline
+setrelativelyhighorlow. Thecorrelationbetween
+numbersindicatethesecond-bestresult.
+τ and performance can be observed in Figure 8
+q
+andfurtherdiscussedinAppendixD.
+TriviaQA PopQA ARC-C
+(acc) (acc) (acc)
+5 ConclusionandFutureWork
+Mistral
+7B
+MAIN-RAG(Decs.) 71.0 58.9 58.9 In this work, we address the challenges of noisy
+MAIN-RAG(Asc.) 70.2 53.5 57.4 document retrieval in RAG by introducing a
+MAIN-RAG(τ −0.5·σ) 71.2 58.6 59.0
+q training-free, multi-agent framework, MAIN-RAG.
+MAIN-RAG(τ −1.0·σ) 70.8 58.0 58.5
+q
+MAIN-RAG(τ −1.5·σ) 70.4 58.4 57.7 Our approach employs multiple LLM agents to
+q
+Llama3 collaboratively filter and rank retrieved docu-
+8B
+MAIN-RAG(Decs.) 74.1 64.0 61.9 ments,enhancingtherecallofrelevantinformation
+MAIN-RAG(Asc.) 73.6 63.5 60.7 whileminimizingirrelevantcontent. Specifically,
+MAIN-RAG(τ −0.5·σ) 74.1 64.0 58.6
+q MAIN-RAG utilizes an adaptive judge bar that dy-
+MAIN-RAG(τ −1.0·σ) 74.1 63.3 58.9
+q
+MAIN-RAG(τ −1.5·σ) 74.3 64.0 57.2 namicallyadjustsbasedonthescoredistributionof
+q
+relevantandnoisydocumentsindifferentqueries.
+Experimental results demonstrate that MAIN-RAG
+document set, as discussed in Section 3.3. From consistentlyoutperformstraining-freeRAGbase-
+Figure 6, we observe that Agent-2 assigns confi- lines across various QA benchmarks. Regarding
+dentlyhighrelevancescorestorelateddocuments,
+futuredirections,theMAIN-RAGframeworkunveils
+resulting in a skewed-high score distribution. In several potential facets that merit further explo-
+contrast, while Agent-2 scores noisy documents ration,suchasintegratingwithamorefine-grained
+withamoreuniformdistribution,thelowestscores adaptivejudgebar,extendingtheapproachtoother
+for noisy documents are significantly lower than tasksbeyondquestionanswering,andincorporat-
+thoseforrelateddocuments. Thisdisparityallows inghumanfeedbackortuning-basedapproachesto
+thefilteringmechanismtoimprovetheprediction enhancetheefficacyofdocumentfiltering.6 Limitations Chia-YuanChang,Yu-NengChuang,GuanchuWang,
+MengnanDu,andNaZou.2023b. Dispel: Domain
+Weconductexperimentsonfourdatasetsusingtwo generalizationviadomain-specificliberating. arXiv
+differentpre-trainedLLMarchitectures. Theseex- preprintarXiv:2307.07181.
+perimentsprimarilyfocusonLLMinferencewith
+Chia-YuanChang,JiayiYuan,SiruiDing,QiaoyuTan,
+retrievedexternaldocuments. Wedidnotconsider Kai Zhang, Xiaoqian Jiang, Xia Hu, and Na Zou.
+otherresearchquestionsinRAGorpromptinglan- 2024. Towardsfairpatient-trialmatchingviapatient-
+guage models such as context compression (Xu criterionlevelfairnessconstraint. InAMIAAnnual
+SymposiumProceedings,volume2023,page884.
+etal.,2024a;Lietal.,2024),documentsposition
+and ordering (Liu et al., 2024; Xu et al., 2024b), Jiawei Chen, Hongyu Lin, Xianpei Han, and Le Sun.
+decodingmethods(Lietal.,2023a;Shietal.,2024; 2024. Benchmarking large language models in
+retrieval-augmentedgeneration. InProceedingsof
+Xu,2023). Thechoiceofretrieversandrerankers
+theAAAIConferenceonArtificialIntelligence,vol-
+isalsoorthogonaltoourmainresearchagenda(Lin
+ume38,pages17754–17762.
+etal.,2022a;Asaietal.,2024a;Xu,2024;Xuetal.,
+2024c,interalia). Yu-NengChuang,SongchenLi,JiayiYuan,Guanchu
+Wang, Kwei-Herng Lai, Leisheng Yu, Sirui Ding,
+We acknowledge that LLM inference under
+Chia-YuanChang,QiaoyuTan,DaochenZha,etal.
+RAG workflow contributes to carbon emissions,
+2024a. Understanding different design choices in
+representingapotentiallimitationandenvironmen- training large time series models. arXiv preprint
+tal risk of our work. To mitigate this, we aim to arXiv:2406.14045.
+reducetheneedforrepetitiveexperimentsbyensur-
+Yu-NengChuang,GuanchuWang,Chia-YuanChang,
+ingmorepredictableoutcomesandimplementing
+Ruixiang Tang, Fan Yang, Mengnan Du, Xuant-
+controlledexperimentalsettings. ing Cai, and Xia Hu. 2024b. Large language
+models as faithful explainers. arXiv preprint
+arXiv:2402.04678.
+References
+Yu-Neng Chuang, Tianwei Xing, Chia-Yuan Chang,
+ZiruiLiu,XunChen,andXiaHu.2024c. Learningto
+Akari Asai, Jacqueline He, Rulin Shao, Weijia Shi,
+compresspromptinnaturallanguageformats. arXiv
+Amanpreet Singh, Joseph Chee Chang, Kyle Lo,
+preprintarXiv:2402.18700.
+LucaSoldaini,SergeyFeldman,MikeD’arcy,etal.
+2024a. Openscholar: Synthesizingscientificlitera-
+PeterClark,IsaacCowhey,OrenEtzioni,TusharKhot,
+ture with retrieval-augmented lms. arXiv preprint
+AshishSabharwal,CarissaSchoenick,andOyvind
+arXiv:2411.14199.
+Tafjord.2018. Thinkyouhavesolvedquestionan-
+swering? tryarc,theai2reasoningchallenge. arXiv
+AkariAsai,ZeqiuWu,YizhongWang,AvirupSil,and
+preprintarXiv:1803.05457.
+HannanehHajishirzi.2024b. Self-rag: Learningto
+retrieve,generate,andcritiquethroughself-reflection.
+AbhimanyuDubey,AbhinavJauhri,AbhinavPandey,
+InTheTwelfthInternationalConferenceonLearning
+AbhishekKadian,AhmadAl-Dahle,AieshaLetman,
+Representations.
+Akhil Mathur, Alan Schelten, Amy Yang, Angela
+Fan,etal.2024. Thellama3herdofmodels. arXiv
+Rishi Bommasani, Drew A Hudson, Ehsan Adeli,
+preprintarXiv:2407.21783.
+Russ Altman, Simran Arora, Sydney von Arx,
+MichaelSBernstein,JeannetteBohg,AntoineBosse-
+YannDubois,ChenXuechenLi,RohanTaori,Tianyi
+lut,EmmaBrunskill,etal.2021. Ontheopportuni-
+Zhang,IshaanGulrajani,JimmyBa,CarlosGuestrin,
+tiesandrisksoffoundationmodels. arXivpreprint
+Percy S Liang, and Tatsunori B Hashimoto. 2024.
+arXiv:2108.07258.
+Alpacafarm: A simulation framework for methods
+thatlearnfromhumanfeedback. AdvancesinNeural
+TomBBrown.2020. Languagemodelsarefew-shot
+InformationProcessingSystems,36.
+learners. arXivpreprintarXiv:2005.14165.
+TianyuGao,HowardYen,JiatongYu,andDanqiChen.
+Chia-YuanChang,NingChen,Wei-TingChiang,Chih- 2023. Enablinglargelanguagemodelstogenerate
+HenLee,Yu-HsuanTseng,Chuan-JuWang,Hsien- textwithcitations. arXivpreprintarXiv:2305.14627.
+Hao Chen, and Ming-Feng Tsai. 2020. Query ex-
+pansion with semantic-based ellipsis reduction for KelvinGuu,KentonLee,ZoraTung,PanupongPasu-
+conversationalir. InTREC. pat,andMingweiChang.2020. Retrievalaugmented
+languagemodelpre-training. InInternationalconfer-
+Chia-Yuan Chang, Yu-Neng Chuang, Zhimeng Jiang, enceonmachinelearning,pages3929–3938.PMLR.
+Kwei-HerngLai,AnxiaoJiang,andNaZou.2023a.
+Coda: Temporaldomaingeneralizationviaconcept Mingzhi Hu, Xin Zhang, Yanhua Li, Yiqun Xie, Xi-
+driftsimulator. arXivpreprintarXiv:2310.01508. aowei Jia, Xun Zhou, and Jun Luo. 2024. Onlyattending whatmatter withintrajectories–memory- forknowledge-intensivenlptasks. AdvancesinNeu-
+efficienttrajectoryattention. InProceedingsofthe ralInformationProcessingSystems,33:9459–9474.
+2024SIAMInternationalConferenceonDataMining
+(SDM),pages481–489.SIAM. XiangLisaLi,AriHoltzman,DanielFried,PercyLiang,
+Jason Eisner, Tatsunori Hashimoto, Luke Zettle-
+Mingzhi Hu, Xin Zhang, Yanhua Li, Xun Zhou, and
+moyer,andMikeLewis.2023a. Contrastivedecod-
+JunLuo.2023a. St-ifgsm: Enhancingrobustnessof
+ing: Open-endedtextgenerationasoptimization. In
+human mobility signature identification model via
+Proceedings of the 61st Annual Meeting of the As-
+spatial-temporal iterative fgsm. In Proceedings of
+sociationforComputationalLinguistics(Volume1:
+the29thACMSIGKDDConferenceonKnowledge
+LongPapers),pages12286–12312,Toronto,Canada.
+DiscoveryandDataMining,pages764–774.
+AssociationforComputationalLinguistics.
+Mingzhi Hu, Zhuoyun Zhong, Xin Zhang, Yanhua
+XiaonanLi,ChangtaiZhu,LinyangLi,ZhangyueYin,
+Li, Yiqun Xie, Xiaowei Jia, Xun Zhou, and Jun
+TianxiangSun,andXipengQiu.2023b. Llatrieval:
+Luo. 2023b. Self-supervised pre-training for ro-
+Llm-verifiedretrievalforverifiablegeneration. arXiv
+bustandgenericspatial-temporalrepresentations. In
+preprintarXiv:2311.07838.
+2023IEEEInternationalConferenceonDataMining
+(ICDM),pages150–159.IEEE.
+ZongqianLi,YinhongLiu,YixuanSu,andNigelCol-
+GautierIzacard,MathildeCaron,LucasHosseini,Se- lier.2024. Promptcompressionforlargelanguage
+bastian Riedel, Piotr Bojanowski, Armand Joulin, models: Asurvey. arXivpreprintarXiv:2410.12388.
+andEdouardGrave.2021. Unsuperviseddensein-
+formationretrievalwithcontrastivelearning. arXiv Jimmy Lin, Rodrigo Nogueira, and Andrew Yates.
+preprintarXiv:2112.09118. 2022a. Pretrained transformers for text ranking:
+Bertandbeyond. SpringerNature.
+ZiweiJi,NayeonLee,RitaFrieske,TiezhengYu,Dan
+Su, Yan Xu, Etsuko Ishii, Ye Jin Bang, Andrea
+StephanieLin,JacobHilton,andOwainEvans.2022b.
+Madotto,andPascaleFung.2023. Surveyofhalluci-
+TruthfulQA:Measuringhowmodelsmimichuman
+nationinnaturallanguagegeneration. ACMComput- falsehoods. InProceedingsofthe60thAnnualMeet-
+ingSurveys,55(12):1–38.
+ingoftheAssociationforComputationalLinguistics
+(Volume1: LongPapers),pages3214–3252,Dublin,
+Albert Q Jiang, Alexandre Sablayrolles, Arthur Men-
+Ireland.AssociationforComputationalLinguistics.
+sch,ChrisBamford,DevendraSinghChaplot,Diego
+delasCasas,FlorianBressand,GiannaLengyel,Guil-
+NelsonFLiu,KevinLin,JohnHewitt,AshwinParan-
+laumeLample,LucileSaulnier,etal.2023a. Mistral
+jape,MicheleBevilacqua,FabioPetroni,andPercy
+7b. arXivpreprintarXiv:2310.06825.
+Liang.2024. Lostinthemiddle: Howlanguagemod-
+Zhengbao Jiang, Frank Xu, Luyu Gao, Zhiqing Sun, elsuselongcontexts. TransactionsoftheAssociation
+Qian Liu, Jane Dwivedi-Yu, Yiming Yang, Jamie forComputationalLinguistics,11:157–173.
+Callan,andGrahamNeubig.2023b. Activeretrieval
+augmentedgeneration. InProceedingsofthe2023 AlexMallen,AkariAsai,VictorZhong,RajarshiDas,
+Conference on Empirical Methods in Natural Lan- Daniel Khashabi, and Hannaneh Hajishirzi. 2022.
+guageProcessing,pages7969–7992,Singapore.As- When not to trust language models: Investigating
+sociationforComputationalLinguistics. effectivenessofparametricandnon-parametricmem-
+ories. arXivpreprintarXiv:2212.10511.
+Hongye Jin, Xiaotian Han, Jingfeng Yang, Zhimeng
+Jiang,ZiruiLiu,Chia-YuanChang,HuiyuanChen, KrishnaPillutla,SwabhaSwayamdipta,RowanZellers,
+andXiaHu.2024. Llmmaybelonglm: Selfextend JohnThickstun,SeanWelleck,YejinChoi,andZaid
+llm context window without tuning. In Forty-first Harchaoui. 2021. Mauve: Measuring the gap be-
+InternationalConferenceonMachineLearning. tweenneuraltextandhumantextusingdivergence
+frontiers. AdvancesinNeuralInformationProcess-
+MandarJoshi,EunsolChoi,DanielSWeld,andLuke
+ingSystems,34:4816–4828.
+Zettlemoyer.2017. Triviaqa: Alargescaledistantly
+supervisedchallengedatasetforreadingcomprehen-
+OriRam,YoavLevine,ItayDalmedigos,DorMuhlgay,
+sion. arXivpreprintarXiv:1705.03551.
+Amnon Shashua, Kevin Leyton-Brown, and Yoav
+Shoham.2023. In-contextretrieval-augmentedlan-
+VladimirKarpukhin,BarlasOg˘uz,SewonMin,Patrick
+guagemodels. TransactionsoftheAssociationfor
+Lewis,LedellWu,SergeyEdunov,DanqiChen,and
+ComputationalLinguistics,11:1316–1331.
+Wen-tau Yih. 2020. Dense passage retrieval for
+open-domain question answering. arXiv preprint
+arXiv:2004.04906. Victor Sanh, Albert Webson, Colin Raffel, Stephen
+Bach, Lintang Sutawika, Zaid Alyafeai, Antoine
+PatrickLewis,EthanPerez,AleksandraPiktus,Fabio Chaffin, Arnaud Stiegler, Arun Raja, Manan Dey,
+Petroni,VladimirKarpukhin,NamanGoyal,Hein- et al. 2022. Multitask prompted training enables
+richKüttler, MikeLewis, Wen-tauYih, TimRock- zero-shottaskgeneralization. InInternationalCon-
+täschel,etal.2020. Retrieval-augmentedgeneration ferenceonLearningRepresentations.TimoSchick,JaneDwivedi-Yu,RobertoDessì,Roberta FangyuanXu,WeijiaShi,andEunsolChoi.2024a. Re-
+Raileanu,MariaLomeli,EricHambro,LukeZettle- comp: Improvingretrieval-augmentedlmswithcon-
+moyer,NicolaCancedda,andThomasScialom.2024. textcompressionandselectiveaugmentation. InThe
+Toolformer: Languagemodelscanteachthemselves TwelfthInternationalConferenceonLearningRepre-
+to use tools. Advances in Neural Information Pro- sentations.
+cessingSystems,36.
+Zhichao Xu. 2023. Context-aware decoding reduces
+Weijia Shi, Xiaochuang Han, Mike Lewis, Yulia hallucinationinquery-focusedsummarization. arXiv
+Tsvetkov,LukeZettlemoyer,andWen-tauYih.2024. preprintarXiv:2312.14335.
+Trustingyourevidence:Hallucinatelesswithcontext-
+awaredecoding. InProceedingsofthe2024Confer- Zhichao Xu. 2024. Rankmamba: Benchmarking
+enceoftheNorthAmericanChapteroftheAssoci- mamba’sdocumentrankingperformanceintheera
+ation for Computational Linguistics: Human Lan- oftransformers. arXivpreprintarXiv:2403.18276.
+guageTechnologies(Volume2: ShortPapers),pages
+ZhichaoXu,DanielCohen,BeiWang,andVivekSriku-
+783–791,MexicoCity,Mexico.AssociationforCom-
+mar.2024b. In-contextexampleorderingguidedby
+putationalLinguistics.
+label distributions. In Findings of the Association
+forComputationalLinguistics: NAACL2024,pages
+Ivan Stelmakh, Yi Luan, Bhuwan Dhingra, and
+2623–2640, Mexico City, Mexico. Association for
+Ming-Wei Chang. 2022. Asqa: Factoid ques-
+ComputationalLinguistics.
+tions meet long-form answers. arXiv preprint
+arXiv:2204.06092.
+Zhichao Xu, Jinghua Yan, Ashim Gupta, and Vivek
+Srikumar.2024c. Statespacemodelsarestrongtext
+Hugo Touvron, Louis Martin, Kevin Stone, Peter Al-
+rerankers. arXivpreprintarXiv:2412.14354.
+bert, Amjad Almahairi, Yasmine Babaei, Nikolay
+Bashlykov,SoumyaBatra,PrajjwalBhargava,Shruti
+Yue Yu, Wei Ping, Zihan Liu, Boxin Wang, Jiaxuan
+Bhosale, et al. 2023. Llama 2: Open founda-
+You,ChaoZhang,MohammadShoeybi,andBryan
+tion and fine-tuned chat models. arXiv preprint
+Catanzaro.2024. RankRAG:Unifyingcontextrank-
+arXiv:2307.09288.
+ing with retrieval-augmented generation in LLMs.
+InTheThirty-eighthAnnualConferenceonNeural
+AVaswani.2017. Attentionisallyouneed. Advances
+InformationProcessingSystems.
+inNeuralInformationProcessingSystems.
+Jiayi Yuan, Hongyi Liu, Shaochen Zhong, Yu-Neng
+Guanchu Wang, Yu-Neng Chuang, Ruixiang Tang,
+Chuang, Songchen Li, Guanchu Wang, Duy Le,
+ShaochenZhong,JiayiYuan,HongyeJin,ZiruiLiu,
+HongyeJin, VipinChaudhary, ZhaozhuoXu, etal.
+Vipin Chaudhary, Shuai Xu, James Caverlee, et al.
+2024. Kv cache compression, but what must we
+2024a. Taylorunswift: Securedweightreleasefor
+giveinreturn? acomprehensivebenchmarkoflong
+largelanguagemodelsviataylorexpansion. InPro-
+contextcapableapproaches. InFindingsoftheAsso-
+ceedingsofthe2024ConferenceonEmpiricalMeth-
+ciationforComputationalLinguistics:EMNLP2024,
+ods in Natural Language Processing, pages 6928–
+pages4623–4648.
+6941.
+Rowan Zellers, Ari Holtzman, Hannah Rashkin,
+GuanchuWang,Yu-NengChuang,FanYang,Mengnan
+YonatanBisk,AliFarhadi,FranziskaRoesner,and
+Du,Chia-YuanChang,ShaochenZhong,ZiruiLiu,
+Yejin Choi. 2019. Defending against neural fake
+ZhaozhuoXu,KaixiongZhou,XuantingCai,etal.
+news. Advances in neural information processing
+2024b. Tve: Learningmeta-attributionfortransfer-
+systems,32.
+able vision explainer. In Forty-first International
+ConferenceonMachineLearning.
+YueZhang,YafuLi,LeyangCui,DengCai,LemaoLiu,
+TingchenFu,XintingHuang,EnboZhao,YuZhang,
+Guanchu Wang, Junhao Ran, Ruixiang Tang, Chia-
+YulongChen,etal.2023. Siren’ssongintheaiocean:
+YuanChang,Yu-NengChuang,ZiruiLiu,Vladimir
+asurveyonhallucinationinlargelanguagemodels.
+Braverman,ZhandongLiu,andXiaHu.2024c. As-
+arXivpreprintarXiv:2309.01219.
+sessing and enhancing large language models in
+rare disease question-answering. arXiv preprint
+arXiv:2408.08422.
+Yile Wang, Peng Li, Maosong Sun, and Yang Liu.
+2023. Self-knowledge guided retrieval augmen-
+tation for large language models. arXiv preprint
+arXiv:2310.05002.
+Jason Wei, Maarten Bosma, Vincent Y Zhao, Kelvin
+Guu, Adams Wei Yu, Brian Lester, Nan Du, An-
+drewMDai,andQuocVLe.2021. Finetunedlan-
+guagemodelsarezero-shotlearners. arXivpreprint
+arXiv:2109.01652.Appendix
+A ComputationInfrastructure
+For a fair comparison of evaluation, the experiments are conducted based on the following physical
+computinginfrastructureinTable3.
+Table3: Computinginfrastructurefortheexperiments.
+DeviceAttribute Spec
+ComputingInfrastructure GPU
+GPUModel Nvidia-A100
+GPUNumber 4
+GPUMemory 80GB
+B PerformanceComparisonamongMAIN-RAGandItsVariantBaselines
+Our results demonstrate that MAIN-RAG outperforms all training-free, without retrieval, and MAIN-RAG
+variant baselines by margins up to 6.1% (with Mistral ) and 12.0% (with Llama3 ) in all four
+7B 8B
+benchmarks,asshowninTable1,Figure9,andFigure10. Notably,thequestionsinPopQAheavilyrely
+onexternalknowledgetoenablepre-trainedLLMstogenerateaccurateanswers. Inthiscase,MAIN-RAG
+exhibitsasignificantadvantageoverthebaselines,becausetheretrieverisnotfine-tunedonthetarget
+questionsetsandmayretrievealargenumberofnoisycandidatedocuments.
+(a) TriviaQA (b) PopQA (c) ARC-Challenge
+Figure9: PerformancecomparisonamongMAIN-RAGanditsvariantbaselinesonthreeQAbenchmarks,whereall
+threeLLMagentsarepre-trainedMistral .
+7B
+(a) TriviaQA (b) PopQA (c) ARC-Challenge
+Figure10: PerformancecomparisonamongMAIN-RAGanditsvariantbaselinesonthreeQAbenchmarks,whereall
+threeLLMagentsarepre-trainedLlama3 .
+8BC SystemInstructionsofAgent-1 (Predictor),Agent-2 (Judge),andAgent-3
+(Final-Predictor)
+We present the system instructions of Agent-1 (Predictor), Agent-2 (Judge), and Agent-3
+(Final-Predictor)inFigure11inMAIN-RAGframework.
+SystemInstruction(Agent-1 (Predictor)):
+YouareanaccurateandreliableAIassistantthatcananswerquestionswiththehelpofexternaldoc-
+uments. Youshouldonlyprovidethecorrectanswerwithoutrepeatingthequestionandinstruction.
+SystemInstruction(Agent-2 (Judge)):
+Youareanoisydocumentevaluatorthatcanjudgeiftheexternaldocumentisnoisyforthequery
+withunrelatedormisleadinginformation. GivenaretrievedDocument,aQuestion,andanAnswer
+generatedbyanLLM(LLMAnswer),youshouldjudgewhetherboththefollowingtwoconditions
+arereached: (1)theDocumentprovidesspecificinformationforansweringtheQuestion; (2)the
+LLM Answer directly answers the question based on the retrieved Document. Please note that
+externaldocumentsmaycontainnoisyorfactuallyincorrectinformation. Iftheinformationinthe
+documentdoesnotcontaintheanswer,youshouldpointitoutwithevidence. Youshouldanswer
+with"Yes"or"No"withevidenceofyourjudgment,where"No"meansoneoftheconditions(1)
+and(2)areunreachedandindicatesitisanoisydocument.
+SystemInstruction(Agent-3 (Final-Predictor)):
+YouareanaccurateandreliableAIassistantthatcananswerquestionswiththehelpofexternaldoc-
+uments. Youshouldonlyprovidethecorrectanswerwithoutrepeatingthequestionandinstruction.
+Figure11: SysteminstructionsofAgent-1 (Predictor),Agent-2 (Judge),andAgent-3 (Final-Predictor).
+D CaseStudiesofDifferentAdaptiveJudgeBarτ inMAIN-RAG
+q
+We demonstrate the case studies of the documents filtered and ranked by MAIN-RAG under different
+adaptive judge bars τ . The demonstrations show that Agent-2 (Judge), pre-trained LLMs, is able
+q
+toprovideconvincingjudgmentabilityforthequerieswithhighadaptivejudgebarτ (confident),but
+q
+suffersinthoselowadaptivejudgebarqueries(unconfident). ThecasestudiesonPopQAandTriviaQA
+areillustratedinFigure12-15.CaseStudy1
+Question: InwhatcitywasMontxuMirandaborn?
+AdaptiveJudgeBarτ : 9.575
+q
+FilteredandOrderedDocuments: MontxuMirandaMontxuMirandaDíez(born27Decem-
+ber1976inSanturce)isaSpanishpolevaulter. Hispersonalbestof5.81metres,achieved
+inSeptember2000inBarcelona,isstillthestandingSpanishnationalrecord. Mirandawas
+bornin1981inBuenaventura,Colombiaandwasabandonedbyhismotherwhenhewasone
+monthold. Atage9,aprecociousMirandabeganaquesttolocatehismother. Hehitched
+rides on truck beds over the course of hundreds of miles and was able to find his uncle
+workingataconstructionsite. Hisuncleinformedhimthatifhewasreallythelittleboyhis
+sistergaveaway,thenheshouldhaveabirthmarkonhislegwhereasMirandaunveiledthe
+2-inchlongcircularproof. Themanledhimtohismother’snewhome,onlytobeabandoned
+againbyhismother. ...
+GroundTruth:"Santurtzi","Santurce"
+LLMAnswer:MontxuMirandawasborninSanturce. (correct)
+CaseStudy2
+Question: WhatisthecapitalofGminaCzorsztyn?
+AdaptiveJudgeBarτ : -8.425
+q
+FilteredandOrderedDocuments: GminaWolsztynisanurban-ruralgmina(administrative
+district)inWolsztynCounty,... SromowceWyz˙neisavillageintheadministrativedistrictof
+GminaCzorsztyn,withinNowyTargCounty,LesserPolandVoivodeship,insouthernPoland,
+closetotheborderwithSlovakia. Itliesapproximately8kmsouth-eastofManiowy,25km
+eastofNowyTarg,and78kmsouth-eastoftheregionalcapitalKraków. Thevillagehasa
+population of 1,100. Czosnów is a village in Nowy Dwór Mazowiecki County, Masovian
+Voivodeship,ineast-centralPoland. Itistheseatofthegmina(administrativedistrict)called
+GminaCzosnów. Itliesapproximately7kmsoutheastofNowyDwórMazowieckiand26km
+northwestofWarsaw. Thevillagehasapopulationof420. ...
+GroundTruth:"Maniowy"
+LLMAnswer:ThecapitalofGminaCzorsztynisManiowy. (correct)
+CaseStudy3
+Question: WhatisArcangeloGhisleri’soccupation?
+AdaptiveJudgeBarτ : 0.4875
+q
+FilteredandOrderedDocuments: S.MicheleArcangelo,archangelinJewish,Christian,and
+Islamic teachings ; Andrea di Cione Arcangelo (1308–1368), Italian painter, sculptor, and
+architect active in Florence ; Antonio di Arcangelo, Italian painter, active in Florence in
+a Renaissance style, between 1520 and 1538 ; Arcangelo Califano (1730–1750), baroque
+composer and cellist ; Arcangelo Placenza da Calatafimi, (1390–1460) venerated Italian
+Franciscanfriarandpreacher;ArcangeloCanetoli(1460–1513),veneratedCatholicpriest;
+ArcangeloCascieri(1902–1997),influentialsculptor,majorfigureinBostonArchitectural
+CollegeinBoston,Massachusetts;ArcangelodiCola(active1416-1429)Italianlate-Gothic
+painter;...
+GroundTruth:"journalist","journo","journalists"
+LLMAnswer:ArcangeloGhisleriwasanItaliangeographer,writer,andSocialistpolitician.
+(wrong)
+Figure12: CaseStudy: AdaptiveJudgeBarτ (Dataset: PopQA;LLM Agents: Mistral )
+q 7BCaseStudy1
+Question: InwhatcitywasFernandoGarcíaborn?
+AdaptiveJudgeBarτ : 6.234
+q
+FilteredandOrderedDocuments: FernandoGarcía(bornJuly4,1930inSantiago,Chile)is
+a Chilean composer. Active since 1956 he has done orchestral music, chamber music, etc.
+HestudiedwithJuanOrrego-SalasandGustavoBecerra-Schmidt,amongothers. Hisstyle
+is strongly influenced by serialism and aleatoric procedures. He also played a role in the
+beginningsofelectroacousticmusicinChile,afteratriphemadetoFranceintheearly1950s
+whereheheardmusiqueconcrete. HeworkedfortheInstitutodeExtensiónMusicalofthe
+UniversityofChile,andin1962hepremieredhismostimportantpiece,thecantataAmérica
+Insurrecta,whichwonanawardattheChileanMusicFestival. AftertheChileancoup-d’état,
+hewasforcedintoexile,firstinPerú(1973-1979),andtheninCuba(1979-1990). ...
+GroundTruth:"Santiago","SantiagodeChile","Santiago,Chile"
+LLMAnswer: According to the document, Fernando García was born in Santiago, Chile.
+(correct)
+CaseStudy2
+Question: InwhatcountryisIttamalliyagoda?
+AdaptiveJudgeBarτ : -6.88
+q
+FilteredandOrderedDocuments: IttamalliyagodaIttamalliyagodaisavillageinSriLanka.
+It is located within Central Province. Loluwagoda Loluwagoda is a well known village in
+Sri Lanka which is situated on Nittambuwa - Giriulla 221 main road between Mirigama
+andGiriullatowns. MainreligionofthepeopleinthevillageisTheravadaBuddhism.The
+oldRamannaNikayatempleinthevillage(SriMahendraramaya)waswell-knownamong
+Buddhist monks in the area as a hidden and quiet temple which is not promoting social
+servicesorfestivalsinordertoobtaindonations. Agroupfromthevillagersannuallydonate
+medicine to the Mitirigala Nissarana Vanaya with a group from Atambe village. Like the
+mostvillagesinGampahadistrict,thepopulationLoluwagodaisavillageintheGampaha
+District, Sri Lanka. It is located on the Nittambuwa - Giriulla 221 main road, between the
+townsofMirigamaandGiriulla. ...
+GroundTruth:"SriLanka","DemocraticSocialistRepublicofSriLanka"
+LLMAnswer:Accordingtothedocument,IttamalliyagodaisavillageinSriLanka. (correct)
+CaseStudy3
+Question: WhatisAndreasRüdiger’soccupation?
+AdaptiveJudgeBarτ : 0.40625
+q
+FilteredandOrderedDocuments: Johannes Andreas Rüdiger (1 November 1673 – 6 June
+1731)wasaGermanphilosopherandphysicist. AntonioRüdiger(born3March1993)isa
+Germanprofessionalfootballerwhoplaysasacentre-backforclubChelseaandtheGermany
+national team. Rüdiger began his career at VfB Stuttgart, representing their reserves in 3.
+LigaandthefirstteamintheBundesliga. In2015hejoinedRoma,initiallyonloanandayear
+laterfora C9millionfee. HewassignedbyChelseain2017foranestimated£27million,
+wherehewontheFACupinhisfirstseason, followedbytheUEFAEuropaLeagueinhis
+secondseason,andtheUEFAChampionsLeaguein2021. Hemadehisinternationaldebut
+forGermanyinMarch2014. ...
+GroundTruth:"philosopher"
+LLMAnswer: According to the document, Andreas Rüdiger (born 1993) is a German
+professionalfootballerwhoplaysasacentre-backforclubChelseaandtheGermanynational
+team. (wrong)
+Figure13: CaseStudy: AdaptiveJudgeBarτ (Dataset: PopQA;LLM Agents: Llama3 )
+q 8BCaseStudy1
+Question: InwhichUSstateisNewHaven?
+AdaptiveJudgeBarτ : 16.13
+q
+FilteredandOrderedDocuments: NewHaven,ConnecticutNewHavenisacoastalcityinthe
+U.S.stateofConnecticut. ItislocatedonNewHavenHarboronthenorthernshoreofLong
+IslandSoundinNewHavenCounty,Connecticut,andispartoftheNewYorkmetropolitan
+area. Withapopulationof129,779asdeterminedbythe2010UnitedStatesCensus,itisthe
+second-largestcityinConnecticutafterBridgeport. NewHavenistheprincipalmunicipality
+ofGreaterNewHaven,whichhadatotalpopulationof862,477in2010. NewHavenwasthe
+firstplannedcityinAmerica. Foundedin1638byEnglishPuritans,NewHaven,Vermont
+NewHavenisatowninAddisonCounty,Vermont,UnitedStates. Thepopulationwas1,727
+atthe2010census. ...
+GroundTruth:"richestplacesinconnecticut","Connecticut","Connectecut"
+LLMAnswer:NewHavenislocatedintheUSstateofConnecticut. (correct)
+CaseStudy2
+Question: Whereistheareaof127,000squarekilometres(49,000sqmiles)incentralSouth
+Australia,wherepublicarenotadmittedunderAustralianDefenceForceregulations?
+AdaptiveJudgeBarτ : -10.675
+q
+FilteredandOrderedDocuments: would double the area of land in South Australia under
+environmentalprotectionto1.8millionhectares. Theareaincludes390speciesofplantsand
+a large number of habitats for rare species of animals and birds. In May 2011, after years
+ofnegotiations, RannjoinedwithFederalDefenceMinisterStephenSmithandResources
+MinisterMartinFergusontoannouncethatlargeareasoftheWoomeraProhibitedArea,the
+largest defence testing reserve in the world, would be opened up for mining, allowing the
+futureexploitationofmineraldepositsestimatedatbillionsofdollars. ...
+GroundTruth:"woomeradisambiguation","Woomera"
+LLMAnswer: The area of 127,000 square kilometres (49,000 sq miles) in central South
+Australia,wherepublicarenotadmittedunderAustralianDefenceForceregulations,isthe
+WoomeraProhibitedArea. (correct)
+CaseStudy3
+Question: What name is given to an alcoholic drink that is taken in an effort to cure a
+hangover?
+AdaptiveJudgeBarτ : 0.49375
+q
+FilteredandOrderedDocuments: HangoverdrinkinKoreaHangoverdrinksaredrinkssold
+inSouthKoreathatareconsumedtoeasethehangoverafterheavydrinking. Hangoverdrinks
+are consumed before a heavy drinking session and an ingredient in them is said to break
+down a toxin produced in our liver when drinking and also reduce the effect of alcohol on
+ourbrain’sneurotransmitters. Get-togetheramongco-workersorstudentsareverycommon
+in Korea. A lot of people in Korea consume the hangover drinks before they attend the
+get-togethersotheycangetoutofthehangoverquicklyonthenextday. hangovercure. ...
+GroundTruth:"hairofdog","alcoholreadministration","recoverydrinking","hairoffdogs
+back"
+LLMAnswer: The name given to an alcoholic drink that is taken in an effort to cure
+ahangoveris"hangoverdrink"or"hangovercure."InKorea,itiscalled"haejangsul."(wrong)
+Figure14: CaseStudy: AdaptiveJudgeBarτ (Dataset: TriviaQA;LLM Agents: Mistral )
+q 7BCaseStudy1
+Question: InAncientGreecewhatwasahoplite?
+AdaptiveJudgeBarτ : 8.522
+q
+FilteredandOrderedDocuments: Hoplite formation in art The hoplites were soldiers from
+Ancient Greece who were usually free citizens. They had a very uniform and distinct
+appearance; specifically they were armed with a spear ("dory") in their right hand and a
+heavyroundshieldintheirleft. Hoplitesoldierswereorganizedinbattleintothe"Phalanx
+formation". Thegoalofthisformationwastocreateuniformityandapowerfulmilitaryforce
+in order to maximize the effectiveness as the army as a whole, rather than use people as
+individualfighters. Withthehopliteformationeveryonewasthesameinbattle. ThePhalanx
+formation item of armor or equipment, thus ’hoplite’ may approximate to ’armored man’.
+Hopliteswerethecitizen-soldiersoftheAncientGreekCity-states. ...
+GroundTruth:"Acitizen-soldier","militiagroups","Militiamen"
+LLMAnswer:Accordingtothedocument,ahoplitewasacitizen-soldierofAncientGreece
+who was primarily armed with spears and shields. They were organized in battle into the
+"Phalanxformation"andwereknownfortheiruniformappearance,wearingthesamearmor
+andcarryingthesameweaponsinthesameposition. (correct)
+CaseStudy2
+Question: WhatdidArthurWynneinvent?
+AdaptiveJudgeBarτ : -18.2506
+q
+FilteredandOrderedDocuments: the "New York World" newspaper. He is best known for
+theinventionofthecrosswordpuzzlein1913,whenhewasaresidentofCedarGrove,New
+Jersey. Wynne created the page of puzzles for the "Fun" section of the Sunday edition of
+the"NewYorkWorld". FortheDecember21,1913,edition,heintroducedapuzzlewitha
+diamondshapeandahollowcenter,thelettersF-U-Nalreadybeingfilledin. Hecalledita
+"Word-CrossPuzzle."AlthoughWynne’sinventionwasbasedonearlierpuzzleforms,such
+astheworddiamond,heintroducedanumberofinnovations(e.g. theonJanuary14,1945.
+OnDecember20,2013,hewashonoredwithaninteractiveGoogleDoodlecommemorating
+the"100thanniversaryofthefirstcrosswordpuzzle"withapuzzlebyMerlReagle. ...
+GroundTruth:"crosswordpuzzle","Crossword","Fillincrossword"
+LLMAnswer:Accordingtothedocument,ArthurWynneinventedthecrosswordpuzzlein
+1913. (correct)
+CaseStudy3
+Question: TheAmerica’sCuptrophywasheldbyAmericafrom1852until1983whenthe
+Cupwaswonbywhichchallenger?
+AdaptiveJudgeBarτ : 0.0222
+q
+FilteredandOrderedDocuments: IIwontheCup. 1983America’sCupwastheoccasionof
+the first winning challenge to the New York Yacht Club, which had successfully defended
+the cup over a period of 132 years. An Australian syndicate representing the Royal Perth
+Yacht Club fielded the Australia II, skippered by John Bertrand against defender Liberty,
+skippered by Dennis Conner, won the match races to win the America’s Cup, ending the
+longestwinningstreakinsportinghistoryandendingU.S.dominationoftheracingseries. ...
+GroundTruth:"AustraliaIIofAustralia","australiaiiofaustralia"
+LLMAnswer:Accordingtothedocument,theAmerica’sCuptrophywasheldbytheNew
+YorkYachtClub(NYYC)from1857until1983. TheCupwaswonbyanAustraliansyndicate
+representingtheRoyalPerthYachtClub,fieldingtheAustraliaII,skipperedbyJohnBertrand,
+in1983. (wrong)
+Figure15: CaseStudy: AdaptiveJudgeBarτ (Dataset: TriviaQA;LLM Agents: Llama3 )
+q 8B

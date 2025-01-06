@@ -1,0 +1,474 @@
+2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+BERT-Enhanced DGA Botnet Detection: A
+Comparative Analysis of Machine Learning and
+Deep Learning Models
+Qui Cao1,2,Phuc Dao-Hoang1,2, Dat-Thinh Nguyen1,2, Xuan-Ha Nguyen1,2, Kim-Hung Le1,2
+1University of Information Technology, Ho Chi Minh City, Vietnam
+2Vietnam National University, Ho Chi Minh City, Vietnam
+Email: {22521208, 22521110, 19520982}@gm.uit.edu.vn, {hanx, hunglk}@uit.edu.vn
+Abstract—WiththeproliferationofInternetofThings,detect- Detecting DGA botnets is increasingly difficult due to
+ingDomainGenerationAlgorithm(DGA)botnetsiscriticalfor theirabilitytogeneratenumerousdomainnames.Traditional
+protectingnetworksfromevolvingandsophisticatedcybersecu-
+methods struggle with these dynamic domains, leading to
+rity threats. This paper explores a novel approach combining
+the adoption of machine and deep learning-based solutions.
+BERT with machine learning and deep learning techniques to
+detect DGA botnets. We provide a comprehensive benchmark Machinelearningmodels,suchasdecisiontreesandrandom
+by evaluating the performance of various BERT versions and forests, rely on features like domain structure and entropy,
+detectionmethodsondiversedatasets.Ourexperimentalresults while deep learning models, including RNNs and CNNs,
+reveal the significant impact of BERT version selection on
+learn patterns from raw domain data. These approaches have
+detection accuracy and the superior performance of deep
+shown promise in improving detection accuracy, particularly
+learning models, such as CNN, MLP, and LSTM, compared to
+conventionalmachinelearningmodels.Thesefindingshighlight for previously unseen DGA families.
+the potential of BERT and deep learning in improving DGA To further enhance DGA botnet detection, a promising
+botnet detection and offer valuable insights for future research solution is to combine a language model, such as BERT
+in this area.
+(Bidirectional Encoder Representations from Transformers),
+Index Terms—Domain Generation Algorithm botnet, Ma-
+withamachinelearningordeeplearningmodel.BERTserves
+chine learning, Deep learning, BERT
+as a tokenizer, extracting meaningful features from domain
+I. INTRODUCTION names by capturing both lexical and contextual information.
+These features are then fed into a detection model, such as
+A botnet is a network of compromised devices controlled
+RF, CNN or RNN, to classify domains as benign or DGA-
+by cybercriminals, known as botmasters, to carry out illegal
+related. This hybrid approach leverages BERT’s ability to
+activitieswithouttheowner’spermission.Thesenetworksof-
+process textual patterns and the deep learning model’s clas-
+tenincludevariousnetworkingdevices,allcontrolledthrough
+sificationprecision,significantlyboostingdetectionaccuracy.
+malware typically delivered via phishing or exploiting out-
+Despite advancements in DGA detection, the integration
+dated software vulnerabilities. Botnets pose a significant
+of BERT with the detection model has not been comprehen-
+threat due to their scale and capacity, with examples like the
+sivelyexplored.Furthermore,thereisalackofbenchmarking
+Conficker and Mirai botnets [1], which infected millions of
+studies comparing various BERT versions in this context.
+devices and were used for spamming, data theft, and DDoS
+This paper addresses these gaps by introducing a novel ap-
+attacks. The botmasters can control the infected devices,
+proach and performing extensive experiments to benchmark
+making detection and dismantling difficult. More advanced
+the performance of different BERT and deep learning model
+botnets, however, employ even greater evasion techniques.
+combinations. The main contributions of this paper are as
+One such variant is the Domain Generation Algorithm
+follows:
+(DGA) botnet [2], which generates new domain names al-
+gorithmically to maintain contact with its C&C server. This • WeproposeaDGAbotnetdetectionapproachthatcom-
+enablesthebotnettoevadedomainblacklistingandcontinue bines BERT with machine learning and deep learning-
+operations even if certain domains are blocked. By moni- based model, enabling more effective feature extraction
+toring DNS traffic, security systems attempt to distinguish and improved classification accuracy.
+between benign and malicious domains, but the adaptive • We conduct extensive benchmarking experiments, com-
+nature of DGA botnets makes them particularly challenging paring various BERT versions and detection models,
+to neutralise. A prime example is the Conficker botnet [3], to provide a detailed analysis of their performance
+which used DGA to support large-scale spam and malware detecting DGA botnets. This benchmarking serves as
+distribution, affecting millions of systems globally. a valuable resource for future research in the field.
+979-8-3315-4204-7/24/$31.00 ©2024 IEEE
+46341801.4202.05736SIACCI/9011.01
+:IOD
+|
+EEEI
+4202©
+00.13$/42/7-4024-5133-8-979
+|
+)SIACCI(
+secneicS
+noitamrofnI
+dna
+noitamotuA
+,lortnoC
+no
+ecnerefnoC
+lanoitanretnI
+ht31
+4202
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:41 UTC from IEEE Xplore. Restrictions apply.2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+The remainder of this study is organized as follows: Sec- extracted from domain names in DNS request packets to
+tionIIprovidessomerelatedworks.Next,SectionIIIpresents identify DGA-based botnets. By testing their method on
+in detail our methodology. Then, Section IV provides the multiple real-world datasets, both simulated and actual data,
+experimentresultsanddiscussion.Finally,SectionVpresents they achieved a detection rate of 99.1% with a false pos-
+the conclusion for this research. itive rate of 0.6%. Yong-lin Zhou et al. [11] introduced a
+new method for detecting DGA botnets by analysing DNS
+II. RELATEDWORK
+protocol queries, explicitly focusing on non-existing domain
+DGA botnets represent one of the most challenging and (NXDomain) queries. Although their method successfully
+elusivecybersecuritythreatstoday.Thesebotnetsusedomain filtered out potential DGA domains, it required more time
+generation algorithms to create random domains, making to accurately confirm suspicious domains, highlighting the
+detection and blocking efforts more difficult. To address this need for future improvement.
+threat,numerousstudieshaveproposedvariousdetectionand
+preventionmethods,includingbehaviouralanalysis,machine
+III. METHODOLOGY
+learning models, and algorithm-based detection techniques A. Overview
+[4],[5].Thissectionpresentsanoverviewofrelatedresearch,
+In our research, we aim to evaluate the performance of a
+highlighting the techniques developed to effectively identify
+detection system which combines BERT as a tokenizer and
+and mitigate DGA botnets.
+a deep learning model as a classifier. Hence, we conduct a
+comprehensiveexperimentwithdifferentBERTversionsand
+A. Domain generation algorithm
+various deep-learning models. The detection system follows
+Ranjana B. Nadagoudar and M. Ramakrishna [6] com-
+a structured workflow, beginning with Preprocessing and
+pared the performance of LSTM, RNN, and GRU models
+culminating in a comprehensive Detection Model evaluation.
+in distinguishing legitimate and malicious domain names,
+specifically focusing on their ability to detect computer-
+generated domain names. Their study demonstrated that the
+GRU model, which achieved up to 99% accuracy in binary
+classification, is highly effective in detecting and classifying
+DGAdomains,markingasignificantadvancementinnetwork
+security. Yu Fu et al. [7] proposed two new domain genera-
+tionalgorithmsbasedonHMMandPCFGandevaluatedtheir
+ability to evade detection compared to existing algorithms. Fig.1. Ourworkflowonevaluatingadetectionmodel.
+Theexperimentalresultsshowedthatthesealgorithmsexhibit
+better detection evasion capabilities than current alternatives. • Preprocessing: In this stage, relevant datasets are col-
+Similarly, Hieu Mac et al. [8] examined the effectiveness of lected from various sources that are suitable for the
+variousmachinelearningmethodsfordetectingDGAbotnets detection task. The collected data is cleaned to ensure
+using a large real-world dataset. Their comparison included its quality and usability. This involves preparing labels
+popular methods such as C4.5, ELM, and SVM, along with for classification, removing duplicate and invalid sam-
+newerapproacheslikeLSTM,BiLSTM,andRecurrentSVM. ples, and addressing inconsistencies in the dataset. To
+LSTM and BiLSTM achieved over 90% accuracy, demon- convert domain names into numerical features suitable
+strating strong performance in identifying DGA patterns, for machine learning, BERT is applied as a tokenizer.
+while the other methods also showed promising results. BERT captures both lexical and contextual features,
+transforming raw text into a structured format that the
+B. DGA botnet detection
+detection model can process efficiently.
+Anwar. S. R et al. [9] proposed an effective deep learning • Buildingthedetectionmodel:Afterpreprocessing,the
+framework to help detect malware using the DGA algorithm dataset is split into training and testing subsets. The
+to generate domain names. The authors proposed a two- detectionmodelisthentrainedandevaluated.Through-
+levelmodelthatcombinesfeaturegenerationandblockclus- out the training phase, the model’s hyperparameters are
+tering and classification. They use seven linguistic features tuned to achieve the best configuration for detection
+to describe domain names. MLP classifier helps distinguish accuracy. Once the model is trained, it is tested on the
+between DGA and normal, K-means clusters that group unseen test data to evaluate its performance. The final
+related DGA. The results show that the model achieves step involves recording and exporting a detailed report
+high accuracy, surpassing other methods. The article has highlightingthemodel’seffectivenessindetectingDGA
+achieved its intended purpose and contributed to improving botnets.
+malwaredetection.AhmedM.Manasrahetal.[10]proposed
+B. BidirectionalEncoderRepresentationsfromTransformers
+a method for detecting DGA botnets using machine learning
+techniques to classify domains as legitimate or illegitimate. BERT [12] is a language model developed by Google that
+Their approach focuses on evaluating linguistic features captures the full context of words by processing text in both
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:41 UTC from IEEE Xplore. Restrictions apply.2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+directionsratherthantraditionalmodelsthatreadthetextone • RecurrentNeuralNetworks(RNNs)aredeeplearning
+way. This makes BERT highly effective for different tasks. models that process sequential data, such as text, sen-
+Our detection model uses BERT as a tokenizer to extract tences, or time series. RNNs are structured to handle
+features from domains. To convert a domain into a token temporaldependencies,similartohowhumansinterpret
+vector, BERT tokenizes input text into subword units, map- sequential data, such as in language translation.
+ping them to numerical IDs from a predefined vocabulary, • LongShort-TermMemoryNetworks(LSTMs),intro-
+with special tokens like [CLS] and [SEP] added. Each token duced by Hochreiter and Schmidhuber, are an advanced
+is then transformed into a fixed-length vector and fed into a version of RNNs. LSTMs are specifically designed
+detection model to classify domains. In this study, we used to capture long-term dependencies in sequential data,
+three state-of-the-art BERT versions, described below: making them highly effective for tasks like language
+• LinkBERT [13] is an improved version of BERT translation,speechrecognition,andtimeseriesforecast-
+that helps to cover the relationship between documents ing.
+through hypertext links and citations. It allows to con- Machine Learning Models:
+nect knowledge from different sources. This model can
+• RandomForestisanensemblealgorithmthatcombines
+directly replace BERT in many language applications.
+multiple decision trees, each built from random subsets
+LinkBERT gives better results especially in multi-text
+ofdataandfeatures.Predictionsaremadebyvoting(for
+understanding and deep knowledge tasks.
+classification) or averaging (for regression) across all
+• DistilBERT [14] is a scaled-down and faster version of trees.Thisrandomnessreducesoverfittingandenhances
+the original BERT. It is also pre-trained on the same
+model robustness, making Random Forest effective for
+dataset as BERT, but uses a self-supervised training
+complex datasets.
+method, using the BERT base model itself as a teacher.
+• Support Vector Machine (SVM) is a supervised ma-
+This means that DistilBERT is trained only on the text
+chinelearningalgorithmprimarilyusedforclassification
+directly without humans labeling them, and uses the
+tasks. It works by finding the optimal hyperplane that
+automated process to generate data samples and labels
+maximises the margin between different classes in a
+from BERT. DistilBERT is a scaled-down version of
+dataset, ensuring that the data points from each class
+BERT that retains language understanding.
+are as far apart as possible.
+• CodeBERT [15] is a model specifically designed for • K-Nearest Neighbors (KNN) is a fundamental classi-
+trainers to understand language implementers. The spe-
+fication algorithm widely used in pattern recognition,
+cial feature of CodeBERT is that it is trained on both
+data mining, and intrusion detection. As a supervised
+natural language and source code of 6 popular pro-
+learning method, KNN operates on the principle that
+gramminglanguages,includingPython,Java,Javascript,
+data points with similar features are likely to share the
+PHP, Ruby, and Go. Therefore, CodeBERT can un-
+same labels. During the training phase, KNN stores
+derstand the relationship between natural language and
+the entire dataset for reference when classifying new
+codeinstructions,helpingtoapplyinmanytasksrelated
+instances based on proximity to its nearest neighbours.
+to installers and software development.
+C. The detection model D. Datasets
+In this paper, we evaluate the detection performance of In this paper, we use four distinct datasets to evaluate
+different widely used machine learning and deep learning the performance of our proposed detection model. These
+models. Particularly, our experiments include three machine- datasets encompass a mix of benign and malicious domain
+learning models and four deep-learning models as below: names,providingadiversefoundationfortrainingandtesting
+Deep Learning Models: the detection model’s ability to differentiate between regular
+domain traffic and domains generated by DGA botnets. The
+• Convolutional Neural Networks (CNNs) are a pow-
+detail description is listed below:
+erful deep learning architecture, particularly effective in
+tasks involving computer vision and image processing. • majestic million.csv [16] includes 1,101,673 samples
+CNNs are a specialised class of neural networks de- belonging to 70 classes (1 legitimate class and 69 DGA
+signedtoprocessgrid-structureddataefficiently,making classes). The normal domains are from the Majestic
+them highly suitable for visual data. top 1 million dataset, while the malicious domains are
+• Multi-Layer Perceptions (MLPs) are an artificial neu- obtained from the DGArchive.
+ral network composed of multiple layers of neurons. • argencon.csv 1 consists of 2,918,496 samples, dis-
+Theseneuronstypicallyutilisenonlinearactivationfunc- tributed across 53 classes—2 legitimate classes and
+tions, enabling MLPs to capture complex patterns in 51 DGA classes. The legitimate domain names were
+data. This ability to learn nonlinear relationships makes sourced from the Alexa Top 1 Million domains, while
+MLPsparticularlyusefulfortaskssuchasclassification,
+regression, and pattern recognition. 1https://huggingface.co/datasets/harpomaxx/dga-detection
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:41 UTC from IEEE Xplore. Restrictions apply.2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+the DGA domain names were obtained from the repos- Tables I, II, III, and IV, respectively, present the binary
+itories curated by Andrey Abakumov and John Bam- classificationresultsoffourbenchmarkeddatasets.Thetables
+benek. generally show that the proposed solution achieves high
+• umbrella million.csv2 includes2,324,298samplesbe- accuracy in detecting DGA botnets, with the best accuracy
+longing to 49 classes (1 legitimate class and 48 DGA of each dataset being above 91%. Additionally, the results
+classes). The benign domains are from the Majestic indicatethesignificantimpactofchoosingtheBERTversion
+top 1 million dataset, while the malicious domains are ondetectionperformance.Furthermore,italsoshowsthatthe
+obtained from Netlab 360. CNNandMLPmodelsstablyachieveahigheraccuracythan
+• dga data.csv 3 includes 160,000 samples belonging to other models. In more detail:
+9classes(2legitimateclassesand7DGAclasses).This
+dataset has been collected from Alexa website ranking TABLEII
+and a blacklist of previous DGA domain names.
+BINARYCLASSIFICATIONRESULTSOFARGENCONDATASET(%)
+Architecture
+E. Evaluation metrics BERT Model ACC F1 TPR PPV
+CNN 92.89 92.78 92.14 93.55
+In this paper, to evaluate the performance of our proposed
+MLP 91.64 91.62 91.96 91.40
+detection model, we use four key evaluation metrics: Ac- RNN 79.73 88.31 82.78 85.02
+curacy, F1 Score, Recall (True Positive Rate), and Preci- LinkBERT RDF 87.94 87.40 83.75 91.37
+SVM 82.92 81.77 76.72 87.53
+sion (Positive Predictive Value). These metrics are derived
+KNN 89.62 89.44 88.06 90.87
+from the confusion matrix, which is based on four essential LSTM 90.77 90.66 90.39 91.06
+components:TruePositives(TP),TrueNegatives(TN),False CNN 92.11 91.97 91.07 93.02
+MLP 91.67 91.49 90.20 92.94
+Positives (FP), and False Negatives (FN).
+RNN 84.26 82.85 76.65 90.43
+DistilBERT RDF 87.14 86.66 83.67 89.86
+IV. EXPERIMENTALRESULTS SVM 83.19 82.42 78.93 86.23
+KNN 89.38 89.25 88.27 90.25
+This section presents the comprehensive results of our LSTM 84.29 82.90 76.78 90.36
+experiments, focusing on two key tasks: binary classification CNN 91.72 91.67 91.73 91.74
+MLP 82.11 83.64 92.16 76.72
+and multiclass classification. For each task, we evaluate the
+RNN 83.09 82.87 82.61 83.36
+model’sperformanceusingfourmentionedmetrics.Thebest CodeBERT RDF 86.66 86.14 83.03 89.49
+scoreineachmetricwithineachBERTversionishighlighted SVM 76.13 73.47 66.22 82.51
+KNN 85.29 84.62 81.09 88.47
+in red, while the second-best score is marked in blue.
+LSTM 90.26 90.23 90.70 89.91
+A. Binary classification results
+TABLEIII
+BINARYCLASSIFICATIONRESULTSOFMAJESTICMILLIONDATASET(%)
+TABLEI
+BINARYCLASSIFICATIONRESULTSOFDGA DATADATASET(%)
+Architecture
+ACC F1 TPR PPV
+BERT Model
+Architecture
+ACC F1 TPR PPV CNN 91.32 91.34 92.10 90.70
+BERT Model
+MLP 90.75 90.76 91.49 90.17
+CNN 86.80 87.17 90.73 84.01 RNN 79.81 78.08 72.79 84.49
+MLP 86.81 86.81 86.81 87.01 LinkBERT RDF 82.63 80.58 71.85 91.73
+RNN 84.80 84.20 80.77 88.17 SVM 83.26 81.79 74.96 89.98
+LinkBERT RDF 92.03 91.62 86.74 97.08 KNN 87.72 87.57 86.24 88.95
+SVM 91.51 91.05 85.94 96.80 LSTM 82.22 79.75 70.98 91.39
+KNN 92.01 91.96 90.98 92.95
+CNN 91.12 90.97 91.03 91.03
+LSTM 85.21 84.97 83.92 86.26
+MLP 89.82 89.67 89.14 90.36
+CNN 87.54 87.77 91.25 84.67 RNN 79.48 76.36 66.63 89.85
+MLP 87.52 87.52 87.52 87.71 DistilBERT RDF 82.69 80.59 71.62 92.12
+RNN 84.94 84.55 83.66 85.68 SVM 81.55 79.82 72.79 88.36
+DistilBERT RDF 91.87 91.49 87.11 96.34 KNN 86.34 86.07 84.14 88.09
+SVM 91.26 90.81 86.00 96.20 LSTM 79.54 76.34 66.63 89.76
+KNN 92.67 92.63 91.80 93.48
+CNN 86.85 86.73 86.52 87.16
+LSTM 84.84 83.94 80.79 87.56
+MLP 82.27 83.34 89.56 78.09
+CNN 86.54 86.20 85.00 87.62 RNN 75.70 73.97 69.47 79.46
+MLP 85.71 85.71 85.71 85.92 CodeBERT RDF 80.68 78.96 72.29 86.98
+RNN 83.84 83.17 80.85 85.86 SVM 79.77 78.17 72.22 85.20
+CodeBERT RDF 91.74 91.31 86.45 96.76 KNN 81.83 80.90 76.72 85.55
+SVM 89.70 89.07 83.54 95.38 LSTM 83.10 83.29 84.92 81.93
+KNN 87.18 86.30 80.39 93.14
+LSTM 86.91 86.89 86.91 87.33
+Theexperimentresultsoffourdatasetsshowthatchoosing
+2https://www.kaggle.com/datasets/xeric7/dga-detection the BERT version has an impact on the detection perfor-
+3https://www.kaggle.com/datasets/gtkcyber/dga-dataset mance. The LinkBERT give the best accuracy on three out
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:41 UTC from IEEE Xplore. Restrictions apply.2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+TABLEIV TABLEV
+BINARYCLASSIFICATIONRESULTSOFUMBRELLA MILLIONDATASET MULTICLASSCLASSIFICATIONRESULTSOFDGA DATADATASET(%)
+(%)
+Architecture
+ACC F1 TPR PPV
+Architecture BERT Model
+ACC F1 TPR PPV
+BERT Model CNN 60.97 55.74 60.97 59.56
+CNN 96.99 96.96 96.70 97.27 MLP 60.64 55.72 60.64 58.50
+MLP 96.57 96.57 96.57 96.63 RNN 50.31 42.22 50.31 39.90
+RNN 51.26 51.37 51.93 51.21 LinkBERT RDF 57.24 51.90 56.08 60.69
+LinkBERT RDF 93.11 93.01 91.73 94.32 SVM 48.75 46.67 50.78 50.06
+SVM 72.69 72.55 72.27 72.82 KNN 52.92 47.82 48.07 55.61
+KNN 90.88 90.96 91.92 90.02 LSTM 50.77 41.50 50.77 40.74
+LSTM 50.08 66.63 49.96 50.08 CNN 59.80 56.14 59.80 61.64
+CNN 96.88 96.87 96.89 96.89 MLP 61.35 57.24 61.35 60.64
+MLP 96.29 96.29 96.29 96.36 RNN 51.07 46.89 51.07 47.89
+RNN 60.48 56.86 52.32 62.78 DistilBERT RDF 58.03 52.63 56.75 54.41
+DistilBERT RDF 92.96 92.86 91.63 94.11 SVM 52.06 50.24 54.93 53.50
+SVM 73.99 73.87 73.64 74.10 KNN 54.18 49.42 49.62 57.14
+KNN 90.30 90.30 90.34 90.25 LSTM 51.51 46.41 51.51 49.03
+LSTM 49.92 66.48 50.32 49.92 CNN 58.41 53.72 58.41 53.57
+CNN 96.44 96.42 96.56 96.34 MLP 55.11 50.48 55.11 52.16
+MLP 96.74 96.20 96.91 96.26 RNN 48.26 38.83 48.26 38.48
+RNN 50.08 66.62 49.27 50.08 CodeBERT RDF 53.59 42.18 46.70 51.36
+CodeBERT RDF 93.29 93.12 90.96 95.40 SVM 42.88 34.65 37.92 41.38
+SVM 65.77 63.38 59.32 68.03 KNN 43.06 36.69 37.68 38.93
+KNN 86.99 86.51 83.54 89.70 LSTM 58.79 53.91 58.79 56.83
+LSTM 50.04 66.58 49.87 50.04
+accuracy in two of the four datasets, while DistilBERT and
+offourdatasets,whiletheCodeBERTperformedworstcom- CodeBERT each record the best performance in one dataset.
+pared to other BERT versions. Additionally, the LinkBERT All BERT versions maintain high accuracy in three datasets,
+and DistilBERT maintain a stable high accuracy across four except for the DGA Data dataset, likely due to its complex
+datasets,whiletheCodeBERTperformworstattheMajestic structureandclassimbalanceacross70classes.Furthermore,
+Milliondatasetwiththebestaccuracyof86.85%comparedto CNN, MLP, and LSTM models distinguish themselves with
+91.32% of the LinkBERT. In addition to the BERT versions, superiordetectionperformance,achievingthetopaccuracyin
+the CNN and MLP models stand out for their superior all datasets. Specifically, CNN records the highest accuracy
+detection performance. They achieve the top accuracy scores in the Argencon and Umbrella Million datasets, MLP leads
+in three out of four datasets, except for DGA Data, where intheDGA Datadataset,andLSTMachievesthebestresult
+KNN achieves the best result. CNN and MLP also perform in the Majestic Million dataset.
+well in F1, TPR, and PPV metrics, further solidifying their
+effectiveness.
+TABLEVI
+Inconclusion,itshowsthatselectingtheBERTversionim- MULTICLASSCLASSIFICATIONRESULTSOFARGENCONDATASET(%)
+pactsdetectionaccuracy,withLinkBERTconsistentlyoutper-
+Architecture
+formingotherversions. Additionally,CNNandMLP models ACC F1 TPR PPV
+BERT Model
+emerge as the best-performing models across most datasets, CNN 83.70 83.38 83.70 84.74
+making them the optimal choices for DGA botnet detection MLP 81.50 80.91 81.50 81.81
+RNN 40.97 37.25 40.97 39.55
+tasks. This demonstrates the importance of both model and
+LinkBERT RDF 62.10 57.08 59.91 61.94
+BERT selection in achieving high detection performance. SVM 49.10 43.89 46.27 52.46
+KNN 74.59 72.57 73.18 73.42
+B. Multiclass classification results LSTM 45.59 41.90 45.59 43.34
+CNN 83.12 82.80 83.12 83.90
+Tables V, VI, VII and VIII present the multiclass clas- MLP 82.10 81.75 82.10 82.17
+sification results for four datasets: DGA Data, Argencon, RNN 39.75 34.82 39.75 37.64
+DistilBERT RDF 63.11 59.32 60.50 67.34
+Majestic Million, and Umbrella Million. The tables indicate
+SVM 46.71 40.34 44.33 43.34
+that the proposed solution achieves acceptable accuracy in KNN 72.70 70.17 70.89 70.97
+classifying DGA botnets, with the best accuracy reaching LSTM 40.30 35.56 40.30 38.57
+CNN 80.29 79.66 80.29 81.46
+approximately 80% in three out of four datasets. The results
+MLP 75.54 74.52 75.54 75.31
+highlightthesignificantimpactofselectingtheBERTversion RNN 39.94 32.72 39.94 31.54
+on classification performance. Furthermore, they reveal that CodeBERT RDF 57.27 52.39 54.17 64.61
+SVM 38.12 32.25 36.54 33.73
+deep learning models consistently outperform other models.
+KNN 59.36 56.25 57.15 56.74
+The findings demonstrate that while the BERT version LSTM 76.01 75.80 76.01 77.54
+does affect detection performance, no single version signif-
+icantly outperforms the others. LinkBERT achieves the best In conclusion, the choice of BERT version significantly
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:41 UTC from IEEE Xplore. Restrictions apply.2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+TABLEVII BybenchmarkingvariousBERTversionsanddetectionmeth-
+MULTICLASSCLASSIFICATIONRESULTSOFMAJESTICMILLION odsacrossmultipledatasets,weassessedtheeffectivenessof
+DATASET(%)
+BERTinimprovingdetectionaccuracy.Theresultsshowthat
+Architecture selecting BERT version significantly impacts performance,
+ACC F1 TPR PPV
+BERT Model with deep learning models consistently outperforming tra-
+CNN 78.80 77.16 78.80 79.15
+ditional machine learning models. These findings provide
+MLP 78.67 77.00 78.67 79.35
+RNN 53.68 47.09 53.68 46.79 importantinsightsforfutureresearchtoenhanceDGAbotnet
+LinkBERT RDF 63.14 41.70 45.41 44.99 detection strategies.
+SVM 53.13 32.89 35.48 36.07
+KNN 63.32 46.20 46.66 47.42 VI. ACKNOWLEDGEMENT
+LSTM 92.69 90.52 92.69 88.77
+CNN 75.86 74.05 75.86 77.07 This research is funded by University of Information
+MLP 76.42 74.00 76.42 74.95 Technology-Vietnam National University HoChiMinh City
+RNN 52.51 46.84 52.51 46.59
+under grant number D1-2024-46.
+DistilBERT RDF 65.20 41.18 45.24 52.52
+SVM 56.27 34.59 38.97 41.32
+REFERENCES
+KNN 63.28 47.58 48.37 48.70
+LSTM 91.98 89.34 91.98 87.27 [1] Han Zhang, Manaf Gharaibeh, Spiros Thanasoulas, and Christos Pa-
+CNN 70.40 66.74 70.40 68.95 padopoulos. Botdigger: Detecting dga bots in a single network. In
+MLP 70.18 67.38 70.18 68.44 TMA,2016.
+RNN 53.37 48.22 53.37 46.18 [2] Arthur Drichel, Marc Meyer, and Ulrike Meyer. Towards robust
+CodeBERT RDF 63.61 40.96 43.98 43.17 domaingenerationalgorithmclassification.InProceedingsofthe19th
+SVM 51.31 29.25 31.27 31.23 ACM Asia Conference on Computer and Communications Security,
+KNN 56.13 37.15 38.71 37.86 2024.
+LSTM 90.75 86.37 90.75 82.43 [3] Tzy-Shiah Wang, Hui-Tang Lin, Wei-Tsung Cheng, and Chang-Yu
+Chen. Dbod: Clustering and detecting dga-based botnets using dns
+trafficanalysis. Computers&Security,64:1–15,2017.
+TABLEVIII
+[4] Tong Anh Tuan, Hoang Viet Long, and David Taniar. On detecting
+MULTICLASSCLASSIFICATIONRESULTSOFUMBRELLAMILLION andclassifyingdgabotnetsandtheirfamilies. Computers&Security,
+DATASET(%)
+113:102549,2022.
+[5] Hoang-Cong-Thanh Nguyen, Xuan-Ha Nguyen, and Kim-Hung Le.
+Architecture ACC F1 TPR PPV An automated benchmarking framework for anomaly-based intrusion
+BERT Model detection systems. In 2024 International Conference on Multimedia
+CNN 93.50 93.48 93.50 93.88 AnalysisandPatternRecognition(MAPR),2024.
+MLP 91.69 91.61 91.69 91.88 [6] Ranjana B. Nadagoudar and M. Ramakrishna. Dga domain name
+RNN 21.71 07.89 21.71 04.85 detectionandclassificationusingdeeplearningmodels. International
+LinkBERT RDF 93.11 93.01 91.73 94.32 JournalofAdvancedComputerScience&Applications,15(7),2024.
+SVM 54.29 40.85 42.73 48.83 [7] Yu Fu, Lu Yu, Oluwakemi Hambolu, Ilker Ozcelik, Benafsh Husain,
+KNN 79.78 77.85 78.87 77.25 Jingxuan Sun, Karan Sapra, Dan Du, Christopher Tate Beasley, and
+LSTM 21.72 07.91 21.72 04.86 Richard R. Brooks. Stealthy domain generation algorithms. IEEE
+CNN 92.01 91.96 90.98 92.95 TransactionsonInformationForensicsandSecurity,2017.
+MLP 94.62 94.59 94.62 94.77 [8] Hieu Mac, Duc Tran, Van Tong, Linh Giang Nguyen, and Hai Anh
+RNN 21.60 07.83 21.60 04.81 Tran. Dga botnet detection using supervised learning methods. In
+DistilBERT RDF 93.06 92.93 91.31 94.61 Proceedings of the 8th International Symposium on Information and
+SVM 57.98 40.67 42.51 52.41 CommunicationTechnology,pages211–218,2017.
+KNN 84.02 81.31 81.75 81.15 [9] M. B. Smithamol, Vinodu George, and Abdul Rahiman. A deep
+LSTM 21.73 07.91 21.73 04.86 learning framework for domain generation algorithm-based malware
+CNN 95.72 95.68 95.72 95.80 detection. JournalName,2023.
+MLP 80.72 79.63 80.72 81.77 [10] Ahmed M. Manasrah, Thair Khdour, and Raeda Freehat. Dga-based
+RNN 21.64 07.85 21.64 04.82 botnets detection using dns traffic mining. Journal of King Saud
+CodeBERT RDF 93.29 93.12 90.96 95.40 University-ComputerandInformationSciences,2022.
+SVM 53.03 33.17 37.01 37.17 [11] Yonglin Zhou, Qing shan Li, Qidi Miao, and Kangbin Yim. Dga-
+KNN 77.32 73.03 73.65 73.24 based botnet detection using dns traffic. Journal of Internet Services
+LSTM 21.68 07.86 21.68 04.83 andInformationSecurity,3(3/4):116–123,2013.
+[12] JacobDevlin,Ming-WeiChang,KentonLee,andKristinaToutanova.
+Bert: Bidirectional encoder representations from transformers. arXiv
+preprintarXiv:1810.04805,2018.
+affects classification accuracy, with LinkBERT, DistilBERT,
+[13] Michihiro Yasunaga, Jure Leskovec, and Percy Liang. Linkbert:
+and CodeBERT excelling on different datasets. CNN, MLP, Pretraining language models with document links. arXiv preprint
+and LSTM consistently achieved the highest accuracy, mak- arXiv:2203.15827,2022.
+[14] VSanh. Distilbert,adistilledversionofbert:Smaller,faster,cheaper
+ing them the most effective for DGA botnet detection. How-
+andlighter. arXivpreprintarXiv:1910.01108,2019.
+ever,challengeslikedatasetcomplexityandclassimbalance, [15] ZhangyinFeng,DayaGuo,DuyuTang,NanDuan,XiaochengFeng,
+especially in datasets like DGA Data, can negatively affect Ming Gong, Linjun Shou, Bing Qin, Ting Liu, Daxin Jiang, et al.
+Codebert:Apre-trainedmodelforprogrammingandnaturallanguages.
+detection performance.
+arXivpreprintarXiv:2002.08155,2020.
+[16] Ibrahim Yilmaz, Ambareen Siraj, and Dennis Ulybyshev. Improving
+V. CONCLUSION dga-based malicious domain classifiers for malware defense with
+adversarial machine learning. In 2020 IEEE 4th Conference on In-
+This paper explores the use of BERT combined with ma- formation CommunicationTechnology(CICT),Chennai,India,2020.
+chine and deep learning models for detecting DGA botnets. IEEE.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:41 UTC from IEEE Xplore. Restrictions apply.

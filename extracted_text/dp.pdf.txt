@@ -1,0 +1,2060 @@
+BriefingsinBioinformatics,2024,bbae504
+https://doi.org/10.1093/bib/bbae504
+ProblemSolvingProtocol
+MSlocPRED: deep transfer learning-based identification
+of multi-label mRNA subcellular localization
+YunZuo 1,BangyiZhang1,WenyingHe 2,YueBi3,XiangrongLiu 4,XiangxiangZeng5,ZhaohongDeng 1,*
+1SchoolofArtificialIntelligenceandComputerScience,JiangnanUniversity,No.1800LihuAvenue,BinhuDistrict,Wuxi214000,China
+2SchoolofArtificialIntelligence,HebeiUniversityofTechnology,5340XipingRoad,BeichenDistrict,Tianjin300130,China
+3DepartmentofBiochemistryandMolecularBiologyandBiomedicineDiscoveryInstitute,MonashUniversity,WellingtonRd,ClaytonVIC3800,Australia
+4DepartmentofComputerScienceandTechnology,NationalInstituteforDataScienceinHealthandMedicine,XiamenKeyLaboratoryofIntelligentStorageand
+Computing,XiamenUniversity,422SimingSouthRoad,SimingDistrict,XiamenCity,Fujian361005,China
+5SchoolofInformationScienceandEngineering,HunanUniversity,YueluDistrict,Changsha410012,China
+*Correspondingauthors.YunZuo,SchoolofArtificialIntelligenceandComputerScience,JiangnanUniversity,No.1800LihuAvenue,BinhuDistrict,Wuxi214000,
+China.E-mail:zuoyun@jiangnan.edu.cn;ZhaohongDeng,SchoolofArtificialIntelligenceandComputerScience,JiangnanUniversity,No.1800LihuAvenue,Binhu
+District,Wuxi214000,China.E-mail:dengzhaohong@jiangnan.edu.cn
+Abstract
+Subcellular localization of messenger ribonucleic acid (mRNA) is a universal mechanism for precise and efficient control of the
+translationprocess.AlthoughmanycomputationalmethodshavebeenconstructedbyresearchersforpredictingmRNAsubcellular
+localization,veryfewofthesecomputationalmethodshavebeendesignedtopredictsubcellularlocalizationwithmultiplelocalization
+annotations,andtheirgeneralizationperformancecouldbeimproved.
+In this study, the prediction model MSlocPRED was constructed to identify multi-label mRNA subcellular localization. First, the
+preprocessedDataset1andDataset2aretransformedintotheformofimages.TheproposedMDNDO–SMDUresamplingtechnique
+isthenusedtobalancethenumberofsamplesineachcategoryinthetrainingdataset.Finally,deeptransferlearningwasusedto
+constructthepredictivemodelMSlocPREDtoidentifysubcellularlocalizationfor16classes(Dataset1)and18classes(Dataset2).The
+resultsofcomparativetestsofdifferentresamplingtechniquesshowthattheresamplingtechniqueproposedinthisstudyismore
+effectiveinpreprocessingforsubcellularlocalization.ThepredictionresultsofthedatasetsconstructedbyinterceptingdifferentNC
+end(Boththe5’and3’untranslatedregionsthatflanktheprotein-codingsequenceandinfluencemRNAfunctionwithoutencoding
+proteinsthemselves.)lengthsshowthatforDataset1andDataset2,thepredictionperformanceisbestwhentheNCendisintercepted
+by35nucleotides,respectively.Theresultsofbothindependenttestingandfive-foldcross-validationcomparisonswithestablished
+prediction tools show that MSlocPRED is significantly better than established tools for identifying multi-label mRNA subcellular
+localization.Additionally,tounderstandhowtheMSlocPREDmodelworksduringthepredictionprocess,SHapleyAdditiveexPlanations
+wasusedtoexplainit.Thepredictivemodelandassociateddatasetsareavailableonthefollowinggithub:https://github.com/ZBYnb1/
+MSlocPRED/tree/main.
+Keywords:subcellularlocalization;deeptransferlearning;sequenceanalysis;interpretableanalysis
+Introduction
+streamline this process [11–16]. In recent years, an increasing
+In the intricate process of eukaryotic development, the precise number of machine learning algorithms have been employed
+subcellularlocalizationofmessengerribonucleicacid(mRNA)isa to predict mRNAs and non-coding RNA’s (ncRNAs’) subcellular
+fundamentalandessentialregulatorymechanism,withprofound localization[17–20].In2021,Wangetal.’smethod,DM3Loc,uti-
+implications for protein synthesis [1]. Eukaryotic cells exhibit lizedone-hotencodingasinputfeaturesandemployedConvolu-
+a dynamic distribution of mRNA, often found in diverse cellu- tionalNeuralNetwork(CNN)andmulti-headattentiontopredict
+lar compartments, particularly in complex organisms where it multiplelabelsforsixpositions[21].Li’steam,alsoin2021,pre-
+orchestratesmultiplefunctions[2–6].mRNAlocalizationisgov- sentedSubLocEP,whichtookintoaccountadditionalfeaturesand
+ernedbyintricatebiologicalrules;yet,anydisruptioncantrigger usedaweightedaggregationofsingle-layermodels[22].In2022,
+severe health consequences, including cancers, spinal muscu- Bietal.introducedClarionthatcombinedsequenceinformation
+lar atrophy, Alzheimer’s disease, and neurological disorders [7– and prior label knowledge, using multiple binary classifiers to
+10]. Consequently, a comprehensive understanding of mRNA’s achievemulti-labelpredictions[23].In2023,Yuanetal.developed
+localization machinery is of paramount biological importance. RNAlight,whichassembledk-mersintosequencefeaturemaps
+However, given the time-consuming nature of traditional bio- andtargetedamoregeneralapproach[24].Inthesameyear,Wang
+chemicalmethods,thereisapressingneedforthedevelopment et al.introduced DeepmRNALoc,employing a two-stage feature
+of a computationally efficient and accurate predictive tool to extractionstrategyinadeeplearningneuralnetwork[25].
+Received:May29,2024.Revised:August19,2024.Accepted:September30,2024
+©TheAuthor(s)2024.PublishedbyOxfordUniversityPress.
+ThisisanOpenAccessarticledistributedunderthetermsoftheCreativeCommonsAttributionNon-CommercialLicense(https://creativecommons.org/
+licenses/by-nc/4.0/),whichpermitsnon-commercialre-use,distribution,andreproductioninanymedium,providedtheoriginalworkisproperlycited.For
+commercialre-use,pleasecontactjournals.permissions@oup.com
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+20242 | Zuoetal.
+Althoughagreatdealofresearchworkhasbeencarriedoutand Thebenchmarkdatasetcollectedbasedonthe
+manycomputationaltoolshavebeenconstructedforsubcellular RNALocatev1.0[26],namelyDataset1
+localizationprediction,therearestillmanylimitations:(i)theyare ConsideringthatWangetal.[21]collecteddataonsevensubcellu-
+oftendesignedforsingle-positionprediction,whileinreality,mul- larlocalizations[nucleus,exosome,cytosol,cytoplasm,ribosome,
+tiplepositionsmayberelevant.(ii)Convertingmulti-positionclas- membrane,endoplasmicreticulum(ER)]basedontheRNALocate
+sificationintomultiplebinaryproblemscanbecomputationally v1.0 database in 2021, they constructed DM3Loc [21] to iden-
+expensive.(iii)Thegeneralizationandaccuracyofcurrentmod- tify multiple subcellular localizations and compared its perfor-
+els are not optimal, and their feature extraction methods may mancewiththatoffouradvancedmethods.Inordertoobjectively
+be limited or unreliable. To address these limitations, a com- comparethepredictiveperformanceofthemodelconstructedin
+putational tool needs to be developed that can handle multi- thisstudy,thebenchmarkdatasetconstructedbyWangetal.[21]
+positionpredictionmoreefficiently,considermoresophisticated wasusedasDataset1.Thedetailedstepsforconstructingtraining
+featureextractiontechniques,andimproveoverallperformance andtestingdatasetsforDataset1areasfollows:
+andgeneralizability.Withthisinmind,thisstudyaimstoestablish (i)Forthesevensubcellularlocalizationdatacollected,sincean
+a multi-label computational tool that can be directly used to mRNAcanlocalizeatmultipledepartmentsandweareconsider-
+predictmulti-labelsubcellularlocalizations.Theflowchartofthe ingsevendepartments,atotalof128(27)possiblecombinationsof
+predictionmodelMSlocPREDdevelopedinthisstudyisdepicted mRNAlocalizationsexistintheory,removingcategorieswithless
+inFig.1.Figure1mainlyconsistsofthefollowingparts:initially, than230sequencesandduplicatesequences.Finally,thedataset
+Dataset1andDataset2aredividedintoatrainingsetandatesting isdividedinto16categories:
+set(datapreprocessing)accordingtoa9:1ratio.Subsequently,the
+⎧
+m
+d
+b
+coaisu
+nlt
+al vat
+n
+ei n-
+c
+rcd
+e
+te
+eim
+s
+t
+dh(e
+iM
+e
+nn ts
+D
+q
+oi uNo aan
+D
+na
+fO
+otl
+i
+r–n
+t
+mySo Mr aom
+tD
+fa
+sU
+e
+ul a)d
+ic
+tri
+h
+aes bst cr
+a
+li
+l
+emb
+a
+fu
+sp
+ost
+l
+r.i io
+n
+T
+tn
+rg
+h
+a–
+ea
+nsi
+l
+sbm
+g fao
+ei
+lr
+rl aa
+it
+lnr ehi
+c
+at
+m
+ey
+rd
+no
+i
+isf
+d
+nM
+ae gtm
+,a
+a
+th
+p
+haa
+l
+arol ta eyn
+ie
+t
+so
+d
+h
+,b aeti
+n
+los
+l
+⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎨d
+d
+d
+da
+a
+a
+at
+t
+t
+ta
+a
+a
+a1
+1 1
+3 1
+5
+1=
+=
+=
+=d
+d
+d
+da
+a
+a
+at
+t
+t
+ta
+a
+a
+a1
+1 1
+3 1
+5
+1(
+(
+(
+(0
+0
+1
+11
+1
+1
+10
+0
+0
+00
+0
+0
+00
+1
+0
+10
+0
+0
+00
+0
+0
+0)
+)
+)
+),
+,
+,
+,d
+d
+d
+da
+a
+a
+at
+t
+t
+ta
+a
+a
+a1
+2 1
+4 1
+6
+1=
+=
+=
+=d
+d
+d
+da
+a
+a
+at
+t
+t
+ta
+a
+a
+a1
+2 1
+4 1
+6
+1(
+(
+(
+(0
+0
+1
+11
+1
+1
+10
+0
+0
+00
+1
+0
+10
+0
+0
+00
+0
+0
+01
+0
+1
+0)
+)
+)
+)
+d
+u
+f
+liia
+ns
+eit
+d
+ena
+ig
+d
+nf iar
+r
+to oePm
+c
+sy
+t
+et
+ohD
+pro
+aya
+,n
+rt
+r
+aa
+es
+ts
+ac
+ee drt
+ii
+s
+mp1
+tt
+ah.a
+gT
+en
+eh
+td
+sei .s
+xD
+Ts
+t
+ha
+c
+ct
+er
+oa
+i gp
+ns ee
+t
+t
+net
+it
+n
+e2
+e rtr
+aa
+la
+i
+tr
+t
+n
+ee
+e
+e
+dst
+b
+ir
+o
+ma yvn
+e
+l
+ais
+r
+n
+gf
+t
+eeo
+e
+,r
+hx
+am
+at
+n
+se
+f
+did
+al re
+e
+ti sn
+rn
+ait
+n
+do
+ne
+sai
+r
+pm
+ss ap
+ea
+re
+a
+eg
+c
+c
+ne
+i
+hs
+t-
+⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎩d
+d
+dda
+a
+aat
+t
+tta
+a
+aa7 1
+9 1
+1 1
+1
+11
+3=
+=
+=
+=d
+d
+d
+da
+a
+a
+ata
+t
+t
+ta
+a
+a7 1
+9 1
+1 1
+1
+1(
+1
+31
+(
+(
+(1
+1
+1
+10
+1
+1
+11
+0
+1
+10
+1
+1
+11
+1
+0
+10
+0
+0
+0)
+1
+0
+0,
+)
+)
+)d
+,
+,
+,a
+d
+d
+dt
+a
+a
+aa
+t
+t
+t8 1
+1 a
+a
+a0 1
+1 1
+1
+1=
+2
+4=
+=
+=da
+d
+d
+dt
+a
+a
+aa8
+t
+t
+t1
+1 a
+a
+a0 1
+1 1
+1
+1(
+2
+41
+(
+(
+(1
+1
+1
+10
+1
+1
+11
+0
+1
+11
+1
+1
+10
+1
+0
+10
+1
+1
+1)
+0
+0
+0)
+)
+)
+(1)
+background and is cropped according to the size of the text to 15 15 16 16
+ensure a compact display effect. The image files are saved in
+thecorrespondingdirectoriesusingthesamenamingconventions Inwhich,one-hotwasusedtorepresentthelocalizationcate-
+as the source text files.It should be noted that in this step,we gories,theyareinthefollowingorder:nucleus,exosome,cytosol,
+only convert the NC-termini of the sequences (the first 35 and cytoplasm,ribosome,membrane,and ER.For example,0100000
+last 35 nucleotides).After completing the above steps,the data meansthissequencehastheexosomeannotation,and0100001
+willbesenttotheoptimizedAlexNettransferlearningmodelfor meansthissequencehastheexosomeandERannotations.The
+training.Finally,oncethenetworktrainingiscomplete,thetesting meaningsoftheother14equationsaresimilar.(ii)Afterdivision,
+setisinputintothepredictorMSlocPRED,yieldingtestresultsand the 16 categories of data were obtained. (iii) The 16 classes of
+computingvariousmetricsformulti-labelclassificationtoassess dataobtainedwererandomlydividedintotwoparts:thetraining
+theperformanceofnetwork. datasetandthetestingdataset.Where90%ofthedataineach
+class is used as training data, the rest of the data is used as
+test data.(iv)In order to test theimportance of the N-terminal
+andC-terminalofsubcellularlylocalizedsequences,theN-and
+Materials and methods
+C-termini of the preprocessed sequences were intercepted to
+Benchmarkdataset
+lengthsof20–45,intervalof5,thatis,thesequencelengthsare
+It is crucial to build a reliable benchmark dataset in order to 40, 50, 60, 70, 80, and 90, respectively. Table1 lists the specific
+developpredictivemodelswithgoodgeneralizationperformance quantities for each category in the training and testing sets of
+and statistical significance. All mRNA subcellular localization Dataset1,alongwiththecorrespondinglabels.
+datasets used in this study were sourced from the RNALocate
+Basedonthebenchmarkdatasetcollectedby
+database (a resource for RNA subcellular localization analysis).
+clarion[23]formessengerribonucleicacid
+RNALocate v1.0 (version 1.0, updated in February 2020) [26]
+subcellularlocalizationsfromtheRNALocate
+integrated GenBank (https://www.ncbi.nlm.nih.gov/genbank/)
+v2.0[28](Dataset2)
+[27], and the mRNA sequence data in the FASTA format
+were obtained from the National Center for Biotechnology FortheninesubcellularlocalizationdatacollectedfromClarion
+Information in February 2020 (https://www.ncbi.nlm.nih.gov/ (exosome, nucleus, nucleoplasm, chromatin, cytoplasm, nucle-
+sites/batchentrez).RNALocatev2.0(version2.0,updatedinJune olus, cytosol, membrane, and ribosome), the detailed steps for
+2021)[28]integratedRNAsubcellularlocalizationdatafromfive constructingthetrainingandtestdatasetsareasfollows:
+databases(CSCD)[29],EVmiRNA[30],exoRBase[31],PomBase[32] (i)Fortheninesubcellularlocalizationtrainingandtestdata
+and TAIR [33].To comprehensively validate the effectiveness of collected,sinceanmRNAcanlocalizeatmultiplecompartments
+the predictive model constructed in this study, we constructed andweareconsideringninecompartments,atotalof512(29)pos-
+predictivemodelsusingtwobenchmarkdatasetscollectedfrom siblecombinationsofmRNAlocalizationsexistintheory,thecat-
+theRNALocatev1.0andRNALocatev2.0databases.Thespecific egorieswithlessthan300sequencesandduplicatedsequences
+descriptionsofthetwobenchmarkdatasetsareasfollows: were removed and finally the training and test datasets were
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+2024MSlocPRED:deeptransferlearning-basedidentification | 3
+Figure1.TheframeworkdiagramofthepredictionmodelMSlocPREDconstructedinthispaper.
+Table1. ContentofDataset1
+Classes Label Totalcounts Trainset Testset Classes Label Totalcounts Trainset Testset
+1 0100000 3603 3243 360 9 1101010 1032 929 103
+2 0100001 240 216 24 10 1101100 1677 1509 168
+3 0100100 242 205 23 11 1101101 224 202 22
+4 0101000 574 517 57 12 1101110 714 643 71
+5 1100000 1662 1496 166 13 1111000 879 791 88
+6 1100001 266 239 24 14 1111010 337 303 34
+7 1100100 586 527 59 15 1111100 430 387 43
+8 1101000 1909 1718 191 16 1111110 233 210 23
+dividedinto18categories,respectively: sequence has the exosome annotation; 100100000 means this
+sequencehastheexosomeandchromatinreticulumannotations;
+⎧ themeaningsoftheother16equationsfollowinthismanner.(ii)
+⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎨d
+d
+d
+da
+a
+a
+at
+t
+t
+ta
+a
+a
+a2
+1
+2
+3
+2
+5
+2=
+=
+=
+=d
+d
+d
+da
+a
+a
+at
+t
+t
+ta
+a
+a
+a2
+1
+2
+3
+2
+5
+2(
+(
+(
+(1
+0
+1
+10
+0
+0
+00
+0
+0
+00
+0
+1
+00
+1
+0
+00
+0
+0
+00
+0
+0
+00
+0
+0
+00
+0
+0
+1)
+)
+)
+),
+,
+,
+,d
+d
+d
+da
+a
+a
+at
+t
+t
+ta
+a
+a
+a2
+2
+2
+4
+2
+6
+2=
+=
+=
+=d
+d
+d
+da
+a
+a
+at
+t
+t
+ta
+a
+a
+a2
+2
+2
+4
+2
+6
+2(
+(
+(
+(0
+1
+1
+11
+1
+0
+10
+0
+0
+00
+0
+0
+00
+0
+0
+10
+0
+0
+00
+0
+1
+00
+0
+0
+00
+0
+0
+0)
+)
+)
+)
+T
+a af
+nh
+t
+de
+er
+C1 d8
+-i
+tvc eil rsa mis os
+in
+nt
+.
+ar (a
+lii
+oi in
+)
+fIi snn ug
+o
+brd cda eet
+lr
+la uts loe at
+t
+rs
+e
+lsa otn
+ct
+ad
+h le
+it ze
+i
+es
+m
+dti
+p
+sn
+o
+eg
+r
+qtd uaa ent na
+c
+ces ee
+o
+st
+f
+,s ttw
+hh
+eeer
+N
+Ne
+-
+-o
+t te
+eb
+r
+rt
+m
+mai
+i
+in
+n
+ne
+a
+ad
+l
+l
+7 7 8 8 andC-terminalofthepreprocessedsequenceswereintercepted
+⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎪⎩d
+d
+dd
+a
+a
+aa
+t
+t
+tt
+a
+a
+aa2 9
+2
+1
+2
+1
+2
+11
+3
+5=
+=
+=
+=d
+d
+d
+da
+a
+a
+ata
+t
+t
+ta
+a
+a2 9
+2
+1
+2
+1
+2
+1(
+1
+3
+51
+(
+(
+(1
+1
+1
+10
+1
+1
+10
+1
+1
+10
+1
+1
+10
+0
+0
+01
+1
+1
+00
+0
+1
+10
+0
+0
+0)
+0
+0
+1,
+)
+)
+)d
+,
+,
+,a
+d
+d
+dt
+a
+a
+aa
+t
+t
+t2 1
+a
+a
+a0
+2
+1
+2
+1
+2
+1=
+2
+4
+6=
+=
+=da
+d
+d
+dt
+a
+a
+aa
+t
+t
+t2 1
+a
+a
+a0
+2
+1
+2
+1
+2
+1(
+2
+4
+61
+(
+(
+(1
+1
+1
+10
+1
+1
+10
+1
+1
+10
+1
+1
+10
+0
+0
+01
+0
+0
+11
+1
+1
+10
+0
+1
+1)
+0
+0
+0)
+)
+)
+q
+Dt 4o
+0
+u
+a,l
+a
+te
+5
+ann
+0
+st,g eit6t tih
+0
+e
+2,s
+s
+,7o af0f
+lo,
+or2
+8
+n0
+0
+e
+g–
+,
+a5
+9
+wc0
+0
+h
+i,
+,
+ti han
+cn
+at tde hter e1v
+g0
+ca
+o0
+ol
+r,
+y
+ro
+r
+rf
+e
+ein5
+s
+sp, ptt
+e
+ohh
+c
+nea
+t
+dit
+v
+it
+ni
+e
+rs
+a
+gl,
+y
+it
+.
+n
+lh
+aT
+ie
+bna eb
+gs le
+l se
+aq .nu
+2
+de lin
+s
+tc
+t
+ese sttl ihe nn
+e
+gg st sph ees
+tc
+sa ifr oie
+c
+f
+data2 =data2 (111101101),data2 =data2 (111101111)
+17 17 18 18
+(2)
+Resamplingmethods
+In which,we use one-hot encoding to represent the local-
+ization categories, they are in the following order: exosome, Duetotheextremeimbalanceofthetrainingdatasetconstructed
+nucleus,nucleoplasm,chromatin,cytoplasm,nucleolus,cytosol, inthisstudy,theratioof16trainingsamplesforDataset1isas
+membrane, and ribosome. For example, 100000000 means this follows:3243:216:205:517:1496:239:527:1718:929:1509:202:
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+20244 | Zuoetal.
+Table2. ContentofDataset2
+Classes Label Totalcounts Trainset Testset Classes Label Totalcounts Trainset Testset
+1 100000000 7506 6774 732 10 110000110 393 349 44
+2 010000000 3365 3037 328 11 111101000 394 359 35
+3 000010000 1911 1715 196 12 111100100 580 527 53
+4 110000000 1291 1154 137 13 111101100 1730 1557 173
+5 100100000 353 319 34 14 111100110 497 448 49
+6 100000100 1143 1016 127 15 111100101 493 445 48
+7 100000001 475 422 53 16 111101110 1884 1688 196
+8 110010000 392 345 47 17 111101101 1320 1190 130
+9 110000100 647 587 60 18 111101111 1139 1034 105
+643:791:303:387:210;theratioof18trainingsamplesforDataset in the k class,nk is the total numb(cid:8)er of samples in the k class(cid:9),
+2isasfollows:6774:3037:1715:1154:319:1016:422:345:587:349: anddisthedimensionality.XX = X1,X2,···,Xk−1,Xk+1,···,Xt (cid:2)
+359: 527: 1557: 448: 445: 1688: 1190: 1034.Therefore,this study (cid:8)denotesallsamplesi(cid:9)ntheotherclassesexceptthekclass,Xt =
+proposedtheMDNDO–SMDUresamplingalgorithmtoreducethe xt 1,xt 2,···,xt i,···,xt
+nt
+(cid:2) denotesallsamplesinthetclass,ntisthe
+ratiooftrainingsamplesforDataset1(16categories)andDataset totalnumberofsamplesinthetclass.Whentheisampleinthe
+2 (18 categories). We calculate the number of various types of kclassissynthesizedusingMDNDO,xkdenotesthemeanofthe
+i
+samplesaftersamplingaccordingtoEquation(3): datatobegenerated,andσ denotestheautocorrelationmatrix
+(cid:6) (cid:7) (correlationcoefficientmatrix)ofxk i.Thenσ i2canbeexpressedin
+N=round
+n1+n2+···+nk+···+nt
+(3) theformofequation(6):
+t
+⎡ (cid:13) (cid:14) ⎤
+2
+β xt 0 ··· 0
+⎢ i,1 (cid:13) (cid:14) ⎥
+pleA s,m kon =g 1t ,h 2e ,m 3,, ··n ·k ,r te .p Fr oe rse Dn ats tat sh ee t 1n ,u tm =b 1e 6r ; Dof att ah se etk 2c ,l ta =ss 18s .a Fm or- σ i2=⎢ ⎢ ⎢ ⎢ ⎢ 0 . β x .t i,2 2 ·· .· 0 . ⎥ ⎥ ⎥ ⎥ ⎥ (6)
+each class of training samples with a quantity less than N,use ⎢ ⎣ . . . . . . (cid:13) . . (cid:14) ⎥ ⎦
+undersamplingbasedonthesimilarityofMahalanobisdistances 0 0 ··· β xt 2
+(SMDU)toremovesimilarorredundantsamples,andanoversam- i,d d×d
+plingalgorithmbasedonmulti-dimensionalnormaldistribution
+(MDNDO)tosynthesizesampleswiththesamedistribution.The Wheretheprowandqcolumnelementofσ2isdenotedas:
+i
+MDNDO–SMDU resampling algorithm proposed in this study is ⎧
+describedasfollows: (cid:18) (cid:19) ⎨ 0 , p(cid:3)=q
+σ i2 p,q = ⎩β(cid:13)
+xt
+(cid:14) 2
+,
+p=q, p,q=1,2,···,d (7)
+i,p
+Multi-dimensionalnormaldistribution
+oversamplingalgorithm
+βistheprobabilityfactorthatistakenas0.05inthisstudy.
+The MDNDO oversampling algorithm was proposed in our
+previousresearchforsynthesizingmulti-labellysinesequences.
+Thethirdstep:Assumingthattpsamplesaregeneratedforeach
+Given the effectiveness of the MDNDO oversampling algorithm
+sampleinthekclass,fornk×tpsyntheticsamplesgeneratedfrom
+all samples in the k class, all synthetic samples are evaluated
+in predicting post translational modification sites in proteins,
+usingindicatorI.Theindicatorfortheksyntheticsampleis:
+this study utilizes the MDNDO oversampling algorithm to
+synthesize training samples for each class with fewer than
+(cid:20)
+(cid:21) (cid:21)
+N. The main idea of oversampling algorithm based on multi- (cid:21) (cid:21)2
+dimensional normal distribution (MDNDO) used in this study I i= 1m ≤j≤in m (cid:21)xk i −xl j(cid:21) ,i=1,2,···,nk×tp (8)
+is to synthesize theMksamples that follow the same normal
+distribution, and the Mkcomputation formula is shown in
+Equation(4):
+Wherel=1,2,···,k−1,k+1,···,t,m=n1+n2+···+k−1+
+Mk=N−nk,k=1,2,3,···,t (4) k re+ ar1 ra+ n· g· e· d+ it n.T ah se cen nk d× intp gm ore dt eri rc ,s soca tl hc au tla tt he ed Mfr kom synE tq hu ea tt icio sn a( m8) pa lere
+s
+selectedaretheMksamplesthattakethehighestvaluesinI(i.e.
+Inwhichnkisthesamplenumberofthekclass,k=1,2,3,···,t. thoseconsideredtobethefurthestfromthelclassaccordingto
+The specific steps of the MDNDO oversampling technique are themetricdefinedinEquation(8)).
+shownbelow: The forth step: Use the reverse numerical conversion of
+The first step: for the truncated nucleotides at the NC end, nucleotidestoconvertnucleotidesrepresentedby1to4tofour
+convert thefour nucleotides(A,C,G,T)intonumericalvectors, kindsofnucleotides,namely:
+namely:
+A−1,C−2,G−3,T−4 (5) 1−A,2−C,3−G,4−T (9)
+(cid:8) (cid:9) Finally, the training samples synthesized using MDNDO are
+The second step: suppose Xk = xk 1,xk 2,···,xk i,···,xk
+nk
+(cid:2) ,k = combined with the original nk training samples, and finally N
+1,2,···,t is all samples in the k class,where xk is the i sample training samples can be obtained for training the correlation
+i
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+2024MSlocPRED:deeptransferlearning-basedidentification | 5
+Table3. Thepseudo-codeofMDNDOoversampling
+Algorithm1:MDNDOoversampling
+Input:Thekclassoforiginaltrainingsamples:xk 1,xk 2,···,xk i,···,xk nk,k=1,2,···,t,thenumberofsamplesnk
+Output:SynthesizedMktrainingsamplesQ 1k,Q 2k,Q 3k,···,Q Mk
+k
+1.Encodingtrainingsamplesxk,xk,···,xk,···,xk byusingequation(5)
+1 2 i nk
+2.ForEACHi:1≤i≤nk/∗Calculatet(cid:18)hed(cid:19)iagonalma(cid:18)trixof(cid:19)covariancegeneratedforeachsampleinthekclass∗/
+3.DOc=xk;b=size(c,2);z=zeros b,b ;m=zeros 2∗b,1 ;
+i
+4. ForEACHj1:1≤j1≤size(c,2)
+5. ForEACHj2:1≤j2≤size(c,2)
+6. IFj1== (cid:18) j2 (cid:19) (cid:18) (cid:18) (cid:19)(cid:19) (cid:18) (cid:19) (cid:22)(cid:23) (cid:18) (cid:18) (cid:19)(cid:19)
+7. DOz j1,j2 =0.05∗ c j1 ˆ2;t :,i =diag(z);t1 i =diag t :,i ;
+8. ENDIF
+9. ENDFOR
+10. ENDFOR
+11.ENDFOR
+12.ForEA (cid:22)C (cid:23)Hi:1(cid:24)≤i≤nk(cid:13)/∗Forea (cid:18)ch (cid:22)sam (cid:23)p (cid:19)le,k(cid:14)p(cid:25)syntheticsamplesaregenerated∗/
+13.DOp1 i = mvnrnd xk i,sqrt t1 1,i ,kp ;
+14.ENDFOR
+15.ForEACHi:1≤i≤nk/∗Findtheminimumnumberofparadigmsforeachsyntheticsampleandallothersamples∗/
+16. ForEACHj1:1≤j1≤kp
+17. ForEA (cid:18)CH (cid:19)k1:1≤k(cid:13)1≤n1(cid:13)+n2(cid:22)+· (cid:23)· (cid:18)·+n (cid:19)k−1+n(cid:14)k+1(cid:14)+···+nt
+18. nn1 k1 =sqrt norm p1 1,i j1,: −xl
+k1
+ˆ2 ;/∗l=1,2,···,k−1,k+1,···,t∗/
+19. ENDF(cid:18)OR(cid:19)
+20. m1 i,j1 =min(nn1);
+21. ENDFOR
+22.ENDFOR
+23.Thenk×kpmetricscalculatedfrom15–17arerearrangedinascendingorder
+24.TheMksyntheticsamplesselectedthattakethehighestvalues
+25.RETURNQk,Qk,Qk,···,Qk
+1 2 3 Mk
+predictionmodel.Thepseudo-codeofMDNDO(i.e.Algorithm1) samplesineachclass,selectthetopNgpairsofsampleswiththe
+isshowninTable3. smallestdistance,andrandomlyselectonesamplefromeachpair
+todelete.Thedetailedstepsareasfollows:
+SimilarityofMahalanobisdistances Thefirststep:supposethatxg = xg,xg,···,xg,···,xg repre-
+1 2 i ng
+undersamplingalgorithm sentalltrainingsamplesinthegclass,inwhichxg,g=1,2,···,t,
+Similarity-based undersampling was firstly proposed by Cateni d is the dimensionality of the extracted features, and ng is the
+et al., and its basic idea is to calculate the Euclidean distance number of all samples in the g class.Normalize all columns of
+between any two samples in each class, select the top N pairs thematrixxgandgetatransformedmatrixw,wheretheelement
+of samples with the smallest result from the obtained lower w i,hoftheirowandhcolumncanberepresentedas:
+triangular matrix, and randomly select one sample from each
+p pla ei sr .t Go ivd ee nle tt he, et eh fu fes ca tic vh ei ne ev sin sg ofth te hego Sa iml o ilf ard ie tyle -t bi an sg edsim unil da er rss aa mm -- w i,h=
+max
+1≤x j≤g i, nh g(cid:26)
+xg
+j,h(cid:27),i=1,2,···,ng,h=1,2,···,d (10)
+pling algorithm,in our previousresearch,we proposed Kmeans
+similarity-basedundersamplingtoremoveredundantandsimilar
+non-carbonylatedsamples. Thesecondstep:computetheMahalanobisdistancebetween
+ConsidertwoflawsthatexistintheEuclideandistance:(i)it everytworowsofthetransformedmatrixwto(cid:18)geta(cid:19)symmetrical
+does not consider that different variables (dimensions) vary on squaredistancematrixD1,wheretheelementd p,q ofthematrix
+differentscales.Forexample,y1andy2representlengths,andthe D1canberepresentedas:
+differencebetweenusing‘centimeters’astheunitofmeasureand (cid:18) (cid:19) (cid:28)
+using‘meters’astheunitofmeasureisverylarge.Theyarereally d p,q = (wp−wq)S−1(wp−wq)(cid:2) (11)
+thesamevalue,itisjustthedifferenceinunitsthatcausesthe
+resultsoftheEuclideandistancecalculationstovarydramatically.
+(ii)Thecorrelationbetweenthevariableswasnotconsidered.If Wherewpandwqrepresentedvectorsconsistingofallelements
+thecorrelationbetweentwovariables(dimensions)isverystrong, ofthepandqrowsofthematrixw,respectively.S−1istheinverse
+theEuclideandistancedoesnotcapturethecorrelation.Whereas ofthecovarianceofwp,wq.
+Mahalanobisdistancewiththehelpoftheideaofnormalization Thethirdstep:itwasclearthattheelementslocatedonthe
+oftheunitarycase,solvingforthedistanceaddstheinverseof maindiagonalofthesymmetricalsquaredistancematrixD1are
+the covariance matrix of y1,y2, so that variables (dimensions) zero. Because the matrix D1 was a symmetry matrix, only the
+with greater variance correspond to smaller weights, and the lowertriangleofthematrixD1wasconsideredinthebelow,and
+contribution of two highly correlated variables (dimensions) to D1wasdefinedasadissimilaritymatrix. (cid:18) (cid:19)
+theMahalanobisdistanceissmallerthanthecontributionoftwo The fourth step: The smaller the element d p,q , the more
+variables with relatively low correlation.In view of this,in this ‘similar’ the samples wp and wq. The pairs of samples were
+study,we calculate the Mahalanobis distance between any two rearranged based on this similarity index.For the most similar
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+20246 | Zuoetal.
+Table4. Thepseudo-codeofSMDUundersampling
+Algorithm2:SMDUundersampling
+Input:Thegclassoforiginaltrainingsamples:xg=xg 1,xg 2,···,xg i,···,xg ng,g=1,2,···,t,thenumberofsamplesng
+Output:AfterundersamplingNtrainingsamplesQg,Qg,Qg,···,Qg
+1 2 3 N
+1.Encodingtrainingsamplesxg 1,xg 2,···,xg i,···,xg ngbyusingequation(5)
+2.ForEACHi:1≤i≤ng/∗No(cid:18)rma(cid:19)lizeallcolumnsofthematrixxg∈Rn×dandgetatransformedmatrixw∗/
+3. ForEA(cid:18)CH(cid:19)k:1≤k≤ (cid:18)siz(cid:18)e x(cid:19)g (cid:19),2
+4. a(cid:18)i,k(cid:19)=max xg :,k ;
+5. IFa(cid:18)i,k(cid:19)==0(cid:18) (cid:19)
+6. w i,k =xg i,k /ng
+7. ELSE(cid:18) (cid:19) (cid:18) (cid:19) (cid:18) (cid:18) (cid:19)(cid:19)
+8. w i,k =xg i,k /max xg :,k
+8. ENDIF
+9. ENDFOR
+10.ENDFOR
+11./∗Calculat(cid:13)ethedistan(cid:14)cebetweenanytwosamples∗/
+12.D1=pdist w,"mahal" ;D=squareform(D1);
+13.ForEACHi:1≤i≤ng
+14. ForEACHj:1≤j≤ng
+15. IFj>(cid:18)= (cid:19)i
+16. D i,j =0;
+17. ENDIF
+18. ENDFOR
+19.ENDFOR
+20.D1=nonz(cid:13)eros(D); (cid:14)
+21.D2=sort D1,’ascend’ ;
+22.SelecttheNgmostsimilarcouplesofsamples
+23.EliminateonesamplefromtheNgmostsimilarcouples
+24.ObtainN=ng−NgtrainingsamplesQ 1g,Q 2g,Q 3g,···,Q Ngafterundersampling
+25.RETURNQg,Qg,Qg,···,Qg
+1 2 3 N
+pairs,we randomly selected one sample to eliminate,thus pre- (3)Initializetheweightsoftheoutputlayertorandomvalues,
+servingtheoriginalclassdistributionwithoutsignificantlossof but keep the weights of the other layers the same as the
+information.Thepseudo-codeofSMDU(i.e.Algorithm2)isshown originallytrainedweights.
+inTable4. (4)Starttrainingonthesubcellularlocalizationdataset.
+(5)Selecttheoptimalmodelbasedonfive-foldcross-validation
+AlexNettransferlearning
+andfiveevaluationindicators(Aiming,Coverage,Accuracy,
+Transfer learning allows models developed for one task to be Absolute_True,Absolute_False).
+reusedasastartingpointformodelsforanothertask,andsaves
+Aftermodifyingtheinputandoutputterminals,thefinalnet- thesignificantcomputationalandtimeresourcesneededtotrain
+workstructurediagramofAlexNetisillustratedinFig.2.Figure2a
+neuralnetworks.Inthisstudy,theAlexNetmodeltrainedatthe
+depictsthemodifiedinputend,Fig.2bshowstheoverallarchitec-
+ComputerVisionChallengeviatheImageNetdatasetwasusedto
+ture of AlexNet used for transfer learning,and Fig.2c presents
+transfertheapplicationtothesubcellularlocalizationdatasetfor
+the classifier modified for use in this study, where the input
+retraining(fine-tuning).Themajorstepsareshownbelow:
+of the classifier should correspond to the number of features,
+(1)Eachsamplefromthetrainingandtestdataisfirsttrans- andtheoutputshouldbethenumberofclasses.Toensurethe
+formedintotheformofanimageandthenfedintotheinput reproducibilityoftheexperimentalresults,thisstudyprovidesa
+layeroftheAlexNetnetwork. detaileddescriptionofthehardwareandsoftwareenvironments
+(2)Then load the trained network and resize the dataset used during the experimental process, as well as the experi-
+image to the same size as the network.The newly loaded mental settings. The hardware configuration includes an Intel
+data is not needed for a 1000-category classification task, Gold 6226R processor and an NVIDIA RTX 4090 GPU equipped
+so the last three layers of AlexNet must be targeted for with 24GB of video memory, which are used to handle large
+readjustment to the newclassification problem: (i) extract datasetsandcomplexcomputationaldemands.Allexperiments
+alllayersexceptthelastthree;(ii)theextractedlayersare wereconductedintheMATLABenvironment,utilizingitscapa-
+transferredtothenewtaskandthelastthreeoriginallayers bilitiesformatrixcomputationandvisualizationtoperformdata
+arereplacedwithafullyconnectedlayer,asoftmaxlayer, analysis and model experiments. Experimental parameter set-
+and a classification output layer; (iii) Configure the new tingsincludedsettingthenumberofiterationsto5490forDataset
+fully-connected layer parameters based on our new data 1and9639forDataset2,andalearningrateof0.0001,toensure
+asfullyConnectedLayer(class,‘WeightLearnRateFactor’,20, thatthemodeladequatelylearnsthedatafeaturesandachieves
+‘BiasLearnRateFactor’,20).(iv)Setthehyperparametersfor stabletrainingperformance.
+modeltrainingrespectivelyasops=trainingOptions(‘sgdm’, In order to select the optimal transfer learning model, this
+‘InitialLearnRate’, 0.0001, ‘ValidationData’, augimdsTest, study also compared AlexNet with several traditional neural
+‘Plots’, ‘training-progress’, ‘MiniBatchSize’, 4, ‘MaxEpochs’, networksusedinthefieldofcomputervision(VGG16,GoogLeNet,
+3,‘ValidationPatience’,Inf,‘Verbose’,false); ResNet-50) on two datasets, with the comparative results
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+2024MSlocPRED:deeptransferlearning-basedidentification | 7
+Table5. ComparisonoftransferlearningeffectappliedtodifferentnetworksonDataset1
+Name Aiming Coverage Accuracy Absolute_True Absolute_False
+VGG16 0.6910 0.7420 0.5433 0.0901 0.3164
+GoogLeNet 0.8033 0.6055 0.5006 0.1226 0.3186
+ResNet-50 0.7467 0.6910 0.5343 0.1137 0.3121
+AlexNet 0.7378 0.7611 0.5676 0.1120 0.2935
+Table6. ComparisonoftransferlearningeffectappliedtodifferentnetworksonDataset2
+Name Aiming Coverage Accuracy Absolute_True Absolute_False
+VGG16 0.6963 0.4373 0.3573 0.1059 0.3543
+GoogLeNet 0.6652 0.6043 0.4445 0.1156 0.3328
+ResNet-50 0.6381 0.6042 0.4470 0.1393 0.3315
+AlexNet 0.6636 0.6586 0.4756 0.1151 0.3163
+in order to evaluate the predictive performance of MSlocPRED,
+theevaluationcriterionforamulti-labelsystemcanbedefined
+asfollows:
+(cid:30)(cid:21) (cid:21)(cid:31)
+Aiming=
+n1(cid:29)n (cid:21) L
+(cid:21) (cid:21)i
+L∩ ∗L
+(cid:21)
+(cid:21)∗ i(cid:21)
+(12)
+i=1 (cid:30)(cid:21) i (cid:21)(cid:31)
+Coverage=
+1(cid:29)n (cid:21) L i∩L∗ i(cid:21)
+(13)
+n (cid:8)L(cid:8)
+i=1(cid:30)(cid:21) i (cid:21)(cid:31)
+Accuracy=
+n1(cid:29)n (cid:21)
+(cid:21)
+(cid:21)L Li∩ ∪L L∗
+i
+∗(cid:21)
+(cid:21) (cid:21) (14)
+i=1 i i
+Figure2.Transferlearningnetwork. Absolute−True=
+n1(cid:29)n Δ(cid:18)
+L i,L∗
+i(cid:19)
+(15)
+(cid:30)(cid:21) i=1 (cid:21) (cid:21) (cid:21)(cid:31)
+Absolute−False=
+1(cid:29)n (cid:21) L i∪L∗ i(cid:21)−(cid:21) L i∩L∗ i(cid:21)
+(16)
+presentedinTable5andTable6.ForDataset1,AlexNetexhibited n M
+i=1
+superiorperformanceintermsofAccuracy(0.5676)andCoverage
+where n is the total number of samples,M is the total number
+(0.7611),anditsAbsoluteFalse(0.2935)wasthelowestamongthe
+oflabelsinthesystem,∪and∩denote‘union’and‘intersection’
+four networks, demonstrating its superior learning capabilities
+insettheory,(cid:8)(cid:8)istheoperatorthatoperatesononeofthesets
+and good generalization performance. On Dataset 2, despite
+to calculate the number of elements, Δ() denotes an operator
+a general increase in error rates across all networks, AlexNet
+thatoperatesonasubsetofthemtodeterminewhetheralltheir
+maintains the lowest Absolute_False (0.3163), while continuing
+subsetelementsareequal.L isthesubsetofalllabelsobserved
+to lead in Accuracy (0.4756) and Coverage (0.6586), further i
+experimentallyfortheisample,L∗ isthesubsetofallpredicted
+demonstrating its stability and adaptability across different i
+labelsfortheisample,and
+settings. Moreover, although GoogLeNet achieved the highest
+⎧ Aiming (0.8033) in Dataset 1 and ResNet-50 exhibited the best
+Absolute_True value (0.1393) in Dataset 2. However, in terms (cid:29)n (cid:18) (cid:19) ⎪⎨1, alllabelsinL iarethesameas
+of overall performance, AlexNet displays a more balanced and Δ L i,L∗ i = ⎪⎩ thecorrespondinglabelsinL i (17)
+i=1 0, otherwise
+consistent performance across both datasets. These results
+indicate that AlexNet not only maintains high Accuracy and
+Coverage, but also effectively controls Absolute_False, making Inamulti-labelsystem,(i)‘Aiming’or‘Precision’denotesthe
+it the preferred network architecture for performing transfer average ratio of predicted labels agreeing with true labels; (ii)
+learning. ‘Coverage’ or ‘Recall’ indicates the average ratio of true labels
+coveredbypredictedlabels;(iii)‘Accuracy’indicatestheaverage
+Fivekindsofmulti-labelevaluationindicators
+ratio of correctly predicted labels to the total number of labels
+Forthetwobenchmarkdatasetscollectedandprocessedinthis (including correctly and incorrectly predicted labels, as well as
+study(Dataset1,Dataset2),Dataset1:wehaveatotalof13135 thosetruelabelsthatwereomittedduringthepredictionprocess);
+trainingsamples,the7subcellularlocalizationdatawerespecif- (iv) ‘Absolute-True’ or ‘Subset-Accuracy’ indicates the average
+icallydividedinto16categories,ofwhich3243arelabelledwith ratio of predicted labels that are exactly the same as the true
+exosome annotation,the other 15 categories have two or more labels; and (v) ‘Absolute-False’ or ‘Hamming loss’ indicates the
+labels. Dataset 2: there are 22 966 training samples, the nine average ratio of the inconsistency between the predicted label
+subcellular localization data were specifically divided into 18 andthetruelabeltothetotalnumberofcategoriesandsamples.
+categories, among them, 6774 with exosome annotation; 3037 Obviously,in a multi-label system, when the values of Aiming,
+withnucleus,1715withcytoplasm,theother15categorieshave Coverage,AccuracyandAbsolute-Truearehigher,andthevalueof
+twoormorelabels.Therefore,inthecurrentstudywearedeal- Absolute-Falseislower,theperformanceoftheconstructedmodel
+ingwithamultilabelsystemaccordingtoChou’sformula[34], isbetter.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+20248 | Zuoetal.
+Figure3.Five-foldcross-validationresultsofdifferentresamplingmethodsforDataset1.
+Results and discussion usedtocalculatetheMahalanobisdistanceofanytwosamples
+Preprocessingtrainingdatabasedon in each category (categories 1, 5, 8, 9, and 10), select theN1 =
+multi-dimensionalnormal n i −M,i ∈ {1,5,8,9,10}pairs of samples that have the smallest
+distribution–similarityofMahalanobisdistances distance (i.e. the most similar pair of samples), and randomly
+resamplingtechnique deleteoneofthemtoachievethepurposeofremovingthemost
+similarsamples.
+Since both training datasets constructed in this study are
+For Dataset 2, since the number of training data for classes
+extremely unbalanced, for Dataset 1, the ratio of 16 classes of
+4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 17, and 18 are less than 1200,
+trainingsamplesis3243:216:205:517:1496:239:527:1718:929:
+N = M−n,i ∈ {4,5,6,7,8,9,10,11,12,14,15,17,18}samplesare
+1509: 202: 643: 791: 303: 387: 210.The number of training data i i
+synthesizedforthese13classesoftrainingdatausingtheMDNDO
+forclasses2,3,4,6,7,11,12,13,14,15,and16arelessthan800
+(train1 : 216,train1 : 205,train1 : 517,train1 : 239,train1 : 527, over-samplingalgor(cid:18)ithm, (cid:19)
+train12 : 202,train13 : 643,train14 : 791,train16 : 303,train17 : 387, whereM=round n1+n2+n 13 8+···+n18 isthenumberoftrainingsam-
+11 12 13 14 15 plesforeachclassaftersampling,andround()denotesrounding.
+train1 : 210), therefore, this study synthesizedNsamples using
+16 Fortheremaining5classes,theSMDUunder-samplingalgorithm
+thealgorithmproposedinapreviousstudyonMDNDOforthese
+is utilized to select the N = n −M,i ∈ {1,2,3,13,16} pairs of
+11 classes of training data. Assuming n2, n3, n4, n6, n7, n11, n12, i i
+sampleswiththesmallestdistance(i.e.themostsimilarpairsof
+n13,n14,n15 andn16 arethenumberofsamplesfortrain1 2,train1 3,
+samples)andrandomlydeletesoneofthem,thusachievingthe
+train1,train1,train1,train1 ,train1 ,train1 ,train1 ,train1 andtrain1 ,
+4 6 7 11 12 13 14 15 16 purposeofdeletingthemostsimilarsamples.
+respectively,thenumberofsamplesgeneratedforthese11classes
+isN=M−n i,i∈{2,3,4(cid:18),6,7,11,12,13(cid:19),14,15,16},
+where M = round n1+n2+n3+···+n16 is the number of training
+16
+samples for each class after sampling, and round() represents Effectivenessofmulti-dimensionalnormal
+rounding. In this study, five-fold cross validation was used to distribution–similarityofMahalanobisdistances
+train prediction models. For classes(cid:18) 2,(cid:19)3, 4, 6, 7, 11, 12, 13, 14, resamplingtechnique
+15, and 16 training samples, round 4 5M samples were use(cid:18)d as(cid:19) Inordertoobjectivelyevaluatetheperformanceoftheprediction
+trainingdataforeachfoldinfive-foldcrossvalidation,round 1M modelMSlocPREDconstructedinthisstudy,theMDNDO–SMDU
+5
+samples were used as test data,and round() represents round- resamplingtechniqueiscomparedwiththetrainingdatasetcon-
+ing. For the training data of categories 1, 5, 8, 9, and 10, since structedbythreemethods,namely,utilizingonlyMDNDOover-
+their numbers are 3243,1496,1718,929,and 1509,respectively, sampling, utilizing only the SMDU under-sampling algorithm,
+in contrast to the other 11 classes of training data, which are and no sampling. The results of the five-fold cross-validation
+muchlargerinnumber,theSMDUunder-samplingalgorithmwas correlationareshowninFigs3and4.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+2024MSlocPRED:deeptransferlearning-basedidentification | 9
+Figure4.Five-foldcross-validationresultsofdifferentresamplingmethodsforDataset2.
+From the five evaluation metrics and the specific prediction could predict five categories, SMDU predicted three categories,
+labelsinFigs3andFig.4,itcanbeobservedthatwhennosam- and MDNDO–SMDU could predict up to eleven categories.This
+plingisperformed(i.e.theoriginaltrainingdataset),duetothe indicates that the MDNDO–SMDU sampling method not only
+extremedifferenceinthenumberofsamplesbetweenthelarge learns features more comprehensively and completely but also
+andsmallclasses,theresultsofthetrainedmodelpredictionsare significantlyincreasesthenumberofcategorypredictions,which
+skewedtowardsthelargeclass(takethefirstfoldasanexample, isofsignificantimportanceforpracticalapplications.
+forDataset1:allwerepredictedtobeCategory1,exceptfor20 Table8showsthetestresultsonDataset2.SimilartoDataset
+werepredictedtobeCategory8forthe2619testsets.ForDataset 1,theMDNDOsamplingmethodperformedexceptionallyinCat-
+2:4390outof4589testdatawerepredictedtobeclass1).Although egory 1 with 5134 correct predictions,while the SMDU method
+the predictors Aiming, Coverage, Accuracy, Absolute-True, and hadarelativelyhighnumberofcorrectpredictionsinCategory13,
+Absolute-Falsereached0.94,0.58,0.53,0.24,0.24and0.79,0.43, totaling1422.TheMDNDO–SMDUmethodhadthehighestnum-
+0.43, 0.30, 0.27 for the two datasets, respectively, this model is berofcorrectpredictionsinCategory13,amountingto2045,and
+an invalid model.When using only SMDU under-sampling,it is alsoshowedexcellentperformanceinCategory5with906correct
+obvious that due to the imbalance of samples across different predictions. Additionally, the MDNDO–SMDU sampling method
+categories,mostcategories(especiallythosewithasmallnumber) couldpredict12categoriesonDataset2,whiletheMDNDOand
+werenottested.WhenonlyusingMDNDOover-samplingtosyn- SMDUmethodscouldonlypredict7and5categories,respectively.
+thesizesubcellularlocalizationdata,ithasacertaineffect.When TheapplicationoftheMDNDO–SMDUmethodagainconfirmsits
+usingMDNDO–SMDUforresampling,itcanbefoundthatamong significantadvantagesincomprehensivelyandcompletelylearn-
+categoriescontainingtwoormorepositions,mostcategoriesonly ingdatafeatures,playingacrucialroleinenhancingclassification
+haveonepositionundetected. performance.
+After testing two training datasets (Dataset 1 and Dataset 2) It should be noted that for multi-label classification tasks,if
+using different sampling methods, the results show significant themodelcaneffectivelypredictsomecorrectlabelsbutnotcom-
+differencesincategoryprediction.Inordertoclearlypresentthese pletelypredictalllabelscorrectly,themodelisactuallyeffective.
+results,usingthefirstfoldofthefive-foldcross-validationasan Therefore,judging the effectiveness of a model based solely on
+example,twotables(Tables7and8)summarizetheperformance average accuracy and complete correctness is neither scientific
+ofdifferentsamplingmethodsonvariouscategories. norfair.Consequently,wehaveproposedasetofmetricstoassess
+Table7displaysthetestresultsonDataset1usingthreesam- multi-labelclassificationsystems:PartiallabelaccuracyMR.
+j
+plingmethods(MDNDO,SMDU,andMDNDO–SMDU).Itisevident
+fromthetablethattheMDNDOsamplingmethodachievedthe m ax
+highest number of correct predictions for Category 1, totaling
+Pk
+2126, while this number significantly decreased to 381 when MR j=
+m
+k= axj (18)
+usingtheSMDUmethod.Forothercategories,theMDNDO–SMDU Ck
+k=j
+method showed notable advantages in certain categories, such
+as Category 10 with 1325 correct predictions, while the SMDU
+methodperformedbetterinCategory13with580correctpredic- Inthisdefinition,Pk representsthetotalnumberofpredicted
+tions.ItisparticularlynoteworthythattheapplicationofMDNDO samplesatcomputationlevelk,wherethetruelabelsmatchthe
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+202410 | Zuoetal.
+Table7. Differentsamplingalgorithmspredictthenumberofclassesinthefirstfoldofthefive-foldcross-validationonDataset1
+Class MDNDO SMDU MDNDO–SMDU Class MDNDO SMDU MDNDO–SMDU
+1 2126 381 33 9 0 0 4
+2 0 0 342 10 20 703 1325
+3 111 0 348 11 0 0 83
+4 0 0 4 12 0 0 0
+5 0 0 0 13 0 580 0
+6 464 0 0 14 0 0 53
+7 0 0 18 15 0 0 4
+8 851 0 403 16 0 0 0
+Table8. Differentsamplingalgorithmspredictthenumberofclassesinthefirstfoldofthefive-foldcross-validationonDataset2
+Class MDNDO SMDU MDNDO–SMDU Class MDNDO SMDU MDNDO–SMDU
+1 5134 784 407 10 50 0 121
+2 106 5 1 11 339 0 103
+3 100 112 130 12 0 0 0
+4 0 0 0 13 0 1422 2045
+5 0 0 906 14 0 0 0
+6 0 0 125 15 0 0 441
+7 482 0 217 16 0 0 65
+8 0 0 29 17 0 0 0
+9 55 0 0 18 0 591 0
+predicted labels, and the number of correctly predicted labels Table9.Theinfluenceofdifferentsamplingalgorithmson
+predictionresultsonDataset1
+(considering only labels marked as ‘1’ among all true labels) is
+exactly k. Meanwhile, Ck denotes the total number of samples Method MR1 MR2 MR3 MR4
+at the same level k where the true label count equals k (also
+None 100.00% 24.66% 24.49% 6.58%
+considering only labels marked as ‘1’ among all true labels).
+MDNDO 100.00% 30.74% 17.57% 4.87%
+Thevalueofmaxisthehighestnumberoflabelsmarkedas‘1’
+SMDU 100.00% 67.83% 65.34% 20.88%
+occurrenceswithinthesamplecategoriesinthecurrentdataset.
+MDNDO–SMDU 100.00% 86.40% 74.97% 44.89%
+Forexample,whencalculatingthedataforDataset1atlevel
+k=4, with the value of max is 6 (i.e. the sample in Dataset 1
+with the most label marked as ‘1’ is: 1111110), the numerator
+of interest would be P4 +P5 +P6,where P4 is the total number Table10.Theinfluenceofdifferentsamplingalgorithmson
+ofsampleswherethepredictedlabelsmatchthetruelabelsand predictionresultsonDataset2
+t sh ime in lau rm ly.b Ter heof cm ora retc sh pi on ng dl ia nb ge dls enis oe mx ia nc at tly or4 w;P o5 ua ldnd beP6 Ca 4r +e Cd 5ef +in Ce 6d
+,
+Method MR1 MR2 MR3 MR4
+whereC4isthetotalnumberofsamplesinthetruedatasetwith None 93.17% 0.00% 0.00% 0.00%
+exactly4labelsmarkedas‘1’.C5andC6aredefinedsimilarly.The MDNDO 95.14% 16.6% 10.38% 5.54%
+numerator encompasses all samples with the following labels: SMDU 94.57% 73.62% 74.48% 75.09%
+MDNDO–SMDU 96.57% 81.54% 66.67% 68.68% 1101010,1101100,1101101,1101110,1111000,1111010,1111100,
+and1111110.Notably,forsampleswithmorethan4labelsmarked
+as ‘1’ (such as 1101101, 1101110, 1111010, 1111100, 1111110),
+onlythecaseswhereexactly4labelsmatchareconsidered.The algorithm demonstrates significant superiority in multiple key
+correspondingdenominatorincludesthetotalnumberofsamples indicators. On Dataset 1, an MR1 of 100% was achieved by all
+withthetruelabels:1101010,1101100,1101101,1101110,1111000, sampling algorithms,indicating that each method was capable
+1111010,1111100,and1111110.Thiscanthenbesubstitutedinto ofpredictingatleastonecorrectlabel.However,MDNDO–SMDU
+theformulaasfollows:MR4= CP 44++ CP5 5+ +P C6 6. outperformedothersamplingmethodswithMR2,MR3,andMR4
+Byapplyingthismethod,the partial label matching rate MR j scores of 86.40%, 74.97%, and 44.89%, respectively. It is worth
+can be effectively calculated,providing insights into the perfor- notingthatSMDUfollowscloselybehindwithscoresof67.83%,
+mance of classification models in scenarios with imbalanced 65.34% and 20.88% for MR2, MR3, and MR4, respectively. These
+datasets. In this study, four indicators MR1,MR2,MR3,MR4 are resultsdemonstratethesignificantadvantagesofMDNDO–SMDU
+usedtoevaluatetheeffectivenessofthemulti-labelclassification inenhancingdatabalanceandimprovingtherobustnessofthe
+modelbeforeandaftertheapplicationofthesamplingmethods. classificationmodel.OnDataset2,MDNDO–SMDUalsoexhibited
+Where MR1 denotes the probability of at least one label being superior performance, achieving the best scores for MR1 and
+correctly predicted,that is,statistical analysis is conducted for MR2 at 96.57% and 81.54%, respectively. In terms of MR3 and
+categoriescontainingoneormorelocationsandsoonforothers. MR4,SMDUheldaslightadvantage,reaching74.48%and75.09%,
+The results of the five-fold cross validation calculation are respectively.Therefore,theMDNDO–SMDUresamplingalgorithm
+shown in Tables9 and 10, and the MDNDO–SMDU resampling demonstrated a significant overall advantage in handling
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+2024MSlocPRED:deeptransferlearning-basedidentification | 11
+Figure5.PredictionresultsofinterceptedsequenceswithdifferentvaluesattheNCendonDataset1.
+complexandimbalanceddatasets.Thismethodnotonlyexcelled To elucidate whether subcellular localized sequences of N-
+in classification accuracy but also achieved comprehensive terminal and C-terminal nucleotides affect the predictive per-
+improvementsacrossvariousevaluationmetricssuchaspartial formance of the model, for subcellular localization sequences
+label matching rates. MDNDO–SMDU provides a more effective in the training dataset,we intercepted their N-terminal and C-
+approachtoaddressingcomplexclassificationtasksbyeffectively terminalnucleotidesfrom20to40forDataset1andfrom20to
+combiningtheadvantagesofoversamplingandundersampling, 50forDataset2(i.e.thelengthofeachsampleafterinterception
+showcasingitspotentialvalueinlearningdatafeatures. rangedfrom40to80forDataset1andfrom40to100forDataset
+2), and the interval is 5. Figure5 and Fig.6 give the results of
+thefive-foldcross-validationperformancecomparisonfordiffer-
+Comparisonofpredictiveperformancebetween
+entNCend-valueinterceptsequences.Basedonthecomparison
+datasetsconstructedwithdifferentlengthson
+resultswecanseethatthemodelconstructedusingthedataset
+N-terminalandC-terminal
+constructedwith35nucleotidesinterceptedfromeachoftheN
+In molecular biology, the N-terminus (5(cid:2) end) and C-terminus andCterminalsachievedthebestpredictionperformancewith
+(3(cid:2) end) of mRNA are considered critical regions for regulating 73.78%,76.11%,56.76%,11.20%,and0.2935forAiming,Coverage,
+mRNAfunction.Theseterminioftencontainvariousregulatory Accuracy, Absolute-False, and Absolute-True for Dataset 1, and
+elements,suchasprotein-bindingsitesandstabilitycontrolele- 66.36%,65.86%,47.56%,11.51%,and0.3163forAiming,Coverage,
+ments,whichplaycrucialrolesinmRNAsubcellularlocalization Accuracy,Absolute-False,andAbsolute-TrueforDataset2.From
+and translation efficiency. Notably, the 5(cid:2) untranslated region thecomparisonresults,itcanbeconcludedthatthepredictorwas
+(N-UTR) and the 3(cid:2) untranslated region (C-UTR) of mRNA have influencedtoacertainextentbythelengthofthesequence.
+been found to contain regulatory elements that interact with Ultimately,toensurethatourmodelachievesoptimalpredic-
+specificproteinswithinthecell,therebyguidingmRNAtransport tiveperformance,weextractedsequencesoflength35fromboth
+tospecificcellularregions[35,36]. the N-terminus and C-terminus (resulting in a total length of
+To further emphasize the importance of the N-terminus (5(cid:2) 70)fromDataset1andDataset2asinputforMSlocPREDduring
+end)andC-terminus(3(cid:2) end)ofmRNAinpredictingsubcellular trainingandtesting.Itisimportanttonotethatafterthemodelis
+localization, several relevant studies have been reviewed. Yan trained,thepredictormustalsobeprovidedwithsequencesof35
+et al. identified that the N-terminal and C-terminal regions of nucleotidesfrom both the N-terminusand C-terminus,totaling
+RNA sequences exhibit significant biological activity [37]. Meer 70nucleotides,asinputduringthepredictionphase.
+et al. (2012) [38] and Bergalet et al. [39] have also emphasized
+the importance of the N-terminal and C-terminal untranslated
+ComparingMSlocPREDwithexistingmethods
+regions(N-UTRandC-UTR),pointingoutthatregulatoryelements
+andtools
+withintheseregionshaveasignificantimpactonmRNAsubcellu-
+larlocalization.ThestudyofDM3Locfurthercorroboratesthese For the prediction performance of MSlocPRED, we firstly com-
+findings, employing a multi-head self-attention mechanism to pared it with the other four predictors in different aspects on
+predictmRNAlocalizationacrossvarioussubcellularregions.The Dataset 1. Since the original training datasets were friendly
+results demonstrated that DM3Loc outperforms existing meth- offered by DM3Loc, RNATracker, mRNALoc, and iLoc-mRNA,
+odsinoverallperformanceandprovidesbiologicalinsightsinto MSlocPRED was compared with these methods using the five-
+RNA-binding protein motifs and key signals [21].These studies foldcross-validationaccordingtotheresultslistedintheirworks.
+collectively support our approach of analyzing the N-terminus We used the original six types of subcellular localization data
+and C-terminus of mRNA, facilitating a more comprehensive providedbyDM3Loc,adjustedthemodelparametersconstructed
+understandingofitsbehaviorandfunctionwithinthecell. inthisstudytobinaryclassification.Theareaunderthereceiver
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+202412 | Zuoetal.
+Figure6.PredictionresultsofinterceptedsequenceswithdifferentvaluesattheNCendonDataset2.
+Table11. Thefive-foldcross-validationcomparisonwithexistingmethodsonDataset1
+Compartment Method AUC APR MCC
+Nucleus DM3Loc 0.7725 0.8765 0.3859
+RNATracker 0.7531 0.8601 0.345
+mRNALoc 0.6075 0.7655 0.1501
+iLoc-mRNA 0.5186 0.7200 0.0516
+MSlocPRED 0.7038 0.7586 0.3778
+Exosome DM3Loc 0.7233 0.9964 0.0736
+RNATracker 0.7533 0.997 0
+mRNALoc 0.4065 0.9887 −0.0294
+iLoc-mRNA / / /
+MSlocPRED 0.6097 0.6290 0.1700
+Cytosol DM3Loc 0.7406 0.3193 0.2872
+RNATracker 0.7331 0.3176 0.1383
+mRNALoc 0.4529 0.1177 −0.0134
+iLoc-mRNA 0.531 0.1339 0.0253
+MSlocPRED 0.9164 0.9312 0.6831
+Ribosome DM3Loc 0.7589 0.5478 0.355
+RNATracker 0.7447 0.5365 0.2697
+mRNALoc / / /
+iLoc-mRNA 0.7940 0.6634 0.3899
+MSlocPRED 0.8585 0.8893 0.6145
+Membrane DM3Loc 0.7558 0.4472 0.3115
+RNATracker 0.7386 0.4051 0.1927
+mRNALoc / / /
+iLoc-mRNA / / /
+MSlocPRED 0.8917 0.9121 0.6388
+ER DM3Loc 0.6981 0.2502 0.2048
+RNATracker 0.6265 0.1880 0
+mRNALoc 0.3729 0.1402 −0.1479
+iLoc-mRNA 0.8100 0.5702 0.3762
+MSlocPRED 0.9275 0.9404 0.7205
+operating characteristic (ROC), the precision-recall (PR) curves, theotherfivecompartments.DM3Locachievesthebestprediction
+andtheMatthewscorrelationcoefficient(MCC)wereusedtoeval- performance in Nucleus, and our method obtains the second
+uate their performance and these methods were compared.As best.From the results can also be concluded that the predictor
+canbeseenintheTable11,asfarasAUCisconcerned,compared was greatly influence by the selected sample. Additionally, the
+totheexistingDM3Loc,RNATracker,mRNALoc,andiLoc-mRNA, best performance also indicated that deep transfer learning is
+theimpactsoftheMSlocPREDaregenerallyincreasedby17.58% more suitable than traditional machine learning algorithms for
+to 46.35% for cytosol, 6.45% to 11.38% for ribosome, 13.59% to multi-labelsubcellularlocalizationrecognition.
+15.31%formembrane,and11.75%to55.46%forER.Intermsof To further demonstrate the effectiveness of the MSlocPRED
+MCC,exceptforNucleus,ourmethodobtainedthebestresultsin predictor,wealsocomparedMSlocPREDtoaccessibleweb-servers
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+2024MSlocPRED:deeptransferlearning-basedidentification | 13
+Table12. PerformancecomparisonbetweenMSlocPREDandotherstate-of-arttoolsonindependenttestdataset
+Dataset Method Aiming Coverage Accuracy Absolute-true Absolute-false
+DM3Loc 0.9593 0.6537 0.6203 0.3310 0.1902
+Dataset1 Clarion 0.9818 0.4808 0.4808 0.2426 0.2665
+MSlocPRED 0.8001 0.8003 0.6251 0.2262 0.2127
+DM3Loc 0.7605 0.5327 0.4855 0.2650 0.2338
+Dataset2 Clarion 0.7845 0.4175 0.4168 0.2823 0.2683
+MSlocPRED 0.6060 0.6780 0.4503 0.2093 0.3338
+Table13. Summaryofsubcellularlocalizationpredictors
+Type Tool Subcellular Benchmarkdataset Encodingscheme Classifier AUC APR MCC
+localization size
+Single-label RNATracker Cyt,ER,Ins,Mem, 11373(Dataset1) One-hot CNN 0.7249 0.5507 0.1576
+Mito,Nuc 13860(Dataset2) RNAsecondary LSTM
+structure Attention
+iLoc-mRNA Cyp,Cyt,Den,ER, 4901 K-mer SVM 0.6634 0.5219 0.2108
+Exo,Mito,Nuc,Rib
+mRNALoc Cyp,ER,ECR,Mito, 14909 PseKNC SVM 0.4600 0.5030 −0.0102
+Nuc
+Multi-label DM3Loc Cyt,ER,Exo,Mem, 17870 One-hot CNN 0.7415 0.5729 0.2697
+Nuc,Rib Attention
+MSlocPRED Exo,Nuc,NP,Chr,Cyp, 14608(Dataset1) Converttoimages AlexNet 0.8179 0.8434 0.5341
+No,Cyt,Mem,Rib 22966(Dataset2)
+Note:cytosol:Cyt;endoplasmicreticulum:ER;insoluble:Ins;membranes:Mem;mitochondrial:Mito;nuclear:Nuc;cytoplasm:Cyp;dendrite:Den;exosome:
+Exo;mitochondrion:Mito;nucleus:Nuc;ribosome:Rib;extracellularregion:ECR;nucleoplasm:NP;chromatin:Chr;nucleolus:No.
+DM3LocandClariononindependenttestdatasets(Dataset1and
+Dataset 2).As indicated in the Table12,when tested using the
+independent test datasets (i.e. 35 nucleotides from each of the
+NCends)afterpreprocessinginthispaper,intermsofCoverage,
+for Dataset 1 and Dataset 2,MSlocPRED was broadly improved
+by14.66%–31.95%and14.53%–26.05%,respectively.Forthefour
+assessment metrics of Aiming, Accuracy, Absolute-False and
+Absolute-True, although the MSlocPRED results are lower than
+those of DM3Loc and Clarion, a look at the specific test labels
+revealsthefollowing:theDM3Locpredictedallthetestsamples
+(Dataset1andDataset2)tobeExosome,andafewsampleswere
+predicted as both Nucleus or Nucleus and Cytoplasm. Clarion
+predicted almost all of the test data as Exosome, and a few
+sampleswerenotpredictedatall.ForDataset1,thenumberof
+completelycorrectpredictionsbyMSlocPREDwere495forclass
+1,40forclass2,3forclass4,18forclass5,17forclass6,1for
+Figure7.Waterfallchartforcategory2inDataset1.
+class7,87forclass8,71forclass9,566forclass10,87forclass
+12, 71 for class 13, and 3 for class 15, respectively. For Dataset
+2, the number of completely correct predictions by MSlocPRED metrics of AUC, APR, and MCC for each position. For models
+were1093forclass1,53forclass2,91forclass3,28forclass5, unable to predict certain cellular compartments, the denom-
+2forclass6,50forclass8,1forclass10,2forclass11,185for inators of these metrics have been appropriately adjusted to
+class13,523forclass16,399forclass17,and120forclass18, ensure fairness in the comparison process. The proposed pre-
+respectively. For the other categories that were not completely dictionmodel,MSlocPRED,employsmaturetechniquesandalgo-
+predicted correctly, analyzing the labels tested reveals that for rithmsfromthefieldofimageprocessing,transformingdatainto
+categoriescontainingtwoandmorepositions,mostofthemcan imageform.Comparedtotraditionalmethods,theuseofimages
+be predicted for one or two positions, even though they were asinputdataallowscomplexdatarelationshipstobedisplayed
+notcompletelypredicted.Theexperimentalresultsshowedthat visually,makingpatternrecognitionandfeatureextractionmore
+therecognitionofmulti-labeledsubcellularlocalizationafterthe intuitive. For the input image data, feature extraction is per-
+NC-terminal interception of fragments was effective using the formedusingamodifiedAlexNet,andclassificationisconducted
+modelMSlocPREDconstructedinthisstudy. throughtransferlearning.Thisapproachisparticularlyvaluable
+As shown in Table13, a comparison of the current state-of- inbioinformatics,whereslightvariationsinexperimentalcondi-
+the-artsubcellularlocalizationmodelsissummarized,covering tionsornewexperimentalsetupsoftenleadtochangesindata
+aspects such as subcellular positions, the sizes of benchmark distribution. Utilizing a pre-trained image recognition network
+dataset, encoding schemes, and classifiers, along with average provides robust feature extraction capabilities,reduces the risk
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+202414 | Zuoetal.
+Figure8.Barchartforcategory2inDataset1.
+of overfitting, and enhances generalization performance of the feature bar charts, providing a comprehensive analysis of the
+model. predictionresults.
+Ultimately, the average AUC, APR, and MCC of MSlocPRED ThewaterfallchartinFig.7illustratesthecumulativeeffectof
+reached 0.8179, 0.8434, and 0.5341, respectively, representing eachfeatureonthepredictionscoreforCategory2inDataset1.
+improvements of 0.0930, 0.2927, and 0.3233 over the highest PositiveSHAPvalues,suchasthoseforFeature3734,Feature1665,
+averageAUCandAPR(0.7249and0.5507forRNATracker)andMCC andFeature2250,significantlyboostthepredictionscore.Incon-
+(0.2108 for iLoc-mRNA) observed in single-label methods.Com- trast, features like Feature4031 and Feature4061 have negative
+pared to the most advanced multi-label method,DM3Loc (with SHAPvalues,indicatingtheyreducethepredictionscore.
+AUC,APR,andMCCof0.7415,0.5729,and0.2697,respectively),the Figure8presentsabarchartthatvisuallyrepresentsthecon-
+increases were 0.0764,0.2705,and 0.2644.Experimental results tributionsofthetop-rankingfeatures,emphasizingtheirmagni-
+demonstrate that MSlocPRED exhibits superior performance tudes.Feature125emergesasthemostimpactful,contributinga
+and robustness compared to both single-label and multi-label valueof0.51,followedcloselybyFeature356withacontribution
+methods. The innovative combination of this new encoding of0.31.Thischarteffectivelyhighlightstherelativeimportanceof
+method and transfer learning techniques shows significant thesekeyfeaturesinthepredictionprocess.
+advantagesovertraditionalmethodsinvariousaspects. A bee swarm plot provides a comprehensive view of SHAP
+values for all features,showcasing their distribution and influ-
+ence on the prediction outcome. Figure9 illustrates this, high-
+Model interpretability analysis based on lightinghowmostfeaturescontributepositively.However,italso
+SHapley Additive exPlanations values revealsdiscernibleoutlierswithsubstantialnegativeimpactson
+OverviewofSHapleyAdditiveexPlanations the prediction score, indicating the nuanced nature of feature
+interactions.
+Thecomplexityandnumerousparametersofdeeplearningmod-
+els pose significant challenges in understanding their internal FeatureanalysisforDataset2
+workings. To address this issue, SHapley Additive exPlanations
+InDataset2,theanalysisofcategory8mirrorspreviousfindings.
+(SHAP), a machine learning interpretability approach grounded
+Thecumulativeimpactofkeyfeatures,suchasFeature2608,Fea-
+in game theory,is used.SHAP values are assigned to individual
+ture373,and Feature1012,significantly enhances the prediction
+features,effectivelyquantifyingtheirimpactonthemodel’spre-
+score,asillustratedinFig.10.Conversely,negativecontributions
+dictionoutcomes,therebyfacilitatingadeeperunderstandingof
+aredemonstratedbyfeatureslikeFeature2357andFeature1135,
+themodel’sdecision-makingprocess.Consequently,weemployed
+resultinginadecreaseinthepredictionscore.
+the SHAP library to generate waterfall charts, bar graphs, and
+Similar to the analysis in Dataset 1, Fig.11 further quanti-
+bee swarm plots for the in-depth analysis of the 4096 features
+fies the feature contributions in Dataset 2 for category8. Here,
+present in the ‘fc7’ layer of the AlexNet network.Our objective
+Feature2608standsoutwiththehighestpositiveSHAPvalueof
+wastointerprettheinfluenceofthesefeaturesontheprediction
+0.215,clearlydemonstratingitsparamountsignificanceindriving
+outcomes.Toillustratethis,weselectedasinglelabelfromeachof
+thepredictionoutcome.Thecomprehensiveviewofthefeature
+thetwodatasetstoclearlydemonstratethefeaturecontributions
+impact in Dataset 2 for category8 is offered by Fig.12, the bee
+tothepredictionresults.
+swarmplot.ItshowcasesadiversedistributionofSHAPvalues,
+illustrating the intricate interplay between features and their
+FeatureanalysisforDataset1
+influenceontheprediction.Thisplothighlightsthesignificance
+For the second class in Dataset 1, the SHAP algorithm was ofbothhighandlowSHAPvaluesinappreciatingthecomplexity
+employed to generate waterfall plots, bee swarm plots, and ofthepredictionprocess.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+2024MSlocPRED:deeptransferlearning-basedidentification | 15
+significantlyoutperformsestablishedtoolsforidentifyingmulti-
+labelmRNAsubcellularlocalizations.SHAPvalueswereusedto
+explainthepredictionprocessofMSlocPRED.
+Although the MSlocPRED model demonstrates strong perfor-
+mance in predicting seven and nine subcellular localizations,
+thereremainsroomforimprovementinitsaccuracyandgener-
+alization capabilities.One of the limitations of the model is its
+inabilitytocoverotherimportantlocalizationsitesorachievea
+higheraccuracy,whichmayaffecttheapplicabilityandcompre-
+hensiveness of the model in certain biological contexts. Future
+research will explore more themes related to mRNA, including
+extendingthemodeltopredictadditionalcriticallocalizationsites
+andfurtheroptimizingthepredictionalgorithmsandprocessing
+techniques to enhance accuracy. Additionally, the possibility of
+developingcustomizedmodelsforspecificbiologicalapplications
+deserves further investigation. Beyond transfer learning, other
+approachessuchasmeta-learningandcontrastivelearningwill
+also be explored.The focus will not only be on learning strate-
+giesthemselvesbutalsoondesigningtargetedmachinelearning
+schemes based on specific task challenges such as data imbal-
+ance,incompletefeatureextraction,andtheeffectivenessofsam-
+plingmethods.Subsequentstudieswillcontinuetoexaminehow
+tointegratetheselearningstrategieswithmulti-labelsubcellular
+localization methods. Through these explorations, we hope to
+provide more comprehensive and precise solutions for mRNA
+subcellularlocalizationresearch.
+Figure9.Beeswarmplotforcategory2inDataset1.
+KeyPoints
+• SubcellularlocalizationofmRNAsisauniversalmech-
+anism for precise and efficient control of the transla-
+tionprocess.However,uptillthepresentmoment,most
+predictionmethodshavebeendesignedforsingle-label
+subcellular localization, ignoring the mutual informa-
+tionbetweenmulti-labellocalizations.Withthisinmind,
+thisstudyestablishedamulti-labelcomputationaltool,
+MSlocPRED,whichcanbedirectlyusedtopredictmulti-
+labelmRNAsubcellularlocalization.
+• MDNDO–SMDU resampling technique was firstly pro-
+posedandincorporatedtoreducetheproportionofthe
+originaltrainingsamples.
+• Inputting NC-terminal interception of fragments
+directly as a picture into the convolutional neural
+network, and the predictive model was constructed
+Figure10.Waterfallchartforcategory8inDataset2.
+using deep transfer learning to identify subcellular
+localization.
+• ThemodelinterpretabilityanalysisbasedonSHAPval-
+Conclusion and outlook
+uesshowedthatthepredictionmodelconstructedinthis
+In this study, the multi-label prediction model MSlocPRED study,MSlocPRED,waseffective.
+was constructed to identify multi-label mRNA subcellular
+localizationsforsevensubcellularlocalizationsinDataset1and
+nine subcellular localizations in Dataset 2. The preprocessed
+datasetsweretransformedintoimageformats,andtheMDNDO– Funding
+SMDU resampling technique was used to balance the number
+ThisworkissupportedbytheNationalNaturalScienceFounda-
+of samples in each category. Deep transfer learning was
+tionofChina[62302198];NaturalScienceFoundationofJiangsu
+subsequently employed to develop the MSlocPRED predictive
+Province of China [BK20231035]; Fundamental Research Funds
+model.Comparativetestsamongvariousresamplingtechniques
+fortheCentralUniversities[JUSRP124014];NationalKeyResearch
+demonstrated that the proposed MDNDO–SMDU method is
+and Development Program of China [2021YFE010178]; National
+more effective for preprocessing subcellular localizations. The
+Natural Science Foundation of China [62176105]; Hong Kong
+prediction performance was optimal when the NC end was
+ResearchGrantsCouncil[PolyU152006/19E].
+intercepted by 35 nucleotides for both datasets. Independent
+testing and five-fold cross-validation showed that MSlocPRED Conflictofinterest:Nonedeclared.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+202416 | Zuoetal.
+Figure11.Barchartforcategory8inDataset2.
+2. Lashkevich KA, Dmitriev SE. mRNA targeting, transport and
+localtranslationineukaryoticcells:fromtheclassicalviewto
+adiversityofnewconcepts.MolBiol2021;55:507–37.https://doi.
+org/10.1134/S0026893321030080.
+3. RossJ.mRNAstabilityinmammaliancells.MicrobiolRev1995;59:
+423–50.https://doi.org/10.1128/mr.59.3.423-450.1995.
+4. Wang R, Jiang Y, Jin J. et al. DeepBIO: an automated and
+interpretabledeep-learningplatformforhigh-throughputbio-
+logicalsequenceprediction,functionalannotationandvisual-
+ization analysis.Nucleic Acids Res 2023;51:3017–29.https://doi.
+org/10.1093/nar/gkad055.
+5. ChengH,RaoB,LiuL.etal.PepFormer:end-to-endtransformer-
+based siamese network to predict and enhance peptide
+detectability based on sequence only. Anal Chem 2021;93:
+6481–90.https://doi.org/10.1021/acs.analchem.1c00354.
+6. LiH,PangY,LiuB.BioSeq-BLM:aplatformforanalyzingDNA,
+RNA,andproteinsequencesbasedonbiologicallanguagemod-
+els.Nucleic Acids Res 2021;49:e129.https://doi.org/10.1093/nar/
+gkab829.
+7. BhattiGK,KhullarN,SidhuIS.etal.Emergingroleofnon-coding
+RNA in health and disease. Metab Brain Dis 2021;36:1119–34.
+https://doi.org/10.1007/s11011-021-00739-y.
+8. ChinA,LécuyerE.RNAlocalization:makingitswaytothecenter
+stage. Biochim Biophys Acta Gen Subj Nov 2017;1861:2956–70.
+https://doi.org/10.1016/j.bbagen.2017.06.011.
+9. Nussbacher JK, Tabet R, Yeo GW. et al. Disruption of RNA
+metabolisminneurologicaldiseasesandemergingtherapeutic
+interventions.Neuron2019;102:294–320.https://doi.org/10.1016/
+Figure12.Beeswarmplotforcategory8inDataset2.
+j.neuron.2019.03.014.
+10. LiuB,GaoX,ZhangH.BioSeq-Analysis2.0:anupdatedplatform
+foranalyzingDNA,RNAandproteinsequencesatsequencelevel
+Data availability
+andresiduelevelbasedonmachinelearningapproaches.Nucleic
+The predictive model MSlocPRED and associated datasets are AcidsRes2019;47:e127.https://doi.org/10.1093/nar/gkz740.
+availableat:https://github.com/ZBYnb1/MSlocPRED/tree/main. 11. LiuY,ShenX,GongY.etal.Sequencealignment/mapformat:
+a comprehensive review of approaches and applications.
+Brief Bioinform 2023;24:bbad320. https://doi.org/10.1093/bib/
+References bbad320.
+12. Zhu H, Hao H, Yu L. Identifying disease-related microbes
+1. Buxbaum AR, Haimovich G, Singer RH. In the right place at
+based on multi-scale variational graph autoencoder embed-
+therighttime:visualizingandunderstandingmRNAlocaliza-
+ding Wasserstein distance. BMC Biol 2023;21:294. https://doi.
+tion.NatRevMolCellBiol2015;16:95–109.https://doi.org/10.1038/
+org/10.1186/s12915-023-01796-8.
+nrm3918.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+2024MSlocPRED:deeptransferlearning-basedidentification | 17
+13. Wei L,Xing P,Shi G.et al.Fast prediction of protein methyla- deep learning. Molecules 2023;28:2284. https://doi.org/10.3390/
+tionsitesusingasequence-basedfeatureselectiontechnique. molecules28052284.
+IEEE/ACM Trans Comput Biol Bioinform 2019;16:1264–73.https:// 26. ZhangT,TanP,WangL.etal.RNALocate:aresourceforRNA
+doi.org/10.1109/TCBB.2017.2670558. subcellular localizations. Nucleic Acids Res 2017;45:D135–d138.
+14. Zhou H, Wang H, Tang J. et al. Identify ncRNA subcellular https://doi.org/10.1093/nar/gkw728.
+localization via graph regularized k-local hyperplane distance 27. SayersEW,CavanaughM,ClarkK.etal.GenBank.NucleicAcids
+nearest neighbor model on multi-kernel learning. IEEE/ACM Res2019;47:D94–d99.https://doi.org/10.1093/nar/gky989.
+Trans Comput Biol Bioinform 20222022;19:3517–29. https://doi. 28. CuiT,DouY,TanP.etal.RNALocatev2.0:anupdatedresource
+org/10.1109/TCBB.2021.3107621. for RNA subcellular localization with increased coverage and
+15. Ding YJ, Tiwari P, Guo F. et al. Shared subspace-based radial annotation. Nucleic Acids Res 2022;50:D333–d339. https://doi.
+basis function neural network for identifying ncRNAs sub- org/10.1093/nar/gkab825.
+cellular localization. Neural Netw 2022;156:170–8. https://doi. 29. XiaS,FengJ,ChenK.etal.CSCD:adatabaseforcancer-specific
+org/10.1016/j.neunet.2022.09.026. circularRNAs.NucleicAcidsRes2018;46:D925–d929.https://doi.
+16. WangY,ZhaiY,DingY.etal.SBSM-pro:supportbio-sequence org/10.1093/nar/gkx863.
+machineforproteinsarXivpreprint,p.arXiv:2308.10275.2023. 30. LiuT,ZhangQ,ZhangJ.etal.EVmiRNA:adatabaseofmiRNA
+17. Zhang ZY, Zhang Z, Ye X. et al. A BERT-based model for the profilinginextracellularvesicles.NucleicAcidsRes2019;47:D89–
+prediction of lncRNA subcellular localization in Homo sapi- d93.https://doi.org/10.1093/nar/gky985.
+ens.IntJBiolMacromol2024;265:130659.https://doi.org/10.1016/ 31. Li S, Li Y, Chen B. et al. exoRBase: a database of circRNA,
+j.ijbiomac.2024.130659. lncRNAandmRNAinhumanbloodexosomes.NucleicAcidsRes
+18. SunZ-J,ZHANGZ-Y,YANGY-H.etal.Towardsabetterprediction 2018;46:D106–d112.https://doi.org/10.1093/nar/gkx891.
+ofsubcellularlocationoflongnon-codingRNA.FrontComputSci 32. LockA,RutherfordK,HarrisMA.etal.PomBase2018:user-driven
+2022;16:165903. reimplementationofthefissionyeastdatabaseprovidesrapid
+19. ZhangZY.etal.iLoc-miRNA:extracellular/intracellularmiRNA and intuitive access to diverse, interconnected information.
+prediction using deep BiLSTM with attention mechanism. Nucleic Acids Res 2019;47:D821–d827. https://doi.org/10.1093/
+Brief Bioinform 2022;23:1–10. https://doi.org/10.1093/bib/ nar/gky961.
+bbac395. 33. Berardini TZ, Reiser L, Li D. et al. The Arabidopsis informa-
+20. LiH,LiuB.BioSeq-Diabolo:biologicalsequencesimilarityanaly- tion resource: making and mining the “gold standard” anno-
+sisusingDiabolo.PLoSComputBiol2023;19:e1011214.https://doi. tatedreference plantgenome.Genesis2015;53:474–85.https://
+org/10.1371/journal.pcbi.1011214. doi.org/10.1002/dvg.22877.
+21. Wang D, Zhang Z, Jiang Y. et al. DM3Loc: multi-label mRNA 34. ChouKC.Someremarksonpredictingmulti-labelattributesin
+subcellularlocalizationpredictionandanalysisbasedonmulti- molecularbiosystems.MolBiosyst2013;9:1092–100.https://doi.
+head self-attention mechanism. Nucleic Acids Res 2021;49:e46. org/10.1039/c3mb25555g.
+https://doi.org/10.1093/nar/gkab016. 35. JambhekarA,DerisiJLJR.Cis-actingdeterminantsofasymmet-
+22. LiJ,ZhangL,HeS.etal.SubLocEP:anovelensemblepredictorof ric,cytoplasmicRNAtransport.RNA2007;13:625–42.https://doi.
+subcellularlocalizationofeukaryoticmRNAbasedonmachine org/10.1261/rna.262607.
+learning. Brief Bioinform 2021;22:1–11. https://doi.org/10.1093/ 36. Martin KC,Ephrussi AJC.mRNA localization: gene expression
+bib/bbaa401. in the spatial dimension. Wiley Interdisciplinary Reviews: RNA
+23. BiY,LiF,GuoX.etal.Clarionisamulti-labelproblemtrans- 2009;136:719–30.https://doi.org/10.1016/j.cell.2009.01.044.
+formation method for identifying mRNA subcellular localiza- 37. Zichao Y, Eric L, Mathieu BJB. Prediction of mRNA sub-
+tions. Brief Bioinform 2022;23:1–12. https://doi.org/10.1093/bib/ cellular localization using deep recurrent neural networks.
+bbac467. 2019;35:i333–42.
+24. YuanGH,WangY,WangGZ.etal.RNAlight:amachinelearn- 38. Meer EJ, Wang DO, Kim S. et al. Identification of a cis-acting
+ing model to identify nucleotide features determining RNA elementthatlocalizesmRNAtosynapses.ProcNatlAcadSciU
+subcellularlocalization.BriefBioinform2023;24:1–13.https://doi. SA2012;109:4639–44.
+org/10.1093/bib/bbac509. 39. Bergalet J,Lécuyer E.The functions and regulatory principles
+25. Wang S, Shen Z, Liu T. et al. DeepmRNALoc: a novel pre- of mRNA intracellular trafficking. Adv Exp Med Biol 2014;825:
+dictor of eukaryotic mRNA subcellular localization based on 57–96.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/6/bbae504/7821152
+by
+Jnls
+Cust
+Serv
+on
+26
+November
+2024©2019Oxford UniversityPress.

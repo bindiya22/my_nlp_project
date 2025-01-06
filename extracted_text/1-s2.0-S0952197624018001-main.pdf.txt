@@ -1,0 +1,884 @@
+Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+ContentslistsavailableatScienceDirect
+Engineering Applications of Artificial Intelligence
+journalhomepage:www.elsevier.com/locate/engappai
+A framework for Interpretable deep learning in cross-subject detection of
+event-related potentials
+Shayan Jalilpoura, Gernot Müller-Putza,b,*
+aInstituteofNeuralEngineering,GrazUniversityofTechnology,Graz,Austria
+bBioTechMed,Graz,Austria
+A R T I C L E I N F O A B S T R A C T
+Keywords: Event-relatedpotential-basedBrain-ComputerInterfacesarebecomingwidelypopularduetotheirabilitytosend
+Electroencephalography commandsquicklywithhighaccuracy.However,thestationarycharacteristicsofelectroencephalographicsig-
+Brain-computerinterface nals,coupledwiththeirlowsignal-to-noiseratio,leadtovariationsinamplitude,timeperiod,andlatencyinthe
+Error-relatedpotential
+patterns of event-related potentials across different trials, sessions, days and subjects. Conventional feature
+Perturbation-evokedpotential
+extractionandmachinelearningalgorithmsarenotdesignedtohandlethesedifferences,requiringthedevel-
+Mixeddepthwiseconvolutions
+Deformableconvolutions opmentofmethodsthatcanaddressthesevariations.Here,weproposeanovellightweightdeepneuralnetwork
+forevent-relatedpotentialclassification,consistingofthreemodules.Inthismodel,wehaveaspatio-temporal
+module that learns local features simultaneously across channels and time points. Following this, there’s a
+componentextractormodulecomprisingdepthwiseconvolutions,inspiredbymixeddepthwiseconvolutions,to
+capturetheevent-relatedpotentialcharacteristicswithdifferenttemporaldurations.Lastly,anadvancedtem-
+poral layer addresses event-related potential shape and scale variations using deformable convolutions. We
+conductedexperimentsonevent-relatedpotentialdetectioninasubject-independentscenariousingoneerror-
+relatednegativitypotentialdatasetandthreeperturbation-evokedpotentialdatasets.Comparisonsweremade
+withestablishedmethodsincludingtwoconventionalmachinelearningalgorithmsandthreewell-knowndeep
+learningarchitectures,demonstratingthatourmodeloutperformedthemintermsofclassificationaccuracyand
+parameterefficiency.Inouranalysis,weaimedtounderstandthemodel’sperformanceusinggradient-weighted
+classactivationmappingandt-distributedstochasticneighborembedding.Thesemethodsfacilitatedthevisu-
+alization and interpretation of our model’s effectiveness, providing insights into its relationship with the
+neuroscientificcharacteristicsofevent-relatedpotentials.
+1. Introduction andepilepsy.Moreover,newdevelopmentsinthisfieldopensupnew
+possibilitiesinnon-medicalscopelikegaming,entertainment,enhanced
+Electroencephalogram(EEG)-basedbrain-computerinterfaces(BCI) learning,augmentedandvirtualreality.
+isacrucialdomainwithinthebroaderfieldofBCIsystems.BCIswere BCIsystemscanbecategorizedintodifferentgroups.Themostwell
+initiallyinventedtofacilitatecommunicationbetweenthebrainandthe knownonesareevent-relatedpotential(ERP),steady-stateevokedpo-
+outsideworldwithouttheneedtouseperipheralnervesandmuscles, tential(SSEP),slowcorticalpotential(SCP)andmovementrelatedpo-
+particularly for patients with conditions such as amyotrophic lateral tential(MRP).ERPscanbedescribedasfluctuationsinthebrainsignals
+sclerosis (ALS). In recent years, BCIs have witnessed significant ad- whicharegeneratedasaresponsetosensory,cognitive,auditoryand
+vancementsbothinthescientificcommunityandintheirpracticalap- visualevents.ERPsaretime-lockedtotheonsetofastimulusorevent,
+plications, propelling the field of neurotechnology into a new era of andtheycanbecharacterizedwithspecificamplitude,polarity,topog-
+innovation.Thisemergingtechnologyenablesitsuseinawiderangeof raphyandlatency.Nameofthesebrainpotentialsisdeterminedbased
+medical applications, including restoring mobility for motor impair- on the polarity and temporal information of neural activations. For
+ments,assistingincommunicationforpatientswithlocked-insyndrome, instance,N1is anegativeamplitude changethat occursafter 100ms
+and diagnosing and treating neurological disorders such as parkinson withrespecttotheonestofthestimuli.Recently,ERP-basedBCIsystems
+* Correspondingauthor.InstituteofNeuralEngineering,GrazUniversityofTechnology,Stremayrgasse16/4,8010,Graz,Austria.
+E-mailaddress:gernot.mueller@tugraz.at(G.Müller-Putz).
+https://doi.org/10.1016/j.engappai.2024.109642
+Received8July2024;Receivedinrevisedform17October2024;Accepted6November2024
+Available online 21 November 2024
+0952-1976/© 2024 The Authors. Published by Elsevier Ltd. This is an open access article under the CC BY license ( http://creativecommons.org/licenses/by/4.0/ ).S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+have attracted significant attention for expanding applications in the (MRCP), and sensorimotor rhythm (SMR). In the first dataset, P300
+domainsofhuman-computerinteractions.ERP-basedBCIs(Lewis,1984) components evoked a visual oddball paradigm known as rapid serial
+hold distinct advantages when compared to other BCI systems across visual presentation (RSVP). The second dataset is associated with
+variousdimensions.Oneprimarystrengthliesinitshightemporalres- error-relatednegativitypotentials(ERN)andwasutilizedintheKaggle
+olution. Additionally, when taking into account the short latencies of BCI Challenge, where participants received feedback following char-
+ERPs,thesecharacteristicsenabletheBCIsystemtodecodeERPsona acterrecognitioninaP300spellertask.Insometrials,erroneousfeed-
+millisecond-by-millisecond basis, resulting in a fast operation of the backwasintentionallypresentedtosubjectstoevokeERN.Inthethird
+commands. Secondly, these systems offer better accuracy when dataset,Participantsperformedself-pacedfingermovementinorderto
+compared to motor imagery (MI)-based BCIs, all the while they can induceMRCPs.FinallyintheSMRdataset,datafromBCICompetitionIV
+extend the capability of encompassing a greater number of classes or Dataset2Awasusedtoclassifyfourmotorimagerytasksincludingleft
+commands. In MI-based BCI, participants are instructed to imagine and right hands, feet and tongue. Furthermore, Schirrmeister et al.
+specificmovements,suchashandgraspingorlimbmovement.Different (2017) designed two deep learning models named Deep and Shallow
+brainpatternsareelicitedduringdifferentmotorimagerytasks.How- ConvNets with two and five convolutional layers, respectively. They
+ever, since MI-based BCI primarily focuses on tasks involving motor demonstratedthattheirmodelsachievedsuperioraccuracyindecoding
+movements, distinguishing between brain activities for different MI motor imagery compared to the filter bank common spatial pattern
+taskscanbechallenging. (FBCSP)(KaiKengAngetal.,2008)method.
+Furthermore, ERPs have more stable and reliable behavior within AnotherchallengeinBCI systemsiscoping withsignificantdiffer-
+individualsincomparisonwithothermodalitiesofBCI.Generally,BCI encesinneuralresponsesamongindividuals,attributedtothediverse
+systemsbasedonERPsdemonstratetheacceptablespeed,accuracyand sensory,perceptual,andcognitiveabilities,orthephysiologicaldiffer-
+stability,whiletheyrequirenospecificusertrainingduetothebrain’s ences present in different people such as age (Marsella et al., 2017),
+inherentresponsetothestimuli. gender (Corsi-Cabreraet al., 1993), handedness (Zapała et al., 2020).
+DespitethestridesmadeinERP-basedBCIsystems,theyencountered SubjectindependentclassificationposeschallengesinBCIsystemsdue
+obstaclesthathinderedtheirabilitytopavethepathfromthelaboratory to the inter-subjectvariability. This highlights the essentiality of cali-
+totherealworld.Duetothenon-stationarynatureoftheEEGsignals, brating the BCI system for each individual, a process that can be
+coupledwiththeimpactoftechnicalandbiologicalnoises,thepatterns time-consuming due to the requirement of collecting sufficient
+ofrecordedERPsmayvaryatdifferenttimes,evenforthesameindi- subject-specific data for calibration. To mitigate the subject specific
+vidual. The subject variations can be because of the changes in the calibrationinBCIsystems,manystudiestriedtousedomainadaptation
+impedanceandpositionoftheelectrodes(KappenmanandLuck,2010), and transfer learning methods to address this problem. For example,
+fatigue(Japetal.,2009),age(Volosyaketal.,2017)oremotionalstate Zhangetal.(2021)developed5CNNbasedadaptivemodelsformotor
+of the participants (Myrden and Chau, 2015). Many EEG processing imagery classification by subject tuning the models. Liu et al. (2020)
+methodswereproposedtoenhancetheperformanceofERP-basedBCIin validated maximum independence domain adaptation (MIDA) and
+therealmofartifactrejection,featureextractionandclassification.For transfer component analysis (TCA) for mental fatigue for EEG-based
+instance, Blankertzet al. (2011)introduced shrinkageestimators asa mental fatigue recognition. Hang et al. (2019) designed a deep
+regularizationterminthelineardiscriminantanalysis(LDA),andthey domain adaptation network (DDAN) with CNN and maximum mean
+showedtheshrinkageyieldedbetterperformanceforsingletrialclas- discrepancy(MMD)tominimizefeaturedistributiondifferencesacross
+sificationofERPs.Stepwiselineardiscriminantanalysis(SWLDA)was subjectsintwomotorimagerydatasets.Theyalsoutilizedcenter-based
+proposedbyKrusienskyetal.(Krusienskietal.,2008)toimprovethe discriminative featurelearning(CDFL)tokeepfeatureswithinaclass
+classification of ERPs. Rivet et al. (2009) focused on the feature closetogetherandseparateinter-classfeatures.However,bothdomain
+extraction part to enhance the signal-to-noise ratio (SNR) of ERP adaptationandtransferlearningtechniquesencounterchallengesthat
+detectionthroughtheapplicationofanunsupervisedtechniqueknown impedetheirpracticalapplication(Wanetal.,2021).Domainadapta-
+as xDAWN. Quiroga and Garcia (2003) designed a rapid and tion methods focus on offline adaptation of the feature distributions.
+parameter-freedenoisingmethod,employingwaveletdecompositionto Additionally,transferlearningmethodsrelyingondeepneuralnetworks
+enhancethevisualizationofsingle-trialERPsinbothvisualandauditory (DNN)sufferfromchallengesininterpretingthenetwork,makingthem
+contexts. Xiao et al. (2020) made a comparison between different al- lesscomprehensible.Additionally,theirperformancemayunexpectedly
+gorithms such as discriminative canonical pattern matching (DCPM), declinewithnewparametersandmodels,resultingininstability(Lotte
+LDA,SWLDA,bayesianLDA,shrinkageLDA,spatial-temporaldiscrim- etal.,2018).Thesetechniquesrequirefurtheradjustmenttothebuilt
+inantanalysis(STDA),xDAWNandEEGNet(Lawhernetal.,2018)to model by integrating the source and target data. This additional step
+exploretheperformanceofeachmethodforthesingle-trialERPclassi- leadstocomputationalcomplexityalongsidethedemandtoaccessallor
+fication.Also,otherspatialfilteringmethodslikecanonicalcorrelation partial amounts of target domain data. As a result, adaptive models
+analysis (CCA) (Roy et al., 2015) and common spatial pattern (CSP) present practical challenges for online use, making them less than an
+(JalilpourandHajipourSardouie,2021;Yuetal.,2012)werestudiedfor ultimatesolution.
+the classification of the P300 component. In most machine learning From a neurophysiological standpoint, it can be said that in ERP-
+studies,usinghand-craftedfeaturesrequiresexpertisetofindfeatures based BCI paradigms, the brain reacts to stimuli with a sequence of
+forclassification.However,deeplearningmodelscandirectlyworkwith ERP components. For example, in rapid serial visual presentation
+raw data, automatically figuring out the most useful patterns in EEG (RSVP)oroddballparadigms,twodiscriminativecomponentsknownas
+data(Wangetal.,2023,2024;Zhangetal.,2023).Thismakesfeature N2andP300canbeobservedafteroccurrenceofthetargetstimulus.
+extractionmoreeffectivecomparedtomanualmethods.Oneofthefirst Both ERP components are linked to selective attention and stimulus
+studies that used a multilayer perceptron (MLP) was conducted by evaluationindicatingthedetectionofvisualtargetsintheattendedvi-
+Cecotti and colleagues (Cecotti et al., 2014). In their research, they sual field (Acqualagna and Blankertz, 2013). Schalk et al. (2000)
+created a convolutional neural network (CNN) for detecting ERPs in implementedanexperimentforcontrollingacursorusingmuorbeta
+single trials. They discovered that MLP performed better than linear rhythm amplitude. In rare trials, incorrect feedback was presented to
+methods,thankstothenonlinearcapabilitiesofneuralnetworks.Law- participants,leadingtotheobservationofapositivepotentialaround
+hern et al. (2018) introduced another model called EEGNet, utilizing 180msintheEEGsignalsaftertheincorrectfeedback,knownaserror
+depthwiseandseparableconvolutionstocreateacompactCNN.They potentials. In another study, Ferrez and Del R. Millan (Ferrez et al.,
+evaluated EEGNet on four different datasets: ERP-based speller, feed- 2008) designed a human-robot interaction paradigm to elicit the
+back error-related negativity, movement-related cortical potentials error-related potential (ErrP) and utilized this component to detect
+2S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+errors in single-trial classification. Their findings revealed that ErrP 2.1. Datasets
+comprises four peaks: a fronto-central positivity around 200 ms, fol-
+lowed by a frontal negativity named ERN (NE) component, then a We evaluated the performance of the proposed model on three
+frontal-central positive peak or Pe component, preceded by the N4 publicly available datasets, and also on a dataset recorded from two
+component.Additionally,itwasdemonstratedthattwocomponents,Pe studiesfeaturedinourpriorworks.Theclassificationwasdonethrough
+(errorpositivity)andERN(error-relatednegativity),areprominentin asingle-trialmannerinasubject-independentERPdetectionacrossall
+all ErrP-based BCI experiments
+(SpA˜¼;ler
+and Niethammer, 2015). datasets.AdetaileddescriptionofeachdatasetispresentedinTable1.
+Neurosciencestudieshaveshownthatthehumanbrainelicitsspecific
+patternsknownasperturbation-evokedpotentials(PEPs)inresponseto 2.2. EEGbalancewholebodyperturbations
+balancedperturbations(Dietzetal.,1985).PEPsconsistofP1,N1,P2,
+andN2components,andtheamplitudesofthesecomponentscanvary The dataset was obtained from 30 healthy participants across two
+basedonthephysicalcharacteristicsoftheperturbation.Vargheseetal. separatestudies,with15participantsineachstudy.Inthefirststudyby
+(2017)carriedoutanextensivereviewontheneuralresponsesassoci- (JalilpourandMüller-Putz,2022),participantswereseatedinaglider,
+atedwithbalancereactions,andtheirliteraturereviewrevealedthatin whichwastiltedtotherightandleftatanglesof1.5,5,and10degrees.
+allbalanceperturbationstudies,PEPsconsistofEEGcomponentsinthe Movementsat5and10degreeswereconsideredasbalanceperturba-
+sameorder.InERP-basedBCIsystems,thesequenceofERPcomponents tionsandwereexecutedatahighspeed,whereas1.5-degreemovements
+maintainsthesameorderacrossdifferenttrials,sessions,andsubjects. occurred at a low speed to introduce unpredictability in balance per-
+Although,theamplitudesandlatenciesofERPscanvaryacrossdifferent turbations for participants. An industrial robot was connected to the
+timingandamongindividuals.Giventhesevariations,itisessentialto glider, executing off-vertical axis rotation (OVAR) movements. The
+employ a model that considers the diverse time periods of ERPs to setup of the second study (Jalilpour and Müller-Putz, 2023) was the
+accuratelycapturetheirdistinctwaveformsinEEGdata. sameasthepreviousone,withthedifferencebeingthatonlythe5-de-
+To tackle the mentioned challenges, we introduce a novel neural greeanglewasusedtoexhibitmovements.Additionally,ascreendis-
+network designed to extract subject-independent features for ERP- playedtheperturbationdirectionafewsecondsbeforethemovements,
+related classification. Our model eliminates the necessity for subject- insometrialsthedirectionoftheperturbationwasnotthesameasthe
+specificparametertuningstrategiesandcanbeappliedacrossvarious presentedone.EEGdataweremeasuredusing63EEGelectrodeswith
+subjects.Theproposedmodelisdesignedwithaspatio-temporalmodule samplingrateof512Hz.Topreprocessthedata,itwasfilteredbetween
+to extract local and initial spatial and temporal information from the [0.5, 30] Hz and downsampled to 64 Hz. Subsequently, bad EEG
+data. Following this, the next layer utilizes two types of depthwise channels were identified and removed, and artifact subspace recon-
+convolutionsforchannelsandtimepointstoextractERPcharacteristics struction(ASR)(Mullenetal.,2013)wasappliedtoeliminatethenoisy
+in spatial and temporal domains. Drawing inspiration from Mixed- partofthedatawithhighfluctuation.Independentcomponentanalysis
+Depthwise convolutions (Tan and Le, 2019), the temporal depthwise (ICA) (Makeig etal., 1995)and ICLabel(Pion-Tonachinietal., 2019)
+convolutions havedifferentkernelsizestocaptureimportant features werethenexploitedtofindandeliminatenoisycomponents.Finally,the
+with varying temporal information, such as latency and time period. preprocessed data were referenced to the common average reference
+Subsequently, a high-level temporal Layer, inspired by deformable (CAR), and the removed channels were interpolated by using the
+convolutions(Daietal.,2017),isappliedtodealwithERPvariations. neighborhood channels. To segment the data into epochs containing
+Finally, a fully connected layer is employed to distinguish between ERPsandrestperiods,weextractPEPsusingatimeintervalof[0,1.5]s
+differentERPs.Inthepaper’sfinalsection,weemployt-SNE(t-distrib-
+with respect to perturbation onset and non-ERP epochs in the time
+uted Stochastic Neighbor Embedding) (van der Maaten and Hinton, periodof[(cid:0) 2.5,(cid:0) 1]s.
+2008) and Gradient-weighted Class Activation Mapping (Grad-CAM)
+(Selvarajuetal.,2017)tovisualizeandinterpretvariouslayersofour
+2.3. EEGwaistperturbations
+model.UtilizingGrad-CAM,wecomputesaliencymapsforeachclass,
+enablingustointerprettherelationshipbetweeneachlayerofthemodel
+Inthisdataset(PetersonandFerris,2018),participantsexperienced
+and the most discriminative EEG features. Subsequently, t-SNE is
+physical perturbations while either walking or standing on a balance
+applied to visualize the feature distribution of different classes in the
+beam mounted to a treadmill. Two electromechanical motors were
+finallayerofthemodel.
+positioned on the right and left sides of the participants, applying
+medial-lateralpullperturbationstotheparticipants’waist.Participants
+2. Materialandmethods
+wereinstructedtostandinatandemstance,andduringwalkingtrials,
+theykeptaspeedof0.22m/stofacilitatetheirbalanceonthebalance
+Inthissection,wefirstlyintroducedthedatasets,whichconsistedof
+beam.Thebrainactivityof30healthyyoungadultswasrecordedusing
+PEP and ERN datasets. Then we described the proposed model, and
+a128EEGelectrodesystem(BioSemiActiveII,BioSemi).Wefollowed
+finally, we specified the metrics used to test the performance of the
+the same preprocessing steps as those mentioned above, thus main-
+models.
+tainingapreprocessingpipelinesimilartotheoriginalpapertomitigate
+anypotentialtechnicalandbiologicalartifactsthatcouldinterferewith
+Table1
+Summaryofthedatasetsusedinthisstudy.
+Datasets #of #of Trialsper Test Sampling Task
+channels participants participant metrics rate
+Dataset#1:EEGbalancewholebodyperturbations( 63 30 ~590 ACC 64 Perturbationinasimulated
+JalilpourandMüller-Putz,2022,2023) aviationscenario
+Dataset#2:EEGwaistperturbations(PetersonandFerris, 128 30 ~204 ACC 64 Pullsperturbationswhile
+2021) standingontreadmill
+Dataset#3:EEGwaistperturbations(PetersonandFerris, 128 30 ~204 ACC 64 Pullsperturbationswhile
+2021) walkingontreadmill
+Dataset#4:Kaggle-ERN(Margauxetal.,2012) 56 26 340 AUC 100 Errorfeedbackduringvisual
+P300spellertask
+3S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+thesignal.
+2.4. Kaggle-ERN
+This dataset, initially collected for the BCI Challenge ERN dataset
+(Kaggle-ERN) (Margaux et al., 2012), involved participants spelling
+characters using a 6 × 6 grid matrix speller paradigm. In this P300
+spellermatrix,rowsandcolumnsflashedinarandomorder,andthetask
+oftheparticipantswastogazeatthetargetletter.TheP300component
+waselicitedineachrepresentationofthetargetroworcolumn.After
+completing a trial, participants received feedback on their character
+detection. The challenge aimed to distinguish erroneous and correct
+feedbackbyusingEEGsignalstoexplorethepresenceofERNinbrain
+signals. Twenty-six healthy adults were measured in this experiment
+with56EEGchannels sampledat600Hz.The classsampleswereun-
+balanced due to the unequal ratio of correct to erroneous feedback.
+Moreover, the classifier should be trained on the data of 16 subjects
+releasedintheearlystageofthecompetition,andthentestedonthe10
+remaining subjects. The preprocessing steps consisted of band pass
+filteringbetween1and40Hz,anddownsamplingto100Hz.Thetrials
+were segmented into 1.25 s epochs with respect to onset of feedback
+presentation.
+Tosimplifythediscussionoffindingsandanalyzesspecifictoeach
+Fig.1. Thearchitectureofthespatio-temporalmodule.
+dataset,wewillusedistinctnotationsforeachdataset."Dataset#1″will
+refer to the whole body perturbation dataset, and "Dataset #2″ and
+substantialdifferences.Weappliedseparatedepthwiseconvolutionson
+"Dataset #3″will denote data collected on the standing and walking
+thechannelsandtimepoints,withanotabledistinctionfromEEGNet:
+waist perturbation conditions, respectively. Lastly, the Kaggle ERN
+the depthwise spatial convolution precedes the temporal depthwise
+datasetwillberepresentedas"Dataset#4".
+convolution. Our assumption is that altering the sequence of these
+depthwise convolutions enhances feature representation by initially
+2.5. Proposedarchitecture
+focusingonimportantbrainareasandsubsequentlyextractingtemporal
+informationfromimportantchannels.Furthermore,weemploymixed
+This section outlines the architecture of the proposed network, depthwise convolution, inspired by Google’s MixConv approach (Tan
+consisting of a spatial-temporal layer, a component extraction layer
+andLe,2019).MixConvresemblesdepthwiseseparableconvolutionbut
+(CompExt), and an advanced temporal layer. The model’s design is with a unique approach—input filters (kernels) are partitioned into
+rooted in the observation that, in ERP-based BCI applications, brain
+virtual tensors or groups, and depthwise convolution with distinct
+responses comprise a series of ERP components. While the latency,
+kernelsizesisappliedtoeachtensor.Theresultingvirtualfilteredten-
+amplitude,andtimedurationoftheseresponsesmayvaryacrosssub- sorsarethenconcatenated.Thismethod,asdemonstratedinGoogle’s
+jects, sessions, and trials, the sequence of ERP components remains
+work, outperforms vanilla depthwise convolution in COCO object
+consistentacrossthesevariations.Basedonthisknowledge,theshallow
+detection (Lin et al., 2014) while utilizing fewer parameters. In EEG
+network was developed to decode the ERP component in subject-
+studies, depthwise convolution, especially in the context of EEGNet
+independent classification. The lightweight characteristics of this
+(Lawhern et al., 2018), has gained popularity. However, a frequently
+modelfacilitatetheinterpretationoftheneuralnetworklayers,unlike
+overlookedaspectofdepthwiseconvolutionsistheuseofasinglekernel
+the complex model with many parameters. The designed network in-
+size.InMixConv,theutilizationofmultiplekernelswithvaryingsizes
+tegratesthreeprimarymodules:aspatial-temporallayerthatfocuseson
+enablesthemodeltocapturediversetemporalpatternsinEEGsignals,
+learninglower-leveldiscriminativefeatures,followedbyacomponent
+potentiallycontributingtoimprovedaccuracy.Wedividetheinputfilter
+extractormoduleaimedatcapturingthetemporalinformationofERP
+(15)intothreevirtualtensors(groups),witheachgroupcontainingfive
+components with varying latencies and time durations. Finally, the
+filters. This choice is decided by neuroscience insights, as ERP-based
+advancedtemporallayerenrichesthetemporalrepresentationbyinte-
+BCIs typically involve a maximum of five consecutive ERP compo-
+gratinginformationfromtheERPcomponents,compellingthemodelto
+nents. Considering the varying lengths of ERP components, we have
+focusonthesequenceofERPs.
+chosenthetemporalkernelsizesofthethreevirtualtensorstobe60,
+120,and250ms.Fromthetemporalviewpoint,thesekernelsizesallow
+2.6. Spatio-temporallayer
+themodeltograspbothlongandshorttemporalpatterns.Forinstance,
+thelongtemporalkernelletsthemodellearnprolongedtemporalde-
+Wedesignedtheinitiallayertocatchthelocalfeaturesbyemploying
+pendenciesofERPs,whereastheshortertemporalkernelsize(60ms)
+a two-dimensional convolution operator to smooth the data. The
+enablesthemodeltoextractessentialfeaturesfromeachspecificERP.A
+convolutionuses15filterswithkernelsizeof(2,3)andastrideof(1,1),
+schematicofthesecondmodulewasshowninFig.2.
+followed by batch normalization and activation through exponential
+Inthismodule,allthedepthwiseandpointwiseconvolutionisfol-
+linearunits(ELUs).Thislayerfocusesonextractinglow-levelfeatures,
+lowedbybatchnormalization,theELUactivationfunction,andanovel
+discarding unnecessary information to address the low SNR of EEG
+attentionmechanismcalledSimAM(Simple,Parameter-FreeAttention
+signals. The framework of the spatio-temporal layer was depicted in
+ModuleforConvolutionalNeuralNetworks).Whileattentionmodules
+Fig.1.
+are commonly used in deep learning to improve feature extraction,
+manyexistingattentionmodules,suchasCBAM(ConvolutionalBlock
+2.7. CompExtlayer
+AttentionModule)(Wooetal.,2018)andSE(Squeeze-and-Excitation
+Networks)(Huetal.,2018),canenhancefeaturesalongonlyonedata
+Thislayerincorporatesspatialandtemporalconvolutions,drawing
+dimension.Additionally,thesemodulesareconstructedusingaseriesof
+inspirationfromtheEEGNet(Lawhernetal.,2018)networkbutwith
+4S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+Fig.2. CompExtmoduleiscomposedofspatialandtemporaldepthwiseconvolutions,followedbyanadaptiveaveraginglayerandpointwiseconvolutions.
+intricate factors, which introduce additional parameters to the neural featuremapofidenticalsize.Thefinaloutputisthenobtainedusingthe
+network.Toaddresstheaforementionedproblems,theSimAMattention formulabelow,withthesigmoidfunctionusedtopreventexcessively
+module, which is parameter-free and capable of being applied to 3D largeweightvalues.
+weights,wasintroducedbyYangetal.,n.d.)inspiredbytheattention ( )
+1
+mechanismsinthehumanbrain.Invisualneuroscience,neuronsthat X=sigmoid ⊙X (4)
+E
+carrythemostinformationmanifestdistinctfiringpatternscomparedto
+surroundingneurons.Additionally,theseinformativeneuronssuppress
+In the final stage of this module, the output tensors from depthwise
+theactivityofneighboringneurons,aphenomenonreferredtoasspatial
+convolutionsareconcatenatedanddownsampledto40usingAdaptive
+suppression (Webb et al., 2005). In our task, specific EEG channel
+Average Pooling, aiming to decrease redundant information and
+electrodes at key time points, particularly associated with ERP detec- simplifythemodel’scomplexity.Subsequently,apointwiseconvolution
+tion.Moreover,instudiesrelatedtobalanceperturbation,ERPcompo-
+isimplementedasthefinallayerofmixed-depthwiseconvolution,fol-
+nents,particularlyN1,wereevokedwithhighamplitudesaround100
+lowed by batch normalization, an activation function, and SimAM
+ms and over frontocentral areas. This characteristic results in a high
+attention.
+contrastwithothertimeintervalsandbrainregions.Hence,theSimAM
+mechanismcanallocategreaterweightstothesecriticaltimepointsand
+EEGelectrodes.TheSimAMalgorithmtriestoidentifytheimportanceof
+2.8. Advancedtemporallayer
+eachneuronbymeasuringthelinearseparabilityofeachneuronwith
+otherneurons.Tofindthelinearseparabilityamongneurons,theenergy
+Thelastmoduleofthenetworkistheadvancedtemporallayerwhich
+functionisdefinedasfollows:
+is a combination of deformable convolutionals and an adaptive aver-
+(cid:0) )
+4 β2+λ agingpoolinthetemporaldimension.Traditionalconvolutionalneural
+e* t = (t(cid:0) α)2+2β2+2λ (1) networksareconstrainedbyfixedgridsorreceptivefields,preventing
+themfromeffectivelycapturingvariationsintheobjectshapeandscale.
+Wheretrepresentsthetargetneuron,λisacoefficientassignedthevalue This limitation hinders their ability to adapt to geometric trans-
+of1e(cid:0) 4,αand β2arethemeanandvariancecalculatedoverallneurons formations.Deformableconvolutionalneuralnetwork(Daietal.,2017)
+wasproposedtosolvethisproblembyintegratingadaptivekerneloff-
+usingthefollowingformulas.
+setsintotheconvolution’ssamplegrid,enablingthenetworktohandle
+1 ∑M geometric transformations. This feature of deformable convolutions
+α=
+M
+xi (2)
+helpsthenetworkinmanagingvariationsinERPs,suchaschangesin
+i=1
+amplitude and latencies arising from subject-specific differences.
+1
+∑M Deformable convolutional neural networks incorporate two supple-
+β2=
+M
+(xi(cid:0) α) (3) mentary modules alongside standard convolutions. The standard
+i=1 convolutionisdefinedasfollows:here,pnrepresentstheindexvaluesin
+Intheprovidedformulas,irepresentstheindexoftheneuron,xisthe
+thereceptivefieldofR,andp0istheindexvalueofoutput.Also,x,y,w
+denote the input data, output data, and weights of the convolution
+surrounding neuron, and M indicate all the neurons in temporal and
+kernel,respectively.
+spatialdimensionsofeachfilter(kernel),denotedas,M = H× W. ∑
+Oncetheenergyfunctioniscomputed,theweightsofeachfilterin y(p0)= w(pn)*x(p0+pn) (5)
+thefeaturematrixareadjustedtoemphasizeinformativeparts.There- pn∈R
+fore,SimAMtakestheinputfeaturemapandtransformsitintoanew
+Toachieveanadaptiveandadjustablereceptivefield,anoffsetΔwill
+5S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+beintroducedtotheaforementionedformula,modifyingitasfollows: onesubjectservedasthetestset,while thedataoftheremaining29
+∑ subjectswereusedasthetrainingset.Thisprocedurewasrepeateduntil
+y(p0)= w(pn)*x(p0+pn+Δ n) (6)
+eachsubjecthadbeenutilizedasthetestsubjectonce.Finally,forthe
+pn∈R
+lastdataset,wefollowedthesamestructureasKagglechallenge,using
+Δ nchangesthepositionofsamplingpointovertheinputfeaturemapby thedataof16subjectsforthetrainingsetandthedataoftheremaining
+10subjectsforthetestset.
+applyingaconvolutionaloperationontheinputfeaturemap.Thenext
+In machine learning, a validation set is needed for fine-tuning a
+module is the bilinear interpolation to sample on the offset locations
+pn+ Δ n. Since this value is non-integer and fractional, the bilinear modelduringtraining.Typically,themodelistrainedonthetraining
+set,anditsperformanceismonitoredonthevalidationset.Thetraining
+interpolationisimplementedasbelow:
+∑ procedurestopswhenthereisadecreaseinthevalidationlosstoprevent
+y(p0)= G(q,p)*x(q) (7) overfitting, ensuring that the model generalizes well to unseen data.
+q However, in EEG applications, the poor SNR of EEG signals and the
+Here,pisdefinedasthefractionallocation(p=p0+pn+ Δ n),andq limitednumberofsamplesposesignificantchallengesforthevalidation
+coversallspatiallocationsinthefeaturemapx,andG(q,p)isainter- setindeterminingtheoptimalmodel.Ithasbeenshownthattheoptimal
+polationkernelandisexpressedasfollows: modelobtainedfromthevalidationsetcanintroducebiasesinthetest
+resultsduetodifferencesinthesamplingmethodsusedforthevalida-
+G(q,p)=max(0,1(cid:0) |q(cid:0) p|) (8) tionset(Miaoetal.,2023).WeadoptedasimilarapproachtoMiaoetal.
+(2023)forevaluatingthemodels.Allneuralnetworksweretrainedfor
+We employedtwoconsecutivedepthwisedeformableconvolutions
+250 epochs with a batch size of 50 samples. Batch size refers to the
+with kernel sizes of 5 and 10, respectively, followed by an average
+numberofdatasamplesprocessedbythemodelinonetrainingiteration,
+poolingoperationwithasizeof25.Inthisstudy,deformableconvolu-
+while the number of epochs represents the number of times that the
+tions were employed in a depthwise manner, where convolutions are
+entiredatasetgoesthroughthetrainingprocessofthemodel.Wereport
+applied to each filter separately. We adopted the methodology estab-
+themeanclassificationaccuracyoverthelast5and10epochs,aswellas
+lished by Ravenscroft et al. (2023) for conducting the depthwise
+thehighestclassificationaccuracyachievedthroughoutallepochs.The
+deformableconvolutions.Theframeworkofthismoduleisillustratedin
+mean accuracy over the last 5 and 10 epochs reflects the predictive
+Fig.3.
+stabilityofthemodel,whilethehighestaccuracyhighlightsthemodel’s
+ThestructureoftheproposedmodelislistedinTable2.
+capabilitytoachievepeakperformance.
+2.9. Testperformancecriteria
+2.10. Trainingstrategies
+Accuracy is the most commonly employed metric for evaluating
+All models were implemented using the PyTorch framework on a
+classificationapplications,particularlyinbinaryclassification.Howev-
+GeForceRTX3080GPU.AdamW(LoshchilovandHutter,2017)served
+er,thismetricmaynotbeeffectivewhensignificantdisparitiesexistin
+as the optimizer, configured with a learning rate of 1e-3 and weight
+thesamplesizesoftwoclasses.Inthefirst,secondandthirddatasets,the
+decayof1e-2.Additionally,binarycross-entropylosswasemployedto
+sample sizes for both classes are relatively in the same range. Conse-
+minimizetheoverallloss.ToaddressimbalancedsamplesinDataset#4,
+quently,accuracywaschosenasthemetrictoassessmodelperformance
+weightswere addedintothelossfunction.Toestablishabaselinefor
+for these datasets. In contrast, for the Dataset #4, where the ratio of
+comparingtheresultsoftheproposedmodel,wechoseshrinkageLDA
+’error’to’non-error’trialsisnotequal,theAUC(areaundertheROC
+(Blankertzetal.,2011),RBF-SVM(CortesandVapnik,1995),EEGNet
+curve)wasutilizedtoevaluatetheperformanceofthebinaryclassifi-
+(Lawhernetal.,2018),DeepConvNet(DCN)(Schirrmeisteretal.,2017),
+cation. Furthermore, all classifications were conducted in a subject-
+and ShallowConvNet (SCN) (Schirrmeister et al., 2017) as baseline
+independent manner. In Dataset #1, the model was trained on the
+models.
+data of 15 subjects recorded during the first measurement and then
+evaluated on a distinct set of 15 subjects measured in the second
+experiment.Inthecaseofthesecondandthirddatasets,theclassifica-
+tionwascarriedoutinaleave-one-outsubjectmanner.Here,thedataof
+Fig.3. VisualizationoftheAdvancedTemporalLayerconsistingoftwodepthwisedeformableconvolutions,andadaptiveaveraginglayer.
+6S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+Table2
+Detailedarchitectureoftheproposedmodel.CandTrepresentthenumberofchannelsandtimepointsrespectively.
+Module Layer Outputsize Explanation
+Spatio-Temporal ​ Input (C,T) ​
+​ ​ Conv2d, (15,C,T) kernelsize=(2,3),
+BatchNorm2d,Activation,Dropout padding=‘same’,ELUactivation,dropoutrate=0.3
+​ Split ​ 3×(5,C,T) ​
+CompExt Branch1 Depthwise2d,BatchNorm2d,Activation,SimAM (5,1,T) kernelsize=(C,1),
+padding=‘valid’,
+ELUactivation
+Depthwise2d,BatchNorm2d,Activation,SimAM (5,1,T) kernelsize=(fs/16,1),
+padding=‘same,
+ELUactivation
+​ Branch2 Depthwise2d,BatchNorm2d,Activation,SimAM (5,1,T) kernelsize=(C,1),
+padding=‘valid’,
+ELUactivation
+​ Depthwise2d,BatchNorm2d,Activation,SimAM (5,1,T) kernelsize=(fs/8,1),
+padding=‘same’,
+ELUactivation
+​ Branch3 Depthwise2d,BatchNorm2d,Activation,SimAM (5,1,T) kernelsize=(C,1),
+padding=‘valid’,
+ELUactivation
+​ Depthwise2d,BatchNorm2d,Activation,SimAM (5,1,T) kernelsize=(fs/4,1),
+padding=‘same’,
+ELUactivation
+​ Concatenation AdaptiveAvg,Dropout (15,1,40) avg_size=40,
+dropoutrate=0.65
+​ ​ Pointwise2d,BatchNorm2d,Activation,SimAM (5,1,40) kernelsize=(1,1),
+ELUactivation
+​ Squeeze ​ (5,40) ​
+AdvancedTemporal ​ DepthwiseDeformable1d (5,40) kernelsize=5,
+padding=‘valid’
+​ ​ DepthwiseDeformable1d,Dropout,AdaptiveAvg (5,25) kernelsize=10,
+padding=‘valid’,
+dropoutrate=0.5
+avg_size=25
+​ ​ Flatten (5×25) ​
+​ ​ Linear (125,2) ​
+3. Resultsandanalysis (DeepConvNet)arethenextmodelsthatexhibitbestperformance,while
+theycomeattheexpenseofahighernumberofparameters,exceeding
+Inthissection,weinitiallypresenttheresultsofboththeproposed 100,000 which is much higher than that of the proposed model and
+model and baseline models across the above datasets. Then, by using EEGNet. Furthermore, traditional classification methods such as LDA
+Grad-CAM and t-SNE methods, we aim to interpret the results and and SVM attain accuracies of 87.8% and 92.4%,respectively, placing
+visualizehowlayersofthemodelcontributetotheERPcharacteristics. theminasimilarrangeasEEGNetaccuracy.
+Finally, the ablation studies will be conducted to reveal the role of
+deformableconvolutionsandtheimpactoftheorderinwhichtemporal
+andspatialdepthwiseconvolutionsareappliedintheproposedmodel. 3.2. EvaluatingtheModel’sclassseparabilitywitht-SNE
+T-distributedstochasticneighborembedding(t-SNE)isastatistical
+3.1. Dataset#1:EEGbalancewholebodyperturbations algorithm that projects high-dimensional data onto a two- or three-
+dimensional map using unsupervised nonlinear mapping. To further
+The accuracy of the models for the first datasets is presented in investigate the performance of the models, we applied t-SNE to the
+Table 3. It is evident that our proposed model demonstrates the best embeddingfeaturesofthelastlayerofmodel(fullyconnectedlayer)and
+performancewhencomparedtoothermethods.Achievingthehighest visualizedthe2Dfeaturerepresentationofthedeeplearningmodel.In
+accuracy at 97.6%, our model maintains stable predictability Fig. 4, the t-SNE visualization of EEGNet, DCN, and SCN model was
+throughout the last 5 and 10 epochs (97.4% and 97.5%). This obser- depicted.TheorangeandgreendatasamplesindicatethePEPandrest
+vation highlights our model’s superiority in terms of overall perfor- classes,respectively.Wecanseetwoclustersinthefeaturerepresenta-
+mance and predicting volatility. SCN (ShallowConvNet) and DCN tion of each model, also our model could exhibit better separation
+Table3
+PerformancecomparisonoftheproposedmodelwithbaselinemodelsontheEEGbalancesthewholebodyperturbationsdataset(resultsin%).
+Epochs sLDA RBF-SVM EEGNet DCN SCN Proposedmodel
+​ 87.8 92.4 ​ ​ ​ ​
+Last5 ​ ​ 92.6 95.8 95.5 97.5
+Last10 ​ ​ 92.6 95.8 95.5 97.4
+Best ​ ​ 94 96.7 96.8 97.6
+#ofparameters 600 600 2208 172,727 102,362 2311
+7S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+betweenthetwoclusters. Table4
+Toconfirmthisobservation,weusedthreemetricsforevaluatingthe Clusterevaluationmetricsfordifferentdeeplearningmodels.
+obtainedclusteringforeachmodelincluding. EEGNet DCN SCN Proposedmodel
+Silhouette(⇑) 0.35 0.41 0.39 0.49
+1. Silhouette (Rousseeuw, 1987): The method measures how well an DaviesBouldin(⇓) 1.12 0.92 1.03 0.75
+object aligns with its cluster (cohesion) and distances from other CalinskiHarabasz(⇑) 3748 5651 4593 8287
+clusters(separation),withvaluesrangingfrom(cid:0) 1(pooralignment)
+to+1(optimalclustering).
+isnoteworthythatinthefinal5epochs,boththeDCNandourproposed
+2. DaviesBouldin(DaviesandBouldin,1979):TheDavis-BouldinScore
+model demonstrated equivalent performance levels. To summarize,
+calculates the ratio of within-cluster (cluster scatter) and
+whenitcomestopredictingvolatility,boththeproposedmodelandthe
+between-clusterdistances(clusterseparation).
+DCN achieved top accuracies of exceeding 73% accuracy. In terms of
+3. CalinskiHarabasz(MaulikandBandyopadhyay,2002):Thismethod
+peak performance, the accuracies of the DCN and our model were
+isalsoknownasvarianceratiocriterion(VRC),anditmeasuresthe
+comparablyhigh,bothreaching78%accuracy.
+variance between and within clusters. A high value of this metric
+indicates that clusters display significant variance between each
+otherandminimalvariancewithinthesamplesofeachcluster. 3.4. Dataset#4:Kaggle-ERN
+Table4showstheobtainedvaluesforeachmetricanddeeplearning Lastly,weevaluateourmodelonDataset#4.Thewinningteamin
+model. It is observable that our model provides better separation be- the competition applied the xDAWN + RG (Barachant et al., 2012;
+tweentwoclasseswhenevaluatedwithdifferentcriteria. Barachant and Congedo, 2014) algorithm on the dataset, and could
+achieve 0.73 AUC. Table 7 presents the AUC results for four deep
+3.3. Dataset#2anddataset#3:EEGwaistperturbations learning models, along with sLDA and RBF-SVM. Among the deep
+learning models, our model surpasses other models achieving the
+In this study, we employed a leave-one-subject-out approach to highestAUCat78.2%.Also,ourproposedmodeloutperformedothersin
+evaluateourmodelundertwodistinctconditions:pull-waistperturba- thelast5and10epochs,showcasingimprovementsof4%,5%,and18%
+tionsduringwalkingandstanding.Theaverageclassificationaccuracies comparedtoEEGNet,DCN,andSCNmodels.
+fortheseconditionsarepresentedinTable5(Dataset#2)andTable6
+(Dataset#3).Theresultsindicateasubstantialimprovementinaccuracy 3.5. ModelinterpretationbyGrad-CAM
+with neural network models when compared to traditional machine
+learningmodelslikesLDAandSVM.Specifically,inDataset#2,among TointerpretthefeaturesofourmodelforDataset#4,weemployed
+the deep learning models, the DCN achieved the highest accuracy, Grad-CAMtovisualizehowdifferentlayersofthemodelattendedtothe
+reaching91.4%.Thiswascloselyfollowedbybothourproposedmodel crucial temporal and spatial features of the data. Grad-CAM employs
+andEEGNet,eachattaininganaccuracyof90.6%and90%respectively. gradient-based localization to provide a visual explanation of CNN
+Itisnoteworthy,however,thatwhiletheDCNexhibitedsuperiorper- layers,highlightingthetemporalandspatialsegmentsofthedatawith
+formance, itrequired approximately 100 times more parameters than thehighestcontributiontoclassification.Inthisstudy,weappliedthe
+ourmodelandEEGNet,indicatingahighercomputationalcomplexity. trainedmodeltoeachtesttrial,selectingthecorrectlyclassifiedtrialsas
+Moreover, in terms of robustness, our model demonstrated superior input data for Grad-CAM. Subsequently, we averaged the localization
+performanceinthefinal5and10epochs,exceedingtheDCN’saccuracy mapsofcorrectlyclassifiedsamplesforeachclassseparately.Saliency
+byamarginof0.5%.Intherankingofdeeplearningmodelsbasedon maps were obtained for the last layer of the Spatio-Temporal and
+theirperformanceinthelast5and10epochs,EEGNetandSCNsecured CompExtmodules,aswellasthelastlayerofeachbranchinthemixed-
+thethirdandfourthpositions,respectively. depthwiseconvolutionoftheCompExtmodule.ApplyingGrad-CAMto
+TheresultsofPEPdetectionunderwalkingconditions(Dataset#3) thespatio-temporalmoduleenablesustoexplorethespatialactivation
+arepresentedinTable6.Intheseconditions,similartoDataset#2,the of the learned weights in the CNN layer. Moreover, for ease of com-
+sLDAandRBF-SVMmodelsdemonstratedsignificantlyloweraccuracy parison,weupsampledtheoutputofGrad-CAMfromtheobtainedlayers
+compared to the deep neural networks (DNNs). Among the evaluated to match the length of the input data. Fig. 5 illustrates the gradient
+DNNs,theDCNachievedthehighestaccuracyof78.9%,withourmodel activation weights of the aforementioned layers beside the grand
+closelyfollowingasthesecondhighest(with0.6%difference).TheDCN averagepotentialofERNintheCzchannelforcorrectanderrorfeed-
+displayedamarginallybetterperformance,surpassingourmodelbya backclassesinadditiontotheirdifferenceplot.Inthedifferenceplot
+mere0.2%intheaverageaccuracyoverthelast10epochs.However,it (Error minus Correct) of EEG signals, several peaks can be observed,
+Fig.4. t–SNEvisualizationoffeaturesobtainedfromthelastlayerofthedifferentmodels.
+8S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+Table5
+PerformancecomparisonoftheproposedmodelwithbaselinemodelsontheEEGdatasetofpullperturbationswhilestandingontreadmill(resultsin%).
+Epochs sLDA RBF-SVM EEGNet DCN SCN Proposedmodel
+​ 77.7 78.9 ​ ​ ​ ​
+Last5 ​ ​ 85.5 86.8 80.8 87.3
+Last10 ​ ​ 85.2 86.9 80.6 87.5
+Best ​ ​ 90 91.4 86.6 90.6
+#ofparameters 600 600 3248 212,952 206,042 3286
+Table6
+PerformancecomparisonoftheproposedmodelwithbaselinemodelsontheEEGdatasetofpullperturbationswhilewalkingontreadmill(resultsin%).
+Epochs sLDA RBF-SVM EEGNet DCN SCN Proposedmodel
+​ 65.3 66.7 ​ ​ ​ ​
+Last5 ​ ​ 70.2 73.3 60.4 73.3
+Last10 ​ ​ 69.9 73.7 59.9 73.5
+Best ​ ​ 76.6 78.9 70.7 78.3
+#ofparameters 600 600 3248 212,952 206,042 3286
+Table7
+AUCcomparisonoftheproposedmodelwithbaselinemodelsontheKaggle-ERNdataset(resultsin%).
+Epochs sLDA RBF-SVM EEGNet DCN SCN Proposedmodel
+​ 65.8 63.1 ​ ​ ​ ​
+Last5 ​ ​ 72.1 70.8 58.5 77.2
+Last10 ​ ​ 72.5 70.7 58.5 77.1
+Best ​ ​ 74.4 77.7 73.7 78.2
+#ofparameters 600 600 2128 168,752 91,242 2281
+Fig.5. ComparisonofgrandaverageERPpotentialswiththetemporalfeaturesobtainedfromGrad-CAMforspatio-temporalanalysisandtheCompExtmodule.The
+featuresfromthelayersarebetween(cid:0) 0.5and0.5.Moreoverforbettervisualization,wenormalizethegrandaveragedEEGsignalbetweenthesamerange.
+9S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+startingwithasmallnegativityaround300ms,followedbyapositive parameters,changingthefirstandsecondmodulesinthenetworkcould
+peakat450ms,andfinally,anegativepeakaround700ms.InFig.5,we significantly affect the parameter count. Secondly, the advancedtem-
+seethatthemodel’slayersuccessfullycapturestime-domainfeatures, poral layer in our proposed model introduces greater innovation
+coinciding with ERN components recorded in the Cz channel. It is compared to other modules, and represents one of the few works
+evident that in the spatial-temporal module, the weights of gradient exploring the use of deformable convolutions in EEG applications.
+activation have small values, and there are many oscillations in their Therefore, we applied the model to the datasets without using two
+pattern.Thetemporaldepthwiselayersreducetheseoscillations,adding depthwisedeformableconvolutionallayers.Table8presentstheresults
+moreweightstoimportantpartsofthesignal,orinotherwords,tothe obtainedfromtheablationstudy.
+ERN components. Additionally, the depthwise layers with window Moreover, we examined the impact of the order of temporal and
+lengthsof60and125msextracttemporalfeaturesmoreeffectivelythan spatialdepthwiseconvolutionsintheCompExtlayer.Mostneuralnet-
+thosewithkernelsof250ms,adifferencecanbeexplainedbytheshort works applied to EEG datasets typically use temporal depthwise con-
+time durationof ERNcomponents. Finally,the point-wise layermini- volutions first, followed by spatial depthwise convolution (Lawhern
+mizesfluctuationsandconcentratesspecificallyontimeperiodscorre- etal.,2018;Wangetal.,2024).However,weoptedforthereverseorder,
+spondingtothepeaksofERNcomponents. aimingforthemodeltoidentifythemostimportantEEGchannelsfirst
+Togaininsightsintothemodel’sperformanceinthespatialdomain, andthenextracttherelevanttemporalfeaturesfromthedata.Wehy-
+wevisualizethespatialfeaturerepresentationforthespatial-temporal pothesize this approach is more efficient in capturing discriminative
+module as topographic plots in Figs. 6–9 for Dataset #1, Dataset #2, features.TheresultsweredisplayedinTable9,andaswechangedthe
+Dataset#3,andDataset#4,respectively.Sinceweperformedsubject- order of the convolution, the number of parameters remained
+independent classification for Dataset #2 and Dataset #3, we unchanged.
+randomlyselectedtwosubjectsforDataset#2andDataset#3.Thefirst AnalysisoftheresultsfromTable8revealsthatinthefirstdataset,
+rowinthefiguresindicatesthegrandaveragepotentialofEEGforthe theaccuracydroppedby0.9%and0.8%inthelast5and10epochs,
+difference condition in the time course related to important time in- respectively,inadditiontoadecreaseof1.2%inthebestaccuracy.The
+tervalsofeachdataset,alongwiththebrainactivityatsecond0before minimum differences were found in Dataset #2, with changes of less
+the occurrence of any ERP. In Fig. 6, it can be seen that the model than 1%, suggesting that the classification accuracy is predominantly
+successfullyweightedthefeaturesinthetimerangeof0.1sandinthe influencedbytheSpatio-temporalandCompExtmodulesforthisdata-
+frontalandcentralelectrodes,whicharerelevanttotheoccurrenceof set. Conversely, in Dataset #3, a notable decrease in accuracy was
+theN1componentinthegrandaverageEEGsignals. observed. This reduction indicates that deformable convolutions are
+Figs. 7 and 8 depict the weights obtained by the spatio-temporal crucialinmitigatingsubjectdifferencesinPEPdetection.Specifically,
+module for Subject 1 of Dataset #2 and Subject 7 of Dataset #3, the removal of deformable convolutions resulted in an approximate
+respectively. The EEG signals clearly show that the most vital time 2.4%decreaseinthehighestachievedaccuracyforDataset#3.Lastly,
+periodis0.2sforbothdatasets,andthemoduleassignshigherweights Dataset#4experiencedthemostsignificantdecreaseinperformance,
+tothistimeintervalforthecentralchannels. with approximately a 4% reduction in the AUC by eliminating the
+From Fig. 9, it can be interpreted that the discriminative features deformableconvolutions.Thishighlightstheimportanceofdeformable
+obtainedfromthetimerangeof0.45–0.7srepresentthemaximumand convolutionsinthedetectionofERN.
+minimum amplitude values of the ERN component. Moreover, the InDataset#1andDataset#2,theaccuracydroppedby1%inthelast
+highestweightsinthegradientmapareobservedat0.45sandinthe 5and10epochs,althoughthebestaccuracydidnotchangenoticeably.
+frontalandcentralchannels.Thesechannelsindicatetheircrucialrolein Dataset#3experiencedthepoorestperformance,witha3%decreasein
+error processing in neuroscience. The spatial and temporal feature accuracy over the last 5 and 10 epochs, and a 1.8% drop in the best
+representation ofourmodelreflectsitsabilitytodiscovermeaningful accuracy.Finally,thelastdatasetexhibitedthesmallestchangesinAUC,
+patternsrelatedtoERPcharacteristics. withlessthan1%drop.Thissuggeststhattheorderofconvolutiondoes
+notconsiderablyaffectthemodel’sperformanceonDataset#4.
+3.5.1. Ablationstudy
+To furtherinvestigatetheperformance oftheproposedmodel,we 4. Discussion
+conductedablationanalysesontheaforementioneddatasets.Ourmodel
+comprisesthreemodules,butourfocuswasoninvestigatingtheimpact Inthisresearch,weanalyzedtheeffectivenessofanERP-basedBCI
+ofthefinalmoduleoradvancedtemporallayerwhichisacombination classification for subject-independent classification using a novel,
+of two deformableconvolutions.This decision was influenced bytwo lightweightCNNbasedmodel.Themodelisdesignedtofirstfocuson
+mainfactors.Firstly,thelastmoduleistheonlycomponentofthemodel local features through a spatio-temporal layer. Subsequently, we
+thatrequiresminimalmodificationtothemainstructureoftheproposed incorporatedanewmoduleinspiredbymixeddepthwiseconvolutions
+neural network. Given our efforts to maintain a low number of to address the variability in ERP durations. This involved the use of
+Fig.6. ThebraintopographiesofDataset#1.Differenceconditionisshowninthefirstrow,alongwithfeaturesfromthespatio-temporalmoduleforthecorrectly
+classifiedsamplesinthesecondrow.
+10S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+Fig.7. ThebraintopographiesofEEGdataforthedifferenceconditionofDataset#2wereplottedinthefirstrow,alongwithfeaturesfromthespatio-temporal
+moduleforthecorrectlyclassifiedsamplesinthesecondrow.
+Fig.8. ThebraintopographiesofEEGdataforthedifferenceconditionofDataset#3wereplottedinthefirstrow,alongwithfeaturesfromthespatio-temporal
+moduleforthecorrectlyclassifiedsamplesinthesecondrow.
+Fig.9. ThebraintopographiesofEEGdataforthedifferenceconditionwereplottedinthefirstrow,alongwithfeaturesfromthespatio-temporalmoduleforthe
+correctlyclassifiedsamplesinthesecondrow.
+Table8
+Ablationstudyonthedeformableconvolutions(resultsin%).
+Epochs Dataset#1(Accuracy) Dataset#2(Accuracy) Dataset#3(Accuracy) Dataset#4(AUC)
+Last5 96.6 86.9 71.6 73
+Last10 96.6 86.9 71.7 73.3
+Best 96.8 89.7 75.9 74.6
+#ofparameters 1602 2577 2577 1572
+11S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+Table9 with brain pattern topoplots. We observed that the spatio-temporal
+Ablationstudyontheorderofdepthwiseconvolutions(resultsin%). module effectively focused on brain regions critical for each dataset
+Epochs Dataset#1 Dataset#2 Dataset#3 Dataset#4 classification.Subsequently,ananalysiswasconductedonDataset#4to
+(Accuracy) (Accuracy) (Accuracy) (AUC) elucidate thefunctionality ofeach layer within theCompExtmodule,
+particularlyexaminingtherolesofvarioustemporaldepthwiseconvo-
+Last5 96.5 86.1 70.3 76.5
+Last10 96.4 86 70.4 76.6 lutionsandpointwiseconvolutions.Ourfindingsrevealedthat,forERN
+Best 97 90.7 76.5 77.7 datasets,temporaldepthwiseconvolutionswithkernelsizesof60and
+​ ​ ​ ​ ​
+120mscontributedtotheextractionofusefulfeatures.Thisresultaligns
+with expectations, given that ERPs associated with ERN tasks do not
+manifestlongertimedurations,suchas250ms.Furthermore,analysisof
+temporal kernels of three different lengths, moving away from the
+thepoint-wiseconvolutionlayersdemonstratedareductioninweight
+traditionalapproachofafixedkernelsize.Wesetthemodeltohave15
+oscillationswhenreducingthenumberofdepthchannelsfrom15to5,
+depthchannels,witheachtemporaldepthwiseconvolutioncontaining5
+indicatinganoptimizationoffeatureprocessingefficiency.
+channels. This design, informed by neuroscientific findings that typi-
+Additionally,ourstudyhasseverallimitationsthatmeritattention
+callyupto5ERPcomponentsaretriggeredinvariousBCItasks,aidsin
+minimizingthemodel’sparametercountwhileimprovingperformance. forfutureresearch.Firstly,ourmodelwastestedontwodatasetsrelated
+tobalanceperturbations,wheretheevokedpotentialstypicallyexhibit
+Additionally, we applied a novel attention module named SimAM to
+strong and high amplitude responses. It would be advantageous to
+concentrate on important data features. The ability of this attention
+evaluateourmodelondatasetscomprisingERPsofsmalleramplitude,
+moduletosuppressthesuperfluousdata,acommonchallengeinEEG
+suchasmotor-relatedcorticalpotentials(MRCP)andP300.Secondly,
+analysis characterized by high noise levels and low SNR signals, en-
+forour model,wefocused oneffectively capturingessentialtemporal
+hances system performance without adding any parameters to the
+features through the use of various temporal depthwise convolutions
+model.Finally,deformableconvolutionswereutilizedintheadvanced
+and deformable convolutions. We implemented spatial depthwise
+temporalmoduletolearnmorediscriminativetemporalrepresentation
+convolutionwithakernelsizecorrespondingtothenumberofchannels,
+ofthedata.Theseconvolutionsarespecificallytailoredtoaddressthe
+which limits consideration of the intricate spatial (EEG channel) con-
+geometric transformation challenges of ERP due to data stationarity,
+nections when applying the convolution across all channels. Conse-
+enablingthemodeltoeffectivelycaptureERPvariationsinshape,scale,
+quently,oneofthegoalsforfutureresearchistoenhancethemodelto
+andamplitude.Inourexperiments,wefoundthatournewmodelper-
+adeptlyextractadvancedspatialfeatures.Additionally,theexperiments
+formed better than traditional methods like sLDA and RBF-SVM, and
+in this study were performed in an offline setting. Future studies can
+newer deep learning models such as EEGNet, ShallowConvNet, and
+lookintohowwellthemodelworksinreal-timebrain-computerinter-
+DeepConvNet,insubject-independentclassificationofERPsacrossfour
+facesystemsthatuseERPs.
+datasets.
+Ourmodel demonstratedpromisingperformanceincomparisonto
+5. Conclusion
+othermodelswithinthesameparameterrange,suchasEEGNet.While
+DeepConvNetachievedthehighestaccuracyforDataset#2andDataset
+In conclusion, our study introduced a novel convolutional neural
+#3,itdidsoatthecostofahighernumberofparameters.InDataset#1,
+network tailored for classifying ERPs, specifically targeting PEPs and
+theproposedmodeloutperformedallthebaselinemodelsinthelast5
+ERNs.Weachievedpromisingoutcomesonfourdatasetsusingsubject-
+and10epochs,aswellasachievingthehighestaccuracy.Wespeculate
+independent classification and benchmarked our model against tradi-
+thatthesuperiorperformanceofourmodelisattributedtovariationsin
+tional and advanced deep learning approaches. The design of our
+the training and test sets, recorded across different participants and
+network leveraged a combination of mixed depthwise convolutions,
+sessionswithminordifferencesinthetaskdesignbetweenthefirstand
+SimAMattentionmodule,anddeformableconvolutionstoenhanceits
+second studies. Our model effectively manages these variations,
+performance.Furthermore,visualizationtoolssuchast-SNEandGrad-
+capturingthedesiredinformationfromthesignals.InDataset#2,allthe
+CAMconfirmthatourmodeleffectivelyidentifiescriticalinformation
+neuralnetworkmodelsexceededtheperformanceoftheconventional
+inalignmentwithestablishedneuroscientificprinciples.
+machine learning models. Our proposed model attained the highest
+averaged accuracy in the last 5 and 10 training epochs, while DCN
+DeclarationofgenerativeAIandAI-assistedtechnologiesinthe
+achieved the best accuracy among all models. In Dataset #3, SCN
+writingprocess
+demonstratedthepoorestperformancecomparedtoothermethods.Our
+proposedmodelandDCNachieved73.3%accuracyinthelast5epochs,
+During the preparation of this work, the author(s) used ChatGPT
+with DCN slightly surpassing our model in the last 10 epochs and
+solely for grammatical correction. After using this tool/service, the
+achievingthehighestaccuracy.However,DCNoperatesattheexpense
+author(s) reviewed and edited the content as needed and take(s) full
+ofahighnumberofparameters,resultinginamorecomplexsystem.In
+responsibilityforthecontentofthepublication.
+Dataset#4,itisobviousthatconventionalmachinelearningmethods
+struggle to decode ERN in an imbalanced classification, even when
+CRediTauthorshipcontributionstatement
+employing shrinkage to handle varying class sample sizes. Another
+possibleexplanationforthispoorperformancecouldbetheoverlapof
+ShayanJalilpour:Writing–originaldraft,Visualization,Method-
+variousEPRs,especiallywhenERNoccurssimultaneouslywithvisual
+ology, Investigation, Formal analysis, Conceptualization. Gernot
+evokedpotentials,makingERNdetectionchallenging.
+Müller-Putz:Writing–review&editing,Validation,Supervision.
+Theablationstudyrevealedthatdeformableconvolutionsarecrucial
+for ERP classification, particularly in ERN classification. Omitting
+Declarationofcompetinginterest
+deformableconvolutionsresultedina4%decreaseinAUC.Moreover,
+theablationstudyshowedthatapplyingspatialdepthwiseconvolution
+The authors declare that they have noknown competing financial
+earlier than temporal depthwise convolution leads to better model
+interestsorpersonalrelationshipsthatcouldhaveappearedtoinfluence
+performance.Toillustrateinterpretability,weemployeddetailedvisu-
+theworkreportedinthispaper.
+alizationsusingGrad-CAMandt-SNEmethods.Forallthedatasets,by
+Using Grad-CAM, we showcased the topoplots from the model’s first
+module (spatio-temporal) to understand its role, and compared these
+12S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+Dataavailability interfaces:a10yearupdate.J.Neural.Eng.15,031005.https://doi.org/10.1088/
+1741-2552/aab2f2.
+Makeig,S.,Bell,A.,Jung,T.-P.,Sejnowski,T.J.,1995.Independentcomponentanalysis
+Datawillbemadeavailableonrequest. ofelectroencephalographicdata.In:Touretzky,D.,Mozer,M.C.,Hasselmo,M.
+(Eds.),AdvancesinNeuralInformationProcessingSystems.MITPress.
+References
+Margaux,P.,Emmanuel,M.,S´ebastien,D.,Olivier,B.,J´er´emie,M.,2012.Objectiveand
+subjectiveevaluationofonlineerrorcorrectionduringP300-basedspelling.Adv.
+Hum.-Comput.Interact.2012,1–13.https://doi.org/10.1155/2012/578295.
+Acqualagna,L.,Blankertz,B.,2013.Gaze-independentBCI-spellingusingrapidserial Marsella,P.,Scorpecci,A.,Cartocci,G.,Giannantonio,S.,Maglione,A.G.,Venuti,I.,
+visualpresentation(RSVP).Clin.Neurophysiol.124,901–908.https://doi.org/
+Brizi,A.,Babiloni,F.,2017.EEGactivityasanobjectivemeasureofcognitiveload
+10.1016/j.clinph.2012.12.050. duringeffortfullistening:astudyonpediatricsubjectswithbilateral,asymmetric
+Ang,KaiKeng,Chin,ZhangYang,Zhang,Haihong,Guan,Cuntai,2008.FilterBank sensorineuralhearingloss.Int.J.Pediatr.Otorhinolaryngol.99,1–7.https://doi.
+commonspatialpattern(FBCSP)inbrain-computerinterface.In:2008IEEE org/10.1016/j.ijporl.2017.05.006.
+InternationalJointConferenceonNeuralNetworks(IEEEWorldCongresson Maulik,U.,Bandyopadhyay,S.,2002.Performanceevaluationofsomeclustering
+ComputationalIntelligence).Presentedatthe2008IEEEInternationalJoint algorithmsandvalidityindices.IEEETrans.PatternAnal.Mach.Intell.24,
+ConferenceonNeuralNetworks(IJCNN2008-HongKong).IEEE,HongKong, 1650–1654.https://doi.org/10.1109/TPAMI.2002.1114856.
+China,pp.2390–2397.https://doi.org/10.1109/IJCNN.2008.4634130.
+Miao,Z.,Zhao,M.,Zhang,X.,Ming,D.,2023.LMDA-Net:Alightweightmulti-
+Barachant,A.,Congedo,M.,2014.Aplug&playP300BCIusinginformationgeometry.
+dimensionalattentionnetworkforgeneralEEG-basedbrain-computerinterfacesand
+https://doi.org/10.48550/ARXIV.1409.0107. interpretability.Neuroimage276,120209.https://doi.org/10.1016/j.
+Barachant,A.,Bonnet,S.,Congedo,M.,Jutten,C.,2012.Multiclassbrain–computer
+neuroimage.2023.120209.
+interfaceclassificationbyriemanniangeometry.IEEETrans.Biomed.Eng.59, Mullen,T.,Kothe,C.,Chi,Y.M.,Ojeda,A.,Kerth,T.,Makeig,S.,Cauwenberghs,G.,
+920–928.https://doi.org/10.1109/TBME.2011.2172210.
+Jung,Tzyy-Ping,2013.Real-timemodelingand3Dvisualizationofsourcedynamics
+Blankertz,B.,Lemm,S.,Treder,M.,Haufe,S.,Müller,K.-R.,2011.Single-trialanalysis andconnectivityusingwearableEEG.In:201335thAnnualInternational
+andclassificationofERPcomponents—atutorial.Neuroimage56,814–825.
+ConferenceoftheIEEEEngineeringinMedicineandBiologySociety(EMBC).
+https://doi.org/10.1016/j.neuroimage.2010.06.048. Presentedatthe201335thAnnualInternationalConferenceoftheIEEEEngineering
+Cecotti,H.,Eckstein,M.P.,Giesbrecht,B.,2014.Single-trialclassificationofevent- inMedicineandBiologySociety(EMBC).IEEE,Osaka,pp.2184–2187.https://doi.
+relatedpotentialsinrapidserialvisualpresentationtasksusingsupervisedspatial org/10.1109/EMBC.2013.6609968.
+filtering.IEEETransact.NeuralNetworksLearn.Syst.25,2030–2042.https://doi.
+Myrden,A.,Chau,T.,2015.EffectsofusermentalstateonEEG-BCIperformance.Front.
+org/10.1109/TNNLS.2014.2302898. Hum.Neurosci.9.https://doi.org/10.3389/fnhum.2015.00308.
+Corsi-Cabrera,M.,Ramos,J.,Guevara,M.A.,Arce,C.,Gutierrez,S.,1993.Gender Peterson,S.M.,Ferris,D.P.,2018.Differentiationinthetaandbetaelectrocortical
+differencesmintheeegduringcognitiveactivity.Int.J.Neurosci.72,257–264.
+activitybetweenvisualandphysicalperturbationstowalkingandstandingbalance.
+https://doi.org/10.3109/00207459309024114. eneuro5.https://doi.org/10.1523/ENEURO.0207-18.2018.ENEURO.0207-
+Cortes,C.,Vapnik,V.,1995.Support-vectornetworks.Mach.Learn.20,273–297.
+18.2018.
+https://doi.org/10.1007/BF00994018. Peterson,S.M.,Ferris,D.P.,2021.Humanelectrocortical,electromyographical,ocular,
+Dai,J.,Qi,H.,Xiong,Y.,Li,Y.,Zhang,G.,Hu,H.,Wei,Y.,2017.Deformable andkinematicdataduringperturbedwalkingandstanding.DataBrief39,107635.
+convolutionalnetworks.https://doi.org/10.48550/ARXIV.1703.06211. https://doi.org/10.1016/j.dib.2021.107635.
+Davies,D.L.,Bouldin,D.W.,1979.Aclusterseparationmeasure.IEEETrans.Pattern Pion-Tonachini,L.,Kreutz-Delgado,K.,Makeig,S.,2019.ICLabel:anautomated
+Anal.Mach.Intell.PAMI-1,224–227.https://doi.org/10.1109/
+electroencephalographicindependentcomponentclassifier,dataset,andwebsite.
+TPAMI.1979.4766909. Neuroimage198,181–197.https://doi.org/10.1016/j.neuroimage.2019.05.026.
+Dietz,V.,Quintern,J.,Berger,W.,1985.Afferentcontrolofhumanstanceandgait: Quiroga,R.Q.,Garcia,H.,2003.Single-trialevent-relatedpotentialswithwavelet
+evidenceforblockingofgroupIafferentsduringgait.Exp.BrainRes.61.https://doi. denoising.Clin.Neurophysiol.114,376–390.https://doi.org/10.1016/S1388-2457
+org/10.1007/BF00235630. (02)00365-6.
+Ferrez,P.W.,Del,R.,Millan,J.,2008.Error-relatedEEGpotentialsgeneratedduring Ravenscroft,W.,Goetze,S.,Hain,T.,2023.Deformabletemporalconvolutionalnetworks
+simulatedbrain–computerinteraction.IEEETrans.Biomed.Eng.55,923–929.
+formonauralnoisyreverberantspeechseparation.In:ICASSP2023-2023IEEE
+https://doi.org/10.1109/TBME.2007.908083. InternationalConferenceonAcoustics,SpeechandSignalProcessing(ICASSP).
+Hang,W.,Feng,W.,Du,R.,Liang,S.,Chen,Y.,Wang,Q.,Liu,X.,2019.Cross-subject PresentedattheICASSP2023-2023IEEEInternationalConferenceonAcoustics,
+EEGsignalrecognitionusingdeepdomainadaptationnetwork.IEEEAccess7, SpeechandSignalProcessing(ICASSP),IEEE,RhodesIsland,Greece,pp.1–5.
+128273–128282.https://doi.org/10.1109/ACCESS.2019.2939288.
+https://doi.org/10.1109/ICASSP49357.2023.10095230.
+Hu,J.,Shen,L.,Sun,G.,2018.Squeeze-and-Excitationnetworks.In:2018IEEE/CVF Rivet,B.,Souloumiac,A.,Attina,V.,Gibert,G.,2009.xDAWNalgorithmtoenhance
+ConferenceonComputerVisionandPatternRecognition.Presentedatthe2018 evokedpotentials:applicationtobrain–computerinterface.IEEETrans.Biomed.
+IEEE/CVFConferenceonComputerVisionandPatternRecognition(CVPR).IEEE, Eng.56,2035–2043.https://doi.org/10.1109/TBME.2009.2012869.
+SaltLakeCity,UT,pp.7132–7141.https://doi.org/10.1109/CVPR.2018.00745.
+Rousseeuw,P.J.,1987.Silhouettes:agraphicalaidtotheinterpretationandvalidationof
+Jalilpour,S.,HajipourSardouie,S.,2021.RCTP:regularizedcommontensorpatternfor clusteranalysis.J.Comput.Appl.Math.20,53–65.https://doi.org/10.1016/0377-
+rapidserialvisualpresentationspellers.Biomed.SignalProcessControl70,102930. 0427(87)90125-7.
+https://doi.org/10.1016/j.bspc.2021.102930. Roy,R.N.,Bonnet,S.,Charbonnier,S.,Jallon,P.,Campagne,A.,2015.Acomparisonof
+Jalilpour,S.,Müller-Putz,G.,2022.TowardpassiveBCI:asynchronousdecodingof ERPspatialfilteringmethodsforoptimalmentalworkloadestimation.In:201537th
+neuralresponsestodirection-andangle-specificperturbationsduringasimulated AnnualInternationalConferenceoftheIEEEEngineeringinMedicineandBiology
+cockpitscenario.Sci.Rep.12,6802.https://doi.org/10.1038/s41598-022-10906-5. Society(EMBC).Presentedatthe201537thAnnualInternationalConferenceofthe
+Jalilpour,S.,Müller-Putz,G.,2023.Balanceperturbationanderrorprocessingelicit IEEEEngineeringinMedicineandBiologySociety(EMBC).IEEE,Milan,
+distinctbraindynamics.J.Neural.Eng.20,026026.https://doi.org/10.1088/1741- pp.7254–7257.https://doi.org/10.1109/EMBC.2015.7320066.
+2552/acc486. Schalk,G.,Wolpaw,J.R.,McFarland,D.J.,Pfurtscheller,G.,2000.EEG-based
+Jap,B.T.,Lal,S.,Fischer,P.,Bekiaris,E.,2009.UsingEEGspectralcomponentstoassess communication:presenceofanerrorpotential.Clin.Neurophysiol.111,2138–2144.
+algorithmsfordetectingfatigue.ExpertSyst.Appl.36,2352–2359.https://doi.org/
+https://doi.org/10.1016/S1388-2457(00)00457-0.
+10.1016/j.eswa.2007.12.043. Schirrmeister,R.T.,Springenberg,J.T.,Fiederer,L.D.J.,Glasstetter,M.,Eggensperger,K.,
+Kappenman,E.S.,Luck,S.J.,2010.Theeffectsofelectrodeimpedanceondataquality Tangermann,M.,Hutter,F.,Burgard,W.,Ball,T.,2017.Deeplearningwith
+andstatisticalsignificanceinERPrecordings.Psychophysiology.https://doi.org/ convolutionalneuralnetworksforEEGdecodingandvisualization.Hum.Brain
+10.1111/j.1469-8986.2010.01009.x. Mapp.38,5391–5420.https://doi.org/10.1002/hbm.23730.
+Krusienski,D.J.,Sellers,E.W.,McFarland,D.J.,Vaughan,T.M.,Wolpaw,J.R.,2008. Selvaraju,R.R.,Cogswell,M.,Das,A.,Vedantam,R.,Parikh,D.,Batra,D.,2017.Grad-
+TowardenhancedP300spellerperformance.J.Neurosci.Methods167,15–21.
+CAM:visualexplanationsfromdeepnetworksviagradient-basedlocalization.In:
+https://doi.org/10.1016/j.jneumeth.2007.07.017. 2017IEEEInternationalConferenceonComputerVision(ICCV).Presentedatthe
+Lawhern,V.J.,Solon,A.J.,Waytowich,N.R.,Gordon,S.M.,Hung,C.P.,Lance,B.J.,2018. 2017IEEEInternationalConferenceonComputerVision(ICCV).IEEE,Venice,
+EEGNet:acompactconvolutionalneuralnetworkforEEG-basedbrain–computer pp.618–626.https://doi.org/10.1109/ICCV.2017.74.
+interfaces.J.Neural.Eng.15,056013.https://doi.org/10.1088/1741-2552/aace8c. SpA˜¼ler,M.,Niethammer,C.,2015.Error-relatedpotentialsduringcontinuousfeedback:
+Lewis,G.W.,1984.Temporalstabilityofmultichannel,multimodalERPrecordings.Int. usingEEGtodetecterrorsofdifferenttypeandseverity.Front.Hum.Neurosci.9.
+J.Neurosci.25,131–144.https://doi.org/10.3109/00207458408985595.
+https://doi.org/10.3389/fnhum.2015.00155.
+Lin,T.-Y.,Maire,M.,Belongie,S.,Bourdev,L.,Girshick,R.,Hays,J.,Perona,P., Tan,M.,Le,Q.V.,2019.MixConv:mixeddepthwiseconvolutionalkernels.https://doi.
+Ramanan,D.,Zitnick,C.L.,Dolla´r,P.,2014.MicrosoftCOCO:commonobjectsin
+org/10.48550/ARXIV.1907.09595.
+context.https://doi.org/10.48550/ARXIV.1405.0312. vanderMaaten,L.,Hinton,G.,2008.VisualizingDatausingt-SNE.J.Mach.Learn.Res.
+Liu,Y.,Lan,Z.,Cui,J.,Sourina,O.,Müller-Wittig,W.,2020.Inter-subjecttransfer 9,2579–2605.
+learningforEEG-basedmentalfatiguerecognition.Adv.Eng.Inf.46,101157. Varghese,J.P.,McIlroy,R.E.,Barnett-Cowan,M.,2017.Perturbation-evokedpotentials:
+https://doi.org/10.1016/j.aei.2020.101157. significanceandapplicationinbalancecontrolresearch.Neurosci.Biobehav.Rev.
+Loshchilov,I.,Hutter,F.,2017.Decoupledweightdecayregularization.https://doi. 83,267–280.https://doi.org/10.1016/j.neubiorev.2017.10.022.
+org/10.48550/ARXIV.1711.05101. Volosyak,I.,Gembler,F.,Stawicki,P.,2017.Age-relateddifferencesinSSVEP-basedBCI
+Lotte,F.,Bougrain,L.,Cichocki,A.,Clerc,M.,Congedo,M.,Rakotomamonjy,A., performance.Neurocomputing250,57–64.https://doi.org/10.1016/j.
+Yger,F.,2018.AreviewofclassificationalgorithmsforEEG-basedbrain–computer
+neucom.2016.08.121.
+13S.JalilpourandG.Müller-Putz Engineering Applications of Arti(cid:999)cial Intelligence 139 (2025) 109642
+Wan,Z.,Yang,R.,Huang,M.,Zeng,N.,Liu,X.,2021.Areviewontransferlearningin Yang,L.,Zhang,R.-Y.,Li,L.,Xie,X.,n.d.SimAM:ASimple,Parameter-freeAttention
+EEGsignalanalysis.Neurocomputing421,1–14.https://doi.org/10.1016/j. ModuleforConvolutionalNeuralNetworks.
+neucom.2020.09.017. Yu,K.,Shen,K.,Shao,S.,Ng,W.C.,Li,X.,2012.Bilinearcommonspatialpatternfor
+Wang,Z.,Chen,C.,Li,J.,Wan,F.,Sun,Y.,Wang,H.,2023.ST-CapsNet:linkingspatial single-trialERP-basedrapidserialvisualpresentationtriage.J.Neural.Eng.9,
+andtemporalattentionwithcapsulenetworkforP300detectionimprovement.IEEE 046013.https://doi.org/10.1088/1741-2560/9/4/046013.
+Trans.NeuralSyst.Rehabil.Eng.31,991–1000.https://doi.org/10.1109/ Zapała,D.,Zabielska-Mendyk,E.,Augustynowicz,P.,Cudo,A.,Ja´skiewicz,M.,
+TNSRE.2023.3237319. Szewczyk,M.,Kopi´s,N.,Francuz,P.,2020.Theeffectsofhandednesson
+Wang,H.,Wang,Z.,Sun,Y.,Yuan,Z.,Xu,T.,Li,J.,2024.AcascadexDAWNEEGNet sensorimotorrhythmdesynchronizationandmotor-imageryBCIcontrol.Sci.Rep.
+structureforunifiedvisual-evokedrelatedpotentialdetection.IEEETrans.Neural 10,2087.https://doi.org/10.1038/s41598-020-59222-w.
+Syst.Rehabil.Eng.32,2270–2280.https://doi.org/10.1109/TNSRE.2024.3415474. Zhang,K.,Robinson,N.,Lee,S.-W.,Guan,C.,2021.AdaptivetransferlearningforEEG
+Webb,B.S.,Dhruv,N.T.,Solomon,S.G.,Tailby,C.,Lennie,P.,2005.Earlyandlate motorimageryclassificationwithdeepConvolutionalNeuralNetwork.Neural
+mechanismsofsurroundsuppressioninstriatecortexofmacaque.J.Neurosci.25, Network.136,1–10.https://doi.org/10.1016/j.neunet.2020.12.013.
+11666–11675.https://doi.org/10.1523/JNEUROSCI.3414-05.2005. Zhang,Y.,Yu,Y.,Wang,B.,Shen,H.,Lu,G.,Liu,Y.,Zeng,L.-L.,Hu,D.,2023.Graph
+Woo,S.,Park,J.,Lee,J.-Y.,Kweon,I.S.,2018.CBAM:convolutionalBlockattention learningwithCo-teachingforEEG-basedmotorimageryrecognition.IEEETrans.
+module.https://doi.org/10.48550/ARXIV.1807.06521. Cogn.Dev.Syst.15,1722–1731.https://doi.org/10.1109/TCDS.2022.3174660.
+Xiao,X.,Xu,M.,Jin,J.,Wang,Y.,Jung,T.-P.,Ming,D.,2020.Discriminativecanonical
+patternmatchingforsingle-trialclassificationofERPcomponents.IEEETrans.
+Biomed.Eng.67,2266–2275.https://doi.org/10.1109/TBME.2019.2958641.
+14

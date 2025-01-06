@@ -1,0 +1,1894 @@
+Preprint
+ICLR: IN-CONTEXT LEARNING OF REPRESENTATIONS
+CoreFranciscoPark∗1,2,3,AndrewLee∗4,EkdeepSinghLubana∗1,3,YongyiYang∗1,3,5,
+MayaOkawa1,3,KentoNishi1,4,MartinWattenberg4,&HidenoriTanaka1,3
+1CBS-NTTPrograminPhysicsofIntelligence,HarvardUniversity
+2DepartmentofPhysics,HarvardUniversity
+3Physics&InformaticsLab,NTTResearchInc.
+4SEAS,HarvardUniversity
+5CSE,UniversityofMichigan,AnnArbor
+ABSTRACT
+Recentworkhasdemonstratedthatsemanticsspecifiedbypretrainingdatainflu-
+encehowrepresentationsofdifferentconceptsareorganizedinalargelanguage
+model(LLM).However,giventheopen-endednatureofLLMs,e.g.,theirability
+toin-contextlearn, wecanaskwhethermodelsalterthesepretrainingsemantics
+toadoptalternative,context-specifiedones. Specifically,ifweprovidein-context
+exemplarswhereinaconceptplaysadifferentrolethanwhatthepretrainingdata
+suggests, do models reorganize their representations in accordance with these
+novel semantics? To answer this question, we take inspiration from the theory
+of conceptual role semantics and define a toy “graph tracing” task wherein the
+nodesofthegrapharereferencedviaconceptsseenduringtraining(e.g.,apple,
+bird,etc.)andtheconnectivityofthegraphisdefinedviasomepredefinedstruc-
+ture(e.g.,asquaregrid). Givenexemplarsthatindicatetracesofrandomwalkson
+thegraph, weanalyzeintermediaterepresentationsofthemodelandfindthatas
+theamountofcontextisscaled,thereisasuddenre-organizationfrompretrained
+semantic representations to in-context representations aligned with the graph
+structure. Further,wefindthatwhenreferenceconceptshavecorrelationsintheir
+semantics(e.g., Monday, Tuesday, etc.), thecontext-specified graphstructure
+isstillpresentintherepresentations,butisunabletodominatethepretrainedstruc-
+ture. To explain these results, we analogize our task to energy minimization for
+apredefinedgraphtopology,providingevidencetowardsanimplicitoptimization
+processtoinfercontext-specifiedsemantics.Overall,ourfindingsindicatescaling
+context-size can flexibly re-organize model representations, possibly unlocking
+novelcapabilities.
+1 INTRODUCTION
+Agrowinglineofworkdemonstratesthatlargelanguagemodels(LLMs)organizerepresentationsof
+specificconceptsinamannerthatreflectstheirstructureinpretrainingdata(Parketal.,2024c;d;En-
+gelsetal.,2024;Abdouetal.,2021;Patel&Pavlick,2022;AnthropicAI,2024;Gurnee&Tegmark,
+2023; Vafa et al., 2024; Li et al., 2021; Pennington et al., 2014). More targeted experiments in
+syntheticdomainshavefurthercorroboratedthesefindings,showinghowmodelrepresentationsare
+organizedaccordingtothedata-generatingprocess(Lietal.,2022;Jenneretal.,2024;Trayloretal.,
+2022;Liuetal.,2022b;Shaietal.,2024;Parketal.,2024b;Gopalanietal.,2024). However,when
+amodelisdeployedinopen-endedenvironments,wecanexpectittoencounternovelsemanticsfor
+aconceptthatitdidnotseeduringpretraining. Forexample, assumethatwedescribetoanLLM
+that a new product called strawberry has been announced. Ideally, based on this context, the
+modelwouldaltertherepresentationforstrawberryandreflectthatwearenotreferringtothe
+pretrainingsemantics(e.g.,thefruitstrawberry). DoesthisidealsolutiontranspireinLLMs?
+Motivatedbytheabove,weevaluatewhetherwhenprovidedanin-contextspecificationofaconcept,
+anLLMaltersitsrepresentationstoreflectthecontext-specifiedsemantics. Specifically,wepropose
+∗Equal contribution. Contact: {corefranciscopark,andrewlee}@g.harvard.edu,
+yongyi@umich.edu,{ekdeeplubana, hidenori tanaka}@fas.harvard.edu.
+1
+4202
+ceD
+92
+]LC.sc[
+1v07000.1052:viXraPreprint
+(a) Words on a grid
+(c) Emergent grid representation in context
+apple bird car egg
+house milk plane opera
+box sand sun mango
+rock math code phone
+(b) Data generation
+Random walk on a grid:
+“apple, bird, milk, sand, sun, plane, opera, …” Context length: 200 Context length: 400 Context length: 1400
+Figure 1: Alteration of representations in accordance with context-specified semantics (grid
+structure). (a) We randomly arrange a set of concepts on a grid that does not reflect any correla-
+tionalsemanticsbetweenthetokens. (b)Wethengeneratesequencesoftokensfollowingarandom
+walk on the grid, inputting it as context to a Llama-3.1-8B model. (c) The model’s mean token
+representationsprojectedontothetoptwoprincipalcomponents. Asthenumberofin-contextex-
+emplarsincreases,thereisaformationofrepresentationsmirroringthegridstructureunderlyingthe
+data-generatingprocess. Representationsarefromtheresidualstreamactivationfollowinglayer26.
+an in-context learning task that involves a simple “graph tracing” problem wherein the model is
+shownedgescorrespondingtoarandomtraversalofagraph(seeFig.1).Thenodesofthisgraphare
+intentionallyreferencedviaconceptsthemodelisextremelylikelytohaveseenduringtraining(e.g.,
+apple,bird,etc.),whileitsconnectivitystructureisdefinedusingapredefinedgeometrythatis
+ambivalenttocorrelationsbetweenconcepts’semantics(e.g.,asquaregrid). Basedontheprovided
+context, themodelisexpectedtooutputavalidnextnodeprediction, i.e., anodeconnectedtothe
+lastpresentedone. Asweshow,increasingtheamountofcontextleadstoasuddenre-organization
+ofrepresentationsinaccordancewiththegraph’sconnectivity. ThissuggestsLLMscanmanipulate
+their representations in order to reflect concept semantics specified entirely in-context, inline with
+theories of inferential semantics from cognitive science (Harman, 1982; Block, 1998). We further
+characterizetheseresultsbyanalyzingtheproblemofDirichletenergyminimization,showingthat
+modelsindeedidentifythestructureoftheunderlyinggraphtoachieveanon-trivialaccuracyonour
+task. Thissuggestsanimplicitoptimizationprocess,ashypothesizedbytheoreticalworkonICLin
+toysetups(e.g.,in-contextlinearregression),cantranspireinmorenaturalisticsettings(VonOswald
+etal.,2023a;b;Akyu¨reketal.,2023). Overall,ourcontributionscanbesummarizedasfollows.
+• GraphNavigationasaSimplisticModelofNovelSemantics. Weintroduceatoygraphnav-
+igation task that requires a model to interpret semantically meaningful concepts as referents for
+nodesinastructurallyconstrainedgraph. Inputtingtracesofrandomwalksonthisgraphintoan
+LLM,weanalyzewhetherthemodelaltersitsintermediaterepresentationsforreferentconcepts
+topredictvalidnextnodesasdefinedbytheunderlyinggraphconnectivity,henceinferring,inline
+withtheoriesofsemanticsfromcognitivescience,novelsemanticsofaconcept(Harman,1982).
+• Emergent In-Context Reorganization of Concept Representations. Our results show that as
+context-sizeisscaled,i.e.,asweaddmoreexemplarsincontext,thereisasuddenre-organization
+ofconceptrepresentationsthatreflectsthegraph’sconnectivitystructure. Intriguingly, thesere-
+sults are similar to ones achieved in a similar setup with human subjects (Garvert et al., 2017;
+Whittington et al., 2020). Further, we show the context-specified graph structure emerges even
+when we use concepts that have correlations in their semantics (e.g., Mon, Tues, etc.), but, in-
+terestingly,isunabletodominatethepretrainedstructure. Morebroadly,wenotethatthissudden
+reorganization is reminiscent of emergent capabilities in LLMs when other relevant axes, e.g.,
+computeormodelsize,arescaled(Weietal.,2022;Srivastavaetal.,2022;Lubanaetal.,2024).
+• An Energy Minimization Model of Semantics Inference. To provide a more quantitative ac-
+count of our results, we compute the Dirichlet energy of model representations with respect to
+the ground-truth graph structure, and find the energy decreases as a function of context size.
+This offers a precise hypothesis for the mechanism employed by an LLM to re-organize repre-
+sentationsaccordingtothecontext-specifiedsemanticsofaconcept. Theseresultsalsoserveas
+2Preprint
+:htgnel
+txetnoC
+:htgnel
+txetnoC
+001
+004
+(a) Words on a ring (c) Emergent ring representation in context
+banana 9 0 apple Layer 1 Layer 6 Layer 16 Layer 26
+tomato 8 1 lettuce
+onion 7 2 grape
+orange 6 3 fig
+5 4
+pear carrot
+(b) Data generation
+Randomly pick pairs of neighbors:
+(apple, banana), (orange, onion),
+(fig, carrot), (grape, lettuce), …
+Figure 2: Alteration of representations in accordance with context-specified semantics (ring
+structure). (a)Werandomlyplaceconceptsonaringstructureunrelatedtotheirsemantics. (b)We
+thengeneratesequencesoftokensbyrandomlysamplingneighboringpairsfromtheringwhichis
+usedastheinputcontexttoaLlama-3.1-8Bmodel. (c)Themodel’smeanrepresentationoftokens
+projectedontothetoptwoprincipalcomponents. Asthenumberofin-contextexemplarsincreases,
+there is a formation of representations mirroring the ring structure underlying the data-generating
+process. Therepresentationsarefromtheresidualstreamactivations.
+evidence towards theories of in-context learning as implicit optimization in a more naturalistic
+setting(VonOswaldetal.,2023a;b;Akyu¨reketal.,2023).
+2 EXPERIMENTAL SETUP: IN-CONTEXT GRAPH TRACING
+Wefirstdefineoursetupforassessingtheimpactofcontextspecificationonhowamodelorganizes
+its representations. In the main paper, we primarily focus on Llama3.1-8B (henceforth Llama3)
+(Dubeyetal.,2024),accessedviaNDIF/NNsight(Fiotto-Kaufmanetal.,2024). Wepresentresults
+on other models—Llama3.2-1B / Llama3.1-8B-Instruct (Dubey et al., 2024) and Gemma-2-2B /
+Gemma-2-9B (GemmaTeam,2024)—inApp.C.2.
+Task. Our proposed task, which we call in-context graph tracing, involves random walks on a
+predefinedgraphG.Specifically,inspiredbypriorworkanalyzingstructuredrepresentationslearned
+bysequencemodels,weexperimentwiththreegraphicalstructures:asquaregrid(Fig.1(a)),aring
+(Fig.2(a)),andahexagonalgrid(Fig.10). Resultsonhexagonalgridaredeferredtoappendixdue
+tospaceconstraints. Toconstructthesquaregrid, werandomlyarrangethesetoftokensinagrid
+andaddedgesbetweenhorizontalandverticalneighbors. Wethenperformarandomwalkonthe
+graph, emitting the visited tokens as a sequence (Fig. 1 (b)). For the ring, we add edges between
+neighboringnodesandsimplysamplerandompairsofneighboringtokensonthegraph(Fig.2(b)).
+Nodes in our graphs, denoted T = {τ ,τ ,...,τ }, are referenced via concepts that the model is
+0 1 n
+extremely likely to have seen during pretraining. While any choice of concepts is plausible, we
+selectrandomtokensthat,unlessmentionedotherwise,havenoobvioussemanticcorrelationswith
+one another (e.g., apple, sand, math, etc.). However, these concepts have precise meanings
+associated with them in the training data, necessitating that to the extent the model relies on the
+providedcontext,therepresentationsaremorphedaccordingtothein-contextgraph. Wehighlight
+thatavisualanalogofourtask,whereinoneusesimagesinsteadoftexttokenstorepresentaconcept,
+hasbeenusedtoelicitverysimilarresultswithhumansubjectsastheoneswereportinthispaper
+using LLMs (Garvert et al., 2017; Whittington et al., 2020; Mark et al., 2020; 2024; Brady et al.,
+2009). Wealsonotethatourproposedtaskissimilartoonesstudiedinliteratureonin-contextRL,
+whereinoneprovidesexplorationtrajectoriesin-contexttoamodelandexpectsittounderstandthe
+environmentanditsdynamics(a.k.a.,aworldmodel)(Leeetal.,2024b;Laskinetal.,2022).
+3Preprint
+3 RESULTS
+3.1 VISUALIZINGINTERNALACTIVATIONUSINGPRINCIPALCOMPONENTS
+Sinceweareinterestedinuncoveringcontext-specificrepresentations,weinputsequencesfromour
+data-generatingprocesstothemodelandfirstcomputethemeanactivationsforeachuniquetoken
+τ ∈ T. Namely, assume a given context C := [c ,...,c ], where c ∈ T, that originates from
+0 N−1 i
+anunderlyinggraphG. Ateachtimestep, welookatawindowofN (=50)precedingtokens(or
+w
+alltokensifthecontextlengthissmallerthanN ),andcollectallactivationscorrespondingtoeach
+w
+tokenτ ∈ T atagivenlayerℓ. Wethencomputethemeanactivationspertoken,denotedashℓ ∈
+τ
+Rd. WefurtherdenotethestackofmeantokenrepresentationsasHℓ(T) ∈ Rn×d. Finally,werun
+PCAonHℓ(T), andusethefirsttwoprincipalcomponentstovisualizemodelactivations(unless
+stated otherwise). We note that while PCA visualizations are known to suffer from pitfalls as a
+representationanalysismethod,weprovideathoroughquantitativeanalysisinSec.4todemonstrate
+thatthemodelre-organizesconceptrepresentationsaccordingtothein-contextgraphstructure,and
+proveinSec.5thatthestructureofthegraphisreflectedinthePCAvisualizationsbecauseofthis
+re-organizationofrepresentations. WealsoprovidefurtherevidenceonthefaithfulnessofPCAby
+conducting a preliminary causal analysis of the principal components, finding that intervening on
+conceptrepresentations’projectionsalongthesecomponentsaffectsthemodel’sabilitytoaccurately
+predictvalidnextnodegenerations(App.C.4).
+Results. Figs. 1, 2 demonstrate the resulting visualizations for square grid and ring graphs, re-
+spectively (more examples are provided in the Appendix; see Fig. 9, 10). Strikingly, with enough
+exemplars,wefindrepresentationsareinfactorganizedinaccordancewiththegraphstructureun-
+derlying the context. Interestingly, results can be skewed in the earlier layers towards semantic
+priorsthemodelmayhaveinternalizedduringtraining;however,thesepriorsareoverriddenaswe
+godeeperinthemodel. Forexample,intheringgraph(seeFig.2),conceptsappleandorange
+areclosertoeachotherinLayer6ofthemodel,butbecomeessentiallyantipodalaroundlayer26,
+asdictatedbythegraph;theantipodalnatureisalsomoreprominentascontextlengthisincreased.
+We also observe that despite developing a square-grid structure when sufficient context length is
+given (see Fig. 1), the structure is partially irregular; e.g., it is wider in the central regions, but
+narrowlyarrangedintheperiphery. Wefindthistobeanartifactoffrequencywithwhichaconcept
+is seen in the context. Specifically, due to lack of periodic boundary conditions, concepts that are
+presentintheinner2×2regionofthegridarevisitedmorefrequentlyduringarandomwalkonthe
+graph,whiletheperipheryofthegraphhasalowervisitationfrequency. Therepresentationsreflect
+this,thusorganizinginaccordancewithbothstructureandfrequencyofconceptsinthecontext.
+Overall,theresultsaboveindicatethataswescalecontextsize,modelscanre-organizesemantically
+unrelatedconceptstoformtask-specificrepresentations,whichwecallin-contextrepresentations.
+Intriguingly, these results are broadly inline with theories of inferential semantics from cognitive
+scienceaswell(Harman,1982;Block,1998).
+3.2 SEMANTICPRIORVS. IN-CONTEXTTASKREPRESENTATIONS
+Buildingonresultsfromtheprevioussection,wenowinvestigatetheimpactofusingsemantically
+correlatedconcepts. Specifically,webuildontheresultsfromEngelsetal.(2024),whoshowthat
+representationsfordaysoftheweek, i.e., {Monday, Tuesday, Wednesday, Thursday,
+Friday, Saturday, Sunday}, organize in a circular geometry. We randomly permute the
+orderingoftheseconcepts,arrangethemona7-noderinggraphsimilartotheprevioussection(see
+Fig.3a),andevaluatewhetherthein-contextrepresentationscanoverridethestrongpretrainingprior
+internalizedbythemodel.
+Results. Fig.3(b,c)demonstratetheresultingvisualizations.Wefindthatwhenthereisaconflict
+between the semantic prior and in-context task, we observe the original semantic ring in the first
+twoprincipalcomponents. However,thecomponentsrightafterinfactencodethecontext-specific
+structure: visualizingthethirdandfourthprincipalcomponentsshowsthenewlydefinedringstruc-
+ture. Thisindicatesthatthecontext-specifiedstructureispresentintherepresentations,butdoesnot
+dominatethem. InFig.14, wereportthemodel’saccuracyonthein-contexttask, findingthatthe
+modeloverridesthesemanticpriortoperformwellonourtaskwhenenoughcontextisgiven.
+4Preprint
+2
+tnenopmoC
+lapicnirP
+Principal Component 1
+4
+tnenopmoC
+lapicnirP
+(a) (b) (c)
+Tuesday
+Monday
+Wednesday
+Sunday
+Thursday
+Saturday Principal Component 3
+Friday
+Semantic Link In-Context Link
+Figure 3: In-context representations form in higher principal components in the presence
+of semantic priors. (a) (Purple) Semantic links underlying days of the week. (Dashed blue) We
+define a non-semantic graph structure by linking non-neighboring days and generate tokens from
+thisgraph. (b)(Purple)Theringgeometryformedbysemanticlinksestablishedduringpre-training
+remainsintactinthefirsttwoprincipalcomponents. (c)(Dashedblue)Thenon-semanticstructure
+provided in-context can be seen in the third and fourth principal components. Note that the star
+structureinthefirsttwocomponents(b),whichmatchthegroundtruthgraphicalstructureofourdata
+generatingprocess(a),becomesaringinthenexttwoprincipalcomponents(c).Therepresentations
+arefromtheresidualstreamactivationfollowinglayer21.
+4 EFFECTS OF CONTEXT SCALING: EMERGENT RE-ORGANIZATION OF
+REPRESENTATIONS
+Our results in the previous section demonstrate models can re-organize concept representations in
+accordance with the context-specified semantics. We next aim to study how this behavior arises
+ascontextisscaled—isthereacontinuous, monotonicimprovementtowardsthecontext-specified
+structureascontextisadded?Ifso,isthereatrivialsolution,e.g.,regurgitationbasedoncontextthat
+helpsexplaintheseresults? Toanalyzethesequestions, wemustfirstdefineametricthathelpsus
+gaugehowalignedtherepresentationsarewiththestructureofthegraphthatunderliesthecontext.
+Dirichlet Energy. We measure the Dirichlet energy of our graph G’s structure by defining an
+energy function over the model representations. Specifically, for an undirected graph G with n
+nodes,letA∈Rn×nbeitsadjacencymatrix,andx∈Rnbeasignalvectorthatassignsavaluex
+i
+toeachnodei. ThentheDirichletenergyofthegraphwithrespecttoxisdefinedas
+(cid:88)
+E (x)= A (x −x )2. (1)
+G i,j i j
+i,j
+For a multi-dimensional signal, the Dirichlet energy is defined as the summation of the energy
+over each dimension. Specifically, let X ∈ Rn×d be a matrix that assigns each node i with a
+d-dimensionalvectorx ,thentheDirichletenergyofX isdefinedby
+i
+d
+(cid:88)(cid:88) (cid:88)
+E (X)= A (x −x )2 = A ∥x −x ∥2. (2)
+G i,j i,k j,k i,j i j
+k=1 i,j i,j
+Overall, to empirically quantify the formation of geometric representations, we can measure the
+Dirichlet energy with respect to the graphs underlying our data generating processes (DGPs) and
+ourmeantokenactivationshℓ:
+τ
+(cid:88)
+E (Hℓ(T))= A ∥hℓ−hℓ∥2, (3)
+G i,j i j
+i,j
+where Hℓ(T) ∈ Rn×d is the stack of our mean token representations hℓ at layer ℓ and i,j ∈ T
+are tokens from our DGP at a certain context length. We note Hℓ(T) is a function of context
+5Preprint
+0.05
+0.04
+0.03
+0.02
+0.01
+100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Grid
+0.10
+0.08
+0.06
+0.04
+0.02
+100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Ring
+0.025
+0.020
+0.015
+0.010
+0.005
+100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Hex
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+ycaruccA
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+ycaruccA
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+ycaruccA
+Layer 18 Layer 30 Accuracy
+Figure 4: A model continuously develops task representation as it learns to traverse novel
+graphsin-context. WeplottheaccuracyofgraphtraversalandtheDirichletenergyofthegraph,
+computed from the model’s internal representations, as functions of context length. We note that
+theDirichletenergyneverreachesaperfectzero—rulingoutthattherepresentationsarelearninga
+degeneratestructure,aswasalsoseeninthePCAvisualizationsinSec.3. (a)A4x4gridgraphwith
+16nodes. (b)Acircularringwith10nodes. (c)A“honey-comb”hexagonallattice,with30nodes.
+length as well, but we omit it in the notation for brevity. Intuitively, the measure above indicates
+whetherneighboringtokens(nodes)inthegroundtruthgraphhaveasmalldistancebetweentheir
+representations. Thus, as the model correctly infers the correct underlying structure, we expect to
+seeadecreaseinDirichletenergy. Wedonotethat,inpractice,Dirichletenergyminimizationhasa
+trivialsolutionwhereallnodesareassignedthesamerepresentation.Whilewecanbeconfidentthis
+trivialsolutiondoesnotexistinourresults,forelsewewouldnotseedistinctnoderepresentationsin
+PCAvisualizationsnorhighaccuracyforsolvingourtasks,westillprovideanalternativeanalysisin
+App.C.3wheretherepresentationsarestandardized(mean-centeredandnormalizedbyvariance)to
+renderthistrivialsolutioninfeasible.Wefindresultsarequalitativelysimilarwithsuchstandardized
+representations,butmorenoisysincestandardizationcaninducesensitivitytonoise.
+4.1 RESULTS: EMERGENTORGANIZATIONANDTASKACCURACYIMPROVEMENTS
+WeplotLlama3’saccuracyatthein-contextgraphtracingtaskalongsidetheDirichletenergymea-
+sure (for different layers) as a function of context. Specifically, we compute the “rule following
+accuracy”, where we add up the model’s output probability over all graph nodes which are valid
+neighbors. Forinstance,ifthegraphstructureisapple-car-bird-waterandthecurrentstate
+iscar,weaddupthepredictedprobabilitiesforappleandbird. Thismetricsimplymeasures
+howwellthemodelabidesbythegraphstructure.
+Results are reported in Fig. 4. We see once a critical amount of context is seen by the model,
+accuracystartstorapidlyimprove. WefindthispointinfactcloselymatcheswhenDirichletEnergy
+reachesitsminimumvalue: energyisminimizedshortlybeforetherapidincreaseinin-contexttask
+accuracy, suggesting that the structure of the data is correctly learned before the model can make
+valid predictions. This leads us to the claim that as the amount of context is scaled, there is an
+emergentre-organizationofrepresentationsthatallowsthemodeltoperformwellonourin-context
+graphtracingtask. WenotetheseresultsalsoprovideamorequantitativecounterpartofourPCA
+visualizationresultsbefore.
+Is there a Trivial Solution at play? A simple baseline that would exhibit an increase in per-
+formance with increasing context involves the model merely regurgitating a node’s neighbors by
+copyingthemfromitscontext. Wecallthisthememorizationsolution. Whilesuchasolutionwould
+notexplainthereorganizationofrepresentations,weuseitasabaselinetoshowthemodelislikely
+engaginginamoreintriguingmechanism. Sinceouraccuracymetricmeasuresrulefollowing,this
+memorizationsolutionwillachievevalue1ifthenodehasbeenobservedinthecontextand0other-
+wise. Followingourdatasamplingprocessthen,ifwesimplychooseaninitialnodeatrandomwith
+replacement,wecanexpresstheprobabilityofanodeexistinginacontextoflengthlas:
+(cid:18) n−1(cid:19)l
+p (x)=1− , (4)
+seen1 n
+6Preprint
+fig5
+(a) 50 Nodes (b) 25 Nodes
+Context Size Context Size
+ycaruccA ycaruccA
+Llama-3.1-8B 1-shot Memorization 2-shot Memorization
+Piecewise Linear Fit Transition Point
+Figure5: AmemorizationsolutioncannotexplainLlama’sICLgraphtracingperformance.
+Weplottherule-followingaccuracyfromLlama-3.1-8Boutputsandaccuraciesfromasimple1-shot
+and2-shotmemorizationhypothesis. (a)Aringgraphwith50nodes. (b)Asquaregridgraphwith
+25nodes. Inbothcases,wefindthatthememorizationsolutioncannotexplaintheaccuracyascent
+curve. Instead,wefindaslowphaseandafastphase,whichwefitwithapiecewiselinearfit.
+where x is the context and n is the number of nodes available. Note that the current node itself
+doesnotmatterasthesamplingprobabilityisuniformwithreplacement. Wealsoevaluateanother,
+similarbaselinethatassumesthesametokenmuchbeencounteredtwiceforthemodeltorecognize
+it as an in-context exemplar. To define a closed-form expression for this solution, we have the
+probabilitythatanodehasappearedtwiceasfollows:
+(cid:18) 1(cid:19)1(cid:18) n−1(cid:19)(l−1)
+p (x)=p (x)−l . (5)
+seen2 seen1 n n
+Toevaluatewhetherthememorizationsolutionsaboveexplainourresults,weplottheirperformance
+alongsidetheobservedperformanceofLlama-3. Fig.5showstheresult(a)onaringgraphwith50
+nodesand(b)onagridgraphwith25nodes. Wefind,inbothcases,thatneitherthe1-shotnorthe
+2-shotmemorizationcurvecanexplainthebehaviorofLlama.Instead,weobservethattheaccuracy
+has two phases, a first phase where the accuracy improves very slowly, and a second phase where
+the log-linear slope suddenly changes to a steeper ascent. We find that a piecewise linear fit can
+extractthistransitionpointfairlywell,whichwillbeofinterestinthenextsection.
+5 EXPLAINING EMERGENT RE-ORGANIZATION OF REPRESENTATIONS: THE
+ENERGY MINIMIZATION HYPOTHESIS
+Buildingontheresultsfromprevioussection,wenowputforwardahypothesisforwhyweareable
+toidentifysuchstructuredrepresentationsfromamodel: wehypothesizethemodelinternallyruns
+anenergyminimizationprocessinsearchofthecorrectstructuralrepresentationofthedata(Yang
+etal.,2022),similartoclaimsofimplicitoptimizationinin-contextlearningproposedbypriorwork
+intoysettings(VonOswaldetal.,2023a;b). Moreformally,weclaimthefollowinghypothesis.
+Hypothesis5.1. Letnbethenumberoftokens,dbethedimensionalityoftherepresentations,and
+H(ℓ,t)(T) ∈ Rn×d be the stack of representations for each token learned by the model at layer ℓ
+andcontextlengtht,thenE
+(cid:0) H(ℓ,t)(T)(cid:1)
+decayswithcontextlengtht.
+G
+5.1 MINIMIZERSOFDIRICHLETENERGYANDSPECTRALEMBEDDINGS.
+Wecallthek-thenergyminimizerofE theoptimalsolutionthatminimizesE andisorthogonal
+G G
+tothefirstk−1energyminimizers.
+Formally,theenergyminimizers(cid:8) z(k)(cid:9)n
+aredefinedasthe
+k=1
+7Preprint
+Figure6:Spectralembeddingofaringgraph. Figure7:Spectralembeddingofagridgraph.
+solutiontothefollowingproblem:
+z(k) =arg min E (z) (6)
+G
+z∈Sn−1
+s.t. z ⊥z(j),∀j ≤k−1, (7)
+whereSn−1istheunitsphereinndimensionalEuclideanspace. Theenergyminimizersareknown
+tohavethefollowingproperties(Spielman,2019):
+1. z(1) = c1forsomeconstantc ̸= 0,whichisadegeneratedsolutionthatassignsthesame
+valuetoeverynode;and
+(cid:16) (cid:17)
+2. Ifweuse z(2),z(3) asthecoordinateofnodei,itwillbeagoodplanarembedding. We
+i i
+callthem(2-dimensional)spectralembeddings.
+Spectralembeddingsareoftenusedtoadrawgraphonaplaneandinmanycasescanpreservethe
+structure of the graph (Tutte, 1963). In Figs. 6 and 7, we show the spectral embedding results for
+aringgraphandagridgraphrespectively. Noticehowsuchspectralembeddingsaresimilartothe
+representationsfromourmodelsinFig.1and2. AsweshowinTheoremB.1,thisisinfactexpected
+if our energy minimization hypothesis is true: if the representations H from the model minimize
+theDirichletenergyandarenon-degenerated,thenthefirsttwoprincipalcomponentsofPCAwill
+exactly produce the spectral embeddings z(2),z(3). Here we present an informal version of the
+theorem,anddeferthefullversionandprooftotheappendix.
+Theorem 5.1 (Informal Version of Theorem B.1). Let G be a graph and H ∈ Rn×d (where n ≥
+d≥3)beamatrixthatminimizesDirichletenergyonGwithnon-degeneratedsingularvalues,then
+thefirsttwoprincipalcomponentsofH willbez(2)andz(3).
+See App. B for the formal version and proof of Theorem 5.1. See also Tab. 2 for an empirical
+validationofthetheorem,whereinweshowtheprincipalcomponentsalignverywellwithspectral
+embeddingsofthegraph.
+5.2 ENERGYMINIMIZATIONANDGRAPHCONNECTIVITY
+Giventherelationshipbetweenspectralembeddings(i.e.,energyminimizers)andtheprincipalcom-
+ponentsobservedinourresults(Figs.1, 2), weclaimthatthemodel’sinferenceoftheunderlying
+structureisakintoanimplicitenergyminimization.Tofurtheranalyzetheimplicationofthisclaim,
+weshowthatthemomentatwhichwecanvisualizeagraphusingPCAisthemomentatwhichthe
+model has found a large connected component (i.e., the graph’s structure). Specifically, consider
+an unconnected graph Gˆ, i.e., Gˆhas multiple connected components. Then, there are multiple de-
+generatesolutionstotheenergyminimizationproblem,whichwillbefoundbyPCA.Specifically,
+suppose Gˆhas q connected components, with U denoting the set of nodes of the i-th component.
+i
+8Preprint
+25 36
+(a) # of Nodes (b)
+64 144
+Figure 8: In-context emergence. We analyze the in-context accuracy curves as a function of
+context-size inputted to the model. The graph used in this experiment is an m×m grid, with a
+varying value for m. (a) The rule following accuracy of a graph tracing task. The accuracy show
+a two phase ascent. We fit a piecewise linear function to the observed ascent to extract the transi-
+tionpoint,whichmovesrightwardswithincreasinggraphsize. (b)Interestingly,thetransitionpoint
+scalesasapower-lawinm,i.e.,thenumberofnodesinthegraph.
+Thenwecanconstructthefirstqenergyminimizersasfollows:∀i∈[q],letthej-thvalueofz(i)be
+ i−1
+−α
+j ∈
+(cid:91)
+U
+z(i) = i k (8)
+j 1 othek rw=1
+ise,
+(cid:80)q (cid:80) z(i−1)
+whereα
+1
+=1andα
+i
+= (cid:80)k i′ −= 1i (cid:80)j∈Uk′ z(j i′
+−1)
+fori∈[q]\{1}.
+k=1 j∈Uk j
+It is easy to check that each z(i) constructed above for i ∈ [q] has 0 energy, and is thus a global
+minimizerofE . Moreover,allz(i)’sareorthogonaltoeachotherandhencesatisfyourdefinition
+Gˆ
+of the first q energy minimizers. It is important to notice that these z(i)’s for i ∈ [q] contain no
+information about the structure of the graph, other than identifying each connected component.
+Theorem B.1 tells us that the principal components of a non-degenerated (rank s where s > 1)
+solutionHthatminimizestheenergywillbez(2)···z(s+1).Thus,ifthegraphisunconnected,then
+theenergy-minimizingrepresentationswillbedominatedbyinformation-lessprincipalcomponents,
+in which we should not expect any meaningful visualization. The acute reader may recall that the
+first minimizer z(1) is a trivial solution of the energy minimization that assigns the same value to
+everynode. Conveniently,theaboveargumentalsoimpliesthatthisisnotaconcern: PCAwillrule
+outthisdegeneratesolutionasdemonstratedinTheoremB.1.
+In-contextemergence: Ahypothesis. OurresultsinFig.5showedanintriguingbreakpointthat
+isreminiscentofasecond-orderphasetransition(i.e.,anundefinedsecondderivative). Asshownin
+Fig.8,weinfactfindthisbehaviorisextremelyrobustacrossgraphsofdifferentsizes,andshowsa
+power-lawscalingtrendwithincreasinggraphsize(seeApp.C.7forseveralmoreresultsinthisvein,
+includingdifferentgraphtopologies). Giventherelationshipofferedbetweenenergyminimization
+anddiscoveryofaconnectedcomponent(graphstructure)inouranalysisabove,apossibleframe-
+worktoexplaintheseresultsmaybetheproblemofbond-percolationonagraph(Newman,2003;
+Hooyberghs et al., 2010): in bond-percolation, one starts with an unconnected graph and slowly
+fills edges to connect its nodes; as edges are filled, there is a second-order transition after which
+a large connected component emerges in the graph. The nature of the transition observed in our
+experiments(Fig.8)andthetheoreticalconnectionbetweenenergyminimizationandexistenceofa
+connectedcomponentprovidesomeevidencetowardstheplausibilityofthishypothesis. However,
+webelievetheanalogyisstillloose,forourgraphsizesarerelativelysmall(likelycausingsignifi-
+cantfinite-sizeeffects)andtheexperimentsneedtocorroborateanyscalingtheoryofthetransition
+pointfrompercolationliteraturewouldrequirerunninggraphswithatleast2orders-of-magnitude
+differenceintheirsizes. However,theconsistencyofthehypothesiswithourempiricalresultsand
+analysisimpliesthatinvestigatingitfurthermaybefruitful.
+9Preprint
+6 RELATED WORK
+Model Representations. Researchers have recently discovered numerous structured representa-
+tions in neural networks. Mikolov et al. (2013) suggests that concepts are linearly represented in
+activations, and Park et al. (2024d) more recently suggests this may be the case for contemporary
+language models. Numerous researchers have found concrete examples of linear representations
+for human-level concepts, including “truthfulness” (Burns et al., 2022; Li et al., 2023b; Marks &
+Tegmark, 2024), “refusal” (Arditi et al., 2024), toxicity (Lee et al., 2024a), sycophancy (Rimsky
+etal.,2024),andeven“worldmodels”(Lietal.,2022;Nandaetal.,2023). Parketal.(2024c)finds
+thathierarchicalconceptsarerepresentedwithatree-likestructureconsistingoforthogonalvectors.
+A relevant line of work includes that of Todd et al. (2023) and Hendel et al. (2023). Both papers
+findthatonecancomputeavectorfromin-contextexemplarsthatencodethetask,suchthatadding
+suchavectorduringtesttimeforanewinputcancorrectlysolvethetask. Languagemodelsdonot
+always form linear representations, however. Engels et al. (2024) find circular feature representa-
+tionsforperiodicconcepts,suchasdaysoftheweekormonthsoftheyear,usingacombinationof
+sparseautoencodersandPCA.Csorda´setal.(2024)findsthatrecurrentneuralnetworkstrainedon
+tokenrepetitioncaneitherlearnan“onion”-likerepresentationoralinearrepresentation,depending
+onthemodel’swidth. Unlikesuchpriorwork,wefindthattask-specificrepresentationswithade-
+siredstructuralpatterncanbeinducedin-context. Toourknowledge,ourworkoffersthefirstsuch
+investigationofin-contextrepresentationlearning.
+Scaling In-Context Learning Numerous works have demonstrated that in-context accuracy im-
+proveswithmoreexemplars(Brownetal.,2020;Luetal.,2022;Bigelowetal.,2023). Withlonger
+contextlengthsbecomingavailable,researchershavebeguntostudytheeffectofmany-shotprompt-
+ing(asopposedtofew-shot)(Agarwaletal.,2024;Aniletal.,2024;Lietal.,2023c). Forinstance,
+Agarwaletal.(2024)reportsimprovedperformanceonICLusinghundredstothousandsofexem-
+plars on a wide range of tasks. Similarly, Anil et al. (2024) demonstrate the ability to jail-break
+LLMs by scaling the number of exemplars. Unlike such work that evaluates model behavior, we
+study the effect of scaling context on the underlying representations, and provide a framework for
+predictingwhendiscontinuouschangesinbehaviorcanbeexpectedviamerecontext-scaling.
+SyntheticDataforInterpretability Recentworkshavedemonstratedthevalueofinterpretable,
+syntheticdatageneratingprocessesforunderstandingTransformer’sbehavior,includingin-context
+learning(Parketal.,2024a;Rameshetal.,2023;Gargetal.,2023),languageacquisition(Lubana
+etal.,2024;Qinetal.,2024;Allen-Zhu&Li,2023b),fine-tuning(Jainetal.,2023;Lubanaetal.,
+2023;Junejaetal.,2022),reasoningabilities(Prystawskietal.,2024;Khonaetal.,2024;Wenetal.,
+2024;Liuetal.,2022a),andknowledgerepresentations(Nishietal.,2024;Allen-Zhu&Li,2023a).
+Whilepriorworktypicallypre-trainsTransformersonsyntheticdata,weleveragesyntheticdatato
+studyrepresentationformationduringin-contextlearninginpretrainedlargelanguagemodels.
+7 DISCUSSION
+In this work, we show that LLMs can flexibly manipulate their representations from semanatics
+internalized based on pretraining data to semantics defined entirely in-context. To arrive at these
+results, we propose a simple but rich task of graph tracing, wherein traces of random walks on a
+graph are shown to the model in-context. The graphs are instantiated using predefined structures
+(e.g., lattices) and concepts that are semantically interesting (e.g., to define nodes), but meaning-
+less in the overall context of the problem. Interestingly, we find the ability to flexibly manipulate
+representationsisinfactemergentwithrespecttocontextsize—weproposeamodelbasedonen-
+ergyminimizationtohypothesizeamechanismfortheunderlyingdynamicsofthisbehavior. These
+resultssuggestcontext-scalingcanunlocknewcapabilities, and, morebroadly, thisaxismayhave
+as of yet been underappreciated for improving a model. In fact, we note that, to our knowledge,
+our work is to first to investigate the formation of representations entirely in-context. Our study
+also naturally motivates future work towards formation of world representations Li et al. (2023a)
+and world models (Ha & Schmidhuber, 2018) in-context, which can have significant implications
+toward building general and open-ended systems, as well as forecasting its safety concerns. We
+alsohighlighttherelationofourexperimentalsetuptosimilartasksstudiedinneurosciencelitera-
+tureGarvertetal.(2017);Marketal.(2020;2024),whereinhumansareshownrandomwalksofa
+graphofvisualconcepts;fMRIimagesofthesesubjectsdemonstratetheformationofastructured
+representationofthegraphinthehippocampal–entorhinalcortex,similartoourresultswithLLMs.
+10Preprint
+Limitations. Wedoemphasizethatourworkhasafewlimitations. Namely,PCA,ormorebroadly,
+low dimensional visualizations of high dimensional data can be difficult to interpret or sometimes
+evenmisleading. Despitesuchdifficulties,weprovidetheoreticalconnectionsbetweenenergymin-
+imizationandprincipalcomponentstoprovideacompellingexplanationforwhystructureselicited
+via PCA faithfully represent the in-context graph structure. Second, we find a strong, but never-
+thelessincomplete,causalrelationshipbetweentherepresentationsfoundbyPCAandthemodel’s
+predictions. We view the exact understanding of how these representations form, and the exact
+relationship between the representations and model predictions as an interesting future direction,
+especiallygiventhatsuchunderlyingmechanismseemstodependonthescaleofthecontext.
+ACKNOWLEDGMENTS
+WegreatlythanktheNationalDeepInferenceFabric(NDIF)pilotprogram(Fiotto-Kaufmanetal.,
+2024),especially,EmmaBortz,JadenFiotto-Kaufman,AdamBelfki,DavidBau,andtheteamwho
+provideduswithaccesstorepresentationsofLlamamodels,makingthisworkpossible.CFPandHT
+acknowledge the support of Aravinthan D.T. Samuel, Cecilia Garraffo and Douglas P. Finkbeiner.
+CFP, ESL, KN, MO, and HT are supported by the CBS-NTT Program in Physics of Intelligence.
+MW acknowledges support from a Superalignment Fast Grant from OpenAI, Effective Ventures
+Foundation,EffektivSpendenSchweiz,andtheOpenPhilanthropyProject.Partofthecomputations
+in this paper were run on the FASRC cluster supported by the FAS Division of Science Research
+Computing Group at Harvard University. ESL thanks Eric Bigelow for crucial discussions that
+helped define several hypotheses pursued in this work, and the Harvard CoCoDev lab (especially
+Peng Qian) and Talia Konkle for feedback on an earlier version of the paper. CFP thanks Zechen
+Zhang, Eric Todd, Clement Dumas, and Shivam Raval for useful discussions. All authors thank
+DavidBauandhislabforusefulfeedbackonthepaper’sresults.
+AUTHOR CONTRIBUTIONS
+CFP,AL,ESL,andHTconceivedthein-contextgraphtraversaltask,inspiredbydiscussionsandex-
+perimentationswithMOandKNinarelatedworkonpretraining. CFPandALco-ledexperiments,
+whereCFPdiscoveredthein-contextlearningofthering-structuredrepresentationwithinputfrom
+HT, kicking off this study. AL suggested extending this to grid structures to CFP connecting it to
+world representations, and ESL proposed hexagonal configurations. ESL hypothesized in-context
+transitionswithincreasedcontextandpercolationmechanism. CFPconductedsemanticoverriding
+and percolation experiments, while AL performed accuracy-energy experiments and causal inter-
+ventions, with CFP, AL, and ESL developing transition point detection methods and contributing
+toenergynormalization. YYformulatedtheenergyminimizationtheoryanditsproofs,collaborat-
+ingwithESLtoconnecttheframeworktocomponentexistenceanddemonstratePCA’soptimality.
+MWprovidedalternativehypothesesforexperimentalrobustness. CFP,AL,ESL,YY,andHTco-
+developed an initial manuscript with feedback from MW, with ESL leading the final writing and
+projectnarrativedevelopment. CFP,AL,andHTcreatedfigures,whileCFPandALjointlydevel-
+oped the appendix. AL conducted substantial experiments to verify the main claims generalize to
+othermodelswithCFP’ssupport. HTsupervisedtheproject.
+11Preprint
+REFERENCES
+Mostafa Abdou, Artur Kulmizev, Daniel Hershcovich, Stella Frank, Ellie Pavlick, and Anders
+Søgaard. Can language models encode perceptual structure without grounding? a case study
+incolor. arXivpreprintarXiv:2109.06129,2021.
+Rishabh Agarwal, Avi Singh, Lei M. Zhang, Bernd Bohnet, Luis Rosias, Stephanie Chan, Biao
+Zhang, Ankesh Anand, Zaheer Abbas, Azade Nova, John D. Co-Reyes, Eric Chu, Feryal Be-
+hbahani, Aleksandra Faust, and Hugo Larochelle. Many-shot in-context learning, 2024. URL
+https://arxiv.org/abs/2404.11018.
+Ekin Akyu¨rek, Dale Schuurmans, Jacob Andreas, Tengyu Ma, and Denny Zhou. What learning
+algorithm is in-context learning? investigations with linear models, 2023. URL https://
+arxiv.org/abs/2211.15661.
+Zeyuan Allen-Zhu and Yuanzhi Li. Physics of language models: Part 3.1, knowledge storage and
+extraction. arXivpreprintarXiv:2309.14316,2023a.
+ZeyuanAllen-ZhuandYuanzhiLi. Physicsoflanguagemodels: Part1, learninghierarchicallan-
+guagestructures. ArXive-prints,abs/2305.13673,May,2023b.
+Cem Anil, Esin Durmus, Mrinank Sharma, Joe Benton, Sandipan Kundu, Joshua Batson, Nina
+Rimsky,MegTong,JesseMu,DanielFord,etal.Many-shotjailbreaking.Anthropic,April,2024.
+Anthropic AI. Scaling Monosemanticity: Extracting Interpretable Features from
+Claude 3 Sonnet, 2024. https://transformer-circuits.pub/2024/
+scaling-monosemanticity/index.html.
+Andy Arditi, Oscar Obeso, Aaquib Syed, Daniel Paleka, Nina Panickssery, Wes Gurnee, and
+Neel Nanda. Refusal in language models is mediated by a single direction. arXiv preprint
+arXiv:2406.11717,2024.
+Eric J Bigelow, Ekdeep Singh Lubana, Robert P Dick, Hidenori Tanaka, and Tomer D Ullman.
+In-contextlearningdynamicswithrandombinarysequences. arXivpreprintarXiv:2310.17639,
+2023.
+NedBlock. Semantics,conceptualrole. Routledgeencyclopediaofphilosophy,8:652–657,1998.
+TimothyFBrady, TaliaKonkle, andGeorgeA Alvarez. Compressioninvisualworking memory:
+using statistical regularities to form more efficient memory representations. Journal of Experi-
+mentalPsychology: General,138(4):487,2009.
+Tom Brown, Benjamin Mann, Nick Ryder, Melanie Subbiah, Jared D Kaplan, Prafulla Dhari-
+wal, Arvind Neelakantan, Pranav Shyam, Girish Sastry, Amanda Askell, Sandhini Agar-
+wal, Ariel Herbert-Voss, Gretchen Krueger, Tom Henighan, Rewon Child, Aditya Ramesh,
+Daniel Ziegler, Jeffrey Wu, Clemens Winter, Chris Hesse, Mark Chen, Eric Sigler, Mateusz
+Litwin, Scott Gray, Benjamin Chess, Jack Clark, Christopher Berner, Sam McCandlish, Alec
+Radford, Ilya Sutskever, and Dario Amodei. Language models are few-shot learners. In
+H. Larochelle, M. Ranzato, R. Hadsell, M.F. Balcan, and H. Lin (eds.), Advances in Neu-
+ral Information Processing Systems, volume 33, pp. 1877–1901. Curran Associates, Inc.,
+2020. URL https://proceedings.neurips.cc/paper_files/paper/2020/
+file/1457c0d6bfcb4967418bfb8ac142f64a-Paper.pdf.
+CollinBurns, HaotianYe, DanKlein, andJacobSteinhardt. Discoveringlatentknowledgeinlan-
+guagemodelswithoutsupervision. arXivpreprintarXiv:2212.03827,2022.
+Ro´bert Csorda´s, Christopher Potts, Christopher D Manning, and Atticus Geiger. Recurrent neural
+networkslearntostoreandgeneratesequencesusingnon-linearrepresentations. arXivpreprint
+arXiv:2408.10920,2024.
+AbhimanyuDubey,AbhinavJauhri,AbhinavPandey,andetal. Thellama3herdofmodels,2024.
+URLhttps://arxiv.org/abs/2407.21783.
+12Preprint
+JoshuaEngels,IsaacLiao,EricJ.Michaud,WesGurnee,andMaxTegmark.Notalllanguagemodel
+featuresarelinear,2024. URLhttps://arxiv.org/abs/2405.14860.
+KyFan. Onatheoremofweylconcerningeigenvaluesoflineartransformationsi. Proceedingsof
+theNationalAcademyofSciences,35(11):652–655,1949.
+Jaden Fiotto-Kaufman, Alexander R Loftus, Eric Todd, Jannik Brinkmann, Caden Juang, Koyena
+Pal,CanRager,AaronMueller,SamuelMarks,ArnabSenSharma,FrancescaLucchetti,Michael
+Ripa,AdamBelfki,NikhilPrakash,SumeetMultani,CarlaBrodley,ArjunGuha,JonathanBell,
+Byron Wallace, and David Bau. Nnsight and ndif: Democratizing access to foundation model
+internals,2024. URLhttps://arxiv.org/abs/2407.14561.
+Shivam Garg, Dimitris Tsipras, Percy Liang, and Gregory Valiant. What can transformers learn
+in-context? acasestudyofsimplefunctionclasses,2023. URLhttps://arxiv.org/abs/
+2208.01066.
+MonaMGarvert,RaymondJDolan,andTimothyEJBehrens. Amapofabstractrelationalknowl-
+edgeinthehumanhippocampal–entorhinalcortex. elife,6:e17086,2017.
+GemmaTeam.Gemma2:Improvingopenlanguagemodelsatapracticalsize,2024.URLhttps:
+//arxiv.org/abs/2408.00118.
+PulkitGopalani,EkdeepSinghLubana,andWeiHu. Abruptlearningintransformers: Acasestudy
+onmatrixcompletion. arXivpreprintarXiv:2410.22244,2024.
+Wes Gurnee and Max Tegmark. Language models represent space and time. arXiv preprint
+arXiv:2310.02207,2023.
+DavidHaandJu¨rgenSchmidhuber. Worldmodels. arXivpreprintarXiv:1803.10122,2018.
+GilbertHarman. Conceptualrolesemantics. NotreDameJournalofFormalLogic,23(2):242–256,
+1982.
+Roee Hendel, Mor Geva, and Amir Globerson. In-context learning creates task vectors. In
+Houda Bouamor, Juan Pino, and Kalika Bali (eds.), Findings of the Association for Compu-
+tational Linguistics: EMNLP 2023, pp. 9318–9333, Singapore, December 2023. Association
+for Computational Linguistics. doi: 10.18653/v1/2023.findings-emnlp.624. URL https:
+//aclanthology.org/2023.findings-emnlp.624.
+H. Hooyberghs, B. Van Schaeybroeck, and J. O. Indekeu. Percolation on bipartite scale-free net-
+works. PhysicaA:StatisticalMechanicsanditsApplications,389(15):2920–2929,August2010.
+ISSN0378-4371.
+SamyakJain,RobertKirk,EkdeepSinghLubana,RobertPDick,HidenoriTanaka,EdwardGrefen-
+stette,TimRockta¨schel,andDavidScottKrueger. Mechanisticallyanalyzingtheeffectsoffine-
+tuningonprocedurallydefinedtasks. arXivpreprintarXiv:2311.12786,2023.
+ErikJenner,ShreyasKapur,VasilGeorgiev,CameronAllen,ScottEmmons,andStuartRussell.Evi-
+denceoflearnedlook-aheadinachess-playingneuralnetwork.arXivpreprintarXiv:2406.00877,
+2024.
+JeeveshJuneja,RachitBansal,KyunghyunCho,Joa˜oSedoc,andNaomiSaphra.Linearconnectivity
+revealsgeneralizationstrategies. arXivpreprint.arXiv:2205.12411,2022.
+Mikail Khona, Maya Okawa, Jan Hula, Rahul Ramesh, Kento Nishi, Robert Dick, Ekdeep Singh
+Lubana,andHidenoriTanaka. Towardsanunderstandingofstepwiseinferenceintransformers:
+Asyntheticgraphnavigationmodel. arXivpreprintarXiv:2402.07757,2024.
+MichaelLaskin,LuyuWang,JunhyukOh,EmilioParisotto,StephenSpencer,RichieSteigerwald,
+DJStrouse,StevenHansen,AngelosFilos,EthanBrooks,etal.In-contextreinforcementlearning
+withalgorithmdistillation. arXivpreprintarXiv:2210.14215,2022.
+AndrewLee,XiaoyanBai,ItamarPres,MartinWattenberg,JonathanKKummerfeld,andRadaMi-
+halcea. Amechanisticunderstandingofalignmentalgorithms: Acasestudyondpoandtoxicity.
+arXivpreprintarXiv:2401.01967,2024a.
+13Preprint
+JonathanLee,AnnieXie,AldoPacchiano,YashChandak,ChelseaFinn,OfirNachum,andEmma
+Brunskill.Supervisedpretrainingcanlearnin-contextreinforcementlearning.AdvancesinNeural
+InformationProcessingSystems,36,2024b.
+Belinda Z Li, Maxwell Nye, and Jacob Andreas. Implicit representations of meaning in neural
+languagemodels. arXivpreprintarXiv:2106.00737,2021.
+KennethLi,AspenKHopkins,DavidBau,FernandaVie´gas,HanspeterPfister,andMartinWatten-
+berg. Emergentworldrepresentations: Exploringasequencemodeltrainedonasynthetictask.
+InTheEleventhInternationalConferenceonLearningRepresentations,2022.
+Kenneth Li, Aspen K Hopkins, David Bau, Fernanda Vie´gas, Hanspeter Pfister, and Martin Wat-
+tenberg. Emergent world representations: Exploring a sequence model trained on a synthetic
+task. In The Eleventh International Conference on Learning Representations, 2023a. URL
+https://openreview.net/forum?id=DeG07_TcZvT.
+KennethLi,OamPatel,FernandaVie´gas,HanspeterPfister,andMartinWattenberg. Inference-time
+intervention: Elicitingtruthfulanswersfromalanguagemodel. InThirty-seventhConferenceon
+NeuralInformationProcessingSystems,2023b.URLhttps://openreview.net/forum?
+id=aLLuYpn83y.
+MukaiLi,ShansanGong,JiangtaoFeng,YihengXu,JunZhang,ZhiyongWu,andLingpengKong.
+In-contextlearningwithmanydemonstrationexamples.arXivpreprintarXiv:2302.04931,2023c.
+Bingbin Liu, Jordan T Ash, Surbhi Goel, Akshay Krishnamurthy, and Cyril Zhang. Transformers
+learnshortcutstoautomata. arXivpreprintarXiv:2210.10749,2022a.
+ZimingLiu,OuailKitouni,NiklasSNolte,EricMichaud,MaxTegmark,andMikeWilliams. To-
+wardsunderstandinggrokking: Aneffectivetheoryofrepresentationlearning. AdvancesinNeu-
+ralInformationProcessingSystems,35:34651–34663,2022b.
+YaoLu,MaxBartolo,AlastairMoore,SebastianRiedel,andPontusStenetorp.Fantasticallyordered
+prompts and where to find them: Overcoming few-shot prompt order sensitivity. In Smaranda
+Muresan, Preslav Nakov, and Aline Villavicencio (eds.), Proceedings of the 60th Annual Meet-
+ing of the Association for Computational Linguistics (Volume 1: Long Papers), pp. 8086–8098,
+Dublin,Ireland,May2022.AssociationforComputationalLinguistics. doi: 10.18653/v1/2022.
+acl-long.556. URLhttps://aclanthology.org/2022.acl-long.556.
+EkdeepSinghLubana,EricJBigelow,RobertPDick,DavidKrueger,andHidenoriTanaka. Mech-
+anisticmodeconnectivity. InInternationalConferenceonMachineLearning,pp.22965–23004.
+PMLR,2023.
+Ekdeep Singh Lubana, Kyogo Kawaguchi, Robert P Dick, and Hidenori Tanaka. A percolation
+model of emergence: Analyzing transformers trained on a formal language. arXiv preprint
+arXiv:2408.12578,2024.
+ShirleyMark,RaniMoran,ThomasParr,SteveWKennerley,andTimothyEJBehrens.Transferring
+structuralknowledgeacrosscognitivemapsinhumansandmodels. Naturecommunications,11
+(1):4783,2020.
+Shirley Mark, Phillipp Schwartenbeck, Avital Hahamy, Veronika Samborska, Alon B Baram, and
+TimothyEBehrens.Flexibleneuralrepresentationsofabstractstructuralknowledgeinthehuman
+entorhinalcortex. Elife,13,2024.
+SamuelMarksandMaxTegmark.Thegeometryoftruth:Emergentlinearstructureinlargelanguage
+modelrepresentationsoftrue/falsedatasets,2024. URLhttps://arxiv.org/abs/2310.
+06824.
+TomasMikolov,KaiChen,GregCorrado,andJeffreyDean. Efficientestimationofwordrepresen-
+tationsinvectorspace,2013. URLhttps://arxiv.org/abs/1301.3781.
+NeelNanda,AndrewLee,andMartinWattenberg. Emergentlinearrepresentationsinworldmodels
+ofself-supervisedsequencemodels. arXivpreprintarXiv:2309.00941,2023.
+14Preprint
+M.E.J.Newman.TheStructureandFunctionofComplexNetworks.SIAMReview,45(2):167–256,
+January2003. ISSN0036-1445,1095-7200.
+Kento Nishi, Maya Okawa, Rahul Ramesh, Mikail Khona, Hidenori Lubana, Tanaka, and Ekdeep
+Singh. Representation shattering in transformers: A synthetic study with knowledge editing.
+arXivpreprintarXiv:2410.17194,2024.
+CoreFranciscoPark,EkdeepSinghLubana,ItamarPres,andHidenoriTanaka.Competitiondynam-
+icsshapealgorithmicphasesofin-contextlearning. arXivpreprintarXiv:2412.01003,2024a.
+Core Francisco Park, Maya Okawa, Andrew Lee, Ekdeep Singh Lubana, and Hidenori Tanaka.
+Emergenceof hiddencapabilities: Exploringlearningdynamics inconceptspace, 2024b. URL
+https://arxiv.org/abs/2406.19370.
+KihoPark,YoJoongChoe,YiboJiang,andVictorVeitch. Thegeometryofcategoricalandhierar-
+chicalconceptsinlargelanguagemodels. arXivpreprintarXiv:2406.01506,2024c.
+KihoPark,YoJoongChoe,andVictorVeitch.Thelinearrepresentationhypothesisandthegeometry
+oflargelanguagemodels,2024d. URLhttps://arxiv.org/abs/2311.03658.
+RomaPatelandElliePavlick. Mappinglanguagemodelstogroundedconceptualspaces. InInter-
+nationalconferenceonlearningrepresentations,2022.
+JeffreyPennington,RichardSocher,andChristopherDManning. Glove: Globalvectorsforword
+representation. InProceedingsofthe2014conferenceonempiricalmethodsinnaturallanguage
+processing(EMNLP),pp.1532–1543,2014.
+BenPrystawski,MichaelLi,andNoahGoodman. Whythinkstepbystep? reasoningemergesfrom
+thelocalityofexperience. AdvancesinNeuralInformationProcessingSystems,36,2024.
+Tian Qin, Naomi Saphra, and David Alvarez-Melis. Sometimes i am a tree: Data drives unstable
+hierarchicalgeneralization. arXivpreprintarXiv:2412.04619,2024.
+RahulRamesh,EkdeepSinghLubana,MikailKhona,RobertPDick,andHidenoriTanaka. Com-
+positional capabilities of autoregressive transformers: A study on synthetic, interpretable tasks.
+arXivpreprintarXiv:2311.12997,2023.
+Nina Rimsky, Nick Gabrieli, Julian Schulz, Meg Tong, Evan Hubinger, and Alexander Turner.
+Steering llama 2 via contrastive activation addition. In Lun-Wei Ku, Andre Martins, and
+Vivek Srikumar (eds.), Proceedings of the 62nd Annual Meeting of the Association for Com-
+putational Linguistics (Volume 1: Long Papers), pp. 15504–15522, Bangkok, Thailand, August
+2024. Association for Computational Linguistics. doi: 10.18653/v1/2024.acl-long.828. URL
+https://aclanthology.org/2024.acl-long.828.
+AdamSShai,SarahEMarzen,LucasTeixeira,AlexanderGietelinkOldenziel,andPaulMRiech-
+ers. Transformers represent belief state geometry in their residual stream. arXiv preprint
+arXiv:2405.15943,2024.
+DanielSpielman. Spectralandalgebraicgraphtheory. Yalelecturenotes,draftofDecember,4:47,
+2019.
+Aarohi Srivastava, Abhinav Rastogi, Abhishek Rao, Abu Awal Md Shoeb, Abubakar Abid, Adam
+Fisch, Adam R Brown, Adam Santoro, Aditya Gupta, Adria` Garriga-Alonso, et al. Beyond the
+imitationgame:Quantifyingandextrapolatingthecapabilitiesoflanguagemodels.arXivpreprint
+arXiv:2206.04615,2022.
+Eric Todd, Millicent L Li, Arnab Sen Sharma, Aaron Mueller, Byron C Wallace, and David Bau.
+Functionvectorsinlargelanguagemodels. arXivpreprintarXiv:2310.15213,2023.
+Aaron Traylor, Roman Feiman, and Ellie Pavlick. Can neural networks learn implicit logic from
+physicalreasoning? InTheeleventhinternationalconferenceonlearningrepresentations,2022.
+WilliamThomasTutte. Howtodrawagraph. ProceedingsoftheLondonMathematicalSociety,3
+(1):743–767,1963.
+15Preprint
+KeyonVafa,JustinYChen,JonKleinberg,SendhilMullainathan,andAsheshRambachan. Evalu-
+atingtheworldmodelimplicitinagenerativemodel. arXivpreprintarXiv:2406.03689,2024.
+Johannes Von Oswald, Eyvind Niklasson, Ettore Randazzo, Joa˜o Sacramento, Alexander Mordv-
+intsev, Andrey Zhmoginov, and Max Vladymyrov. Transformers learn in-context by gradient
+descent. InInternationalConferenceonMachineLearning,pp.35151–35174.PMLR,2023a.
+Johannes Von Oswald, Maximilian Schlegel, Alexander Meulemans, Seijin Kobayashi, Eyvind
+Niklasson,NicolasZucchet,NinoScherrer,NolanMiller,MarkSandler,MaxVladymyrov,etal.
+Uncovering mesa-optimization algorithms in transformers. arXiv preprint arXiv:2309.05858,
+2023b.
+Jason Wei, Yi Tay, Rishi Bommasani, Colin Raffel, Barret Zoph, Sebastian Borgeaud, Dani Yo-
+gatama,MaartenBosma,DennyZhou,DonaldMetzler,etal.Emergentabilitiesoflargelanguage
+models. arXivpreprintarXiv:2206.07682,2022.
+KaiyueWen,YuchenLi,BingbinLiu,andAndrejRisteski. Transformersareuninterpretablewith
+myopic methods: a case study with bounded dyck grammars. Advances in Neural Information
+ProcessingSystems,36,2024.
+JamesCRWhittington,TimothyHMuller,ShirleyMark,GuifenChen,CaswellBarry,NeilBurgess,
+andTimothyEJBehrens. Thetolman-eichenbaummachine: unifyingspaceandrelationalmem-
+orythroughgeneralizationinthehippocampalformation. Cell,183(5):1249–1263,2020.
+Yongyi Yang, David P Wipf, et al. Transformers from an optimization perspective. Advances in
+NeuralInformationProcessingSystems,35:36958–36971,2022.
+16Preprint
+A ADDITIONAL EXPERIMENTAL DETAILS
+Hereweprovidesomeadditionaldetailsregardingourexperimentalsetups.
+ContextWindows. Ouranalysesrequirecomputingmeantokenrepresentationsh foreverytoken
+i
+i ∈ T in our graphs. To do so, we grab the activations per each token in the most recent context
+windowofN tokens. Becausewefurtherrequirethateachtokenisobservedatleastonceinour
+w
+window, we use a batch of prompts, where the batch size is equal to the number of nodes in our
+graph. Foreachpromptinthebatch,westartourrandomtraversal(orrandompairwisesampling)
+with a different node, ensuring that each node shows up at least once in the context. In the case
+whenourcontextlength(N )islongerthanthewindow,wesimplyuseeverytoken(N =N ).
+c w c
+ComputationalResources. WerunourexperimentsoneitherA100nodes,orbyusingtheAPIs
+providedbyNDIF(Fiotto-Kaufmanetal.,2024).
+B THE CONNECTION BETWEEN ENERGY MINIMIZATION AND PCA
+STUCTURE
+Inthissection,foramatrixM ∈Rn×d,weuselowercaseboldletterswithsubscripttorepresentthe
+columnsforM,e.g. m representsthek-thcolumnofM. Moreover,weuseσ (M)torepresent
+k k
+the k-th largest singular value of M and when M is PSD we use λ (M) to represent the k-th
+k
+largesteigenvalueofM. Moreover, weusee torepresentavectorwithall-zeroentriesexcepta
+k
+1atentryk,whosedimensionisinferredfromcontext,and1torepresentavectorwithallentries
+being1. Foranaturalnumbern,weuse[n]torepresent{1,2,··· ,n}.
+Furthermore,weuse(cid:8) z(k)(cid:9)n
+torepresenttheenergyminimizersoftheDirichletenergy,defined
+k=1
+inSection4. LetA ∈ Rn×n betheadjacencymatrixofthegraph, D = diag(A1)bethedegree
+matrix,andL = D−AbetheLaplacianmatrix. Throughaneasycalculationonecanknowthat
+foranyvectorx∈Rn,
+E (x)=⟨x,Lx⟩. (9)
+G
+Therefore,fromtheSpectralTheorem(e.g. Theorem2.2.1inSpielman(2019)),weknowthatz is
+k
+theeigenvectorofLcorrespondingtoλ (L)=E (z ).
+n−k+1 G k
+Wewillshowthat,ifamatrixH ∈Rn×dminimizestheenergyandisnon-degenerated(hasseveral
+distinctandnon-zerosingularvalues),thenthePCAmustexactlygivetheleadingenergyminimiz-
+ers,startingfromz .
+2
+TheoremB.1. LetGbeagraphandϵ >ϵ >···>ϵ >0bes≤min{n,d}−1distinctpositive
+1 2 s
+numbers. LetmatrixH ∈Rn×dbethesolutionofthefollowingoptimizationproblem:
+H =arg min E (X) (10)
+G
+X∈Rn×d
+s.t. λ (X)≥ϵ , ∀k ∈[r], (11)
+k k
+thenthek-thprinciplecomponentofH (fork ∈[r])isbez .
+k+1
+Proof. Wefirstprovethattheleadingleft-singularvectorsofH areexactlyenergyminimizers. Let
+r = min{n,d}. Let the SVD of H be H = UΣV⊤, where Σ = diag[σ ,σ ,··· ,σ ] are the
+1 2 d
+singularvaluesofH,andU ∈Rn×r,V ∈Rr×d.
+17Preprint
+Leth′ representsthei-throwofH. Noticethat
+i
+E G(H)=(cid:88) A i,j(cid:13) (cid:13)h′ i−h′ j(cid:13) (cid:13)2 (12)
+i,j
+=(cid:88)
+A
+(cid:13)
+(cid:13)(e −e
+)⊤H(cid:13) (cid:13)2
+(13)
+i,j(cid:13) i j (cid:13)
+i,j
+=(cid:88)
+A
+(cid:13)
+(cid:13)(e −e
+)⊤UΣ(cid:13) (cid:13)2
+(14)
+i,j(cid:13) i j (cid:13)
+i,j
+r
+=(cid:88)(cid:88) σ2⟨e −e ,u ⟩2 (15)
+k i j k
+i,j k=1
+r
+(cid:88)
+= σ2E (u ). (16)
+k G k
+k=1
+Since σ ’s and u ’s are independent, no matter what are the values of u , we know that each σ
+k k k k
+will take the smallest possible value, and from the given condition, it is σ = ϵ ,∀k ∈ [s], and
+k k
+σ =0,∀k ∈[r]\[s].
+k
+Since u ’s are singular vectors, we have u ’s are orthogonal to each other. Using Theorem 1 in
+k k
+Fan(1949),weknowthatforanys′ ∈ [n],theminimizerof(cid:80)s′ E (u )isu = z ,∀k ∈ [s′].
+k=1 G k k k
+Therefore, it is evident that the minimizer of (cid:80)s σ2E (u ) must satisfies u = z ,∀k ∈ [s],
+k=1 k G k k k
+sincefromtheaboveargumentofσ ’sandthegivenconditionconditionweknowthatσ > σ >
+k 1 2
+···>σ >0.
+s
+Nowwehaveprovedthatu = z ,∀k ∈ [s]. NextweconsidertheoutputofPCA.Letp bethe
+k k k
+k-thprinciplecomponentoutputbythePCAofH. Weknowthatp istheeigenvectorof
+k
+C =H(cid:99)H(cid:99)⊤ (17)
+thatcorrespondstothek-thlargesteigenvalueofC,whereH(cid:99) = H − 111⊤H isthecentralized
+n
+H.
+FromtheSpectralTheorem,wehave
+p =arg max ⟨p,Cp⟩. (18)
+k
+p∈Sn−1
+p⊥pi,∀i≤k−1
+LetJ =span{1}bethesetofvectorswhoseeveryentryhasthesamevalue.LetJ⊥bethesubspace
+inRnthatisorthogonaltoJ.ForasubspaceKofRn,letΠ :Rn →Rnbetheprojectionoperator
+K
+ontoK.
+Wehavethat
+p =arg max ⟨p,Cp⟩ (19)
+1
+p∈Sn−1
+(cid:28) (cid:18) (cid:19) (cid:18) (cid:19) (cid:29)
+1 1
+=arg max p, I− 11⊤ HH⊤ I− 11⊤ p (20)
+p∈Sn−1 n n
+=arg max (cid:10) Π (p),HH⊤Π (p)(cid:11) (21)
+J⊥ J⊥
+p∈Sn−1
+=arg max
+(cid:10) p,HH⊤p(cid:11)
+, (22)
+p∈Sn−1
+p⊥J
+which,againfromSpectralTheorem,istheeigenvectorofthesecondlargesteigenvalueofHH⊤,
+whichisu = z . Usinganinductionandthesamereasoning,itfollowsthatforanyk ∈ [s],we
+2 2
+havep =z . Thisprovestheproposition.
+k k+1
+18Preprint
+C ADDITIONAL RESULTS
+C.1 DETAILEDLAYER-WISEVISUALIZATIONOFREPRESENTATIONS
+InFigure9andFigure10weprovideadditionalvisualizationsperlayerforeachofourmodelsand
+eachofourdatageneratingprocesses.
+Layer 0 Layer 2 Layer 4 Layer 6
+0.6 1.25
+0.75 1.0 1.00
+0.4
+0.50 0.75
+0.2 0.25 0.5 0.50
+0.0 0.00 0.25
+0.0 0.00
+0.2 0.25
+0.25
+0.4 0.50 0.5 0.50
+0.6 0.75 0.75
+1.0
+0.6 0.4 0.2 0.0 0.2 0.4 1.0 0.5 0.0 0.5 1.5 1.0 0.5 0.0 0.5 1.0 1.0 0.5 0.0 0.5 1.0 1.5
+Layer 8 Layer 10 Layer 12 Layer 14
+1.5 1.0 1.5 2
+1.0 0.5 1.0
+1
+0.5 0.0 0.5
+0.0 0.5 0.0 0
+0.5 1.0 0.5 1
+1.0
+1.0 1.5
+2
+1.0 0.5 0.0 0.5 1.0 1.5 2.0 1 0 1 2 1 0 1 2 2 1 0 1 2 3
+Layer 16 Layer 18 Layer 20 Layer 22
+3
+3 4
+2 4
+2
+1 1 2 2
+0 0 0 0
+1 1
+2
+2 2 2
+3 4
+3 4 4
+6
+3 2 1 0 1 2 3 4 4 2 0 2 4 4 2 0 2 4 6 4 2 0 2 4 6 8
+Layer 24 Layer 26 Layer 28 Layer 30
+10.0
+6 15
+7.5 10
+4 10
+5.0
+2 2.5 5 5
+0
+0.0 0 0
+2
+2.5 5
+4 5
+6 5.0 10
+8 7.5 10 15
+10.0
+7.5 5.0 2.5 0.0 2.5 5.0 7.5 10 5 0 5 10 10 5 0 5 10 15 15 10 5 0 5 10 15
+Figure9: Weplot2dPCAprojectionsfromeveryotherlayerinLlama3.1-8B(Dubeyetal.,2024),
+giventhegrid-traversaltask. Indeeperlayers,wecanseeaclearvisualizationofthegrid.
+19Preprint
+Layer 0 Layer 2 Layer 4 Layer 6
+0.8
+0.6 0.75
+0.6 0.50 1.0
+0.4 0.4
+0.2 0.25 0.5
+0.2 0.00
+0.0 0.0
+0.0 0.2 0.25
+0.4 0.50 0.5
+0.2
+0.6 0.75 1.0
+0.4 0.8 1.00
+0.6 0.4 0.2 0.0 0.2 0.4 0.6 0.500.250.000.250.500.751.001.25 1.0 0.5 0.0 0.5 1.0 1.0 0.5 0.0 0.5 1.0
+Layer 8 Layer 10 Layer 12 Layer 14
+2.0 2
+1.0
+1.5 1.5
+0.5 1.0 1.0 1
+0.0 0.5 0.5 0
+0.0 0.0
+0.5 0.5 1
+0.5
+1.0
+1.0 1.0 2
+1.5
+1.0 0.5 0.0 0.5 1.0 1.5 1.0 0.5 0.0 0.5 1.0 1.5 1.5 1.0 0.5 0.0 0.5 1.0 1.5 2.0 2 1 0 1 2
+Layer 16 Layer 18 Layer 20 Layer 22
+4 6
+3
+3 3 4
+2 2 2
+2
+1 1 1
+0 0 0 0
+1 1 2
+1 2
+2 4
+2 3
+3 43 4 6
+3 2 1 0 1 2 3 4 2 0 2 4 4 2 0 2 4 6 7.5 5.0 2.5 0.0 2.5 5.0 7.5
+Layer 24 Layer 26 Layer 28 Layer 30
+8
+6 7.5 10 20
+4 5.0 5 15
+2 2.5 10
+0 0.0 0 5
+2 2.5 5 0
+4 5.0 5
+10
+6 7.5 10
+8 10.0 15 15
+7.5 5.0 2.5 0.0 2.5 5.0 7.5 10 5 0 5 10 10 5 0 5 10 15 20 15 10 5 0 5 10 15
+Figure10: Weplot2DPCAprojectionsfromeveryotherlayerinLlama3.1-8B(Dubeyetal.,2024)
+forthehexagonalgridtask.
+20Preprint
+C.2 PCA,DIRICHLETENERGY,ANDACCURACYRESULTSONOTHERMODELS
+Hereweprovideresultsfromotherlanguagemodels,i.e.,Llama3-1B(Dubeyetal.,2024),Llama3-
+8B-Instruct, Gemma2-2B (Gemma Team, 2024), and Gemma2-9B. In Figure 11, we plot the 2d
+PCA projections from the last layer of various models for various data generating processes. In
+Figure 12, we plot the normalized Dirichlet energy curves against accuracy for various language
+modelsonvarioustasks. Acrossallmodelsandtasks,weseeresultssimilartothemainpaper.
+Llama_3.2_1B: grid Llama_3.1_8B_Instruct: grid Gemma_2_2B: grid Gemma_2_9B: grid
+6 100 100
+10
+4
+2 5 50 50
+0 0 0 0
+2
+4 5 50 50
+6 10
+100 100
+8
+7.5 5.0 2.5 0.0 2.5 5.0 7.5 15 10 5 0 5 10 100 50 0 50 100 100 50 0 50 100
+Llama_3.2_1B: ring Llama_3.1_8B_Instruct: ring Gemma_2_2B: ring Gemma_2_9B: ring
+30 40
+3 1.5
+20 30
+2 1.0 10 20
+1 0.5 0 10
+0 10 0
+0.0 20 10
+1
+0.5 30 20
+2
+40 30
+3 1.0
+3 2 1 0 1 2 3 4 2.0 1.5 1.0 0.5 0.0 0.5 1.0 40 20 0 20 40 20 0 20 40
+Llama_3.2_1B: hex Llama_3.1_8B_Instruct: hex Gemma_2_2B: hex Gemma_2_9B: hex
+8 100
+15 100
+6 10 50
+4 50
+2 5 0
+0
+0 0 50
+2 5 100 50
+4
+6 10 150 100
+7.5 5.0 2.5 0.0 2.5 5.0 15 10 5 0 5 10 15 150 100 50 0 50 100 100 50 0 50 100
+Figure11: Weplot2dPCAprojectionsfromthelastlayerofvariouslanguagemodels,givenvarious
+datageneratingprocesses. Forthegridandhexagonalgraphs,weapplyPCAonthelastlayers. For
+the rings, we visualize layers 14, 10, 16, and 20 respectively. Interestingly, for Llama3.2-1B, we
+findtheringrepresentationinthe2ndand3rdprincipalcomponents.
+C.3 STANDARDIZEDDIRICHLETENERGY
+In Fig. 13, we report Dirichlet energy values computed after standardization of representations,
+i.e., aftermean-centeringthemandnormalizingbythestandarddeviation. Thisrendersthetrivial
+solution to Dirichlet energy minimization infeasible, since assigning a constant representation to
+all nodes will yield infinite energy (due to zero variance). As can be seen in our results, the plots
+arequalitativelysimilartothenon-standardizedenergyresults(Fig.12),butmorenoisy,especially
+for the ring graphs. This is expected, since standardization can exacerbate the influence of noise,
+yieldingfluctuationsintheenergycalculation.
+21Preprint
+0.05
+0.04 0.03 0.02 0.01 100 101 102 103
+Context Length
+ygrenE
+telhciriD dezilamroN
+Layer 18
+Layer 30
+Accuracy
+Llama_3.1_8B: grid
+0.05
+0.04 0.03 0.02 0.01 0.00100 101 102 103
+Context Length
+ygrenE
+telhciriD dezilamroN
+Layer 9
+Layer 15
+Accuracy
+Llama_3.2_1B: grid
+0.045 0.040
+0.035 0.030 0.025 0.020 0.015 0.010 100 101 102 103
+Context Length
+ygrenE
+telhciriD dezilamroN
+Layer 18
+Layer 30
+Accuracy
+Llama_3.1_8B_Instruct: grid
+0.030 0.025
+0.020 0.015 0.010 0.005 100 101 102 103
+Context Length
+ygrenE
+telhciriD dezilamroN
+Layer 18
+Layer 24
+Accuracy
+Gemma_2_2B: grid
+0.022 0.020
+0.018 0.016 0.014 0.012 0.010 0.008 100 101 102 103
+Context Length
+ygrenE
+telhciriD dezilamroN
+Layer 28
+Layer 36
+Accuracy
+Gemma_2_9B: grid
+0.10
+0.08
+0.06
+0.04 0.02 100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Llama_3.1_8B: ring
+0.12
+0.10 0.08
+0.06
+0.04 0.02 0.00100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Llama_3.2_1B: ring
+0.12
+0.10 0.08
+0.06
+0.04 0.02 100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Llama_3.1_8B_Instruct: ring
+0.08 0.07
+0.06 0.05
+0.04
+0.03 0.02 0.01 100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Gemma_2_2B: ring
+0.06
+0.05
+0.04
+0.03 0.02 100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Gemma_2_9B: ring
+0.025
+0.020
+0.015 0.010 0.005
+100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Llama_3.1_8B: hex
+0.025
+0.020 0.015
+0.010 0.005
+100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Llama_3.2_1B: hex
+0.0225 0.0200
+0.0175 0.0150
+0.0125 0.0100 0.0075 0.0050
+100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Llama_3.1_8B_Instruct: hex
+0.016 0.014
+0.012 0.010
+0.008 0.006 0.004
+100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+Gemma_2_2B: hex
+0.011 0.010
+0.009 0.008
+0.007 0.006 0.005 0.004
+100 101 102 103
+Context Length
+ygrenE
+telhciriD
+dezilamroN
+0.8
+0.6 0.4 0.2
+Gemma_2_9B: hex
+ycaruccA
+1.0
+0.8 0.6
+0.4
+0.2 0.0
+ycaruccA
+1.0 0.8
+0.6
+0.4 0.2
+ycaruccA
+0.8
+0.6 0.4 0.2 ycaruccA
+0.8
+0.6
+0.4
+0.2 0.0
+ycaruccA
+0.8
+0.6
+0.4 0.2
+ycaruccA
+0.8
+0.6 0.4 0.2 ycaruccA
+1.0
+0.8 0.6
+0.4
+0.2 0.0
+ycaruccA
+0.8
+0.6
+0.4 0.2
+ycaruccA
+0.9 0.8
+0.7 0.6 0.5 0.4 0.3 0.2 0.1 ycaruccA
+1.0
+0.8 0.6
+0.4
+0.2 0.0
+ycaruccA
+0.8
+0.6
+0.4 0.2
+ycaruccA
+0.8 0.7
+0.6 0.5 0.4 0.3 0.2 0.1 ycaruccA
+0.8
+0.6
+0.4
+0.2 0.0
+ycaruccA
+0.8 0.7
+0.6 0.5
+0.4 0.3 0.2 0.1
+ycaruccA
+Figure 12: Accuracy versus normalized Dirichlet energy curves for various language models on
+various tasks. For every model and task, we see energy minimized before accuracy starting to
+improve.
+0.130 0.125 0.120 0.115 0.110 0.105 0.100 0.095
+0.090
+100 101 102 103
+Context Length
+ygrenE telhciriD dezilamroN
+Layer 18
+Layer 30
+Accuracy
+Llama_3.1_8B: grid
+0.13 0.12 0.11 0.10 0.09
+0.08
+100 101 102 103
+Context Length
+ygrenE telhciriD dezilamroN
+Layer 9
+Layer 15
+Accuracy
+Llama_3.2_1B: grid
+0.130 0.125 0.120 0.115 0.110 0.105 0.100 0.095
+0.090
+100 101 102 103
+Context Length
+ygrenE telhciriD dezilamroN
+Layer 18
+Layer 30
+Accuracy
+Llama_3.1_8B_Instruct: grid
+0.125 0.120 0.115 0.110 0.105 0.100 0.095
+0.090
+100 101 102 103
+Context Length
+ygrenE telhciriD dezilamroN
+Layer 18
+Layer 24
+Accuracy
+Gemma_2_2B: grid
+0.130 0.125 0.120 0.115 0.110
+0.105
+100 101 102 103
+Context Length
+ygrenE telhciriD dezilamroN
+Layer 28
+Layer 36
+Accuracy
+Gemma_2_9B: grid
+0.235 0.230 0.225 0.220 0.215
+0.210 0.205 100 101 102 103
+Context Length
+ygrenE telhciriD dezilamroN
+Llama_3.1_8B: ring
+0.30 0.29 0.28 0.27
+0.26 100 101 102 103
+Context Length
+ygrenE telhciriD dezilamroN
+Llama_3.2_1B: ring
+0.300 0.295 0.290 0.285 0.280
+0.275 0.270 100 101 102 103
+Context Length
+ygrenE telhciriD dezilamroN
+Llama_3.1_8B_Instruct: ring
+0.33 0.32 0.31 0.30 0.29
+0.28 0.27 100 101 102 103
+Context Length
+ygrenE telhciriD dezilamroN
+Gemma_2_2B: ring
+0.300 0.295 0.290 0.285 0.280
+0.275 0.270 100 101 102 103
+Context Length
+ygrenE telhciriD dezilamroN
+Gemma_2_9B: ring
+0.065 0.060
+0.055 0.050
+0.045
+100 101 102 103
+Context Length
+ygrenE
+telhciriD dezilamroN
+Llama_3.1_8B: hex
+0.065 0.060
+0.055 0.050 0.045 0.040
+0.035
+0.030
+100 101 102 103
+Context Length
+ygrenE
+telhciriD dezilamroN
+Llama_3.2_1B: hex
+0.065 0.060
+0.055 0.050 0.045
+0.040
+100 101 102 103
+Context Length
+ygrenE
+telhciriD dezilamroN
+Llama_3.1_8B_Instruct: hex
+0.065 0.060
+0.055 0.050 0.045
+0.040
+0.035
+100 101 102 103
+Context Length
+ygrenE
+telhciriD dezilamroN
+Gemma_2_2B: hex
+0.0650 0.0625 0.0600
+0.0575 0.0550 0.0525 0.0500
+0.0475
+0.0450
+100 101 102 103
+Context Length
+ygrenE
+telhciriD dezilamroN
+0.8 0.6 0.4 0.2
+Gemma_2_9B: hex
+ycaruccA
+1.0 0.8 0.6 0.4
+0.2 0.0
+ycaruccA
+1.0 0.8
+0.6 0.4
+0.2
+ycaruccA
+0.8 0.6 0.4 0.2 ycaruccA
+0.8 0.6 0.4
+0.2 0.0
+ycaruccA
+0.8
+0.6 0.4
+0.2
+ycaruccA
+0.8 0.6 0.4 0.2 ycaruccA
+1.0 0.8 0.6 0.4
+0.2 0.0
+ycaruccA
+0.8
+0.6 0.4
+0.2
+ycaruccA
+0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2
+0.1
+ycaruccA
+1.0 0.8 0.6 0.4
+0.2 0.0
+ycaruccA
+0.8
+0.6 0.4
+0.2
+ycaruccA
+0.8 0.7 0.6 0.5 0.4 0.3 0.2
+0.1
+ycaruccA
+0.8 0.6 0.4
+0.2 0.0
+ycaruccA
+0.8 0.7
+0.6 0.5 0.4 0.3
+0.2
+0.1
+ycaruccA
+Figure 13: Accuracy versus zero mean centered normalized Dirichlet energy curves for various
+languagemodelsonvarioustasks. Zeromeancenteringensuresthatgraphrepresentationsarenot
+using the trivial solution to energy minimization (i.e., assigning the same representation for every
+node).
+22Preprint
+C.4 CAUSALANALYSISOFREPRESENTATIONS
+Inthissectionwereportpreliminarycausalanalysesofourgraphrepresentations.Whilefullyunder-
+standing the mechanisms behind the formation of such representations, as well as the relationship
+between said representations and model outputs are an interesting future direction, this is not the
+focusofourworkandthusweonlyranproof-of-conceptexperiments.
+Withthatsaid,weask: dotheprincipalcomponentsthatencodeourgraphrepresentationshaveany
+causalroleinthemodel’spredictions?
+Totestthis,weattemptto“move”thelocationoftheactivationsforonenodeofthegraphtoanother
+bysimplyre-scalingitsprincipalcomponents. Namely,assumeactivationhℓcorrespondingtonode
+i
+i at layer ℓ. Say we wish to “move” the activation to a different target node j. We first compute
+the mean representation of node j using all activations corresponding to node j within the most
+recent N (= 200) timesteps, notated as h¯ . Assuming the first two principal components encode
+w j
+the“coordinates”ofthenode, wesimplyre-scaletheprincipalcomponentsofh tomatchthatof
+i
+h¯ .
+j
+Weviewthisapproachasratherrudimentary. Namely,therearelikelymoreinformativevectorsthat
+encodericherinformation,suchasinformationaboutneighboringnodes. However,wedofindthat
+thefirsttwoprincipalcomponentshavesomecausalroleinthemodel’spredictions.
+Wetestourre-scalinginterventionon1,000randomlygeneratedcontexts. Foreachcontext,assum-
+ingourunderlyinggraphhasnnodes,wetest“moving”theactivationsofthelasttokenitoalln−1
+otherlocationsinthegraph. Wethenreporttheaveragedmetricacrosstheresulting1,000×n−1
+testcases.
+Wereport3metrics:accuracy(Hit@1),Hit@3,and“accumulatedprobabilitymass”onvalidtokens.
+Hit@1 (and Hit@3) report the percentage of times at which the top 1 (top 3) predicted token is a
+valid neighbor of the target node j. For “accumulated probability mass”, we simply sum up the
+probabilitymassallocatedtoallneighbors(i.e.,validpredictions)ofthetargetnodej.
+Table1reportsourresultsforourringandgridtasks. Weincluderesultsforre-scalingwith2or3
+principalcomponents,aswellasnullinterventionsandinterventionswitharandomvector. Overall,
+wefindthattheprincipalcomponentshavesomecausaleffectonthemodel’soutputpredictions,but
+doesnotprovideafullexplanation.
+Ring Grid Hex
+Hit@1 Hit@3 Prob Hit@1 Hit@3 Prob Hit@1 Hit@3 Prob
+Interv. (n=2) 0.61 0.91 0.6 0.57 0.95 0.55 0.30 0.32 0.69
+Interv. (n=3) 0.77 0.96 0.76 0.68 0.98 0.65 0.42 0.46 0.82
+NullInterv. 0.20 0.50 0.20 0.17 0.33 0.16 0.07 0.20 0.05
+RandomInterv. 0.17 0.47 0.19 0.16 0.37 0.17 0.06 0.18 0.05
+Table1: Interventionresultsforourringandgridtasks. Wedemonstratethatoftentimes,simply
+re-scalingtheprincipalcomponentforeachtokenrepresentationcan“move”thetokentoadifferent
+position in the graph. However, we note that our simple re-scaling approach does not perfectly
+captureacausalrelationshipbetweenprincipalcomponentsandmodelpredictions.
+C.5 EMPIRICALSIMILARITYOFPRINCIPALCOMPONENTSANDSPECTRALEMBEDDINGS
+Theorem5.1predictsthatifthemodelrepresentationsareminimizingtheDirichletenergy,thefirst
+twoprincipalcomponentswillbeequivalenttothespectralembeddings(z(2),z(3).
+Here we empirically measure whether the first two principal components are indeed equivalent to
+thespectralembeddings. InTable2,wemeasurethecosinesimilarityscoresbetweentheprincipal
+componentsandspectralembeddings.
+C.6 ACCURACYOFIN-CONTEXTTASKSWITHACONFLICTINGSEMANTICPRIOR
+Whatwouldhappenwhenanin-contexttaskwhichcontradictsasemanticpriorisgiventoamodel?
+Namely,Engelsetal.(2024)showthatwordslikedaysoftheweekhaveacircularrepresentation.
+23Preprint
+|cos(PC1,z(2))| |cos(PC2,z(3))|
+Grid 0.950 0.954
+Ring 0.942 0.930
+Hex 0.745 0.755
+Table 2: Absolute value of cosine distances of principal components from model activations and
+spectralembeddings. Weempiricallyobservethatinpractice,thesecoordinatesendupbeingvery
+similar. For the grid and hexagon, we use principal components from the last layer, while for the
+ring,weuseanearlierlayer(layer10)inwhichtheringisobserved.
+In our experiment, we randomly shuffle tokens for days of the week (i.e., tokens {Mon, Tue,
+Wed, Thu, Fri, Sat, Sun} to define a new ring, and give random neighboring pairs from
+thenewlydefinedringasourin-contexttask.
+Figure14demonstratestheaccuracywhengivenanin-contexttaskthatiscontradictorytoasemantic
+prior. Interestingly, wefirstobservethemodelmakepredictionsthatreflectstheoriginalsemantic
+prior (pink). This accuracy drops very quickly as the model captures that the semantic rule is not
+beingfollowed. Withmoreexemplars,weseeaslowdecayoftheremainingsemanticaccuracyand
+a transition in the model’s behavior as it begins to make predictions that reflect the newly defined
+orderingofourring(blue).
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+0 200 400 600 800
+Number of examples
+ycaruccA
+Shuffled
+Semantic
+Figure14: In-contextstructureoverridessemanticprior. Givenanin-contexttaskthatcontra-
+dictsamodel’ssemanticprior,weobservethemodeltransitionfrommakingpredictionsthatadhere
+tothesemanticprior(pink)topredictionsthatreflectthenewlydefinedin-contexttask.
+Furthermore, in Fig. 15, we quantify the Dirichlet energy computed only from certain PC dimen-
+sions. Wefindthatenergyminimizationhappensinthedimensionscorrespondingtothein-context
+structure.
+0.5
+0.4
+0.3
+0.2
+6×100 101 2×101 3×101
+Context Length
+ygrenE
+Total
+PCA 1,2
+PCA 3,4
+Figure15: Energyminimizationhappensinthein-contextcomponentdimensions. Weshow
+the Dirichlet energy depending on the context given when taking 1) all 2) semantic (PCA 1,2) 3)
+in-context (PCA 3,4) dimensions. We show that energy minimization happens in PCA 3,4 corre-
+spondingtothein-contextdimensions.
+24Preprint
+C.7 ADDITIONALEMPIRICALVERIFICATIONSOFTRANSITIONPREDICTIONS
+Hereweprovideadditionaldetailsforempiricallyverifyingourpredictionsformodeltransitions.
+Figures16,17,and18demonstratedetailedaccuracycurvesforawiderangeofgraphsizes.
+Figure16:Emergentbehaviorforvaryingtaskcomplexity(graphsize)fortheHexagonaltask.
+We plot the accuracy for varying levels of complexity (graph size) for the hexagonal in-context
+task. Interestingly,regardlessofgraphsize,weseeanabrupt,discontinuouschangeinthemodel’s
+performance. Figure19demonstratesthatwecanpredictwhensuchabruptchangecanbeexpected
+asafunctionoftaskcomplexity.
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=16 1.0
+0.8
+0.6
+Llama ICL (raw) 0.4
+Llama ICL (smoothed)
+Piecewise Linear Fit 0.2
+Transition Point:25.58 0.0
+101 102
+Example Index
+robhgienp
+Graph Size=25 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=36 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=49
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=64 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=81 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=100 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=121
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=144 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=169 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=196 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=225
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=256 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=289 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=324 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=361
+Figure17: Emergentbehaviorforvaryingtaskcomplexity(graphsize)forthegridtask. We
+plottheaccuracyforvaryinglevelsofcomplexity(graphsize)forthegridin-contexttask. Interest-
+ingly,regardlessofgraphsize,weseeanabrupt,discontinuouschangeinthemodel’sperformance.
+Figure8demonstratesthatwecanpredictwhensuchabruptchangescanbeexpectedasafunction
+oftaskcomplexity.
+25Preprint
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=10 1.0
+0.8
+0.6
+Llama ICL (raw) 0.4
+Llama ICL (smoothed)
+Piecewise Linear Fit 0.2
+Transition Point:12.86 0.0
+101 102
+Example Index
+robhgienp
+Graph Size=50 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=100 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=200
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=300 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=400 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=500 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=600
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=800 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=900 1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+101 102
+Example Index
+robhgienp
+Graph Size=1000
+Figure 18: Emergent behavior for varying task complexity (graph size) for the ring task.
+We plot the accuracy for varying levels of complexity (graph size) for the ring in-context task.
+Interestingly,regardlessofgraphsize,weagainseeanabrupt,discontinuouschangeinthemodel’s
+performance.
+48 70
+(a) # of Nodes (b)
+126 286
+Figure19: In-contextemergenceinaHexagonalgraphtracingtask. Weanalyzethein-context
+accuracycurvesasafunctionofcontext-sizeinputtedtothemodel. Thegraphusedinthisexper-
+iment is an m×m grid, with a varying value for m. (a) The rule following accuracy of a graph
+tracing task. The accuracy show a two phase ascent. We fit a piecewise linear function to the ob-
+servedascenttoextractthetransitionpoint,whichmovesrightwardswithincreasinggraphsize. (b)
+Interestingly,thetransitionpointscalesasapower-lawinm,i.e.,thenumberofnodesinthegraph.
+a) 48 Nodes b) 70 Nodes c) 126 Nodes d) 286 Nodes
+Figure 20: Hexagonal graph tracing accuracies compared to the memorization solution The
+rulefollowingaccuraciesonthehexagonalgraphcomparedtothememorizationmodelinSec.4.1.
+Hexagonalgraphwitha)48b)70c)126d)286nodes. Generallywefindthatthehexagonalgraph
+trackingaccuracyfromLlama-3.1-8B(Dubeyetal.,2024)islowerthanthe1,2-shotmemorization
+model,indicatingthattheremightbeadifferentunderlyingprocess.
+26

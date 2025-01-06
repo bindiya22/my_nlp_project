@@ -1,0 +1,585 @@
+BriefingsinBioinformatics,2024,25(S1),bbae232
+https://doi.org/10.1093/bib/bbae232
+ProblemSolvingProtocol
+Identifying and training deep learning neural networks
+on biomedical-related datasets
+Alan E. Woessner 1,2, Usman Anjum1,3,4, Hadi Salman1,4, Jacob Lear4, Jeffrey T. Turner5, Ross Campbell5, Laura Beaudry6,
+Justin Zhan1,3,4, Lawrence E. Cornett7, Susan Gauch4, Kyle P. Quinn 1,2, *
+1Arkansas Integrative Metabolic Research Center, University of Arkansas, Fayetteville, AR
+2Department of Biomedical Engineering, University of Arkansas, Fayetteville, AR
+3Department of Computer Science, University of Cincinnati, Cincinnati, OH
+4Department of Computer Science and Computer Engineering, University of Arkansas, Fayetteville, AR
+5Health Data and AI, Deloitte Consulting LLP, Arlington VA, USA
+6Google Cloud, Reston VA, USA
+7Department of Physiology and Cell Biology, University of Arkansas for Medical Sciences, Little Rock, AR
+*Corresponding author. Kyle P. Quinn, Ph.D. Department of Biomedical Engineering, University of Arkansas, 123 John A. White Jr. Engineering Hall, Fayetteville, AR
+72701, USA, Tel.:+479-575-5364, Fax:+479-575-5619, E-mail: kyle@quinnlab.org
+Abstract
+This manuscript describes the development of a resources module that is part of a learning platform named ‘NIGMS Sandbox for Cloud-
+based Learning’ https://github.com/NIGMS/NIGMS-Sandbox. The overall genesis of the Sandbox is described in the editorial NIGMS
+Sandbox at the beginning of this Supplement. This module delivers learning materials on implementing deep learning algorithms for
+biomedical image data in an interactive format that uses appropriate cloud resources for data access and analyses. Biomedical-related
+datasets are widely used in both research and clinical settings, but the ability for professionally trained clinicians and researchers
+to interpret datasets becomes difficult as the size and breadth of these datasets increases. Artificial intelligence, and specifically
+deep learning neural networks, have recently become an important tool in novel biomedical research. However, use is limited due
+to their computational requirements and confusion regarding different neural network architectures. The goal of this learning module
+is to introduce types of deep learning neural networks and cover practices that are commonly used in biomedical research. This
+module is subdivided into four submodules that cover classification,augmentation,segmentation and regression.Each complementary
+submodule was written on the Google Cloud Platform and contains detailed code and explanations, as well as quizzes and challenges
+to facilitate user training. Overall, the goal of this learning module is to enable users to identify and integrate the correct type of neural
+network with their data while highlighting the ease-of-use of cloud computing for implementing neural networks.
+This manuscript describes the development of a resource module that is part of a learning platform named “NIGMS Sandbox for Cloud-
+based Learning” https://github.com/NIGMS/NIGMS-Sandbox. The overall genesis of the Sandbox is described in the editorial NIGMS
+Sandbox [1] at the beginning of this Supplement. This module delivers learning materials on the analysis of bulk and single-cell ATAC-
+seq data in an interactive format that uses appropriate cloud resources for data access and analyses.
+Keywords: cloud-based computing; deep learning; artificial intelligence; biomedical research; engineering education
+Alan E. Woessner is a research associate at the University of Arkansas and the manager for the Imaging and Spectroscopy Core within the NIH-funded Arkansas
+Integrative Metabolic Research Center (AIMRC).
+Usman Anjum is a research associate at University of Cincinnati, Ohio in the Computer Science Department. His research interests include machine learning and
+AI, specifically in natural language processing and application of AI in biomedical research.
+Hadi Salman is a Computer Science PhD graduate from the University of Arkansas with expertise in computer vision.
+Jacob Lear is a Computer Science PhD student at the University of Arkansas studying machine learning.
+Jeffrey T. Turner is a data science specialist at Deloitte with a focus on deep learning, computer vision and machine learning.
+Ross Campbell is a bioinformaticist at Deloitte with a background in biomarker development from multi-omics experiments. He has expertise in optimizing
+bioinformatics machine learning pipelines to run at scale in cloud environments.
+Laura Beaudry is a program manager at Google. Her focus is on technical program management of engineering teams to ensure timely and impactful delivery of
+Google Cloud projects for federal agencies and organizations.
+Justin Zhan is the Head of Department of Computer Science, College of Engineering and Applied Science, University of Cincinnati. His research interests include
+data science, artificial intelligence, blockchain technologies, biomedical informatics, information assurance and social computing.
+Lawrence Cornett holds the rank of distinguished professor in the Department of Physiology and Cell Biology at the University of Arkansas for Medical Sciences.
+He is the director of the Arkansas IDeA Network of Biomedical Research Excellence (INBRE).
+Susan Gauch is a professor of Electrical Engineering and Computer Science at the University of Arkansas whose research focuses on intelligent information
+retrieval and natural language processing.
+Kyle P. Quinn is a professor of biomedical engineering at the University of Arkansas and director of the NIH-funded Arkansas Integrative Metabolic Research
+Center (AIMRC).
+Received: November 30, 2023. Revised: March 26, 2024
+© The Author(s) 2024. Published by Oxford University Press.
+This is an Open Access article distributed under the terms of the Creative Commons Attribution License (https://creativecommons.org/licenses/by/4.0/), which
+permits unrestricted reuse, distribution, and reproduction in any medium, provided the original work is properly cited.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/Supplement_1/bbae232/7718482
+by
+Jnls
+Cust
+Serv
+on
+10
+October
+20242 | Woessneretal.
+INTRODUCTION is fully connected to the previous layer with a set of weights [4,
+Image processing and data analysis are important tools for 8]. For biomedical image datasets, however, the most common
+all engineering and life science disciplines [2]. For biomedical- type of deep neural network used is a convolutional neural net-
+related engineering practices,data analysis provides the ability to work (CNN) [3]. A CNN is a type of deep learning model that
+identify biologically relevant patterns hidden within data that utilizes many small kernels that are adjusted to be sensitive
+can be used to draw conclusions regarding everyday life [3, 4]. to image features within the dataset through training. Within
+To understand complex biological pathways and relationships, a convolution layer, kernels are scanned across the input to
+the amount of data required grows exponentially, leading to determine if the input contains those features. To make these
+multi-dimensional datasets that are difficult to understand. types of networks ‘deep’, many of these convolution layers are
+Additionally, as the quantity of data increases, datasets may used, and the feature maps produced by convolution layers are
+contain relationships that are not well known or understood. further highlighted by pooling layers, which isolate the most
+This issue is further compounded by technological advancements important features contained in the feature maps. Finally, the
+in biomedical imaging, where improvements in spatial and output from the last convolution layer is flattened into a vector
+temporal resolution can lead to large three-dimensional or and used to output a single classification for an input. In the
+four-dimensional image datasets. Although there are many biomedical application space, CNNs have previously been used
+well-established tools for multi-dimensional data analysis, the for detecting cancer [5], segmenting cells and tissue [9, 10] and
+patterns that are identified may contain some type of systematic tracking particles [11] and has general uses in bioinformatics
+or user bias.Therefore,advanced data analysis tools are needed to [4]. Deep learning neural networks are fast and can produce
+objectively identify complex patterns hidden within data, which human-like accuracy without user input. However, one of the
+then can be utilized to draw meaningful conclusions. major downsides limiting the broader use of deep learning neural
+Artificial intelligence (AI) broadly defines the simulation of networks in biomedical research is the learning curve associated
+human intelligence via computational models and equations. with these tools. Specific hurdles include: identifying the correct
+Machine learning refers to the use of models and dimensionality type of neural network to use, determining how to create the
+reduction to allow for a computer to ‘learn’ relationships within a network in a programming language, obtaining computational
+dataset [4]. A neural network is a type of machine learning model resources sufficient to train the networks and knowing how to
+that mathematically simulates the neuronal connections in the sufficiently train the network. Open-source deep learning plat-
+human brain to process and understand data [5]. The smallest forms, such as TensorFlow or PyTorch, can allow users to quickly
+base unit for a neural network is a perceptron, and a neural generate deep neural networks [12]. Additionally, these platforms
+network is formed by connecting perceptrons with each other. containmanyexamplesonhowtogetstartedwithgeneratingand
+The strength of a single connection is defined as a weight, and training neural networks. However, these examples are primarily
+layers of perceptrons have an additional bias term. The weights focused on large generic datasets that are meant to highlight the
+and biases of a neural network are used to dictate the flow of capabilities of deep learning neural networks but are far removed
+data through a neural network, where the final output is used frombiomedicalresearch.Theapplicationofdeeplearningneural
+to incrementally ‘train’ a neural network to perform some task. networks on biomedical datasets is severely lacking in publicly
+These tasks typically fall into one of two categories: classification available training examples, resulting in confusion from users on
+or regression.For classification tasks,the final network prediction how to adapt or use neural networks for biomedical research.
+is a discrete outcome for an entire input and falls into one of The goal of our learning module is to introduce new users
+multiple user-defined classes. Segmentation, which is a type of to how deep-learning neural networks can be properly utilized
+classification task, also predicts discrete outcomes, but often on for biomedical datasets. To achieve this goal, the module is
+a pixel-by-pixel basis. Alternatively, regression tasks are used to divided into four submodules that cover image classification,
+predictcontinuousvalues.Whenidentifyingwhattypeofnetwork data augmentation, image segmentation and data regression.
+to use, it is important to consider the specific research question Overall, each submodule is comprised of a single python-based
+that is being asked, as well as the desired outcome. For example, Jupyter notebook for increased user readability and utilizes
+in images containing tumor pathology, such as in the PathMNIST the PyTorch library for data preparation and neural network
+dataset [6],a classification network can be used to determine if an training (Figure 1). Within each submodule, the background
+image contains a tumor. A segmentation network can be used to and motivation for a specific technique, along with the steps
+determine where the tumor is located in an image, and a regres- needed to prepare a dataset for network training, generating a
+sion network could be trained to estimate the size of the tumor. neural network, training a neural network and quantifying the
+These neural networks begin as a model with randomized weights network’s performance, are included. Key scientific concepts are
+and biases that are trained by incremental learning patterns from also discussed within each submodule, and knowledge checks,
+a relatively large pool of data, also known as a training set. After exercises and challenges are included to further test the user’s
+each iteration of training (or epoch), the neural network accuracy understanding. Finally, these modules are freely available on
+is quantified from the training set and cross-checked with a GitHuba nd are set up to be used asynchronouslyo n cloud-
+smaller validation set to determine if the model is overfitting computing resources, which reduces the hardware requirements
+the training data. Once the network completes many epochs and and allows for large dataset storage that is easily accessible to
+training is completed, the patterns the network learned can be the end user. To support the generation of these modules, the
+used to predict outcomes from new data, referred to as a testing Vertex AI product within the Google Cloud Platform (GCP) is used
+set that the network has not previously seen. to enable quick setup of virtual machines. By generating this
+Deep learning is a subset of machine learning where a ‘deep’ module, we have allowed for a means of introducing difficult
+neural network, containing two or more interconnected layers deep learning concepts and increasing the ability for users to
+of perceptrons, is modeled and trained [7]. The most basic form properly utilize neural networks on biomedical-related datasets.
+of a deep neural network is the multi-layered perceptron, which This article describes the algorithms used in each submodule,
+contains multiple hidden layers of perceptrons, where each layer their implementation within the GCP, typical results obtained
+Downloaded
+from
+https://academic.oup.com/bib/article/25/Supplement_1/bbae232/7718482
+by
+Jnls
+Cust
+Serv
+on
+10
+October
+2024Deeplearningneuralnetworks | 3
+Figure 1. The general user workflow for the deep learning module. The user can access the submodules sequentially through the Vertex AI workbench
+and will use multiple datasets within each submodule. For the classification and augmentation submodules, datasets within the MedMNIST library are
+used. A cloud storage bucket containing an image dataset is used for the segmentation submodule, while a public dataset regarding breast cancer data
+is used in the regression submodule.
+when users run each submodule and discussion of how these This submodule is divided into three ‘experiments’ that use
+submodules can aid new biomedical researchers interested in the ResNet-18 network architecture and three levels of trans-
+utilizing deep learning CNNs. fer learning to highlight common methods used when training
+CNNs (Figure 2). The ResNet-18 architecture is comprised of a
+convolution operation, followed by a max pooling operation, and
+METHODS AND IMPLEMENTATION
+then five residual blocks, each with two convolution operations.
+Submodule 1: classification
+Finally, an average pooling operation is used to vectorize the final
+Classification refers to the process of determining some dis- output, and a softmax operation is used to predict the class of
+crete outcome based on continuous features within input data. an input image. For each experiment, the network is trained on
+Although this practice is commonly used by researchers and clin- the PathMNIST dataset,which is a dataset containing RGB images
+icians, training and utilizing professionals to accurately classify (107 180 images total) of colon pathology used to predict cancer
+relatively large (>100 000 samples) datasets is costly and time- prognoses based only on stained images [6, 18]. Prior to the three
+consuming. Recently, CNNs have been growing in popularity and experiments, the PathMNIST dataset is loaded, and the images
+have been shown to complete a multitude of different tasks [7, are normalized to have a mean pixel intensity of 0.5, as well
+8]. When completing a classification task using deep learning, as an intensity standard deviation of 0.5. The images are then
+the first step is to properly identify what type of architecture to randomly sorted into a training, validation and testing dataset.
+use. Experimenters can develop their own custom architectures To maintain consistency across each experiment, each network
+to suit their needs, but this technique may be difficult depending is trained using a stochastic gradient descent with momentum
+on previous experience. An easier initial approach is to use a pre- (SGDM) optimizer with the default training parameters (learning
+defined CNN architecture. There exist many ‘gold standard’ pre- rate=0.001, momentum=0.9). Since these experiments are for
+defined architectures,such as ResNet-18 [13],AlexNet [14]orVGG only comparing different methods of network training and not
+[15], as well as many more [7]. Each pre-defined CNN architec- for producing high-quality classification results, each network
+ture has different advantages such as implementation of novel is trained for five epochs. Finally, the loss for each network is
+convolution block types or convolution block connections (i.e. calculated using the cross-entropy loss algorithm [19]. Following
+skip connections). Moreover, these pre-defined architectures are the network training process, the overall multi-class accuracy is
+widely available as either untrained or pretrained on a relatively calculated as the ratio of correctly predicted training images to
+large dataset such as ImageNet [16]. Utilizing predefined CNN the total number of training images. The accuracy of each model
+architectures are a good starting point with a new dataset and isthencomparedtodeterminethebestmodelforthisapplication.
+provide a quick means of getting started with deep learning. One For the first experiment of this submodule, a neural network is
+common practice when initially using predefined CNNs is to use a createdbasedontheResNet-18architecturewithrandomweights
+technique called transfer learning,where a pre-trained network is and biases and then trained on the PathMNIST dataset. The
+fine-tuned based on a new dataset. This process involves freezing second experiment consists of using a pre-trained version of the
+the weights and biases within the network and re-training the last samenetworkarchitecture.Withthisexperiment,theweightsand
+few layers based on the number of classes within the new dataset biases within the network are frozen to prevent re-training. The
+[17]. While any number of pre-defined architectures can be used, final classification layer is then removed from the pre-trained
+the ResNet-18 network is used in this submodule to demonstrate network and replaced with a new classification layer with the
+the concepts and capabilities of a CNN and transfer learning. correct number of output classes. For this experiment, only the
+Downloaded
+from
+https://academic.oup.com/bib/article/25/Supplement_1/bbae232/7718482
+by
+Jnls
+Cust
+Serv
+on
+10
+October
+20244 | Woessneretal.
+Figure 2. Graphical overview for the classification submodule. The PathMNIST dataset is used to train a ResNet-18 network based on different initial
+conditions: randomized initial weights and biases (first experiment), pre-trained network weights and biases that are frozen during training (second
+experiment) and pre-trained network weights and biases that are unfrozen during training (third experiment).Following network training,the prediction
+accuracy of the three networks is compared.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/Supplement_1/bbae232/7718482
+by
+Jnls
+Cust
+Serv
+on
+10
+October
+2024Deeplearningneuralnetworks | 5
+Figure 3. Examples of data augmentation using the BreastMNIST dataset. The types of augmentation shown are horizontal and vertical flipping (top
+right), scaling (bottom right) and contrast adjustment (bottom left).
+last classification layer is re-trained on the new dataset. Finally, Inthissubmodule,dataaugmentationisexploredthroughdata
+the third experiment uses the pre-trained model and continues visualization and quantifying the effect it has when training a
+to use all the weights and biases within the network on the new CNN. To visualize different augmentation methods, the ChestM-
+dataset [1 7]. NIST dataset is used, which contains grayscale images of chest x-
+rays (112 120 images total) that contain images of eight different
+Submodule 2: augmentation
+common thoracic diseases [18, 21]. For training the neural net-
+Although CNNs are powerful and relatively accurate tools for works, the BreastMNIST dataset, which contains 780 images of
+detectingkey features withindata,thecollected datamay contain cancerous and non-cancerous breast ultrasounds,is used [18,22].
+some inherent biases that may cause the network to incorrectly Although there are many different augmentation methods and
+learn patterns associated with human preferences in data collec- algorithms that are commonly used, datasets within PyTorch can
+tion.Additionally,during the training process of a neural network, be easily augmented using the ‘torchvision’ package. Using this
+the same training set is recycled many times to incrementally package, this submodule visualizes images that are augmented
+train the network. This may result in overfitting the training via random horizontal flipping, rotation, resizing and cropping,
+dataset (particularly when the dataset is small), which will result as well as changes in brightness, contrast, saturation and hue.
+inpoorgeneralizationforthenetwork[7].Tomitigatetheseissues, When performing augmentation on a dataset,it is important to
+a dataset can be transformed or augmented.Augmentation refers identify the types of augmentation that would result in improved
+to the process of synthetically creating more image data through accuracy. In this submodule, the same CNN is trained using
+transformations such as rotation, scaling and cropping [7, 20]. unmodified data, only augmented data and a combination of the
+An augmented dataset contains a random combination of nor- two. The types of augmentation used in these examples consists
+mal and augmented data, which is then used to train the net- of a combination of random horizontal flipping and random crop-
+work. In this submodule, different types of data augmentation ping. The effect of data augmentation on the prediction accuracy
+are discussed and visualized.Additionally,the ResNet-18 network ofanetworkisquantifiedbytrainingResNet-18CNNsoneitheran
+architecture is trained on a dataset containing no augmentation unmodified dataset, a completely augmented dataset or a com-
+and its accuracy is compared to a network trained with random bined dataset containing both augmented and unmodified data.
+cropping and flipping of the dataset. Finally, a network is trained Similar to the previous submodule, each network was trained
+on a dataset that combines the normal and augmented dataset using an SGDM optimizer with cross-entropy loss as the loss
+(Figure 3). criterion.Sincethesizeoftheaugmenteddatasetisproportionally
+Downloaded
+from
+https://academic.oup.com/bib/article/25/Supplement_1/bbae232/7718482
+by
+Jnls
+Cust
+Serv
+on
+10
+October
+20246 | Woessneretal.
+larger compared to the original dataset, a slightly higher training network training on this dataset, a custom dataset class is gener-
+time of 10 epochs was used,and the final prediction accuracy was ated,which loads an image and its labeled map pair and performs
+quantified as the ratio of correctly classified images to the total random horizontal and vertical flipping. For the network to be
+number of input images and compared among the three training trained efficiently,all the image pairs are loaded into memory and
+conditions. each pair is randomly sorted into a training, validation or testing
+dataset using a 70%, 20% and 10% split, respectively.
+Submodule 3: segmentation
+When training a U-Net architecture, slightly higher training
+As seen in previous submodules, CNNs can be trained to output times must be used due to the number of trainable parameters
+a single classification based on a collection of features within within the network. However, since the dataset used in this sub-
+input data. However, image data may have multiple regions of module is substantially smaller relative to other submodules, a
+interest pertaining to different classifications (e.g. tumor versus total of 10 training epochs are used and the amount of overfitting
+healthy tissue), and it may be desirable to spatially resolve these is carefully observed via the validation set. During training, a
+regions of interest. One method for overcoming this issue is to pixel-wise cross-entropy algorithm is used to calculate the loss.
+train a classification CNN on a relatively small image input size and an adaptive moment (ADAM) optimizer [29] with default
+and then allow the trained CNN to classify small sections of a settings (learning rate=0.001) is used. To visualize the accuracy
+larger input image. This will result in a classification map that of the network during the training process, the average loss and
+may contain multiple class labels for a larger input, which is accuracy of the training and validation datasets are plotted at the
+a process known as segmentation [23]. However, this process is end of each epoch. Once the network has been trained, a ratio
+time consuming and computationally inefficient.A more efficient of the correctly classified pixels relative to the total number of
+approach is to train a fully CNN to predict some outcome at pixels in the training,validation and testing datasets is calculated
+every location in the input image. For classification tasks, output to quantify the network accuracy.Finally,the input image,ground
+prediction maps can also be fine-tuned to either only output the truth map and predicted map from the trained network are
+specific class on a per-pixel basis (i.e. semantic segmentation), displayed to allow the user to check the ability for the network
+or to predict the location of individual objects of interest (i.e. to predict each class within an input image.
+instance segmentation). For example, for PathMNIST images of
+Submodule 4: regression
+colon tumors, semantic segmentation networks could identify
+pixel locations within the image containing tumor cells, while As shown in the previous submodules, a classification CNN is a
+instance segmentation could identify the locations of tumor cells tool that allows for simple and complex patterns to be selectively
+and count them. picked out and used to classify the input. However, the CNN
+Semantic segmentation is an ideal method for identifying with output of a class for a given pixel or image is discrete, which may
+high spatial precision where a specific user-defined class can not be ideal when the desired output is actually a continuous
+be identified in an image. One of the first broadly successful number [13]. Regression refers to the method of training a neural
+architectures to implement this prediction scheme is the U-Net networktopredictacontinuousvalue,ratherthanadiscretelabel.
+architecture [24]. This network contains both an encoding and Due to the network output being continuous rather than discrete,
+decoding path for identifying simple and complex features within there are important considerations when training these types of
+an input. This network then produces a classification map that CNNs. In this submodule, the process of training a CNN to predict
+is the same size as the original input. While the U-Net architec- continuous values is explored (Figure 5).
+ture is well suited for semantic segmentation, more advanced For regression neural networks, features are extracted from an
+network architectures, such as YOLOR [25] or SAM[ 26], which input and used to predict some continuous value.In this submod-
+combine groups of neural networks with complex intra-network ule, a tabular dataset (569 total entries) that characterizes cell
+relationships,have been used for efficient instance segmentation. nuclei in breast cancer masses by quantifying image properties
+In this submodule, the U-Net network is explored and applied to such as radius, perimeter and area, is used [30, 31]. This dataset
+a biomedical image dataset for the purpose of delineating skin is first loaded into memory and visualized. Next, the measure of
+features (Figure 4). nuclei radius is identified as the target output for the regression
+The goal of the submodule is to describe the U-Net architecture model. When training a neural network with a regression output,
+and highlight its ability to segment input images. The first step in the equations used to quantify network error are different from
+this module is to describe and generate the U-Net architecture, classification CNNs. Metrics that are commonly used include
+which is made up of four down-sampling blocks and four up- mean absolute error (MAE), mean squared error (MSE) and root
+sampling blocks.To down-sample,or encode,the input image,two mean squared error (RMSE). Although the PyTorch library allows
+convolution operations are followed by a max pooling operation. for data manipulation and neural network training, there are
+Once data are encoded, they are up-sampled, or decoded, back many other Python-based packages that have regression models
+to the original input image size by performing two convolution built-in, such as the popular ‘scikit-learn’ package [32]. To assess
+operations and a bilinear up-sampling operation. By using the the accuracy of a CNN, the accuracy is computed using a simple
+‘imageio’ package in python [27], an example image of tissue is linear model, decision tree and random forest regression model.
+loaded and passed through the initialized network and the output Finally, a simple linear regression neural network is trained on
+is observed. For this submodule, the dataset used is a subset the same dataset.Since regression networks are trained to output
+of a previously published dataset containing RGB images (731 continuous variables rather than discrete classes, the amount
+images total) of in vivo skin autofluorescence that were acquired of training time needs to be increased substantially. The neural
+using a multiphoton microscope [9, 28]. The goal of this dataset network training phase consists of 100 epochs, and the accuracy
+is to use image features to detect whether pixels are classified of the network is assessed by calculating the MSE between the
+as epidermis, dermis, hair or background. Along with the input network-predicted value and the tabular value. To adjust the
+images, a set of corresponding labeled images are provided where weights and biases within the network, a stochastic gradient
+each pixel is labeled based on a specific class [9, 28]. To enable descent (SGD) optimizer is used with a default learning rate of
+Downloaded
+from
+https://academic.oup.com/bib/article/25/Supplement_1/bbae232/7718482
+by
+Jnls
+Cust
+Serv
+on
+10
+October
+2024Deeplearningneuralnetworks | 7
+Figure 4. Graphical overview of segmentation submodule. Using a biomedical dataset of fluorescence images, a U-Net CNN architecture is trained to
+produce a semantic segmentation map based on four user-defined classes. During network training, the classification map produced by the neural
+network is compared to a user-defined segmentation map.
+Figure 5. Graphical overview of regression submodule. An image-based tabular dataset containing continuous values describing the tumorous cells
+within images is typically used to predict a binary prognosis (malignant/benign). Using multiple approaches, the data within the tabular dataset is used
+to predict the continuous nuclear radius.
+0.0001. To compare what the neural network learned versus the only the final prediction layer is allowed to train, the accuracy
+other simple regression models, the most important features for decreases by about 20%. However, if the whole network is allowed
+each type of model are extracted and compared. to re-train, the accuracy is consistent with the randomly initial-
+ized network.
+RESULTS Submodule 2: augmentation
+Submodule 1: classification
+Data augmentation is a common practice for improving the
+Fine tuning a pre-trained CNN to predict a discrete outcome robustness of CNNs. By randomly transforming data within a
+is a useful method for determining the effectiveness of deep dataset, the neural network has a lower chance of memorizing
+learning on a particular dataset. In this submodule, the ResNet- thetrainingdataandisrequiredtoadapttodifferentsituations.In
+18 architecture is used to predict tissue classes based on an input this submodule,the effect of data augmentation on the prediction
+image. When the network architecture is randomly initialized accuracy of a ResNet-18 CNN was observed. When a purely
+and trained on this dataset, a relatively high accuracy (≥90%) augmented dataset is used to train a CNN, the ability for the
+is achieved. Pre-defined network architectures are also available network to accurately classify images decreases by roughly 20%
+as pre-trained versions, which are typically trained on very large relative to a network trained on an unmodified dataset. However,
+and diverse datasets. When using a ResNet-18 model that is pre- when the network is trained on a dataset containing both the
+trained on the ImageNet dataset (>14 million images) [16], and original and augmented dataset, the network accuracy improves
+Downloaded
+from
+https://academic.oup.com/bib/article/25/Supplement_1/bbae232/7718482
+by
+Jnls
+Cust
+Serv
+on
+10
+October
+20248 | Woessneretal.
+by about 5% compared to the original network. This increase the GCP. Any algorithm in these submodules can be easily mod-
+is due to the random variations in the dataset that effectively ified by the researcher to use other datasets or run in another
+increase the size of the overall dataset, meaning the network environment.
+has a larger amount of data to train on [17].A s shown in this CNNs use filters made up of weights and biases to learn how
+submodule,the ratio of original to augmented images allows for a to perform a task such as classification. The architecture and
+balance between the network learning features within the dataset the weights and biases within the network dictate the ability for
+and improving the robustness of those learned features.However, the network to accurately predict the classification of an input.
+the ratio of input images can also severely impact the ability for Although the architecture of these networks can be somewhat
+the network to learn features. In typical CNN training loops, a arbitrary,thereexistmanypre-definednetworkarchitecturesthat
+50/50 split of original to augmented data is implemented but can can be used at a starting point for integrating deep learning with
+be adjusted based on the final accuracy of the trained network. biomedical research. In submodule 1, the ResNet-18 architecture
+is shown to accurately classify histological images when trained
+Submodule 3: segmentation
+from different initial conditions. When randomly initialized and
+Semantic segmentation is the term that refers to the ability to trained on the PathMNIST dataset, a relatively high accuracy
+generate a pixel-wise classification map of some data input. As (≥90%)canbeexpected.Althoughthenetworklearnskeyfeatures
+the input data flow through a traditional CNN, features within about this dataset, this may not always be the case, especially
+the data become encoded and used to ultimately predict a single for datasets with a large number of classes available. To remedy
+classification for a whole input. While this classification can be this issue, the learning rate of the network and the number of
+accurate, it lacks any spatial context within the input [32]. By training epochs can be increased but results in a longer training
+utilizingboth an encodingand decodingpath withina U-Net CNN, time. Finally, when applying CNNs to a dataset, the choice of
+the final output is the same size as the input, resulting in a map hyperparameter settings (i.e. training epochs, learning rate, etc.),
+of classification values. In this submodule, a biomedical-related may need to change based on the dataset and network archi-
+dataset of in vivo images is used to train the U-Net architecture tecture used. Furthermore, optimization of these hyperparame-
+to semantically segment the input image. Overall, this trained ter settings must be carefully performed and may be required
+network is shown to produce relatively high accuracies (>85%). for robust CNN training. Although the image normalization and
+default training parameters used in the first submodule result in
+Submodule 4: regression
+a well-performing neural network, these parameters may need to
+By combining regression and deep learning neural networks, net- be adjusted based on the data that are inputted into the network.
+works can be trained to produce continuous values rather than When a fine-tuning approach is used in submodule 1, the accu-
+discrete classifications. Although this submodule highlights the racy of the trained network drastically decreases if only the pre-
+ability for a neural network to form a regression model, there are diction layer is allowed to train. This decrease in accuracy is due
+many other algorithms that can produce similar results. In these to the intrinsic differences between the ImageNet dataset and the
+experiments,a tabular breast cancer dataset is used to predict the PathMNIST dataset, which are not able to be captured by just the
+average radius of nuclei within the dataset. When simple linear final prediction layer [17].When re-training the prediction layer is
+regression, decision tree and random forest regression models not sufficient,the whole network can be re-trained instead.By re-
+are used with this dataset, the expected outcome is accurately training the whole network, the initial weights and biases are not
+predictedwitharelativelyhighstandarddeviationintheMAEand randomized compared to a ‘from scratch’ model,and the network
+RMSE (>0.01). When the regression neural network is trained, the is optimized for a new dataset, which may decrease the overall
+average MAE and RMSE does not appreciably change (≈0.1), but training time needed to develop a robust network.
+the standard deviation is substantially lower (≤0.001). Inherent biases within a dataset, as well as overfitting during
+the training process of a neural network, are issues that can
+greatly impact the robustness and generalizability of a trained
+DISCUSSION
+neural network. The process of minimizing these issues is com-
+Deep learning is a powerful tool that leverages AI to predict monlyknownasregularization[7].Asshowninsubmodule2,aug-
+outcomes based on input data. However, the broad use of deep mentation is a powerful regularization method that can improve
+learning in biomedical research is still not fully realized due to the the accuracy of a neural network by artificially increasing the
+complex nature of implementing a deep learning approach. The number of images in a dataset through random cropping and
+goal of this module is to provide an environment where biomed- horizontal/vertical flipping. When a fully randomized dataset is
+ical researchers can learn the basics of deep learning and how used, however, the ability for the neural network to accurately
+to implement deep learning for biomedical research, while not predict classes is greatly hindered. Alternatively, when a delicate
+requiring the costly computational equipment typically needed balance of unmodified and augmented images are used,the accu-
+fordeeplearningtasks.Inthismodule,Jupyternotebookscovering racy of the network can improve relative to being trained on only
+key deep learning topics were generated to provide examples of anunmodifieddataset.Whiletheamountofunmodifiedandaug-
+how to utilize classification, augmentation, segmentation and mented images used in the combined dataset is arbitrary in sub-
+regression in biomedical research. To enable multiple routes of module 2, the balance, as well as methods of augmentation, can
+learning,code chunks as well as descriptive explanations for each be optimized via further testing for a specific biomedical dataset.
+code chunk are available within each submodule. Additionally, Depending on the application, a single output classification
+quizzes and code challenges are included to facilitate in-depth network may not be ideal. In cases where an input, such as an
+learning. All modules are available on the National Institutes image, has multiple regions of interest with different classifica-
+of Health (NIH) National Institute of General Medical Sciences tions, a segmentation network can be trained to assign classi-
+(NIGMS) Sandbox GitHub page,and instructions for cloning repos- fication values to each base unit of the input. Alternatively, a
+itories are provided for each module. Each submodule is designed regression network could also be trained if a continuous output is
+to be run within a cloud-computing environment and specifically required. In this module, these concepts are explored and shown
+Downloaded
+from
+https://academic.oup.com/bib/article/25/Supplement_1/bbae232/7718482
+by
+Jnls
+Cust
+Serv
+on
+10
+October
+2024Deeplearningneuralnetworks | 9
+to provide relatively high prediction power for different types of IDeA Network of Biomedical Research Excellence (Arkansas
+datasets. Finally, although the key concepts for each of these INBRE; 3P20GM103429-21S2), the Arkansas Integrative Metabolic
+networks are covered in this module, these methods can also be Research Center (NIH P20GM139768), as well as National Insti-
+combined depending on the user requirements. tutes of Health (NIH) grant numbers R01AG056560, R01EB031032.
+In summary, deep learning is an AI technique where a neural
+network is used to learn simple and complex features within
+a dataset to predict some outcome. This method is incredibly AUTHOR CONTRIBUTIONS
+useful in biomedical image data analysis due to the ability to
+A.W., U.A., H.S., J.L., and J.T. designed and wrote and edited each
+identify complex relationships within large datasets. In this
+submodule. R.C. and L.B. helped with technical program manage-
+module,users are encouraged to explore types of neural networks
+ment for initial module build and enhancements. J.Z., L.C., S.G.,
+and deep learning methods that have been commonly used in
+and K.Q. contributed to module conceptualization, design, and
+biomedical-related datasets. From an education and teaching
+refinement. All authors were involved in manuscript revision and
+perspective, cloud computing platforms such as the GCP allow
+final approval.
+for trainees to be easily trained by removing the burden of
+required computational resources, such as multiple graphical
+processing units, and providing high-end resources at low cost DATA AVAILABILITY
+(∼$1 to run a full module). The NIGMS Sandbox, including this
+The NIGMS sandbox is available at https://github.com/NIGMS/
+module, is publicly available on GitHub, so researchers from a
+NIGMS-Sandbox, and this specific module is available at https://
+wide range of public, private and academic affiliations are able
+github.com/NIGMS/Biomedical-Imaging-Analysis-using-AI-ML-
+to easily access this training module. While the modules within
+Approaches. Additionally, the Google Cloud storage bucket
+the NIGMS Sandbox are intended for cloud computing resources,
+for submodule 3 is available at nigms-sandbox/nosi-uasm-
+the modules are free to be run on local machines once a module
+alml/segmentation_data_small.
+repository has been cloned. However, if this module is run locally,
+one must consider the computational resources available to
+the user. If large network architectures are too computationally
+REFERENCES
+expensive, one may consider using network architectures that
+contain less trainable parameters. While the initial scope of this 1. Lei M, Matukumalli LK, Arora K, et al. NIGMS Sandbox: A
+module is to establish a beginning groundwork for incoming users Learning Platform toward Democratizing Cloud Computing for
+to implement deep learning for biomedical research, the initial Biomedical Research. Brief Bioinform In Press.
+four submodules are relatively limited in their breadth. There are 2. Russ JC. The Image Processing Handbook. 6th ed. Boca Raton: CRC
+many avenues for module expansion in the future to generate a Press. 2011.
+richer knowledge base. Some potential future directions include 3. Gore JC. Artificial intelligence in medical imaging. Magn Reson
+an introduction to other types of basic neural networks such Imaging 2020;68:A1–4.
+as graph neural networks or recurrent neural networks and 4. Min S, Lee B, Yoon S. Deep learning in bioinformatics. Brief
+implementations of more complex networks such as generative Bioinform 2017;18:851–869.
+adversarial networks or more cutting-edge algorithms such as 5. Tran KA, Kondrashova O, Bradley A, et al. Deep learning in
+those utilized in YOLOR [25]. cancer diagnosis, prognosis and treatment selection. Genome
+Med 2021;13:152.
+6. Kather JN, Krisam J, Charoentong P, et al. Predicting survival
+from colorectal cancer histology slides using deep learning:
+Key Points
+a retrospective multicenter study. PLoS Med 2019;16:e1002730.
+• Deep learning can yield interesting scientific out-
+https://doi.org/10.1371/journal.pmed.1002730.
+comes, but proper training for biomedical researchers is 7. Alzubaidi L, Zhang J, Humaidi AJ, et al. Review of deep learning:
+required.
+concepts, CNN architectures, challenges, applications, future
+• Cloud computing platforms are useful in deep learning
+directions. J Big Data 2021;8:53.
+applications for reducing the computational burden of
+8. LeCun Y, Bengio Y, Hinton G. Deep learning. Nature 2015;521:
+local hardware.
+436–44.
+• Cloud computing platforms provide high-end resources
+9. Jones JD, Rodriguez MR, Quinn KP. Automated extraction of skin
+to users at relatively low costs.
+wound healing biomarkers from In vivo label-free multiphoton
+microscopy using convolutional neural networks. Lasers Surg
+Med 2021;53:1086–95.
+10. Woessner AE, Quinn KP. Improved segmentation of collagen
+ACKNOWLEDGEMENTS second harmonic generation images with a deep learning con-
+volutional neural network. J Biophotonics 2022;15:e202200191.
+We would like to acknowledge all investigators and students
+https://doi.org/10.1002/jbio.202200191. Epub 2022 Sep 25.
+involved with generating and testing this module and provid-
+11. Newby JM, Schaefer AM, Lee PT, et al. Convolutional neural
+ing important feedback during development. We would also like
+networks automate detection for tracking of submicron-scale
+to acknowledge Dr Lakshmi Matukumalli and the Google and
+particles in 2D and 3D. Proc Natl Acad Sci U S A 2018;115:
+Deloittestaffforprovidingsupportduringthedevelopmentofthis
+9026–31.
+module.
+12. Lee JH, Kim KG. Applying deep learning in medical images: the
+case of bone age estimation. Healthc Inform Res 2018;24:86–92.
+FUNDING
+13. He K, Zhang X, Ren S, et al. Deep residual learning for image
+This research was funded by National Institutes of Gen- recognition. arXiv e-prints 2015; arXiv:151203385. https://doi.
+eral Medical Sciences (NIGMS) supplement to the Arkansas org/10.48550/arXiv.1512.03385.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/Supplement_1/bbae232/7718482
+by
+Jnls
+Cust
+Serv
+on
+10
+October
+202410 | Woessneretal.
+14. Krizhevsky A, Sutskever I, Hinton GE. ImageNet classification 23. Ciresan D, Giusti A, Gambardella L, et al. Deep neural networks
+withdeepconvolutionalneuralnetworks.CommunACM2017;60: segment neuronal membranes in electron microscopy images.
+84–90. In: Neural Information Processing Systems (NIPS), Lake Tahoe, NV,
+15. Simonyan K, Zisserman A. Very deep convolutional net- USA, 2012, pp. 2843–2851.
+works for large-scale image recognition. arXiv e-prints 2014; 24. Ronneberger O, Fischer P, Brox T. U-net: convolutional
+arXiv:14091556. https://doi.org/10.48550/arXiv.1409.1556. networks for biomedical image segmentation. arXiv e-prints
+16. Deng J, Dong W, Socher R, et al. ImageNet: A large-scale hierar- 2015; arXiv:150504597. https://doi.org/10.48550/arXiv.1505.
+chical image database.In: 2009 IEEE Conference on Computer Vision 04597.
+and Pattern Recognition,Miami,FL,USA,2009,pp.248–255,https:// 25. Wang C-Y, Yeh I-H, Liao H-YM. You only learn one represen-
+doi.org/10.1109/CVPR.2009.5206848. tation: unified network for multiple tasks. arXiv e-prints 2021;
+17. Shin H-C, Roth HR, Gao M, et al. Deep convolutional neural net- arXiv:210504206. https://doi.org/10.48550/arXiv.2105.04206.
+works for computer-aided detection: CNN architectures,dataset 26. Kirillov A, Mintun E, Ravi N, et al. Segment anything. arXiv
+characteristics and transfer learning. IEEE Trans Med Imaging e-prints 2023; arXiv:230402643. https://doi.org/10.48550/
+2016;35:1285–98. arXiv.2304.02643.
+18. Yang J, Shi R, Wei D, et al. MedMNIST v2—a large-scale 27. Klein A, Wallkötter S, Silvester S, et al. imageio/imageio: v2.31.1.
+lightweight benchmark for 2D and 3D biomedical image clas- 2023; https://doi.org/10.5281/ZENODO.8025955
+sification. Sci Data 2023;10:41. 28. Jones JD, Quinn KP. Automated quantitative analysis of wound
+19. Zhang Z, Sabuncu MR. Generalized cross entropy loss for train- histology using deep-learning neural networks. J Investig Derma-
+ing deep neural networks with noisy labels. arXiv e-prints 2018; tol 2021;141:1367–70.
+arXiv:180507836. https://doi.org/10.48550/arXiv.1805.07836. 29. Kingma DP, Ba J. Adam: a method for stochastic optimization.
+20. Perez L, Wang J. The effectiveness of data augmentation in arXiv e-prints 2014; arXiv:14126980. https://doi.org/10.48550/
+image classification using deep learning. arXiv e-prints 2017; arXiv.1412.6980.
+arXiv:171204621. https://doi.org/10.48550/arXiv.1712.04621. 30. Street WN, Wolberg WH, Mangasarian OL. Nuclear
+21. Wang X, Peng Y, Lu L, et al. ChestX-Ray8: Hospital-Scale Chest feature extraction for breast tumor diagnosis. ,
+X-Ray Database and Benchmarks on Weakly-Supervised Classi- pp. 861–70. Proc. SPIE 1905, Biomedical Image Processing and
+fication and Localization of Common Thorax Diseases. In: 2017 Biomedical Visualization, 1993, https://doi.org/10.1117/12.148698.
+IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 31. William, Wolberg OM. Breast cancer Wisconsin (diagnostic).
+Honolulu, HI, USA, 2017, pp. 3462–71, https://doi.org/10.1109/ 1993. https://doi.org/10.24432/C5DW2B.
+CVPR.2017.369. 32. Pedregosa F, Varoquaux G, Gramfort A, et al. Scikit-learn:
+22. Al-Dhabyani W, Gomaa M, Khaled H, et al. Dataset of breast machine learning in python. arXiv e-prints 2012; arXiv:
+ultrasound images. Data Brief 2020;28:104863. 12010490. https://doi.org/10.48550/arXiv.1201.0490.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/Supplement_1/bbae232/7718482
+by
+Jnls
+Cust
+Serv
+on
+10
+October
+2024©2019Oxford UniversityPress.

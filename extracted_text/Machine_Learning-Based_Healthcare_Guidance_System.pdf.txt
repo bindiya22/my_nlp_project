@@ -1,0 +1,394 @@
+2024 Second International Conference on Advances in Information Technology (ICAIT-2024)
+Machine Learning-Based Healthcare Guidance
+System
+Kumar P Yashini P
+Department of CSE Department of CSE, REC
+Rajalakshmi Engineering College Chennai, India
+Chennai, India 220711002@rajalakshmi.edu.in
+kumar@rajalakshmi.edu.in
+Abstract— Hospitals are increasingly utilizing online address missing values and establish a standardized format.
+recommender systems to assist in the medical treatment of The selection of pertinent qualities is based on their influence
+patients. Nowadays, many people research potential on patient well-being and data accessibility to the healthcare
+prescriptions online before consulting their doctors for various
+device in people. Next, the preprocessed data is applied to the
+medical issues. Medical recommendation systems can be
+K-means clustering method. This unsupervised learning
+beneficial, especially during pandemics or natural disasters when
+technique identifies intrinsic patterns within a dataset and
+resources are limited. These systems provide more precise,
+groups patients into clusters based on their similarity. Each
+dependable, and accurate clinical predictions using fewer
+resources. The patient receives trustworthy information from the cluster represents a unique patient profile. After the clustering
+medication recommendation system regarding the medication, process, the system analyzes each cluster to identify
+dose, and potential side effects. The system considers the significant traits and shared attributes among patients in the
+patient's symptoms when selecting the appropriate medication, respective group. This study provides valuable insights into
+which is then delivered based on the user profile. The system the probable health issues, lifestyle variables, or treatment
+employs K-means clustering algorithms to analyze patient data responses commonly observed among the identified clusters.
+to provide personalized medical recommendations. These
+algorithms use patient demographics, medical histories, and
+symptoms gathered from a vast dataset of medical records to II. LITERATURE SURVEY
+produce precise suggestions. By providing fast, accurate
+recommendations tailored to each person's specific needs, this
+Since Liu et al [5] Naive Bayes Logistic Regression
+system aims to enhance patient outcomes
+Patients Are Encouraged to Consume Nutritional
+Supplements, Diets, And Foods That Are Deemed to Be More
+Keywords: Learning Algorithm, Medical Recommender systems,
+Suited To Their Likes, Dietary Preferences. General Health
+Clustering algorithm..
+Using A Meticulous Analysis Process That Involves
+Dieticians And Patients. The Patient-Dietician's Reasoning
+I. INTRODUCTION
+Behind The Recommender System Is Still Not Entirely
+The healthcare[1,2] industry has seen a significant increase Understood By Medical Staff Dietary Assistance For Patients.
+in data collected from various sources, such as wearable
+devices, electronic health records, and medical imaging[3,4]. Eric Appiah Mantey et al [6] algorithms for filtering Health
+To provide personalized and efficient medical recommender systems (HRSs) can successfully tailor
+recommendations, this data can help patients and healthcare behavior modification treatments related to well-being to each
+providers make informed decisions about diagnosis, treatment, person's needs. In particular, little attention is paid to theory-
+and overall healthcare management. One of the innovative based behavioral determinants and the range of lifestyle
+uses of technology in healthcare is the Medical domains that affect well-being. Expanding the With-Me user
+Recommendation System, which uses data analysis and model with characteristics that describe abilities, self-efficacy,
+computer algorithms. This system incorporates many data and the current context is a minimum requirement.
+sources, such as clinical guidelines, medical literature, and Characteristics linked to self-efficacy and skills allow for the
+patient records, to generate tailored and evidence-based recommendation of beneficial but manageable behavior
+suggestions. This study presents a new medical modification activities and knowledge.
+recommendation system methodology using the K-means
+clustering algorithm. Traditional medical recommendation Abdullah et al [7] RNN, Prescription Advice, Curriculum
+systems typically use rule-based or collaborative filtering Instruction, Set Encoder, And Data Mining For Electronic
+techniques. Although these methods have shown effectiveness, Health Records (Ehrs) A Crucial Yet Difficult Duty In
+they may only sometimes capture the complex patterns in Healthcare Is Effectively Prescribing Medication For
+patient data. Complex Multimorbidity Disorders. The Majority Of
+Previous Research Forecasted Drug Regimens Using
+The K-means clustering algorithm, commonly used in data Longitudinal Data, Presuming That The Length Of The Visit
+mining and pattern recognition, presents a viable alternative Inevitably Determined The Encoding Format Of Intra-Visit
+by effectively grouping similar data points into clusters. This Medical Events. Extensive Trials On A Benchmark Dataset
+methodology aims to use unprocessed patient data, including have verified our Model's Superiority Over Multiple State-Of-
+demographic details, medical records, and diagnostic reports, The-Art Baselines. Learning Longitudinal Sequence
+and subject it to comprehensive preprocessing techniques to
+979-8-3503-8386-7/24/$31.00 ©2024 IEEE
+03309601.4202.83616TIACI/9011.01
+:IOD
+|
+EEEI
+4202©
+00.13$/42/7-6838-3053-8-979
+|
+)TIACI(
+ygolonhceT
+noitamrofnI
+ni
+secnavdA
+no
+ecnerefnoC
+lanoitanretnI
+dnoceS
+4202
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:13:46 UTC from IEEE Xplore. Restrictions apply.2024 Second International Conference on Advances in Information Technology (ICAIT-2024)
+DataExhibits Persistent Patterns Of Information Transmission decisions, and patient-facing platforms in the medical and
+And Serialization. ophthalmic fields. The prevalence of chronic diseases is rising
+worldwide, with an estimated 25% of people currently dealing
+Mustafa Haider Abidi et al [8] Deep Learning, Graph with several chronic health conditions. There is more to health
+Clustering, Food Recommendation, Healthcare, Mehrdad care [13,14] than only attending to a patient's problems.
+Rostami, Mourad Oussalah, and Vahid Farrahi. Food is Furthermore, mixed-reality systems such as the Metaverse can
+recommended to assist consumers in changing their eating aid in illness prevention and prediction.
+habits and achieving a healthier diet. This research aims to
+create a new hybrid food recommender system that addresses
+III. METHODOLOGY
+the drawbacks of earlier models, including their disregard for The process of building pre-trained models and how
+food ingredients, time constraints, cold start users, cold start they are used in medical-named entity identification tasks. The
+food products, and community factors. To further enhance the following section will discuss creating a medical knowledge
+food suggestion framework's performance in the end, future graph using the named entity recognition approach.
+works should add user data such as gender, age, height, weight,
+location, and culture.
+Input Data (Symptoms, History,
+Demographics)
+Diana Sousa and Francisco M. Cout [9] cold start, deep
+learning, neural networks, recommender systems, new item
+problem, new user problem, recommender systems evaluation, D ata Preprocessing (Cleaning,
+Normalization, Feature Extraction)
+and stereotypes the suggestion of products from the catalog to
+an unidentified new user or the suggestion of freshly added
+material to consumers who already have it. Better cold-start
+K-Means Clustering
+performance results from integrating metadata describing the
+object or the user. Results show that even though the
+recommendations have worse serendipity and fairness
+characteristics, a multi-layer neural network significantly CLUSTER Analysis And Profiling
+improves cold start accuracy performance measures.
+Yang Han et al [10] Advanced Manufacturing Institute,
+Recommendation Generation
+King [King Ehealth, Health Care, Smart Health Monitoring
+System the terms industry 4.0, internet of medical things,
+convolutional neural network, deep belief network, deep
+Output Recommendation Visualization
+ensemble learning, extreme learning machine, and big data
+processing are used. Through wearable sensors, big data, and
+telecommunications technologies over pervasive computing, Figure.1. Proposed Model Process Flow
+human life has become more competent to provide better
+healthcare services. Big data is designed with the potential to Figure 1 shows that the module collects patient data,
+advance the medical field. Big data uses software and including their symptoms, medical history, and demographics.
+information and communication technology (ICT) to create This input data undergoes preprocessing steps, such as
+connections between patients, wearable sensors, healthcare cleaning, normalization, and feature extraction, to prepare it
+practitioners, and caregivers. For improved outcomes, the for clustering. The preprocessed data is then fed into the k-
+current algorithm's parameters will be further adjusted . means clustering algorithm, which groups patients into
+clusters based on similarities in their features. Each cluster is
+Maria Habibet al [11] cancer recovery, and artificial analyzed to understand the characteristics of the patients
+intelligence recommendation systems are among the within it, which helps in profiling the clusters. Based on the
+companies mentioned. This study focuses on researching an cluster analysis, recommendations for medical treatments or
+intelligent recommendation model for cancer patients' interventions are generated for each cluster.
+rehabilitation, taking advantage of the benefits of the Internet
+of Things. It also creates an intelligent recommendation
+system that is easy for cancer patients' rehabilitation. Given A. Data Preprocessing Module:
+the ambiguity surrounding these factors, the convolutional
+neural network approach was used to forecast both the cause Raw medical data often requires cleaning, transformation,
+and the period of recurrence of cancer patients. The model's and normalization to make it suitable for clustering. This
+findings demonstrated a high prediction accuracy and 92% module handles data preprocessing tasks like cleaning, feature
+forecast accuracy. To identify the optimal scheme, I'll keep extraction, and integration. The aim is to group patient data
+researching cancer rehabilitation suggestion schemes and and important attributes collected from electronic and
+merging them with more sophisticated mathematical models. healthcare records into clusters. Data cleaning techniques are
+Andres et al [12] wearable technology, augmented reality, employed to handle missing data, which include removing
+blockchain, explainable AI, head-mounted displays, virtual records or filling in missing values using appropriate methods.
+and Metaverse realities, and chronic illness management. In Data transformation is used to select the most relevant features
+virtual environments, avatars and three-dimensional (3D) for clustering by eliminating irrelevant or redundant features.
+spaces can improve digital teaching, diagnosis, treatment Feature scaling is a technique that brings all numerical
+979-8-3503-8386-7/24/$31.00 ©2024 IEEE
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:13:46 UTC from IEEE Xplore. Restrictions apply.2024 Second International Conference on Advances in Information Technology (ICAIT-2024)
+features to a similar scale or standardizes them. Data Figure.2 refers to the K-means clustering, grouping data
+integration that involves medical expertise, such as domain- points based on their attributes or dimensions, called features.
+specific medical information like symptoms, diseases, and Each data point is represented as a vector in a multi-
+treatment, is also included. dimensional space, and Feature 1 in K-means clustering refers
+to one of these attributes in the dataset. For example, if you're
+clustering a dataset of customer information, Feature 1 could
+B. Feature Engineering Module:
+represent something like age, income, or spending habits. To
+perform K-means clustering, you select a subset of features or
+Feature engineering is essential in developing a medical all features to define the similarity between data points.
+recommendation system using k-means clustering. Initially, Cluster centroid based on the chosen features and updates the
+we collect medical data from various sources and then clean, centroids iteratively until convergence. The K-means
+transform, and normalize it for processing. After that, we clustering technique, which groups data points into clusters
+extract relevant features from the preprocessed data, such as based on similarity.
+patient demographics, medical history, and symptoms. The
+data is then grouped into clusters using the k-means algorithm, The features or attributes of the data points determine the
+which helps identify similar medical cases or patients. The similarity. For instance, if we cluster disease symptoms,
+algorithm assigns data points to clusters and calculates cluster features could include the intensity of fever, duration of cough,
+centroids. Finally, recommendations are generated for each presence of rash, etc. Each patient represents a data point, and
+cluster based on the assigned data points and centroids. the features describe their symptoms. Each feature contributes
+to the overall similarity or dissimilarity between data points.
+For example, Feature 1 could be fever intensity, which would
+C. K-means clustering Modules:
+be one of the variables used to group patients with similar
+symptoms together. The goal is to assign each data point to
+This module performs K-means clustering on the patient
+the cluster whose centroid is closest to it.
+data to group patients with similar characteristics into clusters.
+The process of clustering begins by randomly selecting initial
+centroids for the clusters. This helps to initialize the process. D. Recommendation Engine Modules:
+After that, we calculate the distance to the centroids and assign
+the data points to the nearest cluster. Then, we update the After clustering, the system uses the cluster assignments to
+cluster centroids by calculating the mean of data points in each generate personalized patient recommendations within each
+cluster and updating the centroids accordingly. We check if cluster. Recommendations include treatment options,
+the centroids have converged by monitoring if they have medications, lifestyle changes, or other relevant medical
+stopped changing significantly. Once they have converged, advice. The healthcare system collects comprehensive patient
+we move on to the next step. Finally, we use the clusters to information, including medical history, symptoms, and other
+generate personalized patient recommendations, including pertinent data from diverse sources such as electronic health
+treatment options, lifestyle changes, and diagnostic tests. records or medical records. This data is then carefully
+scrutinized, cleaned, transformed, and prepared for the
+following processing phase - clustering. The K-means
+clustering algorithm is utilized for grouping system generates
+personalized recommendations for each cluster. These
+recommendations may include treatment options, medications,
+lifestyle changes, or other relevant medical advice. Although
+the initial recommendations for each cluster are generated
+based on their respective assignments, the healthcare system
+takes personalization to another level by tweaking these
+recommendations based on the patient's data within a cluster.
+This ensures that the system adjusts treatment plans and
+medication to match each patient's specific needs, leading to
+better health outcomes. A Medical Recommendation System's
+primary objective is to improve healthcare quality, optimize
+treatment plans, and enhance patient outcomes.
+Figure 3 architecture diagram for a medical
+recommendation system involves gathering and preparing
+data using implicit and explicit feedback. Implicit feedback is
+data inferred from user behavior, such as clicks, view
+durations, purchase history, or search queries. This data is
+collected using click-through rates, view counts, purchase
+history, time spent on content, and search queries.
+Figure.2.K-Means Clustering
+979-8-3503-8386-7/24/$31.00 ©2024 IEEE
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:13:46 UTC from IEEE Xplore. Restrictions apply.2024 Second International Conference on Advances in Information Technology (ICAIT-2024)
+preferences, or needs related to specific items. Data is
+collected from various sources such as electronic health
+records (EHRs), patient surveys, medical claims, or patient
+feedback to populate the patient-item matrix. Each patient's
+profile is built based on their historical interactions with
+healthcare items, including diagnoses, treatments,
+medications, surgeries, or any other healthcare-related activity.
+The patient profile is used to understand the patient's medical
+history, preferences, and health conditions. Item profiling is
+done on healthcare items based on their attributes, including
+medical characteristics (e.g., drug type, medical equipment),
+cost, availability, quality, and patient feedback. Hybrid
+approaches are used to match patients with relevant healthcare
+items. Privacy-aware recommendation systems provide
+personalized recommendations while respecting and
+protecting users' privacy. They aim to balance the need for
+customized user experiences with safeguarding sensitive user
+data.
+Fgure.3. Model Architecture IV. RESULTS & DISCUSSIONS
+Explicit feedback, on the other hand, is direct and K-means clustering can be helpful in a medical
+intentional user expressions of preference or opinion recommendation system to group patients or medical data.
+regarding items or content, including user-provided ratings, The clustering is based on similar characteristics of the
+reviews, likes, or other direct indications of interest or gathered data. The clusters generated can then be used to make
+disinterest. User profiles are created and used in various personalized medical recommendations like treatment options,
+applications, including social media, e-commerce, content preventive care, or lifestyle changes. Collect relevant
+recommendation, and personalization. These profiles include structured medical data, including patient demographics,
+basic information to identify the user, such as a username, medical history, test results, and genetic information. Have an
+email address, or user ID, as well as demographic information, explicit target variable for a recommendation, such as a
+such as age, gender, location, and other relevant details. recommended treatment or intervention.
+Preferences can be categorized by music genres, movie genres,
+hobbies, and more, and behavioral data can reveal user
+evaluations of goods or content. The Hadoop ecosystem is
+utilized to manage and process massive amounts of data. This
+group of free and open-source software tools and frameworks
+is necessary when conducting extensive data analysis with
+Hadoop. Distributed computing, data storage, and batch
+processing are three areas where Hadoop excels. To start
+analyzing big datasets using Hadoop, you must import the data
+into the Hadoop Distributed File System (HDFS) as the first
+step. The initial data analysis phase involves preparing the
+data by performing data transformation, formatting, and
+cleansing. Phase II involves privacy-aware recommendations,
+achieved using probability matrix factorization (PMF) for
+scalability. Collaborative filtering and recommendation
+systems use this technique based on probabilistic modeling
+and Bayesian inference to factorize the user-item interaction
+matrix. The goal is to discover latent factors that explain user-
+item interactions. Although PMF can provide accurate
+recommendations, it can be computationally intensive for Figure.4. Model Precision Measure
+large datasets. To address scalability issues, "patient-item
+matrix matching" is used. "Patient-item matrix matching" is Figure. 4 Precision is a crucial measure of the effectiveness
+used primarily in recommendation systems for healthcare or of a recommender system, especially in situations where
+medical settings. In this context, the "patient-item matrix" is a accuracy and relevance are essential. In the context of a
+matrix that contains information about patients and healthcare recommender system, precision indicates the ratio of relevant
+items. At the same time, "matching" refers to making items that the system recommends compared to the total
+recommendations for individual patients based on their needs, number of items recommended. It provides valuable insight
+preferences, or medical history. The patient-item matrix is a into how accurately the system selects relevant user items.
+structured data representation where rows represent patients, When it comes to Cluster-Specific recommendations,
+columns represent healthcare items or services, and the precision becomes even more significant. These
+matrix's cells contain information about patients' interactions, recommendations are generated by algorithms such as K-
+979-8-3503-8386-7/24/$31.00 ©2024 IEEE
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:13:46 UTC from IEEE Xplore. Restrictions apply.2024 Second International Conference on Advances in Information Technology (ICAIT-2024)
+Means, which group users (or patients) into clusters based on scientists to make informed decisions about feature
+their shared characteristics or traits. Each cluster represents a engineering strategies.
+unique segment of the user population. In the case of medical
+interventions or treatments recommended within a specific
+cluster, high precision indicates that the recommended items
+are relevant and appropriate for the patients grouped within
+that cluster. In other words, a high precision score suggests
+that the recommender system accurately identifies and
+suggests medical interventions that align well with the needs
+and characteristics of the patients within that particular cluster.
+For instance, if a Cluster-Specific recommendation system
+identifies a group of patients with similar symptoms or
+medical histories and recommends treatments tailored to that
+cluster, high precision means that most recommended
+treatments are effective and suitable for the patients within
+that cluster. Enhancing the overall effectiveness and utility of
+the recommendation system, high precision indicates that the
+recommended items are well-suited to the characteristics and
+needs of the user group being targeted. Figure.6. Medicines Recommendation
+Figure 6 Determining the best medicines for short-term
+use requires establishing rating metrics that consider symptom
+relief, side effects, and ease of use. Data can be collected from
+various sources, including patient feedback or clinical trials,
+to obtain accurate ratings. Surveys, electronic health records,
+and other relevant sources can provide valuable information.
+Once sufficient data is collected, an aggregate rating for each
+medicine can be calculated by analyzing and averaging ratings
+from different patients or trials. Medicines can then be ranked
+in descending order based on their aggregate ratings to
+identify the top performers. To ensure that the
+recommendation system only suggests the best medicines, it
+is necessary to carefully select the top 20 medicines with the
+highest short-term ratings, considering factors such as the
+target patient population and medical conditions. Periodic
+rating updates based on new data or feedback are essential to
+keep the recommendation system relevant and up-to-date.
+This helps adapt to changes in medical knowledge, patient
+preferences, and emerging treatments, ultimately improving
+Figure.5.Sparse Data Analysis patient care. Regular updates are critical in ensuring the
+recommendation system provides accurate and helpful
+Figure.5. Sparse data, indicated by columns with few unique suggestions to healthcare professionals and patients.
+values, can negatively impact recommendation systems. This
+is because it may lead to unreliable predictions. You can use V. CONCLUSION AND FUTURE ENHANCEMENT
+bar plots to quickly identify such columns by visualizing the
+distribution of unique values. On the other hand, high In conclusion, a Medical Recommendation System utilizing
+cardinality refers to columns with many unique values. These K-Means Clustering offers a promising approach to enhance
+columns can challenge machine learning algorithms and may the accuracy and personalization of healthcare
+require special handling during data preprocessing. Bar plots recommendations. The application of K-Means clustering to
+can help spot these columns and prioritize further exploration medical data facilitates the identification of meaningful
+or special treatment. Significant differences in the number of patient groups, enabling tailored and targeted
+unique values across columns may indicate data imbalances. recommendations. The system's is contingent on various
+Such imbalances can affect the performance of factors, including the quality of data, feature selection, and the
+recommendation systems by biasing predictions towards the integration of medical knowledge. The clustering process
+majority class. Bar plots can help identify such imbalances by optimizes the grouping of patients with similar characteristics,
+visualizing the distribution of unique values across columns. allowing for precise and cluster-specific recommendations.
+To improve model performance, it's essential to prioritize The system's outcomes are notable across multiple dimensions.
+feature engineering efforts. For example, columns with unique First and foremost, the precision of recommendations within
+values may benefit from encoding categorical variables or each cluster ensures that interventions are relevant and aligned
+grouping rare categories. Bar plots provide insights into each with the common medical traits of patients in that group. This
+column's distribution of unique values, allowing data not only enhances the trustworthiness of the system but also
+979-8-3503-8386-7/24/$31.00 ©2024 IEEE
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:13:46 UTC from IEEE Xplore. Restrictions apply.2024 Second International Conference on Advances in Information Technology (ICAIT-2024)
+contributes to improved patient outcomes and safety by [5] Since Liu, Xiaolong Wang, Jingcheng Du, Yongshuai Hou, Xianbing
+minimizing the risk of false positives. The personalized nature Zhao, Hui Xu, Hui Wang, Yang Xiang, and Buzhou Tang (2023)” A
+Sample-Adaptive Hierarchical Prediction Network for Medication
+of recommendations, guided by K-Means clustering, allows
+Recommendation” Volume 27 pp 6018-6028.
+healthcare providers to allocate resources more efficiently. By [6] Eric Appiah Mantey, Conghua Zhou, Joseph Henry Anajemba, Yasir
+tailoring interventions to specific clusters, the system aids in Hamid, John Kingsley Arthur (2023)”Blockchain-Enabled Technique
+optimizing healthcare resource utilization and promoting cost- for Privacy Preserved Medical Recommender System” Volume 11 2023
+pp 40944-40953.
+effective and targeted treatment strategies. Future work in
+[7] Abdullah M. Almuhaideb, Mariam Elhussein, Reem Osman, Fatema
+medical recommendation systems using K-means clustering Alholyal, Leena Alghamdi, Majd Al-Ismail, Maram Alawami, Zainab
+can focus on various aspects to enhance the quality and Kadour, And Rachid Zagrouba (2023)”Design Recommendations for
+effectiveness of recommendations and some potential Gate Security Systems and Health Status: A Systematic Review”
+Volume 11 pp 131508-131520.
+directions for research and development to incorporate the
+[8] Mustafa Haider Abidi, Usama Umer, Syed Hammad Mian, And
+Multi-modal Data to expand the scope of data used in Abdulrahman Al-Ahmari (2023)” Big Data-Based Smart Health
+clustering by including various types of medical data, such as Monitoring System: Using Deep Ensemble Learning” Volume 11 pp
+images (e.g., X-rays, MRIs), free-text clinical notes, wearable 114880-114903.
+[9] Diana Sousa and Francisco M. Couto (2022) “Biomedical Relation
+device data (e.g., heart rate, activity levels), and genetic
+Extraction With Knowledge Graph-Based Recommendations” Volume
+information. 26 pp 4207-4217.
+[10] Yang Han, Zhenguo Ha, Jianhui Wu, Yanlong Yu, Shuqing Gao,
+Dianbo Hua, And Aimin Yang (2020)”Artificial Intelligence
+Recommendation System of Cancer Rehabilitation Scheme Based on
+REFERENCES
+IoT Technology” Volume 8 pp 44924 - 44935
+[1] S. P. S, K. T, J. M and M. A. Sheriff, "A Comparative Analysis on the [11] Maria Habib, Mohammad Faris, Raneem Qaddoura, Alaa Alomari, and
+Prediction of Heart Failure using Machine Learning Algorithms," 2024 Hossam Faris (2021)” A Predictive Text System for Medical
+5th International Conference on Mobile Computing and Sustainable Recommendations in Telemedicine A Deep Learning Approach in the
+Informatics (ICMCSI), Lalitpur, Nepal, 2024, pp. 206-211, doi: Arabic Context” Volume 9 pp 85690-85708.
+10.1109/ICMCSI61536.2024.00037 [12] Andres Alejandro Ramos Magna, Héctor Allende-Cid, Carla Taramasco,
+[2] S. S. P, M. S. Monesh and B. Lingesh, "A Novel Approach to Detect Carlos Becerra, And Rosa L. Figueroa (2020) “Application of Machine
+Face Fraud Detection Using Artificial Intelligence," 2024 Second Learning and Word Embeddings in the Classification of Cancer
+International Conference on Emerging Trends in Information Diagnosis Using Patient Anamnesis” Volume 8 pp 106198-106213.
+Technology and Engineering (ICETITE), Vellore, India, 2024, pp. 1-6, [13] K. P, Vinod Kumar K. S, P. L and S. S. P, "Enhancing Face Mask
+doi: 10.1109/ic-ETITE58242.2024.10493594. Detection Using Data Augmentation Techniques," 2023 ICRASET, B
+[3] S. P. S, K. T, V. R. S R and V. R, "Predictive Modelling of Critical Vital G NAGARA, India, 2023, pp. 1-5, doi:
+Signs in ICU Patients by Machine Learning: An Early Warning System 10.1109/ICRASET59632.2023.10420361
+for Improved Patient Outcomes," 2024 3rd International Conference for [14] S. P. S, K. P and S. L. T A, "Projection of Plant Leaf Disease Using
+Innovation in Technology (INOCON), Bangalore, India, 2024, pp. 1-6, Support Vector Machine Algorithm," 2023 ICRASET, B G NAGARA,
+doi: 10.1109/INOCON60754.2024.10512042. India, 2023, pp. 1-6, doi: 10.1109/ICRASET59632.2023.10419981
+[4] S. S. P, K. P, K. T and V. R. Chiranjeevi, "Multi-Level Interpretable and
+Adaptive Representation of EEG Signals for Sleep Scoring Using
+Ensemble Learning Multi Classifiers," 2023 RMKMATE, Chennai,
+India, 2023, pp. 1-6, doi: 10.1109/RMKMATE59243.2023.10368630
+979-8-3503-8386-7/24/$31.00 ©2024 IEEE
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:13:46 UTC from IEEE Xplore. Restrictions apply.

@@ -1,0 +1,697 @@
+ECITCARP
+DNA
+YCILOP
+HTLAEH
+n
+HCRAESER
+LANIGIRO
+This copy is for personal use only. To order printed copies, contact reprints@rsna.org
+Natural Language–based
+Machine Learning Models for the
+Annotation of Clinical Radiology
+Reports1
+John Zech, MA
+Purpose: To compare different methods for generating features from ra-
+Margaret Pain, MD
+diology reports and to develop a method to automatically iden-
+Joseph Titano, MD
+tify findings in these reports.
+Marcus Badgeley, MEng
+Javin Schefflein, MD Materials and In this study, 96 303 head computed tomography (CT) reports
+Andres Su, MD Methods: were obtained. The linguistic complexity of these reports was
+Anthony Costa, PhD compared with that of alternative corpora. Head CT reports
+Joshua Bederson, MD were preprocessed, and machine-analyzable features were con-
+Joseph Lehar, PhD structed by using bag-of-words (BOW), word embedding, and
+Eric Karl Oermann, MD Latent Dirichlet allocation–based approaches. Ultimately, 1004
+head CT reports were manually labeled for findings of inter-
+est by physicians, and a subset of these were deemed criti-
+cal findings. Lasso logistic regression was used to train models
+for physician-assigned labels on 602 of 1004 head CT reports
+(60%) using the constructed features, and the performance of
+these models was validated on a held-out 402 of 1004 reports
+(40%). Models were scored by area under the receiver oper-
+ating characteristic curve (AUC), and aggregate AUC statistics
+were reported for (a) all labels, (b) critical labels, and (c) the
+presence of any critical finding in a report. Sensitivity, specific-
+ity, accuracy, and F1 score were reported for the best perform-
+ing model’s (a) predictions of all labels and (b) identification of
+reports containing critical findings.
+Results: The best-performing model (BOW with unigrams, bigrams, and
+trigrams plus average word embeddings vector) had a held-out
+AUC of 0.966 for identifying the presence of any critical head
+CT finding and an average 0.957 AUC across all head CT find-
+ings. Sensitivity and specificity for identifying the presence of
+any critical finding were 92.59% (175 of 189) and 89.67% (191
+of 213), respectively. Average sensitivity and specificity across
+all findings were 90.25% (1898 of 2103) and 91.72% (18 351 of
+20 007), respectively. Simpler BOW methods achieved results
+competitive with those of more sophisticated approaches, with
+an average AUC for presence of any critical finding of 0.951 for
+unigram BOW versus 0.966 for the best-performing model. The
+Yule I of the head CT corpus was 34, markedly lower than that
+of the Reuters corpus (at 103) or I2B2 discharge summaries (at
+271), indicating lower linguistic complexity.
+1 From the Departments of Radiology (J.Z., J.T., J.S., A.S.)
+and Neurosurgery (M.P., M.B., A.C., J.B., E.K.O.), Icahn
+Conclusion: Automated methods can be used to identify findings in radi-
+School of Medicine, 1 Gustave Levy Pl, New York, NY
+ology reports. The success of this approach benefits from the
+10029; Verily Life Sciences, South San Francisco, Calif
+(M.B.); and Department of Bioengineering and Bioinformat- standardized language of these reports. With this method, a
+ics, Boston University, Boston, Mass (J.L.). Received May large labeled corpus can be generated for applications such as
+16, 2017; revision requested June 30; revision received deep learning.
+August 1; accepted September 16; final version accepted
+November 18. Address correspondence to E.K.O. (e-mail:
+q RSNA, 2018
+eric.oermann@mountsinai.org).
+q RSNA, 2018 Online supplemental material is available for this article.
+570 radiology.rsna.org n Radiology: Volume 287: Number 2—May 2018HEALTH POLICY AND PRACTICE: Natural Language–based Machine Learning Models for Annotating Radiology Reports Zech et al
+U
+nstructured text notes contained approaches have increasingly been ap- obtained at Mount Sinai Hospital and
+within the electronic medical re- plied to medical image analysis, requir- Mount Sinai Queens between 2010 and
+cord (EMR) are recognized as ing large numbers of labeled medical 2016, were collected for use in this study
+a rich but difficult-to-access source of images to facilitate these techniques (Table 1). These three types of reports
+medical information. Addressing this (16). Many past efforts to automatically were selected as they were expected to
+has been a goal of clinical informatics extract labels from radiology reports contain markedly different language,
+for decades, and the development of have utilized rule-based systems that and a large sample of each report was
+natural language processing (NLP) al- were handcrafted to a specific corpus of available for analysis. Corpora were as-
+gorithms to automatically extract struc- reports (17). However, machine learn- sembled from cases stored within the
+tured information from the EMR is well ing–based label extraction systems have hospital picture archiving and commu-
+described throughout the medical liter- become increasingly popular because of nication system. In total, 96 303 head
+ature (1–7). Within the field of radiol- their scalability, ease of use, and rap- CT reports were available (Fig 1).
+ogy, there has also been wide interest idly improving accuracy (8,12). Consensus-based clinical entity la-
+in developing NLP tools for epidemio- In this study, we approach the prob- bel generation.—A subset of the head
+logic cohort construction, quality as- lem of generating clinical labels for a CT reports was selected to be labeled
+surance, clinical decision support, and large repository of radiology reports manually. Reports were randomly
+other applications (8–12). as a machine learning problem with an sampled from each year to generate
+Machine learning describes a broad emphasis on scalability and generaliz- a 1004-report corpus for annotation
+collection of techniques developed by ability. Over the past few years, there with reference-standard labels. Clini-
+computer scientists and statisticians that has been substantial progress within cal entities were generated by utilizing
+“focuses on the question of how to get the machine learning community on the United Medical Language System
+computers to program themselves” performing NLP because of the avail- Concept Unique Identifier and ordered
+(13). Using these techniques, power- ability of large data sets and high-per- into a taxonomy. Three physicians (two
+ful algorithms to make inferences from formance computing. Despite progress postgraduate year 4 radiology residents
+data can be learned automatically with in the general case, these newer, more and a postgraduate year 4 neurosurgery
+minimal human input. Deep learning advanced machine learning–based ap-
+describes a particular subcategory of proaches have been only sparsely de-
+machine learning techniques that use scribed within the medical literature https://doi.org/10.1148/radiol.2018171093
+multiple layers of neural networks to (16,18–20). Our purpose was to com-
+Content code:
+perform inference (14). Deep learning pare different methods for generating
+models with varied architectures have features from radiology reports and to Radiology 2018; 287:570–580
+been applied successfully in many dif- develop a method to automatically iden-
+Abbreviations:
+ferent domains, including image recog- tify findings in these reports.
+AUC = area under the receiver operating characteristic
+nition (convolutional neural networks) curve
+and natural language processing (long BOW = bag of words
+Materials and Methods
+short-term memory networks) (14). DM = distributed memory
+DV = document vector
+Deep learning–based image recognition
+techniques often require large amounts Data Sets EMR = electronic medical record
+I2B2 UTHEALTH = Informatics for Integrating Biology and
+of training data to achieve high accu- Radiology reports.—Our study was ap-
+the Bedside 2014 De-identification and Heart Disease
+racy; for example, the standard ILSVRC proved by the Mount Sinai Institutional Risk Factors Challenge
+competition data set, on which such Review Board, and all data were stored LDA = Latent Dirichlet allocation
+algorithms are frequently trained and locally on the hospital premises on a NLP = natural language processing
+evaluated, includes 1.2 million train- dedicated computing resource. Three t-SNE = t-distributed stochastic neighbor embedding
+TTR = type-to-token ratio
+ing images (15). Deep learning–based authors (M.B., E.K.O., and J.L.) were
+employed by Verily Life Sciences (South Author contributions:
+Implications for Patient Care San Francisco, California) at the time Guarantors of integrity of entire study, J.Z., M.P., J.T., A.S.,
+of this work, in addition to their aca- E.K.O.; study concepts/study design or data acquisition
+n Natural language processing ap- or data analysis/interpretation, all authors; manuscript
+demic affiliations. Verily Life Sciences
+proach allows the annotation of a drafting or manuscript revision for important intellectual
+did not provide financial support for
+large corpus of radiologic reports content, all authors; manuscript final version approval,
+this study and has no financial interest all authors; agrees to ensure any questions related to the
+by using only a small labeled
+in it. The first author (J.Z.) had control work are appropriately resolved, all authors; literature
+subset.
+of the data and material submitted for research, J.Z., M.P., J.T., M.B., J.S., A.S., J.B., J.L., E.K.O.;
+n This large labeled corpus facili- publication. Three corpora of radiology clinical studies, J.T., J.S., A.C.; experimental studies, J.Z.,
+tates the training of deep reports, consisting of all head com- M.P., J.T., A.S., A.C., E.K.O.; statistical analysis, J.Z., J.T.,
+J.L., E.K.O.; and manuscript editing, all authors
+learning–based models to iden- puted tomographic (CT) scans, all hip
+tify findings in imaging data. radiographs, and all chest radiographs Conflicts of interest are listed at the end of this article.
+Radiology: Volume 287: Number 2—May 2018 n radiology.rsna.org 571HEALTH POLICY AND PRACTICE: Natural Language–based Machine Learning Models for Annotating Radiology Reports Zech et al
+Table 1 characters separated by spaces or
+punctuation in reports constitute the
+Analysis of Lexical Complexity of Two Common English Language Corpora (Reuters set of tokens. To capture lexical com-
+News and Gutenberg), Amazon Product Reviews, Hospital Discharge Summaries plexity, we calculated simple metrics
+(I2B2), and Three Large Radiology Corpora (Head CT Scans, Hip Radiographs, Chest
+such as the number of unique words,
+Radiographs)
+the number of unique bigrams (two
+Average Normalized Relative words joined and treated as a sin-
+Corpus Complexity gle token, eg, “acute_hemorrhage”),
+the type-token ratio (TTR), which
+Reuters 1.00
+divides unique word count by total
+Gutenberg 0.94
+word count, and the Yule I (which,
+Hip radiographs 0.03
+similarly to TTR, increases when
+Head CT scans 0.08
+rare words occur more frequently in
+Chest radiographs 0.04
+a document, but is calculated based
+I2B2 UTHEALTH 1.36
+on the distribution of the number of
+Amazon pet product reviews 1.01
+words that occur a given number of
+Amazon cellular accessories reviews 0.91
+times) (27). A full description of these
+measures is given in Appendix E1
+(online). We also trained simple first-
+resident) independently generated bi- Comparative nonradiology text order Markov models (which assume
+nary (true or false) labels for these re- corpora.—Several alternative text that the probability of a given word
+ports that indicated the presence or ab- corpora were gathered for the purposes appearing in a sentence depends only
+sence of the specified clinical entities, of characterizing the lexical and seman- on the prior word) on each corpus
+and a consensus set of reference-stan- tic structure of radiology reports prior and calculated the average entropy
+dard labels was generated by majority to analysis. These included subsets of rate for each model (roughly equiva-
+vote (21). The Fleiss k, a measure of the Reuters corpus of more than 10 000 lent to the average per-word entropy,
+interrater agreement, was calculated news stories, the Gutenberg corpus a measure that reflects the variety
+for each individual label, and only la- of more than 3000 English language of language present, specifically de-
+bels with k of 0.60 or greater were books, and the Informatics for Integrat- fined as the average of the negative
+considered for analysis. Whenever we ing Biology and the Bedside 2014 De- logarithm of the probability assigned
+discuss “labels” in this article, we are identification and Heart Disease Risk by the model to each word appearing
+referring to these human-generated re- Factors Challenge (I2B2 UTHEALTH) in a corpus) (28). Utilizing these fea-
+port annotations. In total, there were corpus of discharge summaries (22– tures as measures of lexical complexity
+55 labels included in the analysis, 20 of 25). To compare with documents that and utilizing the Reuters corpus as a
+which were classified as critical labels were similarly constrained in their topic baseline, we scaled each feature such
+on the basis of the criteria used at our matter, we also analyzed Amazon prod- that the score of the Reuters corpus
+hospital, which are derived from a pre- uct reviews from the “Cell Phones and was 1 and then took a simple, normal-
+viously published report (36). At our Accessories” and “Pet Supplies” depart- ized average to create an aggregate
+institution, reporting of acute ischemic ments (26). measure of complexity relative to the
+stroke is required within 15 minutes Reuters corpus. This “average nor-
+Complexity Analysis
+of image acquisition, and reporting of malized relative complexity” measure
+intracranial hemorrhage, airway com- We performed an initial lexical com- equals 1 when the corpus under con-
+promise, acute spinal cord compres- plexity analysis separately for head sideration is equally complex as the
+sion, ruptured aneurysm, and markedly CT scans, chest radiographs, and Reuters corpus, is between 0 and 1
+misplaced lines and tubes is mandated hip radiographs, as well as for each for simpler corpora, and is greater
+within 1 hour of image acquisition. Un- of the comparative nonradiology text than 1 for more complex corpora.
+expected masses are reported within corpora. Because of differences in
+8 hours of image acquisition. In addi- corpora size, we calculated complex- Preprocessing
+tion, findings not contained within this ity measures across entire corpora, All text was preprocessed in a stan-
+specific list that may alter patient treat- as well as averaged measures across dardized manner to facilitate machine
+ment acutely are reported urgently. An randomly sampled partitions of learning techniques. All sections of
+aggregate measure indicating whether 500 000 tokens per partition. A token each report, including any addenda
+a report contained any critical finding is the fundamental unit into which made, were used in feature gener-
+was determined to be true if any of the documents are subdivided in an ation. Reports were segmented by
+20 critical findings were present, and NLP analysis: In a unigram analysis, using standard approaches based
+false otherwise. all single words or other strings of on white spacing and punctuation.
+572 radiology.rsna.org n Radiology: Volume 287: Number 2—May 2018HEALTH POLICY AND PRACTICE: Natural Language–based Machine Learning Models for Annotating Radiology Reports Zech et al
+A generic set of stop words, several Figure 1
+radiology-specific phrases (eg, “CT”),
+and other noninformative characters
+(eg, numbers, “_,” “-,” “,”) were re-
+moved. Text was converted to low-
+ercase, and words were stemmed by
+using the Porter stemming algorithm
+(29). When specified, n-grams were
+constructed based on the words in
+the documents (1-, 2-, or 3-grams).
+N-grams that occurred fewer than 20
+times in training data were excluded
+from the analyses to ensure that the
+constructed vocabulary was meaning-
+ful to the corpus at large.
+Featurization
+We note the distinction between
+machine learning approaches that are
+“supervised” and those that are “un-
+supervised.” Supervised learning is a
+subfield of machine learning concerned
+with predicting outcomes given sets of
+features (eg, regression, classification).
+In contrast, unsupervised learning is
+performed when there are no outcomes
+and our goal is instead to learn asso-
+ciations and patterns between various
+sets of features (eg, clustering, dimen-
+sionality reduction) (30). Three general
+unsupervised approaches to generating
+predictive features were compared. All
+approaches were trained exclusively
+on the 95 299 unlabeled reports and
+were then subsequently incorporated
+into supervised models. A standard
+Figure 1: The overall workflow of the natural language processing analysis beginning with
+grid search was performed for hyper-
+(A) calculating the complexity benchmarks, (B) obtaining reference-standard labels manually,
+parameter selection for all algorithms
+(C) feature engineering with several different methods, and (D) evaluation of the final predictive
+used during both featurization and
+models. ICAHNC = Mount Sinai Hospital and Mount Sinai Queens.
+subsequent modeling. Hyperparam-
+eters refer to algorithm parameters
+that cannot be directly learned during
+training and must be specified before- vocabulary of 3291 words, each docu- phrases of two words in “BOW-Bigram”
+hand. As a benchmark for the more ment had a corresponding BOW uni- (eg, “impression_acute,” “acute_hem-
+sophisticated methods, a simple bag of gram vector of length 3291 in which orrhage”) and three words in “BOW-
+words (BOW) model was used. BOW each entry in the vector corresponded Trigram” (eg, “impression_acute_hem-
+discards grammar and context and ex- to a specific word. A document that orrhage”) to determine if capturing
+clusively utilizes document-level word contained only the phrase “Impression: longer phrases could improve predictive
+occurrences as its features. For each acute hemorrhage” would have a 1 at accuracy.
+document, a BOW vector with a length each of the three entries in the vector Latent Dirichlet allocation (LDA)
+equal to the size of the vocabulary of corresponding to “impression,” “acute,” topic models were built on the unla-
+the corpus was generated in which each and “hemorrhage” and a 0 at every beled reports (31,32). This model was
+entry corresponded to the presence of other entry in the vector. This vector chosen because it represents the most
+a specific word in the document (1 if the (“BOW-Unigram”) was then used as popular unsupervised method of topic
+word was present in document, 0 oth- input to predict each human-assigned discovery based on probabilistic gen-
+erwise). For example, in the unigram label. This approach was extended to erative models, which specify a large
+Radiology: Volume 287: Number 2—May 2018 n radiology.rsna.org 573HEALTH POLICY AND PRACTICE: Natural Language–based Machine Learning Models for Annotating Radiology Reports Zech et al
+Table 2
+Area under the Curve for the Best-performing Models within Each Machine Learning Feature Engineering and Model Category
+Critical Finding
+Overall (n = 55 findings) Critical (n = 20 findings) Present
+Held-out AUC according to Model Type AUC Minimum Maximum SD AUC Minimum Maximum SD AUC
+BOW
+Uni-, bi-, and trigrams 0.954 0.816 1.000 0.041 0.953 0.857 0.997 0.040 0.957
+Unigrams 0.950 0.814 1.000 0.046 0.951 0.857 0.998 0.040 0.951
+Bigrams 0.894 0.515 1.000 0.099 0.912 0.729 0.978 0.061 0.937
+Trigrams 0.790 0.500 0.992 0.133 0.824 0.533 0.961 0.116 0.853
+DM-DV
+Document-embedding vector 0.761 0.500 0.932 0.096 0.831 0.695 0.911 0.066 0.876
+Average word-embedding vector 0.917 0.746 0.992 0.056 0.935 0.746 0.991 0.055 0.935
+Document-embedding vector + 0.917 0.746 0.993 0.056 0.934 0.746 0.991 0.055 0.935
+average word-embedding vector
+LDA
+50 Topics, uni-, bi-, trigrams 0.820 0.500 0.995 0.109 0.887 0.730 0.987 0.074 0.852
+50 Topics, unigrams 0.849 0.566 0.994 0.098 0.905 0.832 0.979 0.049 0.936
+50 Topics, bigrams 0.763 0.454 0.987 0.154 0.877 0.714 0.983 0.089 0.846
+50 Topics, trigrams 0.690 0.399 0.992 0.169 0.812 0.500 0.978 0.149 0.776
+100 Topics, unigrams 0.860 0.500 0.994 0.118 0.922 0.747 0.989 0.060 0.929
+200 Topics, unigrams 0.872 0.550 0.994 0.091 0.914 0.754 0.981 0.060 0.923
+BOW (uni-, bi-, trigrams) + DM-DV 0.957 0.827 1.000 0.039 0.959 0.857 0.997 0.037 0.966
+average word-embedding vector
+Note.—AUC = area under the receiver operating characteristic curve, BOW = bag of words, DM-DV = distributed memory document vector, LDA = Latent Dirichlet allocation, SD = standard deviation.
+joint distribution over many related that must be prespecified before model by learning both word embed-
+variables (33). Although the details model training, and we report results ding vectors as well as an additional
+of LDA are beyond the scope of this for LDA models with 50, 100, and 200 document or paragraph embedding
+article, these models can be concep- topics. vector (document in our case) that cap-
+tualized by assuming that a document For our embedding-based ap- tures some of the semantic content of a
+consists of words and topics. While proaches, we relied on a distributed given document or paragraph. While an
+we know the words in the document, memory (DM)-document vector (DV) active area of research, a straightfor-
+we cannot directly observe the topics, model (19,32). We included this model ward approach for feature generation
+and must infer them. LDA assumes because it is a state-of-the-art discrim- is to sum the word embedding vectors
+that certain topics are more likely to inative method that offers a fundamen- for each word in a document and then
+be associated with certain words, and tally different alternative to LDA’s prob- divide by the total number of words in
+we can therefore use the words in the abilistic generative approach. DM-DV that document to get an “average word
+document to infer the topics. Topics is an extension of a “continuous bag embedding vector” for each document.
+can often be directly interpreted by of words” model, an artificial neural We use these average word embedding
+humans as semantically meaningful network-based approach that utilizes a vectors as features, as well as the in-
+(34). The learned topic assignments predictive task, in this case predicting a dividual document embedding vectors
+in each document can be understood word given the words that precede and learned by the DM-DV model with an
+as characterizing the document’s se- follow it, to learn an n-dimensional vec- embedding dimensionality of 400 and
+mantics. We utilized these topic as- tor of numbers, called an embedding a window of three. Therefore, for each
+signments as our LDA features. For an vector, that captures some of the se- document, these two vectors were cal-
+LDA model trained on head CT data, mantic content of the underlying words. culated and were then used separately
+we reported the average document These learned embedding vectors can and in combination as input to predict
+topic distribution by clinical label and subsequently be utilized as features each human-assigned label. We report
+the top five words associated with in predictive models or as a means of examples of learned word embeddings,
+each topic (35). The number of topics characterizing the underlying semantic average word embedding vectors for
+in an LDA model is a hyperparameter space. DM-DV extends the skip-gram critical versus noncritical findings, and
+574 radiology.rsna.org n Radiology: Volume 287: Number 2—May 2018HEALTH POLICY AND PRACTICE: Natural Language–based Machine Learning Models for Annotating Radiology Reports Zech et al
+Figure 2 Modeling
+We attempted to predict human-gener-
+ated reference-standard document la-
+bels using the features described above
+for the 1004 labeled reports of the head
+CT corpus. Features were entered into
+a Lasso logistic regression to predict
+labels that occurred at least 20 times.
+All statistical analyses were performed
+with scikit-learn 0.18.1 (38). Lasso lo-
+gistic regression differs from standard
+logistic regression in that it introduces
+a penalty for assigning weight to regres-
+sion coefficients (39). This is practically
+useful, as such models can take a very
+large number of features as input and
+assign regression coefficients of 0 to
+many uninformative features, effectively
+ignoring them. Nonzero regression co-
+efficients are assigned only to those
+variables that contribute sufficient ac-
+curacy to the model’s predictions. Sixty
+percent (602 of 1004) of the labeled
+reports were used to train regression
+models, and 40% (402 of 1004) of the
+labeled reports were held out to vali-
+date the accuracy of the models. Final
+models were scored by area under the
+receiver operating characteristic curve
+(AUC), and each model’s mean, mini-
+mum, maximum, and standard devi-
+ation of AUC was reported for (a) all
+Figure 2: Graphs show ROC curves for the different models for several of the higher order labels for (a) labels in aggregate, (b) critical labels
+presence of a critical finding, (b) fracture, (c) hemorrhage, and (d) stroke, infarction, or ischemia. BOW = only, and (c) a binary variable indicat-
+bag of words, ROC =receiver operating characteristic, TM = Latent Dirichlet allocation topic model, WV = ing whether a report contained a critical
+average word embedding vector. finding. Sensitivity, specificity, accuracy,
+and F1 score—defined as (two times
+Table 3 precision times recall)/(precision plus
+recall), where precision refers to posi-
+Performance Metrics for the Best Overall Model (BOW+DM-DV) on a Single Binary tive predictive value and recall refers to
+Prediction Task (Predicting Whether a Report Contains a Critical Result), as Well as Its sensitivity—were reported for the best-
+Overall Performance Predicting All Labels performing model’s (a) predictions of all
+BOW+DM-DV All Labels (n = 22 110) Critical Finding Present (n = 402) labels and (b) identification of reports
+containing critical findings. We illustrate
+Sensitivity (%) 90.25 (1898/2103) 92.59 (175/189)
+held-out AUC curves for selected labels.
+Specificity (%) 91.72 (18 351/20 007) 89.67 (191/213)
+To illustrate the mechanics of unigram
+Accuracy (%) 91.58 (20 249/22 110) 91.04 (366/402)
+BOW modeling, the average, minimum,
+F1 0.671 (3796/5657) 0.907 (350/386)
+and maximum number of nonzero terms
+Note.—BOW+DM-DV = model using both bag of words and average word embedding vector features, F1 = (two times precision used by the unigram BOW model across
+times recall)/(precision plus recall). all labels were calculated, and examples
+of terms learned for specific labels were
+reported.
+clusters among learned word embed- two-dimensional visualizations in which Code to enable readers to repli-
+dings in the head CT corpus (36). We the distance between points reflects cate these methods on their own data
+used t-distributed stochastic neigh- their similarity in 400-dimensional will be made available for download at
+bor embedding (t-SNE) to generate space (37). https://github.com/aisinai.
+Radiology: Volume 287: Number 2—May 2018 n radiology.rsna.org 575HEALTH POLICY AND PRACTICE: Natural Language–based Machine Learning Models for Annotating Radiology Reports Zech et al
+Figure 3
+Figure 3: (a) The unsupervised embedding
+models on the head CT corpus learn vectors cor-
+responding to each word; remarkably, when these
+vectors are added algebraically, they reflect the
+underlying semantics of these concepts. For more
+information, see reference 50. (b) Utilizing t-SNE to
+visualize the embedding space and our reference-
+standard labels, we can observe a centralization
+of critical head documents based on their average
+word-embedding vectors, indicating that docu-
+ments with critical findings tend to be clustered
+together in this space. (c) Also utilizing t-SNE in an
+unsupervised fashion, we can note that the head CT
+corpus has well-defined clusters of shared semantic
+meaning. t-SNE = t-distributed stochastic neighbor
+embedding.
+576 radiology.rsna.org n Radiology: Volume 287: Number 2—May 2018HEALTH POLICY AND PRACTICE: Natural Language–based Machine Learning Models for Annotating Radiology Reports Zech et al
+Results any critical label (Fig 2). It achieved an least accurate means of generating doc-
+average sensitivity and specificity for all ument classifiers, with a best average
+Comparative Lexical Analysis labels of 90.25% (1898 of 2103) and AUC of 0.872. However, topic models
+The English language corpora had more 91.72% (18 351 of 20 007), respectively, did have the advantage of being highly
+unique words, more unique bigrams, and identified reports containing critical interpretable, with the ability to specif-
+and higher TTR scores relative to all findings with a sensitivity and specific- ically survey the individual words that
+three radiology corpora. Notably, the av- ity of 92.59% (175 of 189) and 89.67% constitute each topic (Fig 4).
+erage number of words in the head CT (191 of 213), respectively (Table 3).
+corpus was 5997 words across 96 303 In the unigram BOW model, out
+Discussion
+reports, compared with 26 546 across of 3291 possible unigram tokens, our
+11 887 paragraphs of Reuters, with re- regression model utilized an average The annotation of large radiology re-
+spective TTR scores of 0.011 and 0.046. 35.8 tokens (range, six to 86 tokens) port corpora to facilitate large-scale
+Similarly, the English language corpora by assigning a nonzero weight to their research in radiology with machine
+had an average Yule I of 103 and 76 for regression coefficients. Certain models, learning and deep learning is itself a
+the Reuters and Gutenberg corpora, re- such as that for “CNS edema,” used a nontrivial problem in NLP. Traditional
+spectively, whereas for each radiology limited number of tokens (n = 18) and rule-based approaches can achieve
+corpus, the Yule I was lower than 40. tended to put disproportionate weight impressive results but may be hard to
+On the normalized relative complexity on a single token whose appearance was generalize outside of the training sets
+measure, the radiology corpora were 10 strongly associated with the finding (re- on which the rules are constructed
+to 30 times less complex than Reuters gression coefficient of 4.96 for “edema,” (3,6,11). We found that simple unigram
+(Table 1). Despite accounting for only next most influential coefficient, 20.84 BOW features in a Lasso logistic regres-
+1304 summaries, the I2B2 UTHEALTH “acut”). Other models, such as that for sion performed well at labeling clinical
+had an average of 32 014 unique words, “stroke/infarction/ischemia,” used more entities in a large radiology corpus.
+a Yule I of 271, and an average normal- tokens (n = 65) and assigned substan- Furthermore, distinct from rule-based
+ized relative complexity of 1.36 times tial regression coefficients to multiple methods, which are typically hand engi-
+that of the Reuters corpus. tokens (five most influential tokens: 3.65 neered for a particular type of report,
+for “lacunar,” 2.48 for “infarct,” 1.46 for machine learning approaches such as
+NLP Modeling “stroke,” 1.34 for “chronic,” and 1.19 for those used here can be easily applied
+Most labels occurred infrequently (me- “hypodense”). Unigram BOW models to a wide variety of radiology reports.
+dian incidence, 5.4% [54 of 1004]). Ex- for “edema” and “stroke/infarction/is- Our accuracy for critical findings
+cepting the most common label (pres- chemia” achieved AUCs of 0.991 and of 91.04% demonstrates a substantial
+ence of any abnormality, 81.6% [819 0.954, respectively. improvement on a past effort in 2000
+of 1004]), the next most common label In addition to their accuracy as clas- to automatically code head CT head
+(sinus disease) was present in 29.4% sifiers, the embedding models and topic reports that achieved 84% accuracy
+(295 of 1004) of reports. models provided a means of interpret- (40). A recent study applied machine
+Table 2 presents the results of the ing the underlying semantic structure learning classification (support vector
+best-performing feature extraction and of the radiology corpora. By looking machine with BOW) to knee MR im-
+model pairs. Notably, a simple BOW at the similarity between average word aging reports and achieved a same-hos-
+approach with unigrams with a Lasso embedding vectors, simple clinical and pital F1 score of 0.903–0.921 in iden-
+logistic regression achieved an average semantic relationships can be recapitu- tifying a composite variable indicating
+AUC of 0.950 6 0.046 (standard devia- lated (Fig 3a). By projecting the reports findings of interest across 2454 reports
+tion) on all labels and 0.951 6 0.040 on into the embedding space utilizing the (41). Our results demonstrate that it is
+critical labels. Utilizing the average word average word embedding vector model possible to achieve a similarly high F1
+embedding vectors in a Lasso logistic and then visualizing it with t-SNE, we score (0.907) in identifying reports con-
+regression yielded an AUC of 0.917 6 can note an underlying structure of taining critical findings in a completely
+0.056 on all labels and 0.935 6 0.055 critical CT findings being located cen- different domain of radiology.
+on critical labels. The best-performing trally, with noncritical findings on the Our complexity analysis results
+LDA model utilizing 200 topics and periphery (Fig 3b). Similarly, visualiza- suggest that part of the success of
+unigrams achieved an AUC of 0.872 6 tion of the embedding space itself for simple models in the radiology con-
+0.091 on all labels and 0.914 6 0.060 the head CT corpus allows us to note text is specific to the actual lexical and
+on critical labels. The best-performing distinct, semantically-related groupings semantic structure of the language of
+overall model (a combination of BOW of words corresponding to location, radiology reporting. Despite their rel-
+and average word embedding vector) medical terms and conditions, proper ative sizes being almost an order of
+achieved an AUC of 0.957 6 0.039 on names, procedures, anatomic locations, magnitude smaller than the radiology
+all labels, 0.959 on critical labels, and and radiologist assessment (Fig 3c). corpora, the English language corpora
+0.966 in identifying reports containing Topic models proved to be one of the had more unique words, more unique
+Radiology: Volume 287: Number 2—May 2018 n radiology.rsna.org 577HEALTH POLICY AND PRACTICE: Natural Language–based Machine Learning Models for Annotating Radiology Reports Zech et al
+Figure 4
+Figure 4: The Latent Dirichlet allocation topic
+models provide a highly transparent means of
+document classification. (a) Each topic is illustrated
+in red text, and lines are drawn to each of the five
+words most commonly associated with that topic.
+Certain common words were shared by multiple
+topics (eg, “acute”), and these words appear more
+centrally on the diagram. (b) Each box represents
+the average relative weight of a topic (bottom axis) in
+reports that were positive for a given label (right axis);
+red = relatively high weight, and blue = relatively
+low weight. Labels are sorted vertically so that labels
+with more similar topic weight distributions appear
+in proximity to each other. When used to assign
+average topic weights to reports, topics can be readily
+demonstrated to have captured the underlying clinical
+semantics both broadly and in specific cases.
+bigrams, and higher TTR scores rela-
+tive to all three radiology corpora. Sim-
+ilarly, the I2B2 UTHEALTH corpus was
+easily the most complicated corpus,
+which is suggestive of a substantially
+greater difficulty for performing NLP
+in the general medical context relative
+to radiology or even standard English
+language cases. The limited anatomy
+and pathology described in any given
+type of report, as well as the use of
+automatically generated text and dic-
+tation software, are likely both major
+contributors to the lexical simplicity
+of radiology. Furthermore, the highly
+specialized nature of each imaging
+modality lends itself to the de facto
+creation of sublanguages each with
+a relatively low degree of lexical and
+semantic complexity. This is likely to
+become even truer going forward with
+the wider adoption of standardized
+reporting protocols (eg, LI-RADS, PI-
+RADS) (42).
+The finding that relatively simple
+BOW approaches performed well in-
+vites the question of whether more
+sophisticated and computationally ex-
+pensive approaches are truly required
+for this application. One strength of
+these more sophisticated models is
+that they offer additional character-
+ization of the reports that goes beyond
+their value as predictive features, and
+human interpreters can often discover
+interesting patterns in analyzing these
+578 radiology.rsna.org n Radiology: Volume 287: Number 2—May 2018HEALTH POLICY AND PRACTICE: Natural Language–based Machine Learning Models for Annotating Radiology Reports Zech et al
+results (19,34). One of the more un- only two hospitals. The exact classifiers 3. Jung K, LePendu P, Iyer S, Bauer-Mehren
+expected findings, for example, was learned in this work may not general- A, Percha B, Shah NH. Functional evalua-
+tion of out-of-the-box text-mining tools for
+the distinct groupings associated with ize to external data sets. However, pro-
+data-mining tasks. J Am Med Inform Assoc
+physician names, procedures, and an- vided that a subset of the reports in a
+2015;22(1):121–131.
+atomic locations. Some recent studies new corpus can be manually labeled,
+have reported utilizing this finding for this same method can be implemented 4. Huang SH, LePendu P, Iyer SV, Tai-Seale M,
+Carrell D, Shah NH. Toward personalizing
+performing de-identification, where to infer corpus-specific labels for re-
+treatment for depression: predicting diag-
+a similar analysis is performed to ports in any radiologic corpus.
+nosis and severity. J Am Med Inform Assoc
+identify regions of patient names or In conclusion, because of the
+2014;21(6):1069–1075.
+other protected health information, highly structured language of radiology,
+5. Agarwal V, Podchiyska T, Banda JM, et al.
+and then subsequently including those straightforward machine learning–based
+Learning statistical models of phenotypes
+words as stop words or excluding approaches can achieve state-of-the-art
+using noisy labeled training data. J Am Med
+those regions (43,44). classification results in text corpora of
+Inform Assoc 2016;23(6):1166–1173.
+While we report aggregate AUC radiology reports, generating large data
+6. Carrell DS, Halgrim S, Tran DT, et al. Us-
+numbers for our classifiers, we note sets of labeled reports needed for appli-
+ing natural language processing to improve
+that there was substantial variation in cations such as deep learning.
+efficiency of manual chart abstraction in
+the ability of our approach to recover
+research: the case of breast cancer recur-
+different labels. This reflects the fact Acknowledgments: We thank Burton Drayer, rence. Am J Epidemiol 2014;179(6):749–
+that certain labels (eg, “edema”) are re- MD, and Errol Gordon, MD, for their contri- 758.
+bution to and support of this work. Deidentified
+ferred to with very consistent language
+clinical records used in this research were pro- 7. Zeng QT, Goryachev S, Weiss S, Sordo M,
+in most reports, whereas other labels vided by the I2B2 National Center for Biomed- Murphy SN, Lazarus R. Extracting principal
+(eg, “stroke/infarction/ischemia”) may ical Computing funded by U54LM008748 and diagnosis, co-morbidity and smoking status
+were originally prepared for the Shared Tasks
+be referred to with a wider variety of for asthma research: evaluation of a natural
+for Challenges in NLP for Clinical Data orga-
+language. With an increasing trend nized by Ozlem Uzuner, PhD, I2B2, and SUNY. language processing system. BMC Med In-
+form Decis Mak 2006;6(1):30.
+toward standardization of reporting
+language, we anticipate that more la- Disclosures of Conflicts of Interest: J.Z. dis- 8. Pons E, Braun LM, Hunink MG, Kors JA. Nat-
+bels will become reliably automatically closed no relevant relationships. M.P. disclosed ural language processing in radiology: a sys-
+recoverable in the future. no relevant relationships. J.T. disclosed no rel- tematic review. Radiology 2016;279(2):329–
+evant relationships. M.B. Activities related to 343.
+The method described in this arti- the present article: disclosed no relevant rela-
+cle can be used to generate a large set tionships. Activities not related to the present 9. Dreyer KJ, Kalra MK, Maher MM, et al.
+of automatically labeled radiology re- article: is employed as a fellow at Verily Life Sci- Application of recently developed computer
+ports based on a small set of manually ences. Other relationships: disclosed no relevant algorithm for automatic classification of
+relationships. J.S. disclosed no relevant relation-
+unstructured radiology reports: validation
+labeled reports. Because these labels ships. A.S. disclosed no relevant relationships.
+study. Radiology 2005;234(2):323–329.
+are based purely on the text contained A.C. disclosed no relevant relationships. J.B.
+in the reports and do not incorporate disclosed no relevant relationships. J.L. Activ- 10. Fiszman M, Chapman WW, Aronsky D,
+ities related to the present article: disclosed no
+any machine-derived features learned Evans RS, Haug PJ. Automatic detection
+relevant relationships. Activities not related to
+of acute bacterial pneumonia from chest
+from the corresponding imaging, they the present article: was an employee of Verily
+X-ray reports. J Am Med Inform Assoc
+can be used as an independent set of Life Sciences at the time of this work; is an ad-
+viser/consultant for Google; is currently an em- 2000;7(6):593–604.
+labels to train deep learning–based
+ployee of Merck. Other relationships: disclosed
+image classification models. Work in no relevant relationships. E.K.O. Activities re- 11. Percha B, Nassif H, Lipson J, Burnside E,
+Rubin D. Automatic classification of mam-
+other domains has shown that using lated to the present article: disclosed no relevant
+mography reports by BI-RADS breast tissue
+large data sets with inferred labels for relationships. Activities not related to the pre-
+sent article: is employed as a postdoctoral fel- composition class. J Am Med Inform Assoc
+image classification tasks can deliver low at Verily Life Sciences. Other relationships: 2012;19(5):913–916.
+excellent results, as the larger amount disclosed no relevant relationships.
+12. Solti I, Cooke CR, Xia F, Wurfel MM. Au-
+of training data more than compen-
+tomated classification of radiology reports
+sates for inaccuracy introduced into
+References for acute lung injury: comparison of key-
+the inferred training labels (45–49). word and machine learning based natural
+Additionally, on generating a set of la- 1. Liao KP, Cai T, Savova GK, et al. Devel- language processing approaches. Proceed-
+bels, active learning or semisupervised opment of phenotype algorithms using ings IEEE Int Conf Bioinformatics Biomed
+learning approaches can be utilized as electronic medical records and incorpo- 2009;2009:314–319.
+rating natural language processing. BMJ
+a further means of de-”noising” the 2015;350:h1885. 13. Mitchell TM. The discipline of machine
+data set prior to subsequent super- learning, Vol 3. Pittsburgh, Pa: Carnegie
+2. Murff HJ, FitzHenry F, Matheny ME, et al.
+vised learning (49). Mellon University, School of Computer Sci-
+Automated identification of postoperative
+An important limitation to our work ence, Machine Learning Department, 2006.
+complications within an electronic medical
+was that all reports included in the radi- record using natural language processing. 14. LeCun Y, Bengio Y, Hinton G. Deep learn-
+ology report corpus were derived from JAMA 2011;306(8):848–855. ing. Nature 2015;521(7553):436–444.
+Radiology: Volume 287: Number 2—May 2018 n radiology.rsna.org 579HEALTH POLICY AND PRACTICE: Natural Language–based Machine Learning Models for Annotating Radiology Reports Zech et al
+15. Russakovsky O, Deng J, Su H, Krause J, the 7th ACM conference on Recommender ology reports for the Northern Manhat-
+Satheesh S, Ma S, et al. ImageNet large systems. ACM, 2013; 165–172. tan Stroke Study: a comparison of natural
+scale visual recognition challenge. arXiv [cs. language processing and manual review.
+27. Yule GU. On sentence-length as a statistical
+CV]. 2014. Comput Biomed Res 2000;33(1):1–10.
+characteristic of style in prose: with appli-
+16. Shin HC, Lu L, Kim L, Seff A, Yao J, cation to two cases of disputed authorship. 41. Hassanpour S, Langlotz CP, Amrhein TJ,
+Summers RM. Interleaved text/image Deep Biometrika 1939;30(3/4):363–390. Befera NT, Lungren MP. Performance of a
+Mining on a large-scale radiology database. machine learning classifier of knee MRI re-
+28. Montemurro MA, Zanette DH. Universal
+In: 2015 IEEE Conference on Computer Vi- ports in two large academic radiology prac-
+entropy of word ordering across linguistic
+sion and Pattern Recognition (CVPR). 2015. tices: a tool to estimate diagnostic yield.
+families. PLoS One 2011;6(5):e19875.
+AJR Am J Roentgenol 2017;208(4):750–
+17. Friedlin J, McDonald CJ. A natural language
+29. Porter MF. An algorithm for suffix stripping. 753.
+processing system to extract and code con-
+Program. 1980;14(3):130–137.
+cepts relating to congestive heart failure 42. Castellanos SH, Gonzalez-Aguirre A,
+from chest radiology reports. AMIA Annu 30. Ghahramani Z. Unsupervised learning. In: Ibargüengoitia MC, Vazquez S, Lamadrid JV.
+Symp Proc 2006:269–273. Bousquet O, von Luxburg U, Rätsch G, eds. BI-RADS, C-RADS, GI-RADS, LI-RADS,
+Advanced lectures on machine learning. Lu-RADS, TI-RADS, PI-RADS. The long and
+18. Mcauliffe JD, Blei DM. Supervised topic Berlin, Germany: Springer-Verlag, 2004. winding road of standardization. Proceedings
+models. In: Platt JC, Koller D, Singer Y, Ro- of the European Congress of Radiology. 2014.
+weis ST, eds. Advances in neural informa- 31. Blei DM, Ng AY, Jordan MI. Latent
+tion processing systems 20. Red Hook, NY: Dirichlet allocation. J Mach Learn Res 43. Dernoncourt F, Lee JY, Uzuner O, Szolovits
+Curran Associates, 2008; 121–128. 2003;3(Jan):993–1022. P. De-identification of patient notes with re-
+current neural networks. J Am Med Inform
+19. Mikolov T, Sutskever I, Chen K, Corrado 32. Řehůřek R, Sojka P. Software framework Assoc 2017;24(3):596–606.
+G, Dean J. Distributed representations of for topic modelling with large corpora. In:
+words and phrases and their compositional- Proceedings of the LREC 2010 Workshop on 44. Kassaie B. De-identification In practice.
+ity. arXiv [cs.CL]. 2013. New Challenges for NLP Frameworks. Val- arXiv [cs.CL]. 2017.
+letta, Malta: ELRA, 2010; 45–50.
+20. Mikolov T, Chen K, Corrado G, Dean J. Effi- 45. Joulin A, van der Maaten L, Jabri A, Vasilache
+cient Estimation of word representations in 33. Bishop CM. Pattern recognition and N. Learning visual features from large weakly
+vector space. arXiv [cs.CL]. 2013. machine learning. New York, NY: Springer- supervised data. arXiv [cs.CV]. 2015.
+Verlag, 2006.
+21. Harris PA, Taylor R, Thielke R, Payne J, 46. Krasin I, Duerig T, Alldrin N, et al. Openimag-
+Gonzalez N, Conde JG. Research electronic 3 4. Chang J, Gerrish S, Wang C, Boyd-Graber es: A public dataset for large-scale multi-label
+data capture (REDCap)--a metadata-driven JL, Blei DM. Reading tea leaves: how hu- and multi-class image classification. https://
+methodology and workflow process for pro- mans interpret topic models. In: Bengio Y, github.com/openimages. Accessed March 22,
+viding translational research informatics Schuurmans D, Lafferty JD, Williams CKI, 2017.
+support. J Biomed Inform 2009;42(2):377– Culotta A, eds. Advances in Neural Informa-
+47. Thomee B, Shamma DA, Friedland G, Elizal-
+381. tion Processing Systems 22. Red Hook, NY:
+de B, Ni K, Poland D, et al. YFCC100M: The
+Curran Associates, 2009; 288–296.
+22. Stubbs A, Uzuner Ö. Annotating risk fac- new data in multimedia research. arXiv [cs.
+tors for heart disease in clinical narratives 35. DARIAH-DE. NLP Based Analysis of Lit- MM]. 2015.
+erary Texts. https://github.com/stefanper-
+for diabetic patients. J Biomed Inform 4 8. Bai Y, Yang K, Yu W, Xu C, Ma WY, Zhao
+nes/dariah-nlp-tutorial. Accessed April 13,
+2015;58(Suppl):S78–S91. T. Automatic image dataset construction
+2017.
+from click-through logs using deep neural
+23. Lewis DD. Reuters-21578 text categoriza-
+36. Viertel VG, Trotter SA, Babiarz LS, et al. Re- network. In: Proceedings of the 23rd ACM
+tion test collection, distribution 1.0 http://
+porting of critical findings in neuroradiology. international conference on Multimedia.
+www.daviddlewis.com/resources/testcollec-
+AJR Am J Roentgenol 2013;200(5):1132– ACM, 2015; 441–450.
+tions/reuters21578/. Published 1997. Ac-
+1137.
+cessed April 13, 2017. 49. Collins B, Deng J, Li K, Fei-Fei L. Towards
+3 7. Van der Maaten L, Hinton G. Visualiz- scalable dataset construction: an active
+24. Project Gutenberg. http://www.gutenberg.
+ing data using t-SNE. J Mach Learn Res learning approach. In: Computer Vision –
+org. Published 2016. Accessed April 13,
+2008;9(Nov):2579–2605. ECCV 2008. Berlin, Germany: Springer,
+2017.
+2008; 86–98.
+3 8. Pedregosa F, Varoquaux G, Gramfort A, et
+25. Stubbs A, Kotfila C, Xu H, Uzuner Ö. Identi-
+al. Scikit-learn: machine learning in Python. 50. Mikolov T, Yih WT, Zweig G. Linguistic reg-
+fying risk factors for heart disease over time:
+J Mach Learn Res 2011;12(Oct):2825–2830. ularities in continuous space word represen-
+overview of 2014 i2b2/UTHealth shared
+tations. In: Proceedings of the 2013 Confer-
+task Track 2. J Biomed Inform 2015;58 39. Tibshirani R. Regression shrinkage and se-
+ence of the North American Chapter of the
+(Suppl):S67–S77. lection via the Lasso. J R Stat Soc Series B
+Association for Computational Linguistics:
+Stat Methodol 1996;58(1):267–288.
+2 6. McAuley J, Leskovec J. Hidden factors and Human Language Technologies. Atlanta, Ga:
+hidden topics: understanding rating dimen- 40. Elkins JS, Friedman C, Boden-Albala B, Association for Computational Linguistics,
+sions with review text. In: Proceedings of Sacco RL, Hripcsak G. Coding neuroradi- 2013; 746–751.
+580 radiology.rsna.org n Radiology: Volume 287: Number 2—May 2018

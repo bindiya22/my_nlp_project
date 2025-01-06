@@ -1,0 +1,844 @@
+AnnalsofOperationsResearch(2024)339:329–348
+https://doi.org/10.1007/s10479-022-04834-w
+ORIGINAL RESEARCH
+Identifyingpurchaseintentionthroughdeeplearning:
+analyzingtheQ&DtextofanE-Commerceplatform
+Jing Ma1·Xiaoyu Guo1·Xufeng Zhao1,2
+Accepted:10June2022/Published online: 1 July 2022
+©TheAuthor(s),underexclusivelicencetoSpringerScience+BusinessMedia,LLC,partofSpringerNature2022
+Abstract
+Identifying purchase intention by analyzing the Query and the Document of the product
+description(Q&D)textisoneofthemostimportantmeansofpromotingPurchaseRate(PR).
+Inviewofthatcustomerssometimescannotdescribetheirpurchasingintentioninqueries,
+thispaperaimstoidentifypurchaseintentionfromimplicitqueriesbycomputingsemantic
+similaritybetweenQ&DandproposesanovelmodelbasedonWord2Vecalgorithm,Long
+Short-term Memory (LSTM) and Deep Structured Semantic Model (DSSM). Besides, an
+empiricalanalysisisconductedthroughtheKerasframeworkandbasedonthefactualretrieval
+data of the Home Depot, an E-commerce website selling building materials in America.
+TheresultsshowthattheproposedmodelhasachievedimprovingF1-scoreontestdataset
+comparedwithotherexistingmodels.ThenovelmodelcombinesWord2VecandLSTMto
+extracttextfeaturesandappliesDSSMtofurtherfetchhigh-dimensionrepresentationsby
+maximizing semantic similarity between the user query and the description of the correct
+merchandise.Ourproposedmodelcanbeusedtoremoveorminimizesubjectivefactorsin
+extractingfeatures,improvestheperformanceofpurchasingintentionidentification,andalso
+improvesthecustomerexperienceofonlineshopping.
+Keywords Intentionidentification·LongShort-termMemory(LSTM)·Deepstructured
+semanticmodel(DSSM)·Deeplearning
+B
+XufengZhao
+zx.peak@outlook.com
+JingMa
+majing5525@126.com
+XiaoyuGuo
+xiaoyu.guo@nuaa.edu.cn
+1 CollegeofEconomicsandManagement,NanjingUniversityofAeronauticsandAstronautics,
+Nanjing211106,Jiangsu,China
+2 CollegeofMechanicalandElectricalEngineering,WenzhouUniversity,Wenzhou325035,Zhejiang,
+China
+123330 AnnalsofOperationsResearch(2024)339:329–348
+1 Introduction
+Identifying purchase intention accurately can promote PR in the world of E-Commerce.
+AccordingtoastudybyKweketal.(1970),web-retailerswillbeabletodevelopeffective
+and efficient web-shopping operations to attract new and potential customers with a good
+understandingofthewebshopper’sonlinepurchaseintention.Customersdependonsearch
+results provided by E-Commerce platform to find their desirable products. Products with
+highersemanticsimilaritytoptheresearchresultsonE-CommerceplatformlikeTaobaoand
+HomeDepot,whichessentiallyimprovesthechanceofmakingadeal.Customersmayswitch
+toanotherplatformiftheycannotfindtheproducttheywantinthefirstpageofsearching
+results.
+BalakrishnanandDwivedi(2021)notethatartificialintelligence(AI)enhancespurchase
+intention through digital assistants. However, the very first step for enhancing purchase
+intentionistoidentifythequeryintention(Luoetal.,2018).AsE-Commercehasgainedscale,
+largequantitiesofgoodsaresoldonE-Commerceplatformsanditisharderforconsumersto
+searchfortheirdesirableproductsthanbefore.Additionally,oneinevitabletendency,which
+isdifferentfromearlieronlineshoppingexperiences,isthatcustomerswillutilizenatural
+language instead of key words when searching for the products they want to buy (Luo et
+al.,2018),whichmakesithardertoidentifypurchaseintentionfromtheuserquery.Even
+worse,insomeverticalE-Commerceplatforms,suchasthebuildingmaterialsonlineshop,
+thenameofaproductisoftenuncommonandcustomershavenoideaofwhatisthenameof
+theproducttheywanttobuy.Therefore,theytypewhattheywanttodointhequeryboxorask
+theassistantforhelp.IftheE-Commerceplatformcannotidentifypurchaseintentiontimely,
+it would produce a bad effect on shopping experience and thus easily lost the customers.
+Therefore,E-Commerceplatformsintendtoenhancetheircustomers’shoppingexperience
+byaddressingtheproblemofidentifyingpurchaseintention(Qianetal.,2017;Peng,2018).
+Asthenumberofdataisgrowingdaybyday,anumberofstudiesexplorebigdatadriven
+andmachinelearningmethodstoimprovethelevelandefficiencyinmanagement.Forexam-
+ple,in2018,Kumaretal.(2018)developabigdataanalyticsframework,whichoptimizes
+themaintenanceschedule,improvestheperformanceofremaininglifepredictionandleads
+toreductioninmaintenancecost.In2020,Kumaretal.(2020)designabigdatadrivenframe-
+worktoimprovetheaccuracyofdemandforecasts.In2021,Qayyumetal.(2021)propose
+adepth-wisedensenetworktoidentifytheCOVIDinfectedlungsX-rayseffectively.Inthe
+sameyear,Senguptaetal.(2021)examinethepredictorsofsuccessfulAirbnbbookingswith
+amachinelearning-basedvariable-importanceschemeanddesigncustomizedrecommenda-
+tionsforP2Paccommodationplatforms.Inordertoidentifypurchaseintentionaccurately,
+anumberofstudiesalsohavebeendonewithbigdatadrivenandmachinelearningmeth-
+ods.User’spurchaseintentionincludesexplicitintentionandimplicitintention(Fu&Liu,
+2016).Explicitintentionmeansthattheintentionisincludedinthequerytextwhileimplicit
+intentionistheintentionthatisnotexpressedexternallybuthavinginone’smind(Leeet
+al.,2015).Forexplicitintentionidentification,Luoetal.(2018)proposedaneuralnetwork
+model with bidirectional Long Short-term Memory (bi-LSTM) and attention mechanism,
+aimingtofindthesemanticsimilaritybetweennaturallanguagecontextwordsandcentral
+intentionterm,andLiaoetal.(2020)buildanintentionrecognizingmodeltoobtaininten-
+tions of E-Commerce consumers and provide a better shopping experience for users. For
+implicitintentionidentification,tobestudiedinthispaper,thepresentproceduresoffinding
+thepurchaseintentionfromambiguoussearchqueriesare:(1)savetheusers’dailyrecords,
+includingbehaviorsofsearching,clickingandpurchasing;(2)checkthepurchasingrecords
+123AnnalsofOperationsResearch(2024)339:329–348 331
+aftersearching;(3)buildamapbetweenthequeryandthecommodityboughtbythecon-
+sumer.Iftheproblemofambiguousqueryoccurs,E-Commerceplatformwouldconclude
+a purchase intention and list commodities according to the established mapping relation.
+Basedontheserules,Leeetal.(2015)conductanexperimentalparadigmwithcollectingand
+analyzingtheeyetrackingdataandresponsetime,buildingastandardtorecognizeimplicit
+shopping intention. Fu and Liu (2016) regard implicit consumption intention recognition
+as a multi-label classification task, which combines multiple features based on follower’s
+behavior,intentionbehavior,retweetsbehavior,anduserprofiles.Jiaetal.(2020)analyzea
+largenumberoftextdatawithpurchasingintentionpublishedbyWeibousers.FuandLiu
+(2016)andJiaetal.(2020)identifyimplicitintentiononsocialmediaplatformratherthan
+textofuserquery,whichistheproblemweareintendedtoaddress.Lietal.(2017)noticethat
+theuserqueryalsocontainsimplicitshoppingintentionandleveragetheEncoder-Decoder
+modelto“translate”theimplicitintentionintothecorrespondingexplicitintentionbyusing
+theparallelcorporabuiltonthesocialdata.
+Fewer research puts effort on mining user’s query to find out the implicit intention,
+but implicit intention is very common on E-Commerce platform, especially in vertical E-
+Commerceplatform.Thus,themainobjectiveofthispaperistodeviseamodeltoidentify
+purchaseintentionfromuser’squerybasedonsemanticsimilaritycomputation,inspiredby
+informationretrievaltask.Thekeytechnologytocalculatesemanticsimilarityisdeeplearn-
+ing,whichhasachievedthegreatperformanceinmostNaturalLanguageProcessing(NLP)
+tasks (e.g., (Devlin et al., 2018)). As we devised, our model would utilize deep learning
+methodstopredicttheproducts,whichpossesstheclosestsimilaritywithuser’squery.
+To identify the purchase intention from natural language queries, we propose a novel
+IntentionIdentificationMethodbasedonWord2Vec,LSTMandDSSM(WL-DSSM).Inour
+research,weorganicallyintegrateWord2Vec,LSTM,andDSSM,whichisbuiltontopof
+the good performance of Word2Vec-LSTM in natural language processing (e.g., (Xiao et
+al., 2018)) and LSTM-DSSM in information retrieval (Palangi et al., 2014). First, we use
+methods of natural language processing to pre-process the data. After pre-processing, we
+traintheuniqueWord2Vecmodelusingthecleanedcorpustogiveasemanticrepresentation
+foreachword.Finally,weuseLSTM-DSSMforfurtherextractionoftextfeatures.
+The rest of this paper is organized as follows: In Sect. 2 we discuss related works. In
+Sect.3weprovidethedetailsoftheproposedWL-DSSMmethod.InSect.4wepresentthe
+experimental process and results on assessing the performance of WL-DSSM and discuss
+theirimplications.Andweconcludethepaperinthelastsection.
+2 Relatedworks
+Purchaseintentionidentificationmainlyincludesworksoftwodifferentareas,whichinclude
+semanticrepresentationoftext(includingword-levelandsentence-levelrepresentation)and
+semanticsimilaritycalculation.
+2.1 Semanticrepresentationoftext
+2.1.1 Semanticrepresentationofwordsbasedonone-hotandWord2Vec
+One-hotencodingisoftenusedtoconvertlabelsintoamatrixtomakesurethedistanceswithin
+labelsaresame(Mai&Le,2020).Also,one-hotencodingtransformationisusedtoconvert
+123332 AnnalsofOperationsResearch(2024)339:329–348
+categoricalfeaturesintocontinuousandBooleandummyvariableswith0or1foreachoftheir
+values(Liaoetal.,2020;Tchuente&Nyawa,2021).Actually,one-hotencodingisalsoaneasy
+waytotransformnaturallanguagetomatrixorarray,whichcanbeprocessedbycomputer
+directly.However,thewordvectorsrepresentedbyone-hotencodingareindependentand
+the semantic meaning cannot be mapped. Additionally, the sparse and high-dimensional
+vectorswouldcausecurseofdimensionalityeasilywhenthesizeofdictionaryisbigenough
+(Seger,2018;Rodríguezetal.,2018).Onthebasisofone-hotencoding,Mikolovetal.(2013)
+proposedWord2Vecmodelstoembedwordsintovectorsspacesemantically.Furthermore,
+Mikolovetal.(2013)andRong(2014)illustratedthedetailsaboutWord2Vec,includingthe
+trainingprocedures.Ontheonehand,Word2Veccouldproducewordvectorssemantically
+withalowerdimensionandthusimprovesone-hotencoding.Ontheotherhand,Word2Vec
+couldtransformawordintoavectormoreefficientlythantremendouspre-traininglanguage
+models,suchasBidirectionalEncoderRepresentationfromTransformers(BERT)(Devlin
+etal.,2018),GenerativePre-Training(GPT)(Radfordetal.,2018)andXlnet(Yangetal.,
+2019),whichallhavemillionsofparameterstooptimize.Consequently,Word2Vecismore
+suitableforreal-timefeedbackplatformsbecauseoftheefficiency.
+2.1.2 Longshort-termmemoryforsentencerepresentation
+Recently, deep learning technology has been applied in more and more fields, especially
+in the field of text processing (e.g., (Kumar et al., 2020)). Convolution Neural Network
+(CNN) could learn text semantics through convolution extraction of text features and has
+acertaincapabilityofanti-noise(Zhouetal.,2017).Intherealworld,sequenceisvitalto
+naturallanguage.Forexample,“lookafter”and“afterlooking”havedifferentmeaningand
+CNNcannottellanydifferencesfromeachother.Thatistosay,CNNdidnottakesequence
+factorintoaccount.Inordertosolvethisproblem,Mikolovetal.(2010)proposedRecurrent
+Neural Network Language Model (RNNLM) to give a better representation for sentence
+data.Recurrentneuralnetwork(RNN)introducesconstantcirculationintoitsmodelsothat
+itcouldprocesssequenceinformation.RNNshowsremarkableperformanceinprocessing
+manytasksconcerningsequenceincludingtasksofNLP(e.g.,(Sunetal.,2021)),butRNN
+hasaLong-TermDependenciesproblem(Bengioetal.,1993)whenitprocesseslongertexts.
+TheLSTMarchitecture,proposedbyHochreiterandSchmidhuber(1997),addressesthis
+problemofLong-TermDependenciesbyintroducingamemorycellthatisabletostorestate
+informationoverlongperiodoftimeintoRNN.
+Duetoitsgreatperformance,LSTMhasrecentlybeenusedininformationretrievalfield
+forextractingsentence-levelsemanticvectors(Palangietal.,2016)andcontext-awarequery
+suggestion(Sordonietal.,2015).Additionally,Eachempatietal.(2021)applydeepneural
+networkswithLSTMtocapturethesentimentfromdisclosureinformationaimingtoassess
+theassetprices’impactandKumaretal.(2022)regardtheLSTMasabaseclassifiertodetect
+fraudulentreview.
+2.2 Semanticsimilaritycalculation
+Generally,cosinefunctioniswidelyappliedtocalculatethevalueofsimilarity(e.g.(Kumar
+etal.,2022)).However,semanticsimilaritycalculationdependsonsemanticrepresentation
+oftexttoagreatextent.Xiaetal.(2020)usebi-LSTMtogetthesentencevectorandthen
+calculatethesimilaritybetweenthetwovectorsofquestionandanswerbycosinefunction
+todecidewhethertheanswermatchesthequestionornot.Anetal.(2016)proposeadeep
+123AnnalsofOperationsResearch(2024)339:329–348 333
+learningmodelbasedonLSTM,aimingtocalculatethesemanticsimilaritybetweenquestions
+inquestion-answeringsystem,withStateOfTheArt(SOTA)performanceunderthesituation
+without external information resources. Also, Nassif et al. (2016) build a neural network
+modelbasedonLSTMinordertocalculatethesemanticsimilaritybetweenquestions.The
+twomodelsproposedbyAnetal.(2016)andNassifetal.(2016)onlyadapttothesituationof
+shorttext,buttherearebothshorttextandlongtextwhenshoppingatE-Commerceplatforms,
+withqueryintheformofshorttextandproductdescriptionintheformoflongtext.Daset
+al.(2016)applySiamesenetwork(Chopraetal.,2005)tocalculatesemanticsimilarityand
+tosearchforsimilarquestions.Siamesenetworkconcatenatestwosamenetworks,sharing
+parameterswitheachother.Asaresult,Siamesenetworkonlyworkswellforsentencepairs
+whichhavesimilartextlength.However,thispaperfocusesoncalculatingsemanticsimilarity
+betweenthequeryandtheproductdescription,whichisdifferentfromcalculatingsimilarity
+betweenquestions.Becausethetextlengthsofquestionsaresimilarwhilethetextlengths
+ofqueryandproductdescriptionhaveabiggap,itishardtogetagoodperformanceforthe
+problemtobesolvedinthisstudywithSiamesenetworktheoretically.
+Additionally, some models use semantic similarity to further improve the performance
+of text representation. Deep Structured Semantic Models (DSSM), mapping queries and
+documentsintothesamesemanticspaceundertheconstraintconditionofcosinesimilarity,
+areproposedforfurtherfeatureextractinginthefieldofinformationretrieve(Huangetal.,
+2013).Shenetal.(2014)andPalangietal.(2014)addCNNandLSTMintoDSSM,namely
+CNN-DSSMandLSTM-DSSMrespectively,andimprovetheperformanceofretrieveresults.
+DSSM,CNN-DSSMandLSTM-DSSMusethemethodofWordHashingtogettheword
+vectorrepresentation,whichcannotrepresentawordsemantically.
+Inspired by the existing literature, this paper mines and analyzes Q&D text data from
+the E-Commerce platform using WL-DSSM, which possesses advanced text processing,
+deep learning, and artificial intelligence technology. Based on the great performance of
+DSSMininformationretrievaltask,weintroduceWord2VecandLSTMatthesametimein
+ordertoextractword-levelandsentence-levelfeaturesemantically.Ourresearchattemptsto
+mineimplicitpurchaseintentionfromsearchqueries,toprovidemoreintelligentservicefor
+consumersinonlineshopping.
+3 Methodology
+AimingatidentifyingpurchaseintentionthroughdeeplearningviaanalyzingtheQ&Dtext
+on an E-Commerce platform (Home Depot), this paper proposes a purchase identification
+modelbasedonWord2Vec,LSTMandDSSM.WeshowtheframeworkoftheWL-DSSM
+methodinaschematicdiagraminFig.1.
+First, we pre-process the corpus via natural language processing tools and train the
+Word2Vec model using the processed corpus. Then, we get words vectors of Q and D
+fromWord2Vecmodelaftersegmenting.Finally,wesendvectorstoLSTMsequentiallyand
+extracthigh-levelfeatureviaLSTM-DSSMundertheconstraintconditionofcosinefunction.
+3.1 Definitionoftheproblemandnotations
+In order to identify purchase intention, we calculate the similarity score between Q&D.
+Therefore,ourmodelisdefinedas:
+S(Q,D)∈[0,1] (1)
+123MSSD-LWfokrowemarfehT
+1.giF
+334 AnnalsofOperationsResearch(2024)339:329–348
+123AnnalsofOperationsResearch(2024)339:329–348 335
+where SindicatesthesemanticsimilaritybetweenQ&D, Sisarealnumberbetween0and
+1, Q denotesauserquery,and Ddenotesadocumentoftheproductdescription. Q and D
+aretheinputsofthemodelandSistheoutputofthemodel.AftercalculatingalltheS,we
+selectamaximumoneandpickupthecorresponding Dastheintentionproduct.
+Additionally,letφ beadictionaryand V bethenumberofwordsinφ. Qvec and Dvec
++
+indicatethevectorrepresentationof Q and D,respectively. D istheintentionof Q while
+− + − + −
+D is not. Accordingly, Dvec and Dvec denote the vector representation of D and D ,
+respectively.Letdbethedimensionofwordvector,W
+i
+bethewordi,andWvi ecbethevector
+representationofW .mql denotesmaximumlengthof Q,mdl denotesmaximumlengthof
+i
+D,andcdenotesthesizeofwindow.Oi istheone-hotrepresentationofwordi andωisthe
+currentword.
+3.2 WordvectorizationbasedonWord2Vec
+We first need to map words into semantic vectors so that the semantic similarity can be
+calculated.DSSMusesthemethodofWordHashingtotransformwordsintoarrays.Word
+Hashing could reduce dimensionality, but it would cause that the words which have same
+spelling but different meaning would have the same n-gram representation (Huang et al.,
+2013).Inthispaper,inspiredbythegreatperformanceofWord2Vec(Mai&Le,2020;Xia
+etal.,2020),wetrainWord2VecvectorsusingCBOW(ContinuousBag-of-Words)model.
+TheinputlayerofCBOWistheone-hotencodingsofthewordsbeforeandaftertarget
+wordω.AsisshowninFig.2,takesentence“RadiantBarrieriseasytouseandinstall”asan
+example.Wetransverseeachwordinthesentenceandregarditasthetobepredictedwordω.
+Ifω=is andc=2,thenthewordsbeforeωareW1 = Radiant andW2 = Barrier;the
+wordsafterωareW4 =easyandW5 =to.Therefore,Context(ω)={W1,W2,W4,W5}.
+Furthermore,taketheone-hotencoding O1, O2, O4, O5,whichhavethesamedimension
+V,astheinputofCBOW.
+The output of CBOW is a Huffman Tree, the leaf node of which is created by words
+appearedinthecorpusandtheweightofwhichisdefinedbythefrequencyofwords.Asthe
+conventionalcustomsofCBOW,ifthenodeisclassifiedtotheleft,thisnodebelongstothe
+negative class and represents with 1; otherwise belongs to the positive one and represents
+with0.Letθbetheundeterminedcoefficient.Accordingtotheequationofsigmoidfunction,
+theprobabilityofclassifyinganodetothepositiveclassis
+(cid:2) (cid:3)
+1
+σ XωTθ = 1+e−XωTθ. (2)
+(cid:4) (cid:5)
+Therefore,theprobabilityofclass(cid:2)ifyinganodeto(cid:3)thenegativeclassis1−σ XωTθ .Letthe
+j −1th classificationresultbe p dω
+j
+| Xω,θω
+j−1
+,and
+(cid:2) (cid:3) (cid:6) (cid:2) (cid:3)(cid:7) (cid:6) (cid:2) (cid:3)(cid:7)
+p dω j |Xω,θω j−1 = 1−σ XωTθω j−1
+dω
+j σ XωTθω j−1
+1−dω
+j . (3)
+Foreachword,thereisonlyapathfromroottonodeωinHuffmanTree,withlω−1times
+binaryclassificationtotally.Theprobabilityofclassifyingcorrectlyis
+(cid:8)lw (cid:2) (cid:3)
+p(ω| Context(ω))= p dω j | Xω,θω j−1 . (4)
+j=2
+123tupniWOBCfoelpmaxE
+2.giF
+336 AnnalsofOperationsResearch(2024)339:329–348
+123AnnalsofOperationsResearch(2024)339:329–348 337
+Consequently,theprobabilityofeverywordincorpusζ classifiedcorrectlyis
+(cid:9)
+P = p(ω| Context(ω)). (5)
+ω∈ζ
+TheobjectivefunctionofCBOWistomaximize P.Forthisreason,takethelogarithmof
+p(ω|Context(ω))asthefollowingequation:
+(cid:9)
+L = logp(ω|Context(ω))
+w∈ζ
+t
+(cid:9) (cid:8)lw (cid:2) (cid:3)
+= log p dω j |Xω,θω j−1
+w t∈ζ j=2
+=
+(cid:9) log(cid:8)lw (cid:6) 1−σ(cid:2)
+XωTθω
+j−1(cid:3)(cid:7) dω
+j
+(cid:6) σ(cid:2)
+XωTθω
+j−1(cid:3)(cid:7) 1−dω
+j
+(6)
+w i∈ζ j=2
+=
+(cid:9) (cid:9)lw (cid:10) log(cid:6) 1−σ(cid:2)
+XωTθω
+j−1(cid:3)(cid:7) dω
+j
+(cid:6) σ(cid:2)
+XωTθω
+j−1(cid:3)(cid:7) 1−dω j(cid:11)
+w i∈ζ j=2
+(cid:9) (cid:9)lω (cid:12) (cid:6) (cid:2) (cid:3)(cid:7) (cid:2) (cid:3) (cid:6) (cid:2) (cid:3)(cid:7)(cid:13)
+= dω
+j
+·log 1−σ XωTθω
+j−1
++ 1−dω
+j
+·log σ XωTθω
+j−1
+.
+w i∈ζ j=2
+(cid:6) (cid:2) (cid:3)(cid:7) (cid:2) (cid:3) (cid:6) (cid:2) (cid:3)(cid:7)
+WriteL(ω, j)=dω
+j
+·log 1−σ XωTθω
+j−1
++ 1−dω
+j
+·log σ XωTθω
+j−1
+asL(ω, j).
+ThentheobjectivebecomestomaximizeL(ω, j),whichhastwoindependentvariablesθω
+j−1
+and Xω.Takepartialderivativesforthetwovariablessequentiallyandwecouldget
+(cid:12) (cid:6) (cid:2) (cid:3)(cid:7) (cid:2) (cid:3) (cid:6) (cid:2) (cid:3)(cid:7)(cid:13)
+∂L(ω, j) ∂
+∂θω
+=
+∂θω
+dω
+j
+·log 1−σ XωTθω
+j−1
++ 1−dω
+j
+·log σ XωTθω
+j−1
+j−1
+(cid:2)
+j−1
+(cid:3) (cid:2) (cid:3) (cid:6) (cid:2) (cid:3)(cid:7)
+=dω
+j
+·σ XωTθω
+j−1
+Xω− 1−dω
+j
+· 1−σ XωTθω
+j−1
+Xω (7)
+(cid:6) (cid:2) (cid:3)(cid:7)
+= 1−dω
+j
+−σ XωTθω
+j−1
+Xω,
+and (cid:6) (cid:2) (cid:3)(cid:7)
+∂L(ω, j)
+∂Xω = 1−dω j −σ XωTθω j−1 θω j−1. (8)
+Updateθω
+j−1andWvec asfollowingequation:
+∂L(ω, j)
+θω j−1 :=θω j−1+η ∂θω , (9)
+j−1
+(cid:9)lω
+∂L(ω, j)
+W :=W +η W ∈Context(ω). (10)
+vec vec ∂θω vec
+j=2 j−1
+Stoptheprocedureofiterationwhengradientbecomesverysmallandwefinallygetthe
+representationforeverywordincorpusζ.Therefore,wetransformQ&Dintowordvectors
+andaddthemtoarraysl andl ,thedimensionsofwhichares·d ·mql ands·d ·mdl,
+Q D
+respectively.
+123338 AnnalsofOperationsResearch(2024)339:329–348
+3.3 High-levelfeatureextractionbasedonLSTM-DSSM
+Comparingwithmachinelearning,deeplearningextractsfeaturesmoreeffectivelyandcon-
+venientlyandwithouthumaninteraction.Asaclassicalmodelofinformationretrieve,DSSM
+couldextractsemanticfeaturesfromtextsofQ&Deffectively(Huangetal.,2013).Inthis
+paper, we apply DSSM to identify purchase intention through constructing LSTM-DSSM
+based on texts of Q&D. We input the vectorized Q&D into LSTM-DSSM, train the deep
+learningnetwork,andevaluateit.
+Putthetth wordrepresentationWvt
+ec
+intoLSTMlayer,whichiswrittenas:
+−−−−→(cid:4) (cid:5)
+h
+t
+= LSTM Wvt
+ec
+. (11)
+AftersendingallvectorsintotheLSTMlayer,wegettherepresentationh foreach Q and
+D. Then connect h to a dense layer with tanh activation function and get the semantic
+representationy,whichiswrittenas:
+y =tanh(W ·h+b ), (12)
+s s
+whereW isthesemanticprojectionmatrixandb isthebiasmatrix.
+s s
+Throughtheabovesteps,wecouldgetthesemanticrepresentationof Q and D,which
+aredenotedasy andy .Next,calculatethesimilarityscorebetweeny andy ,whichis
+Q D Q D
+writtenas:
+(cid:4) (cid:5) yTy
+R(Q,D)=cosine y Q,y D = (cid:14) (cid:14) Q(cid:14) (cid:14)(cid:14) (cid:14)D (cid:14) (cid:14). (13)
+y y
+Q D
+Aftergettingthetextrepresentationh viaLSTMandcalculatingthesimilarityscore,if
+Q&Daresimilarintherealworld,themodelwoulddragthecorrespondingrepresentation
+vectorscloserundertheconstraintconditionofcosinesimilarity;ifQ&Darelackofresem-
+blance in the real world, the model would push the corresponding representation vectors
+away under the constraint condition of cosine similarity. We show the text representation
+undertheconstraintconditionofcosinesimilarityinFig.3.
+InordertoimplementtheDSSMmethod,wetransformthesemanticsimilaritybetween
++
+Qand D intoposteriorprobabilityfollowing(Huangetal.,2013),whichiswrittenas:
+(cid:4) (cid:4) (cid:5)(cid:5)
+(cid:4) (cid:5) exp γR Q,D+
+P D+ | Q = (cid:15) , (14)
+D(cid:4)∈Dexp(γR(Q,D(cid:4)))
+whereγ isthesmoothingfactorofsoftmax.TheobjectiveofWL-DSSMistomaximize
+thesemanticsimilarityof Qand D+ ,whichisequallytominimizeL((cid:10)):
+(cid:8) (cid:4) (cid:5)
+L((cid:10))=−log P D+ | Q . (15)
+( Q,D+)
+4 Experiments
+WeconductexperimentstoassesstheperformanceofWL-DSSMindealingwithidentifying
+purchaseintentionfromuserquery,namely,findadocumentofproductdescriptionwhich
+ismostrelatedtouserquerysemantically.Weperformedexperimentsonaserverequipped
+with2NVIDIAGeForceRTX3090GPUs,sixteenAMDEPYC7302CPUs,and126GB
+RAM, running in a Jupyter notebook. All deep learning models are built using the Keras
+library(Chollet)withtheTensorflowbackend.
+123AnnalsofOperationsResearch(2024)339:329–348 339
+Fig.3 Textrepresentationundertheconstraintconditionofcosinesimilarity.EachwordWiinthedictionary
+φ couldgetwordvector Wvi ec ind-dimensionwordvectorspace.First,getthewordrepresentationafter
+applyingwordsegmentationwithQandD.Next,concatenateWvi ectoformQvec,Dv+ ecandDv− ec,denoting
+(cid:4)
+queryvector,rightandfalsedocumentofproductdescription,respectively.Finally,thedistancebetweenQvec
++(cid:4) (cid:4) −(cid:4)
+andDvecbecomesmallerthanQvecandDvecinthehigh-levelsemanticfeaturespaceundertheconstraint
+conditionofcosinesimilarity
+4.1 Dataset
+We obtain a Q&D text of an E-Commerce dataset from the Home Depot Product Search
+Relevancecompetition1.ShoppersrelyonHomeDepot’sproductauthoritytofindandbuy
+the latest products and to get timely solutions to their home improvement needs. From
+installinganewceilingfantoremodelinganentirekitchen,withtheclickofamouseortap
+ofthescreen,customersexpectthecorrectresultstotheirqueriesquickly.Speed,accuracy
+and delivering a frictionless customer experience are essential. However, since the names
+of building material are not common in the real world, the fact is that some shoppers are
+notfamiliartoproductnamessothattheplatformcannotprovideasearchresultaccurately.
+Therefore, we develop WL-DSSM to discover the customers’ needs and to improve their
+shoppingexperience.
+Table1summarizesthedescriptionofthedataset.Forthevalueofrelevance,threepeople
+ratedtherelevanceofsearch_termandproduct_title,with3indicatingperfectlymatchingand
+1denotingtotallynotmatching,andthenaveragedthethreescoretogetthefinalrelevance.
+Weshowthetextlengthofproduct_title,search_termandproduct_descriptioninFig.4.
+1 https://www.kaggle.com/c/home-depot-product-search-relevance/data.
+123340 AnnalsofOperationsResearch(2024)339:329–348
+Table1 Datasetdescription
+Name Description Datatype Range
+Id Auniquekeyofapairofsearch_term,product_uid Integer 1–240760
+Product_uid Auniquekeyofproduct Integer 100001–224428
+Product_title Productname Text 7–147
+Product_description Documentofproductdescription Text 8–5641
+Search_term Userquery Text 1–60
+Relevance Therelevanceofsearch_termandproduct_title Realnumber 1–3
+Fig.4 Textlengthofproduct_title(left),search_term(middle)andproduct_description(right)
+4.2 Pre-processing
+Inthispaper,wepre-processedthedatasetwiththefollowingfivesteps.
+4.2.1 Conventionalpre-processingoftextdataset
+UsefunctionofSnowballStemmer togeneratestemwordsandfunctionoftokenizer tocut
+words. These two functions are from nltk package. Use pandas package to merge all text
+databeforetrainingWord2VecmodelandthemergeddataistheinputofCBOW.Tosimplify
+theinputofWL-DSSM,weconcatenateproduct_titleandproduct_descriptionasthenew
+product_description.
+4.2.2 Transformationofsemanticsimilarity
+Theobjectiveofthispaperistoidentifypurchaseintention.Therefore,wemusttransform
+thescoreofrelevancetolabels,indicatingwhetherDisthecorrectproductornot.Following
+(Choietal.,2020),wefirstroundthescoreofrelevancetogetdiscretelabels.Next,take2.5
+asathresholdandweconceivethatDismatchedwithQ(labeledwith1)ifthediscretelabel
+exceeds2.5.
+4.2.3 ProcedurestoadapttoDSSM
++ +
+TheinputsofDSSMareonlyQandD .QandD areinone-to-onerelationship,namely,
++ −
+eachQonlyhasoneD andviceversa.AsforD ,DSSMrandomlyselectsthenumberofJ
++
+documentsfromDexceptD .Therefore,wefirstpickupthedatalabeledwith1.Next,we
+−
+usethefunctionofdrop_duplicatestodeletetheduplicateddataincasethat D ismatched
+−
+with Q.Finally,werandomlyselectthenumberof J documentsas D foreach Q.Inthis
+way,ourtaskbecomesamulticlassproblem,whichhasthenumberof J +1classes.
+123AnnalsofOperationsResearch(2024)339:329–348 341
+Table2 Datasplitting
+Number Training set Verificationset Testset(J+1)×1831
+(J+1)×5495 (J+1)×1831
+CorrectQ&Dpair(9157) 5495 1831 1831
+WrongQ&Dpair(J×9157) J×5495 J×1831 J×1831
+4.2.4 Unificationoflengthwithpadding
+FromTable1andFig.4,weseethattherangeofthelengthofproduct_titleisverylarge,
+so areproduct_description andsearch_term. Therefore,it is necessaryto set a thresholdt
+todefinethemaximumlengthforeachfield.Forthoselengthsaresmallerthant,weadd
+paddingtofillthegap.Forthoselengthsexceedt,wedeletetheexceededpart.Ifwejust
+usethemaximumlengthoftextasthet,ononehand,thedimensionoffeatureswouldbe
+large,resultingintakingtoomuchstoragespaceandtimetotrainthedeeplearningmodel.
+ontheotherhand,featureswouldbecomesparseanditwouldhaveabadimpactonmodel
+convergence rate. As we merged product_title and product_description, we calculate the
+lengthsoftextofsearch_termandnewproduct_descriptionandselect24and1200asthet
+respectively,coveringover81%texts.
+4.2.5 Datasplitting
+Basedontheabovepre-processingsteps,wesplitthedataasTable2shows.
+4.3 Parametersetting
+Allthehyper-parametersinthemodelareadjustedbytheperformanceofthetrainingset.
+ThenumberofLSTMunitswassetto128.Thebatchsizewassetto64.Optimizerwassetto
+Adadelta.Thelearningrateoftheoptimizerwassetto1e-1.Epochsweresetto100.When
+thevalidationlossdidnotinferiortothecurrentlowestlosswithin1round,themodelwould
+stop learning early. The L2 regularization of the bias parameter is set to 0.32. The rate of
+Dropoutwassetto0.6.
+4.4 Evaluationmeasures
+Inmanypreviousstudies,thestandardF1isadoptedastheevaluationstandards(e.g.,(Basso
+etal.,2020)).Inthispaper,F1isalsoselectedastheevaluationcriteriaofthemodel.Since
+weareonlyconcernedaboutwhetherthealgorithmsidentifythecorrectproductornot,we
+ignoretheevaluationofnegativeclass.
+TruePositive(TP):atruepositiveisanoutcomewherethemodelcorrectlypredictsthe
+positiveclass;
+FalsePositive(FP):afalsepositiveisanoutcomewherethemodelincorrectlypredicts
+thepositiveclass;
+FalseNegative(FN):afalsenegativeisanoutcomewherethemodelincorrectlypredicts
+thenegativeclass.
+123342 AnnalsofOperationsResearch(2024)339:329–348
+Table3 Descriptionofcomparativemodels
+Model Reference Experiment
+DSSM Huangetal.(2013)usedDSSMto Theexperimentuseswordhashingto
+mapaquerytoitsrelevant representQ&D,appliesDSSMto
+documentsatthesemanticlevel. extracthigh-levelfeature,and
+finallyusessoftmaxtoclassifyD.
+LSTM+DSSM Palangietal.(2014)used Afterembeddingwithwordhashing,
+LSTM-DSSMtogainbetter theLSTMisusedtoextract
+informationretrieveperformance sentence-levelfeatures
+underthesituationoflong-term semantically,andfinallysoftmaxis
+contectinformation. appliedtooutputtheprobabilityof
+classifying.
+Word2Vec+C-DSSM NikhilandSrivastava(2017) First,Word2Vecisusedforword
+combinedtheConvolutionalDeep embedding.Next,CNNandDSSM
+StructuredSemanticModels areappliedfortextfeature
+(C-DSSM)modelwithWord2Vec extractionsequentially.Finally,
+distributedrepresentationsof softmaxfunctionisusedforoutput.
+wordstoclassifyadocumentpair
+asrelevant/irrelavantbyassigninga
+scoretoit.
+Precision:precisionisusedtonotewhatproportionofpositiveidentificationswasactually
+correct;
+Recall:recallisusedtonotewhatproportionofactualpositiveswasidentifiedcorrectly.
+TP
+Precision = , (16)
+TP+FP
+TP
+Recall = , (17)
+TP+FN
+2× Precision × Recall
+F1= . (18)
+Precision + Recall
+4.5 Comparativemodels
+ToassesstheperformanceofourWL-DSSMmodelagainstothercompetitiveapproaches,we
+areintendedtoconductablationstudyusingthefollowingexistingmodelsforcomparative
+purpose.ThedescriptionofcomparativemodelsisshowninTable3.
+4.6 Resultanddiscussion
+As table 4 demonstrate, the proposed model, which is shown in bold, is the best in the
+correct product identification using the Q&D text. It is widely recognized that multiclass
+classificationtasksareoftenharderthanbinaryclassificationtasks.Intuitively,when J =1,
+thereisjustonenegativesampleforeachitemofthedatasetandthegoalofthemodelisto
+differentiatethepositivesamplefromthetwosamples.However,when J > 1,themodel
+hastochoosetherightsamplefrommoresamples.Thus,as J increases,whichdenotesthe
+numberofthenegativesampleincreases,theF1scoresdecreaseamongallofthemodels.
+However,thedecreasingamplitudeofourmodel’sperformanceisthesmallestamongallof
+themodels.
+123AnnalsofOperationsResearch(2024)339:329–348 343
+Table4 Comparisonofexperimentalresultsofeachmodel
+Model TestF1(J =1) TestF1(J =2) TestF1(J =3) TestF1(J =4)
+DSSM 69.21% 53.70% 43.77% 38.04%
+LSTM+DSSM 73.42% 58.50% 50.22% 43.37%
+Word2Vec+C-DSSM 92.14% 90.42% 87.46% 87.01%
+WL-DSSM 95.81% 94.95% 93.11% 91.85%
+Table5 ConfusionMatrix
+Actualclass Predictedclass
+(J =1)
+True False
+True 1689 142
+False 0 0
+Table6 ConfusionMatrix
+Actualclass Predictedclass
+(J =2)
+True False1 False2
+True 1647 75 109
+False1 0 0 0
+False2 0 0 0
+Table7 ConfusionMatrix
+Actualclass Predictedclass
+(J =3)
+True False1 False2 False3
+True 1602 87 76 66
+False1 0 0 0 0
+False2 0 0 0 0
+False3 0 0 0 0
+Table4alsoshowstheresultsoftheablationstudy,wherewecomparearangeofmodels
+that only use DSSM, combination using DSSM and LSTM, as well as combination using
+DSSM, CNN and Word2Vec. Looking at the DSSM and LSTM+DSSM model, we see
+thatthereisaminorperformancedifferencebetweenthem.WhenwelookatWord2Vec+C-
+DSSMmodel,however,itobtainsasubstantialimprovementoverDSSMandLSTM+DSSM.
+Futhermore, WL-DSSM achieves a minor improvement over Word2Vec+C-DSSM, hence
+provingWL-DSSMasamorecompetitiveapproach.
+Wecanseetheresultinconfusionmatrix,whichisanerrortablethatisusedformeasuring
+andvisualizingoftheperformanceofanyclassificationalgorithms.Inerrorconfusionmatrix,
+each column represents the predicted class measures and each row represents actual class
+measures(Kumaretal.,2018).Wecalculatetheconfusionmatrixforeach J viaAPIfrom
+Scikit-learn library.2 The results are shown in Tables 5, 6, 7 and 8. We can see that only
+thefirstrowhasthevalues,whichisdifferentfromanormalconfusionmatrix.Thereason
+is that there is no negative samples in the dataset and we construct them manually. When
+2 https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html.
+123344 AnnalsofOperationsResearch(2024)339:329–348
+Table8 ConfusionMatrix
+Actualclass Predictedclass
+(J =4)
+True False1 False2 False3 False4
+True 1555 59 81 56 80
+False1 0 0 0 0 0
+False2 0 0 0 0 0
+False3 0 0 0 0 0
+False4 0 0 0 0 0
+Fig.5 ImpactofoptimizertuningonF1(AdadeltaVSNadam)
+we input an item of the positive data, our model would construct J items of the negative
+dataautomatically.These J +1itemsaretogetherandthenegativesamplescannotappear
+independently.Thus,thereisnovaluefortherowsofFalseinactualclass.Thesetablesshow
+thatthevalueofTPdecreasesas J increases.
+Fig.5illustratesthevariationofF1scorewithoptimizer.Generally,Nadamoptimizeris
+moreeffectiveinachievinghigherF1scorethanAdadeltaforDSSMandLSTM+DSSM,
+while it is opposite for WV+DSSM and WL+DSSM. Specifically, the performances of
+the two optimizers are about the same when J = 1 for WL+DSSM and J = 3 for
+LSTM+DSSM.Additionally,NadamoptimizerhashigherconvergencyspeedthanAdadelta.
++ −
+DSSMcandraw Q and D closerwhilepull Q and D awayforinformationretrieval.
+ThispaperusesDSSMtoconductpurchaseintentionidentificationasacomparativemodel.
+Since the method of word embedding is word hashing model, DSSM cannot extract the
+semanticfeatureofwordsandignorethesequencesofwords.LSTM+DSSMmodeladds
+LSTMneuralnetworktoDSSM,whichcaneffectivelylearnsequenceinformationandextract
+sentence-levelfeature,sothefinalmodel’sidentificationperformanceisbetterthanDSSM.
+Word2Vec+C-DSSM replaces word hashing model with Word2Vec algorithm, aiming to
+getword embeddingsemantically ratherthanindependentwordembedding.Additionally,
+Word2Vec+C-DSSMaddsconvolutionallayertoDSSM,whichcarriesouttheconvolution
+123AnnalsofOperationsResearch(2024)339:329–348 345
+extractionoftextfeaturestolearntextsemantics.Theidentificationperformanceissignifi-
+cantlyenhancedwhenDSSMintroducesWord2Vecandconvolutionallayer.
+However,convolutionallayeralsohasnoabilitytorecordthesequenceinformationamong
+wordvectors.Inordertoextractthesentence-levelfeatureandstoresequenceinformation,
+thispaperadoptsLSTMneuralnetworkthatconnectsnodesbetweenhiddenlayersandadds
+three control units of the input gate, output gate, and forget gate, which could remember
+the past information and solve the problem of long sequence dependences. Therefore, the
+performanceofclassificationisobviouslyimproved,andsemanticlearningisenhancedvia
+Word2VecandLSTM.
+5 Conclusions
+ShoppersrelyonE-Commerceplatformstofindandbuythelatestproducts.Speed,accuracy
+anddeliveringafrictionlesscustomerexperienceareessentialforE-Commerceplatforms.
+However,customersoftenleaveaquerywithambiguousintention,resultinginunsatisfied
+searchingresultsanddeterioratingcustomerexperience.EspeciallyinverticalE-Commerce,
+querieswithambiguousintentionareverycommoninthatsomeproductnamesareunpopular
+and users even have no idea of what is the name the product they need. Although several
+deeplearningmodelstoidentifypurchaseintentionhavebeendeveloped,noneofthesegive
+aglancetoDSSM,whichpossessgreatperformanceininformationretrieval.Ourresearch
+proposesamodel,combiningWord2VecandLSTMaswellasDSSM,thatcanaccurately
+predict the correct products to improve customers’ shopping experience in E-commerce
+platform. We summarize the theoretical and practical contributions as well as the future
+researchopportunitiesasfollows.
+5.1 Theoreticalcontribution
+This paper proposes a purchase intention identification model based on the existing text
+semanticsanalysis.Thisresearchusesadvancedtextprocessingdeeplearningandartificial
+intelligencetechnologytomineandanalyzetheQ&DtextdataontheE-Commerceplatforms
+basedonpeerresearch.Aimingataddressingtheproblemofidentifyingpurchaseintention
+fromuser’squery,weconstructWL-DSSMmodelforpurchaseintentionidentificationby
+analyzingtheQ&DtextdatabasedonWord2Vec,LSTMandDSSM.Thismodelisusedto
+identifythepurchaseintentionontheE-Commerceplatform.Theproposedmodelisbetter
+than other existing models in terms of F1 score. Combined with the advantages of each
+technology,includingWord2Vec,LSTMandDSSM,WL-DSSMimprovestheperformance
+ofpurchaseintentionidentification.Additionally,dataimbalanceisverycommonandhasa
+badimpactontrainingdeeplearningmodels.Thestrategyofgeneratingnegativesamples
+makes the data in each class balanced. This strategy may helpful for training other deep
+learningmodels.
+5.2 Practicalcontribution
+Depend on the research method proposed in this paper, customers could find and buy the
+productsquicklyandaccurately.Ourmodelcanclassifyadocumentofproductdescription
+into relevant/irrelevant. The relevant product means that it possesses the biggest semantic
+similarityscorewithuserqueryanditmaybethedesirableproductinthehighestdegree.The
+123346 AnnalsofOperationsResearch(2024)339:329–348
+irrelevantproductmeansthatthesemanticsimilarityscoreislowerthanthebiggestsemantic
+similarityscoreanditmaybenotthecorrectproductshopperisfinding.FortheE-Commerce
+platforms,theycouldutilizethismethodtooutputsemanticsimilarityscoresofQ&Dand
+theplatformscansortthescoresinreverseorder.Accordingtothesortresults,theplatform
+couldreturnalistofproductsfortheuserquery.Additionally,ourmodelcouldremoveor
+minimizehumaninputinsearchrelevanceevaluation,whichisaslowandsubjectiveprocess.
+Accordingtoourmodel,theplatformscouldimproveshoppingexperienceandthusattract
+and retain customers to strengthen competitive advantage. For the customers, our method
+allowthemtotypenaturallanguageorwhattheywanttodo(e.g.laythefoundations)inthe
+queryboxincasethatcustomersdonotknowthenameoftheproducttheywant.
+5.3 Futurescopeofresearch
+Despitethesesignificantinsights,therearestillsomelimitationsinthispaper.First,thepro-
+posedmodelhasonlybeentestedonadatasetfromtheHomeDepotplatforms.However,
+differentresultsmighthavebeenobtainedifthemodelhadbeentestedonotherE-Commerce
+platforms.Thefindingsmightnotbedirectlyapplicableonotherdatasetsbecausethelan-
+guages may be different. To overcome these limitations, further research should certainly
+explore the corresponding pre-processing methods for different languages and the model
+shouldbetestedonmultipledatasetscollectedfromadditionalonlineplatforms.Second,we
+developourmodelusingWord2Vec,whichistrainedbythecurrentcorpus.Ifanewword
+emerged, it could not get a semantic representation from Word2Vec model. In the future,
+wewouldexploreadynamicwordrepresentationmethodandcombineitwiththeexisting
+moduleofourmodel.
+Acknowledgements ThisstudywassupportedbytheNationalNaturalScienceFoundationofChinaunder
+grantnumber72174086and71801126,andtheFundamentalResearchFundsfortheCentralUniversities
+undergrantnumberNW2020001.
+References
+An,C.,Huang,J.,Chang,S.,&Huang,Z.(2016).Questionsimilaritymodelingwithbidirectionallongshort-
+termmemoryneuralnetwork.In2016IEEEfirstinternationalconferenceondatascienceincyberspace
+(DSC)(pp.318–322).IEEE.
+Balakrishnan,J.,&Dwivedi,Y.K.(2021).Conversationalcommerce:enteringthenextstageofai-powered
+digitalassistants.AnnalsofOperationsResearch,pp.1–35.
+Basso,S.,Ceselli,A.,&Tettamanzi,A.(2020).Randomsamplingandmachinelearningtounderstandgood
+decompositions.AnnalsofOperationsResearch,284(2),501–526.
+Bengio,Y.,Frasconi,P.,&Simard,P.(1993).Theproblemoflearninglong-termdependenciesinrecurrent
+networks.InIEEEinternationalconferenceonneuralnetworks(pp.1183–1188).IEEE.
+Choi,J.I.,Kallumadi,S.,Mitra,B.,Agichtein,E.,&Javed,F.(2020).Semanticproductsearchformatching
+structuredproductcatalogsine-commerce.arXivpreprintarXiv:2008.08180.
+Chollet,F.:Keras.https://github.com/fchollet/keras.
+Chopra,S.,Hadsell,R.,&LeCun,Y.(2005).Learningasimilaritymetricdiscriminatively,withapplicationto
+faceverification.In2005IEEEcomputersocietyconferenceoncomputervisionandpatternrecognition
+(CVPR’05),(vol.1,pp.539–546).IEEE.
+Das,A.,Yenala,H.,Chinnakotla,M.,&Shrivastava,M.(2016).Togetherwestand:Siamesenetworksfor
+similarquestionretrieval.Inproceedingsofthe54thannualmeetingoftheassociationforcomputational
+linguistics(Volume1:LongPapers,pp.378–387).
+Devlin,J.,Chang,M.-W.,Lee,K.,&Toutanova,K.(2018).Bert:Pre-trainingofdeepbidirectionaltransformers
+forlanguageunderstanding.arXivpreprintarXiv:1810.04805.
+123AnnalsofOperationsResearch(2024)339:329–348 347
+Eachempati,P.,Srivastava,P.R.,Kumar,A.,Tan,K.H.,&Gupta,S.(2021).Validatingtheimpactofaccounting
+disclosuresonstockmarket:Adeepneuralnetworkapproach.TechnologicalForecastingandSocial
+Change,170,120903.
+Fu,B.,&Liu,T.(2016).Implicituserconsumptionintentrecognitioninsocialmedia.JournalofSoftware,
+27,2843–2854.
+Hochreiter,S.,&Schmidhuber,J.(1997).Longshort-termmemory.Neuralcomputation,9(8),1735–1780.
+Huang,P.-S.,He,X.,Gao,J.,Deng,L.,Acero,A.,&Heck,L.(2013).Learningdeepstructuredsemantic
+modelsforwebsearchusingclickthroughdata.Inproceedingsofthe22ndACMinternationalconference
+oninformation&knowledgemanagement,(pp.2333–2338).
+Jia,Y.,Han,D.,Lin,H.,Wang,G.,&Xia,l.(2020).Consumptionintentrecognitionalgorithmsforweibo
+users.ActaScientiarumNaturaliumUniversitatisPekinensis,56,(pp.68–74).
+Kumar,A.,Singh,J.P.,Dwivedi,Y.K.,&Rana,N.P.(2020).Adeepmulti-modalneuralnetworkforinformative
+twittercontentclassificationduringemergencies.AnnalsofOperationsResearch,(pp.1–32).
+Kumar,A.,Gopal,R.D.,Shankar,R.,&Tan,K.H.(2022).Fraudulentreviewdetectionmodelfocusingon
+emotionalexpressionsandexplicitaspects:investigatingthepotentialoffeatureengineering.Decision
+SupportSystems,155,113728.
+Kumar,A.,Shankar,R.,&Aljohani,N.R.(2020).Abigdatadrivenframeworkfordemand-drivenforecasting
+witheffectsofmarketing-mixvariables.Industrialmarketingmanagement,90,493–507.
+Kumar,A.,Shankar,R.,&Thakur,L.S.(2018).Abigdatadrivensustainablemanufacturingframeworkfor
+condition-basedmaintenanceprediction.Journalofcomputationalscience,27,428–439.
+Kwek,C.L.,Tan,H.P.,&Lau,T.-C.(1970).Investigatingtheshoppingorientationsononlinepurchase
+intention in the e-commerce environment: a malaysian study. The Journal of Internet Banking and
+Commerce,15(2),1–21.
+Lee,D.-G.,Lee,K.-H.,&Lee,S.-Y.(2015).Implicitshoppingintentionrecognitionwitheyetrackingdata
+andresponsetime.Inproceedingsofthe3rdinternationalconferenceonhuman-agentinteraction,(pp.
+295–298).
+Li,C.,Du,Y.,&Wang,S.(2017).Miningimplicitintentionusingattention-basedrnnencoder-decodermodel.
+InInternationalConferenceonIntelligentComputing,(pp.413–424).Springer.
+Liao,Y.,Peng,Y.,Shi,S.,Shi,V.,&Yu,X.(2020).Earlyboxofficepredictioninchina’sfilmmarketbased
+onasLiaotackingfusionmodel.AnnalsofOperationsResearch,(pp.1–18).
+Luo,X.,Gong,Y.,&Chen,X.(2018).Centralintentionidentificationfornaturallanguagesearchqueryin
+e-commerce.IneCOM@SIGIR.
+Mai,L.,&Le,B.(2020).Jointsentenceandaspect-levelsentimentanalysisofproductcomments.Annalsof
+Operationsresearch,(pp.1–21).
+Mikolov,T.,Chen,K.,Corrado,G.,&Dean,J.(2013).Efficientestimationofwordrepresentationsinvector
+space.arXivpreprintarXiv:1301.3781.
+Mikolov,T.,Karafiát,M.,Burget,L.,Cernocky`,J.,&Khudanpur,S.(2010).Recurrentneuralnetworkbased
+languagemodel.InInterspeech,(vol.2,pp.1045–1048).Makuhari.
+Mikolov,T.,Sutskever,I.,Chen,K.,Corrado,G.S.,&Dean,J.(2013).Distributedrepresentationsofwords
+andphrasesandtheircompositionality.Inadvancesinneuralinformationprocessingsystems,(pp.3111–
+3119).
+Nassif,H.,Mohtarami,M.,&Glass,J.(2016).Learningsemanticrelatednessincommunityquestionanswering
+usingneuralmodels.Inproceedingsofthe1stworkshoponrepresentationlearningforNLP,(pp.137–
+147).
+Nikhil,N.,&Srivastava,M.M.(2017).Contentbaseddocumentrecommenderusingdeeplearning.In2017
+InternationalConferenceonInventiveComputingandInformatics(ICICI),(pp.486–489).IEEE.
+Palangi,H.,Deng,L.,Shen,Y.,Gao,J.,He,X.,Chen,J.,Song,X.,&Ward,R.(2014).Semanticmodelling
+withlong-short-termmemoryforinformationretrieval.arXivpreprintarXiv:1412.6629.
+Palangi,H.,Deng,L.,Shen,Y.,Gao,J.,He,X.,Chen,J.,etal.(2016).Deepsentenceembeddingusinglong
+short-termmemorynetworks:Analysisandapplicationtoinformationretrieval.IEEE/ACMTransactions
+onAudio,Speech,andLanguageProcessing,24(4),694–707.
+Peng,X.(2018).Researchonrecognitionmethodincustomerpurchaseintentionbasedonintelligentcustomer
+servicelearning.Master’sthesis,ShandongUniversityofFinanceandEconomics.
+Qayyum,A.,Razzak,I.,Tanveer,M.,&Kumar,A.(2021).Depth-wisedenseneuralnetworkforautomatic
+covid19infectiondetectionanddiagnosis.Annalsofoperationsresearch,(pp.1–21).
+Qian,Y.,Ding,X.,Liu,T.,&Yiheng,C.(2017).Identificationmethodofuser’stravelconsumptionintention
+inchattingrobot.SciSinInform,47,997–1007.
+Radford,A.,Narasimhan,K.,Salimans,T.,&Sutskever,I.(2018).Improvinglanguageunderstandingby
+generativepre-training.
+123348 AnnalsofOperationsResearch(2024)339:329–348
+Rodríguez,P.,Bautista,M.A.,Gonzalez,J.,&Escalera,S.(2018).Beyondone-hotencoding:Lowerdimen-
+sionaltargetembedding.ImageandVisionComputing,75,21–31.
+Rong,X.(2014).word2vecparameterlearningexplained.arXivpreprintarXiv:1411.2738.
+Seger,C.(2018).Aninvestigationofcategoricalvariableencodingtechniquesinmachinelearning:binary
+versusone-hotandfeaturehashing.
+Sengupta,P.,Biswas,B.,Kumar,A.,Shankar,R.,&Gupta,S.(2021).Examiningthepredictorsofsuccessful
+airbnbbookingswithhurdlemodels:Evidencefromeurope,australia,usaandasia-pacificcities.Journal
+ofBusinessResearch,137,538–554.
+Shen,Y.,He,X.,Gao,J.,Deng,L.,&Mesnil,G.(2014).Alatentsemanticmodelwithconvolutional-pooling
+structureforinformationretrieval.Inproceedingsofthe23rdACMinternationalconferenceonconference
+oninformationandknowledgemanagement,(pp.101–110).
+Sordoni, A., Bengio, Y., Vahabi, H., Lioma, C., Grue Simonsen, J., & Nie, J.-Y. (2015). A hierarchical
+recurrentencoder-decoderforgenerativecontext-awarequerysuggestion.Inproceedingsofthe24th
+ACMinternationalonconferenceoninformationandknowledgemanagement,(pp.553–562).
+Sun,X.,Xu,W.,Jiang,H.,&Wang,Q.(2021).Adeepmultitasklearningapproachforairqualityprediction.
+AnnalsofOperationsResearch,303(1),51–79.
+Tchuente,D.,&Nyawa,S.(2021).Realestatepriceestimationinfrenchcitiesusinggeocodingandmachine
+learning.AnnalsofOperationsResearch,(pp.1–38).
+Xia,H.,Liu,J.,&Zhang,Z.J.(2020).Identifyingfintechriskthroughmachinelearning:analyzingtheq&a
+textofanonlineloaninvestmentplatform.AnnalsofOperationsResearch,(pp.1–21).
+Xiao,L.,Wang,G.,&Zuo,Y.(2018).Researchonpatenttextclassificationbasedonword2vecandlstm.
+In201811thinternationalsymposiumoncomputationalintelligenceanddesign(ISCID),(vol.1,pp.
+71–74.IEEE).
+Yang,Z.,Dai,Z.,Yang,Y.,Carbonell,J.,Salakhutdinov,R.R.,&Le,Q.V.(2019).Xlnet:Generalizedautore-
+gressivepretrainingforlanguageunderstanding.Advancesinneuralinformationprocessingsystems32.
+Zhou,F.,Jin,L.,&Dong,J.(2017).Reviewofconvolutionalneuralnetwork.ChineseJournalofComputers,
+40,1229–1251.
+Publisher’sNote SpringerNatureremainsneutralwithregardtojurisdictionalclaimsinpublishedmapsand
+institutionalaffiliations.
+123Annals of OperationsResearchisacopyrightof Springer,2024.AllRightsReserved.
