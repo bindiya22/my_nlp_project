@@ -1,0 +1,406 @@
+2023 International Conference on Distributed Computing and Electrical Circuits and Electronics (ICDCECE)
+Information Fusion for Seveirty Detection using
+Machine Learning in Data Mining Healthcare
+1st Vaishali Gupta 2nd Pawan Bhambu
+Department of Computer Science & Engineering, Department of Computer Science Enginnering,
+Chandigarh Engineering College, Vivekananda Global University,
+Jhanjeri, India Jaipur, India
+vaishali.j1631@cgc.ac.in pawan.bhambu@vgu.ac.in
+Abstract—Improved patient care and less mental strain on contents, which leads to poor anti-interference capacity and
+healthcare providers are two benefits of using algorithms for simple to generate mistakes. However, diagnostic procedures
+machine learning to healthcare data. These algorithms may be may exhibit varying features, and analysis and use of such data
+used to spot irregularities in vital signs, which might speed up may be hindered by a lack of coordination and complete
+medical assistance or provide light on a disease's progression. analysis [2][3][4]. The present degree of information use is
+While there is a wealth of literature comparing the unsupervised quite low. Experimental modal analysis may identify damage
+and supervised performances of anomaly detection algorithms by observing shifts in a structure's inherent frequencies,
+on popular public datasets, this same level of conceptual
+damping ratios, and mode shapes (EMA). To pinpoint the
+comparison is lacking when it comes to physiological data.
+damage's origin and extent, it compares the observed modal
+Knowing one's heart rate may provide valuable insight on one's
+characteristics to either a baseline or fictional value and looks
+health and level of physical activity, making it an underutilised
+for deviations. However, erroneous conclusions may be
+data source. Specifically, we used and compared five machine
+reached as a result of processing such a big and complicated
+learning methods, two of which were unsupervised and the other
+data set. In a damage detection system inspired by the
+three supervised, to identify outliers in heart rate data. The
+Dempster-Shafer theory of evidence, a sort of multi-
+algorithms were tested using physiological data from human
+subjects' hearts. Results demonstrated that both outlier factor information fusion was used. When compared to more
+and regression trees algorithms were effective in detecting heart traditional single-parameter approaches, the built-in
+rate anomalies, with both models successfully generalising from parameter's sensitivity and reliability were both significantly
+their simulation heart rate data training to real-world heart rate improved. The findings also demonstrated the broad
+data. In addition, the findings lend credence to the idea that, in applicability of the multi-information fusion approach to
+the absence of real labelled data, simulated data can be used to damage diagnosis. The rising incidence of fatal and seriously
+configure methodologies to a certain degree of performance, injured traffic accidents is a major contributor to these tragic
+indicating that this kind of training could be particularly useful outcomes. Having up-to-date information on incidents is
+in the initial rollout of a system with no preexisting data. crucial. At the moment, systems designed to identify accidents
+are either improving their detection accuracy or trying to make
+Keywords— Information Fusion, Severity Detection, Machine
+accidents more catastrophic. Knowing the specifics of an
+Learning, and Data Mining Healthcare
+event helps emergency medical services (EMS) provide the
+I. INTRODUCTION
+best care possible to those affected [5][6]. In order to properly
+treat patient-specific pathology early on, longitudinal imaging
+The safe and continuing functioning of electrical and
+may record both fixed anatomical features and the dynamic
+mechanical automation systems depends on accurate
+changes that accompany illness development. However,
+diagnosis of thermal defects in critical elements before they
+longitudinal data is seldom used in traditional methods of
+become severe. The overall management of thermal defects is diabetic retinopathy (DR) detection. Automatic depression
+not optimal due to the inability of current algorithms to create
+identification has come a long way in recent years, and a lot
+consistent links among sensors. In order to regulate the built
+of that progress may be attributed to modality fusing and deep
+environment in a way that minimises energy consumption learning techniques. Multi-modal techniques, on the one hand,
+while maximising efficiency, building’s fault detection and
+add a great deal of complexity to the data collecting phase,
+diagnosis (FDD) technology is required. When dealing with
+while deep learning methods, on the other, are notoriously
+complicated systems and unpredictable inputs, recent data-
+mysterious, which undermines their trust. In this study, we
+driven approaches have shown to be advantageous. Existing
+present a multi-task BLSTM model that can process text using
+studies on data-driven FDD, however, treat the issue as
+pretrained word embeddings. With a state-of-the-art F1 score
+nothing more than a classification challenge to label fault
+of 0.87, our technique outperforms prior multi-modal research
+kinds. For a long time, prior information on system setup and
+and provides data for the existence of depression as well as a
+problem severity levels was disregarded. When a transformer
+projected severity score [7]. Moreover, we get the best RMSE
+fails while it is operating, there are a variety of causes and
+among all existing text-based methods. Finally, we use a per-
+corresponding warning indicators. Diagnosing a problem
+time-step attention mechanism to analyse the statements that
+entail looking at the data, determining how serious the
+contributed most to forecasting the sad state. Words like "um"
+problem is, and ultimately pinpointing where in the system the
+and "uh" and other paralinguistic information are really strong
+problem lies [1]. Today, more and more data reflecting real-
+predictors of sadness in our approach. For the first time, the
+time condition information of transformer and an increasing
+fact that conversational fillers may notify a deep-learning
+number of information sources are accessible thanks to the
+model to the possibility of depression has been exposed.
+implementation of novel detection techniques including on-
+Purpose Improve diabetic retinopathy symptom awareness
+line surveillance and live detecting of transformers. However,
+and disease severity categorization from fundus pictures using
+on just one hand, diagnostic procedures are defined by a single
+a hybrid architecture (DR) [8]. Techniques For this study, we
+kind of characteristic data, such as ratio of gas pressure or
+utilised 26,699 fundus pictures of 17,834 people with diabetes
+979-8-3503-4745-6/23/$31.00 ©2023 IEEE
+23315101.3202.66875ECECDCI/9011.01
+:IOD
+|
+EEEI
+3202©
+00.13$/32/6-5474-3053-8-979
+|
+)ECECDCI(
+scinortcelE
+dna
+stiucriC
+lacirtcelE
+dna
+gnitupmoC
+detubirtsiD
+no
+ecnerefnoC
+lanoitanretnI
+3202
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:15:36 UTC from IEEE Xplore. Restrictions apply.from three hospitals in Taiwan, collected between 2007 and which is applied to signatures derived from external stray flux.
+2018, to categorise DR severity. A total of 37 The belief function framework is used by this method to
+ophthalmologists served as the actual truth for the pictures' describe and combine data collected from sensors located all
+lesion diagnosis and severity rating. Two different fusion over the system in order to identify any potential short circuits.
+architectures were proposed for deep learning: one that Researchers investigate how different sensor placements
+combines lesion detection and categorization models around a machine affect their ability to spot problems. The
+sequentially to mimic the choice process of ophthalmologists data collected from the machine's ambient magnetic field is
+(late fusion) and another that merges lesion and intensity fused with other sources to create a novel diagnostic procedure
+classification techniques in parallel (postprocessing fusion). with the benefit of being non-invasive. The diagnostic method
+The efficiency of the architecture was tested using Messidor- relies on data collected by six external flow sensors mounted
+2 and 1748 pictures. Classification accuracy, the weighted on a belt around the machine. These fingerprints are produced
+statistic, and the area underneath the receiver operating by experiments with a rewound induction machine, which
+characteristics curve were the major indicators of performance may generate varying degrees of inter-turn short circuit
+(AUC). Results With an accuracy and weighted of 84.29% defects [12]. The purpose of this work is to investigate the
+and 84.01%, correspondingly, for five-class DR grading, a identification and severity of thermal defects in electrical and
+hybrid architecture performed well when used to hospital data. mechanical automation equipment. Before proposing an
+This method also improved upon the accuracy of traditional MSIF method grounded on the D-S evidential theory, this
+classification algorithms in identifying photos of early DR [9]. work investigated the heterogeneity Multi-Sensor Information
+For referral DR detection, the Messidor-2 model scored an Fusion (MSIF) challenge presented by sensors located in
+AUC of 97.09%, whereas state-of-the-art techniques trained crucial areas of electrical and mechanical automation
+on a bigger database produced AUCs of 85% to 99%. equipment. The impact of thermal problems on the various
+Conclusions In order to make our hybrid designs more durable equipment components was then assessed, with the report
+and trustworthy for widespread use, we enhanced them by offering supporting evidence for the placement of sensors in
+extracting features from DR pictures and boosting the strategic locations. Finally, testing findings demonstrated the
+effectiveness of DR grading. Functional Relevance for efficiency of the proposed approach, and the thermal defect
+Translation The suggested fusion designs have the potential to detection results were reached [13]. Using hierarchical
+provide for more rapid and accurate identification of several labelling, the authors of this research present a unique data-
+DR disorders than is currently possible via manual clinical driven technique for fusing system structural knowledge and
+practice alone [10]. describing severity levels inside a single learning framework.
+We derive the Large Margin Information Fusion (LMIF)
+II. RELATED WORK technique and create a streaming-data-specific online learning
+Using machine learning models like Random Forest, system. The suggested approach is applied to the FDD of a 90-
+Gradient Boosting, and Xtreme Multilayer Perceptron trained ton centrifugal water-cooled chiller, in accordance with
+with patient data and deep learning models like DenseNet201 ASHRAE Research Project 1043 (RP-1043). The benefits of
+and InceptionResNetV2 received training with knee x-ray merging past knowledge of fault dependency data into the
+images, this study aims to enhance the identification of Knee learning process are supported by experimental data showing
+Osteoarthritis at all levels based on the Kellgren-Lawrence that LMIF can significantly enhance the FDD performance
+scale. The cumulative predictive power of these models is and detect the faulty risk level with high accuracy [14]. So as
+used as the basis for the final classification decision, which is to increase the accuracy of a diagnostic, this study presents the
+made via a late fusion technique. Both machine learning and information energy technology and proposes a new criterion
+deep learning models obtained superior performance as that should be efficiently integrated and logically stratified
+measured by Precision, Recall, and F1-score, however the [15].
+ROC curves for deep learning models revealed a greater level
+of efficiency. In addition, the primary characteristics that drive
+III. PROPOSED WORK
+the illness were found using patient data in models of machine Several different techniques exist for accurately
+learning [11]. To identify inter revolution short circuits in classifying and predicting medical conditions. Data mining for
+inductors, this work introduces an approach based on fusion, medical practise faces a number of obstacles and problems.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:15:36 UTC from IEEE Xplore. Restrictions apply.Train the patients Numerical Inputs
+records using SVM To remove duplicate and
+missing values using pre-
+processing techniques
+Data Preprocessing
+SVM ARL
+Final Features
+Categorical Imputation Label Encoding
+Feature
+Selection
+using Boruta
+Collect Patient
+Health Records Patient Database
+gniknaR
+/
+ecnatropmI
+serutaeF
+eht
+Feature Number
+Fig. 1. Suggested work flow
+A. Data Pre-processing (cid:11) X
+(cid:12) (cid:13)
+⎡ ⎤ ⎡ ⎤
+Date, Numeric data, and String, types are represented in ⎢(cid:11) (cid:13)⎥ ⎢X (cid:14)⎥
+the dataset's columns. In addition to continuous variables, our C= ⎢(cid:11) (cid:14)⎥, X= ⎢X (cid:22)⎥ (2)
+dataset also contains categorical ones. The categorical ⎢⋯⎥ ⎢⋯⎥
+variables were label-encoded since the ML model expects all ⎣(cid:11) (cid:16)⎦ ⎣X (cid:16)⎦
+input data to be in numerical form. This procedure gives a
+numeric value to each distinct column category. There are a where (cid:11) projected weights, or regression estimators, for the
+(cid:23)
+number of blanks in the data set that, when used as input, will characteristics of interest in the data, and (cid:11) symbolises the
+(cid:12)
+result in a failure. Thus, we use "NA" to represent missing point when an equation begins to slope down.
+data. The "death" and "recov" columns of certain patient
+collected data are both blank; these records were extracted (cid:5)(cid:24)(cid:7)=(cid:25)=(cid:11) (cid:12)+(cid:11) (cid:13)x (cid:13)+(cid:11) (cid:14)x (cid:14)+⋯+(cid:11) (cid:16)x (cid:16) (3)
+from the occupy a central place and added to the testing
+Our study's logistic regression technique uses a total of 25
+dataset, while the remainder records were added to the train
+features from the dataset, therefore it is based on the dataset's
+dataset. Date-formatted columns also exist in the dataset.
+characteristics.
+Instead of directly using the data columns, model. this model
+has been employed. The relevant (hosp vis—sym on) value h(cid:5)x(cid:7)=(cid:5)(cid:11) +(cid:11) x +(cid:11) x +⋯+(cid:11) x (cid:7) (4)
+has been entered into a new column. From this, we may (cid:12) (cid:13) (cid:13) (cid:14) (cid:14) (cid:16) (cid:16)
+calculate how long it was until the patient went to the hospital
+If the value of is less than or equal to, the model will
+after first experiencing symptoms.
+classify the record as a survivor or a fatality
+B. Machine Learning Classifiers
+(5)
+(cid:11) +(cid:11) x +(cid:11) x +⋯+(cid:11) x ≥0
+(cid:12) (cid:13) (cid:13) (cid:14) (cid:14) (cid:16) (cid:16)
+Logistic Regression. For binary and multiclass issues,
+logistic regression is a popular statistical classification The maximum-likelihood ratio notion is used to find the
+approach. Logistic functions are used to forecast the best possible regression estimator. The attribute-to-class label
+likelihood of a class label. Hypothesis in its operational mapping is performed using a sigmoid function (logistic
+version is function).
+Y=C(cid:4)(cid:5)X(cid:7) (1) The following equations describe the sigmoid equation in
+its functional form:
+where C is a list of linear regression and X is a list of attributes.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:15:36 UTC from IEEE Xplore. Restrictions apply.(cid:13) mitigate the model's inherent bias. The XGB methodology is
+S(cid:5)g(cid:7)=
+(cid:5)(cid:13)!"#$(cid:7)
+(6)
+the result of adjusting a number of variables simultaneously.
+(cid:13) Better model performance may be achieved by finding the
+S(cid:5)g(cid:7)=
+%(cid:13)!"#&’(cid:5)((cid:7)) sweet spot for parameter values. The grid search method was
+used to find optimal values for the parameters.
+where is a numeric constant Euler's number. To prevent
+*
+Rule extracting from such a learned SVM (SVM-Rule)
+model overfitting, LR employs a regularisation parameter.
+process is crucial for data mining as well as the discovery of
+Hyperoptimized parameters for the logistic regression were
+knowledge because to the SVM's high accuracy in regression
+found using a grid search optimization.
+and classification. Nevertheless, in fact, the rules derived
+using SVM-Rule are less intelligible than we expected, due to
+Moreover, feature selection may be accomplished with the
+the presence of a large number of obscure numeric factors
+help of a random forest. It divides the data into a training set
+(i.e., support vectors) in those rules.
+and a test set with the help of bootstrapping data sampling.
+Every bootstrap uses a different set of trees that are generated While the decision tree's obtained rules might not be as
+repeatedly by the model. The final forecast is calculated by precise as SVM rules, they are simple to understand because
+averaging the votes from each category. It's the sum of all the each rule corresponds to a single decision path that can be
+branches of the many decision trees. An example of a followed in the tree structure. Using the coordinates from
+classification method that uses a hierarchical structure is the SVMs aggregate in the tree, as well as the tree structure as a
+decision tree. information gain, gain ratio and Entropy the result of a decision tree rule, rule extracting using SVM trees
+Gini-index are all used to determine which node should be the (SVMT-Rule) is able to do rule extract over a tree structure of
+decision maker. Both data augmentation and entropy were SVM. The support vector rule maintains the excellent
+used in our analysis, as shown by the following formula as: classification accuracy, while the decision-tree rule improves
+the rule's understandability. And as the SVMT Rule
+E(cid:5)Y(cid:7)=∑(cid:16) (cid:23).(cid:13) −p (cid:23)log (cid:14) p (cid:23) (7) aggregates groups of SVMs, it may conduct a very accurate
+E(cid:5)X,Y(cid:7)=∑ P(cid:5)n(cid:7)E(cid:5)n(cid:7) classification on datasets with severe, even overpowering,
+(cid:16)∈4
+class-imbalanced data distribution.
+where represents the entropy of the target, while
+7(cid:5)(cid:25)(cid:7)
+Entropy is the entropy of the attributes with the target, IV. RESULTS & DISCUSSION
+(cid:5)X,Y(cid:7)
+in which 8 =9x ,x ,…,x ; is the list of characteristics that Numpy, Pandas, SciPy, Scikit Learn, Matplotlib and
+(cid:13) (cid:14) (cid:16)
+describe the data. As a result, the attribute that yields the most Datetime, are some of the required packages and libraries for
+useful data will be the "root" attribute: this endeavour. The project's execution has been placing on
+Google Colab, using the CPU real-time. Google Colab has a
+Information_Gain (8)
+=7(cid:5)(cid:25)(cid:7)−7(cid:5)8,(cid:25)(cid:7) CPU with the following specifications: model 79, CPU
+Family 6 (Intel Xeon), model name 79, 2.20 GHz (Cache:
+It takes the predictions of many trees and mixes them using
+56,320 KB), and model name 6 (CPU Family 6). Google
+a set of random vectors denoted by _T. None of the vectors
+Drive is being utilised for storage.
+you choose will affect the vectors you chose before. The
+resulting forest of trees may be represented as . The Common metrics including precision, sensitivity,
+ℎ(cid:5)(cid:24)(cid:7)
+following diagram illustrates the decision tree's tendency to specificity, accuracy, and the F-score were used to assess the
+mistake in its overall conclusions: model's efficacy. The classifiers were compared using a
+number of different metrics, including area under the curve
+GE=P (cid:5)margin _fuc(cid:5)X,Y(cid:7)<0(cid:7) (9) and aspects involved characteristic (ROC). It is one of the
+4,>
+most used methods for evaluating the diagnostic test's
+where quantifies how likely it is that a given sensitivity (response rate) and specificity (false-positive rate).
+P
+4,>
+collection of characteristics corresponds to the Y category.
+Accuracy (cid:4)H!(cid:4)I (10)
+=
+The XGB algorithm is a classification and regression (cid:4)H!(cid:4)I!JH!JI
+method that uses an ensemble of models. The gradient
+where proper classification of test data is a reflection of the
+boosting technique in its regularised version. Unfortunately,
+model's accuracy.
+model overfitting occurs sometimes in the gradient boosting
+approach owing to the asymmetry of the data. Although
+overfitting is still possible, the XGB algorithm's regularisation Sensitivity TP (11)
+=
+parameter helps mitigate this. Comparable to randomized (cid:4)H!JI
+forest, XGB is a tree-based ensemble learning method. The
+Sensitivity measures how well a classification system can
+goal of the boosting data resampling technique is to improve
+anticipate positive labels. The positive predicted value (PPV)
+the accuracy of the model by reducing the misclassification
+or true positive rate (TPR) is another name for this statistic
+error. It's an iterative method. In the following iteration, the
+(PPV).
+model was trained using the data that had previously been
+used for unsuccessful predictions. The method will be
+Specificity (cid:4)I (12)
+repeated until the model reaches a state of optimality. =
+(cid:4)I!JH
+The regularisation parameter lowers the model's variance
+The sensitivity of a classification system is measured by
+by giving misclassified occurrences a larger share of the total
+its ability to accurately forecast the frequency with which
+weight. Addition of mass ameliorates model underfitting. To
+negative class labels will be assigned.
+prevent overfitting from causing a significant increase in the
+misclassification rate, penalty regularisation was used to
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:15:36 UTC from IEEE Xplore. Restrictions apply.score (cid:14)L precision L recall (13)
+F− =
+precision ! recall
+F-score is the average of how well something was
+remembered and how accurate it was. The performance was
+given in fig 2 to fig 6 respectively and the table 1 gives the
+performance analysis.
+Fig. 5. F-score vs. Data Points
+Fig. 2. Accuracy vs. Data Points
+Fig. 6. AUC Curve vs. Data Points
+Nevertheless, as we were particularly interested in
+healthcare and the practical application of machine learning to
+monitoring heart rate, we thought it was important to assess
+Fig. 3. Precision vs. Data Points how well existing algorithms predicted anomalies for a real-
+world data set of heart rates. To determine how often the
+algorithms miss outliers and how much the preceding training
+phase on simulated data affected anomaly identification
+accuracy on actual heart rate data, we resorted to
+visualisations. Prediction techniques with poor sensitivity will
+not perform well in their main purpose (e.g., the detecting of
+anomalies), and prediction models with low sensitivity will
+result in an elevated false alarm rate, therefore it is crucial to
+bear in mind the relevance of both while using these
+algorithms. By keeping both of these systems performance
+metrics at high levels when these anomaly - based models are
+deployed in the real world, we can assure that both medical
+professionals and patients can have faith in the system's
+predictions.
+TABLE I. EVALUATION ANALYSIS
+Fig. 4. Recall vs. Data Points
+Methods Accuracy Precision Recall F1 Score AUC
+DT 0.78 0.81 0.74 0.77 0.76
+RF 0.81 0.87 0.73 0.79 0.81
+LR 0.65 0.64 0.71 0.67 0.65
+SVM 0.78 0.84 0.69 0.76 0.80
+SVM 0.84 0.86 0.81 0.83 0.84
+ARL
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:15:36 UTC from IEEE Xplore. Restrictions apply.V. CONCLUSION [6] Bocklet, T., Steidl, S., Nöth, E., & Skodda, S. (2013). Automatic
+evaluation of parkinson's speech - acoustic, prosodic and voice related
+A difficult but crucial endeavour is the automated cues. Interspeech.
+identification of irregularities in physiological parameters, [7] Nallagonda, S., Godugu, K.K., & Ranjeeth, M. (2020). Energy-
+such as monitoring of heart rates. The inherent Efficiency Analysis of Cognitive Radio Network with Improved
+unpredictability of human physiological data does contribute Energy Detectors and SC Diversity over Nakagami-q Fading
+Environment. 2020 IEEE International Symposium on Sustainable
+to the challenge of anomaly detection in health data. Consider
+Energy, Signal Processing and Cyber Security (iSSSC), 1-6.
+the case of a person whose current heart rate is flagged as
+[8] Ramesh, G. P., Aravind, C. V., Rajparthiban, R., & Soysa, N. (2014).
+abnormal by an anomaly detection system but who, in fact, is Body area network through wireless technology. Int. J. Comput. Sci.
+just starting a very strenuous exercise routine. This study Eng. Commun, 2(1), 129-134.
+analyses the performance of five algorithms based on machine [9] Lu, P., Huo, C., Duan, W., Ai, J., Jin, H., & Jin, L. (2019). Information
+Fusion and Image Processing Based Arc Detection and Localization in
+learning in identifying abnormalities in heart rate data by
+Pantograph-Catenary Systems. 2019 22th International Conference on
+training them on two synthetic datasets. We used the MIT-
+Information Fusion (FUSION), 1-8.
+BIH database to get heart rate data from a single patient and [10] Saucedo-Dorantes, J.J., Zamudio-Ramírez, I., Cureño-Osornio, J.,
+test five different models. Osornio-Rios, R.A., & Antonino-Daviu, J.A. (2021). Condition
+Monitoring Method for the Detection of Fault Graduality in Outer Race
+REFERENCES Bearing Based on Vibration-Current Fusion, Statistical Features and
+Neural Network. Applied Sciences.
+[1] Tseng, V.S., Chen, C., Liang, C., Tai, M., Liu, J., Wu, P.Y., Deng, M., [11] Abasolo, K.H. (2021). Detection of Knee Osteoarthritis Severity using
+Lee, Y., Huang, T., & Chen, Y. (2020). Leveraging Multimodal Deep a Fusion of Machine and Deep Learning models.
+Learning Architecture with Retina Lesion Information to Detect [12] Irhoumah, M., Mercier, D., Pusca, R., Lefevre, E., & Romary, R.
+Diabetic Retinopathy. Translational Vision Science & Technology, 9. (2017). Information fusion of external flux sensors for detection of
+[2] Gao, Y., Liang, Z., Wang, B., Wu, Y., & Wu, P. (2018). Wetland inter-turn short circuit faults in induction machines. IECON 2017 -
+Change Detection Using Cross-Fused-Based and Normalized 43rd Annual Conference of the IEEE Industrial Electronics Society,
+Difference Index Analysis on Multitemporal Landsat 8 OLI. J. Sensors, 8076-8081.
+2018, 8130470:1-8130470:8. [13] Perveen, N., Singh, D., & Mohan, C. K. (2016, December).
+[3] Cessna, J., Alonzo, M., Foster, A.C., & Cook, B.D. (2021). Mapping Spontaneous facial expression recognition: A part based approach. In
+Boreal Forest Spruce Beetle Health Status at the Individual Crown 2016 15th IEEE International Conference on Machine Learning and
+Scale Using Fused Spectral and Structural Data. Forests. Applications (ICMLA) (pp. 819-824). IEEE.
+[4] Datla, R., Chalavadi, V., & Mohan, C. K. (2022, March). A framework [14] Li, D., Zhou, Y., Hu, G., & Spanos, C.J. (2016). Fusing system
+to derive geospatial attributes for aircraft type recognition in large- configuration information for building cooling plant Fault Detection
+scale remote sensing images. In Fourteenth International Conference and severity level identification. 2016 IEEE International Conference
+on Machine Vision (ICMV 2021) (Vol. 12084, pp. 172-179). SPIE. on Automation Science and Engineering (CASE), 1319-1325.
+[5] Dousa, A., & Mohamed, S.A. (2016). Data fusion of video camera and [15] Wang, X., Wang, S., & Zhu, W. (2019). Multilevel Information Fusion
+Laser Range Finder (LRF) for obstacle avoidance. DGA Diagnosis Method for Power Transformer. 2019 IEEE 3rd
+Information Technology, Networking, Electronic and Automation
+Control Conference (ITNEC), 770-773.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:15:36 UTC from IEEE Xplore. Restrictions apply.

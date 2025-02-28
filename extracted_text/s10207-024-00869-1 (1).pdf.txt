@@ -1,0 +1,1559 @@
+InternationalJournalofInformationSecurity(2024)23:2951–2975
+https://doi.org/10.1007/s10207-024-00869-1
+REGULAR CONTRIBUTION
+Swarm-intelligence for the modern ICT ecosystems
+George Hatzivasilis1·Eftychia Lakka1·Manos Athanatos1,2·Sotiris Ioannidis2·Grigoris Kalogiannis2·
+Manolis Chatzimpyrros2·George Spanoudakis2·Spyros Papastergiou3·Stylianos Karagiannis4·
+Andreas Alexopoulos5·Dimitry Amelin6·Stephan Kiefer6
+Accepted:24May2024/Publishedonline:18June2024
+©TheAuthor(s),underexclusivelicencetoSpringer-VerlagGmbHGermany,partofSpringerNature2024
+Abstract
+Digitalizationiscontinuingfacilitatingourdailylives.Theworldisinterconnectedasneverbefore,bringingclosepeople,
+businesses, or other organizations. However, hackers are also coming close. New business and operational models require
+thecollectionandprocessingofmassiveamountsofdatainreal-time,involvingutilizationofcomplexinformationsystems,
+large supply-chains, personal devices, etc. These impose several advantages for adversaries on the one hand (e.g., poorly
+protectedormonitoredelements,slowfashionofsecurityupdates/upgradesincomponentsthatgainlittleattention,etc.),and
+manydifficultiesfordefendersontheotherhand(e.g.,administratelargeandcomplexsystemswithhighdynamicity)inthis
+cyber-security interplay. Impactful attacks on ICT systems, critical infrastructures, and supply networks, as well as cyber-
+warfarearederivingthenecessityformoreeffectivedefensives.Thispaperpresentsaswarm-intelligencesolutionforincident
+handlingandresponse.CyberThreatIntelligence(CTI)iscontinuouslyintegratedinthesystem(i.e.,MISP,CVEs,STIX,
+etc.), and Artificial Intelligence (AI)/Machine Learning (ML) are incorporated in the risk assessment and event evaluation
+processes. Several incident handling and response sub-procedures are automated, improving effectiveness and decreasing
+responsetime.Informationconcerningidentifiedmaliciousactivityiscirculatedbacktothecommunity(i.e.,viatheMISP
+information sharing platform) in an open loop. The proposal is applied in the supply-chain of healthcare organizations in
+Europe (considering also EU data protection regulations). Nevertheless, it is a generic solution that can be applied in any
+domain.
+Keywords Cyber threat intelligence · Risk assessment · Incident handling · Machine learning · Artificial intelligence ·
+Swarm-inteligence·Healthcare·MISP·Drools·AutoML
+ListofAcronyms DoS DenialofService
+DNS DomainNameSystem
+AI ArtificialIntelligence EC EventCalculus
+C&C CommandandControl ECVL Entry’sChainVulnerabilityLevel
+CAPEC CommonAttackPatternEnumerationandClas- EHR ElectronicHealthRecord
+sification ELK Elasticsearch,Logstash,andKibana
+CIL CumulativeImpactLevel ENISA EuropeanUnionAgencyforCybersecurity
+CIS CenterforInternetSecurity FVT ForensicsVisualizationToolkit
+CPE CommonPlatformEnumeration ICT InformationandCommunicationsTechnology
+CSC CriticalSecurityControls ICVL IndividualChainVulnerabilityLevel
+CSIRT ComputerSecurityIncidentResponseTeam IDS IntrusionDetectionSystem
+CTI CyberThreatIntelligence IDPS IntrusionDetectionandPreventionSystem
+CVD CoordinatedVulnerabilityDisclosure IOA IndicatorOfAttack
+CVE CommonVulnerabilitiesandExposures IOC IndicatorofCompromise
+CVL CumulativeVulnerabilityLevel IPCI IndividualPropagatedChainImpact
+CVSS CommonVulnerabilityScoringSystem IPVL IndividualPropagatedVulnerabilityLevel
+ISAC InformationSharingandAnalysisCenter
+Extendedauthorinformationavailableonthelastpageofthearticle
+1232952 G.Hatzivasilisetal.
+IVL IndividualVulnerabilityLevel potentials of cyber-warfare [19, 20] and the importance of
+MISP MalwareInformationSharingPlatform buildingcyber-resilienceincriticalinfrastructures[21–23].
+MitM ManintheMiddle Towards the achievement of these goals, defense strate-
+ML MachineLearning giesandmechanismsareevolving.CyberThreatIntelligence
+MTTResp MeanTimeToResponse (CTI) [24–26] is gathered and processed throughout the
+MTTRest MeanTimeToRestore various phases of the Cyber Kill Chain (Reconnaissance,
+NISTCSF NISTcyber-securityframework Weaponization, Delivery, Exploitation, Installation, Com-
+NLP NaturalLanguageProcessing mand and Control (C&C), and Actions on Objectives) [27,
+PA PrimaryAgent 28].Thereupon,CTIsharingisemergingasavitalweaponin
+PIL PropagatedImpactLevel thedefenders’arsenaltoproactivelycopewiththeincreas-
+PVL PropagatedVulnerabilityLevel ing volume of malicious campaigns [29]. Automating the
+R2L RemotetoLocal procedures for CTI consumption and sharing emerges as a
+SA SupervisoryAgent new challenge for practitioners and researchers. The goal
+SEM SecurityEventManagement is to accomplish, in a timely fashion, situational aware-
+SIM SecurityInformationManagement ness between the involved benign stakeholders by getting
+SIS SmartInformationSystems informed about potential threats to the current Informa-
+SLA ServiceLevelAgreement tion and Communications Technology (ICT) infrastructure
+STIX StructuredThreatInformationeXpression setting. Automation in processing or implementation is
+TAXII TrustedAutomatedeXchangeofIndicatorInfor- desiredbytheinvolvedentitiesforprocedureslikethecap-
+mation tion of indicators of attack or compromise, preparation,
+TLS TransportLayerSecurity response, sharing of CTI among trusted participants, etc.
+U2R UsertoRoot Thereupon, there are several solutions that provide semi-
+UEBA UserandEntityBehaviorAnalytics automated sharing of information, such as indicators with
+malicious/suspicious hashes or IPs. One main contribution
+has been provided by MITRE’s STIX and TAXII in an
+attempt to advance the communal efforts towards a widely
+adoptedprotocolforCTImodellingandsharing[29,30].
+1 Introduction Cybersecurity in healthcare [31, 32] is of paramount
+importance as the industry increasingly relies on digital
+The business landscape is changing towards the 4th Indus- technologytomanagepatientrecords,conductmedicalpro-
+trialRevolution[1,2],andsothethreatlandscapeisadopting cedures,facilitatecommunication,etc.Withthetransitionto
+as well [3–5]. The involved threat actors (both malicious Electronic Health Records (EHRs) and the proliferation of
+and legitimate ones) are following this era of digitalization connectedmedicaldevices,protectingsensitivepatientinfor-
+[6].Threatsareincreasinglybecomingsophisticatedandsus- mation from cyber-threats has become a critical concern.
+tained.Ransomwareiscurrentlythemostprevalentemerging Healthcare organizations must implement robust security
+enterprise-wide business risk, with Deloitte estimating that measures,includingencryption,accesscontrols,andregular
+costforvictimswillreachthe$265billionby2031[7].Social securityaudits,tosafeguardpatientdatafromunauthorized
+engineeringisalsoadvancingalongwiththeexhibitedmal- access or breaches. As cyber-threats continue to evolve,
+ware capabilities. On the other hand, the risk management maintaining a proactive and adaptive cybers-ecurity strat-
+methodologies are also expanded to follow and, in some egy is crucial in ensuring the integrity, confidentiality, and
+cases,trytosurpassthewilystrategies[8].More-and-more availabilityofhealthcareinformation.
+organizationsareenhancingtheircomplianceandresilience Regarding CTI, worldwide there are established Infor-
+elements.FortuneBusinessInsightsforecaststhattheglobal mation Sharing and Analysis Centers (ISACs) specifically
+securitymarketsizewillexceedthe$376.32billionin2029, focused on healthcare [33]. Healthcare ISACs are organi-
+reachinga13.4CAGR[9].Thelatestthreatlandscapereports zations that facilitate the sharing of cybers-ecurity threat
+from various organizations, like ENISA [10], NATO [11], informationandbestpracticeswithinthehealthcareindustry.
+IBM [12], McAfee, [13], and ESET [14], are also reflect- Theyserveascollaborativeplatformswherehealthcareorga-
+ingtheseaspectsacrosstheworldandvariousbusinessand nizations, including hospitals, clinics, insurance providers,
+operationalsectors. and other entities, can exchange information about cybers-
+Attacks on the supply-chains and other logistics envi- ecurity threats, vulnerabilities, and protective measures.
+ronments (e.g., on the USA energy sector [15]) are posing These ISACs play a crucial role in helping the healthcare
+great threats for businesses and national security [16–18]. industrystayvigilantagainstcyber-threats,whichareofpar-
+TheongoingRussia-Ukrainewarsarealsohighlightingthe ticular concern due to the sensitive nature of patient data.
+123Swarm-intelligenceforthemodernICTecosystems 2953
+Theyprovideaforumformemberstoreceiveanddisseminate revealingthatsuchwilyactionsareforminganever-growing
+timelyandrelevantthreatintelligence,helpingtoenhancethe threatformodernsocieties[38].Therefore,concretemethod-
+overall cyber-security posture of the healthcare sector. By ologieshavebeenformedinordertocopewiththevarious
+participatinginanISAC,healthcareorganizationscanbene- phases of the security lifecycle. The following subsections
+fitfromcollectiveintelligenceandworktogethertoaddress reviewthemainmethodsandstandardsforincidenthandling.
+commonsecuritychallenges.
+Thispaperpresentsaswarm-intelligencesolution,which 2.1 Incidenthandlingmethodologies
+was mainly developed under the EU funded project
+AI4HEALTHSEC.Security-andprivacy-awaresmartagents Inordertoapplythebestpracticesinpreventing,handling,
+are continuously monitoring the systems under protection. andmanagingallcybersecurityactivities,itisfirstnecessary
+Theagentsareself-organizedasitconcernstheirmaininter- to identify cyber security incidents. For this reason, many
+nal operation, while they also form a swarm-intelligence specificmethodologiesandframeworksforincidentidenti-
+networkwheretheycansharesecurity/privacyrelatedinfor- ficationhavebeendevelopedintherecentyears.
+mationtosafeguardthesystem-of-systemsasawhole.Each Some consolidated procedures for security incident
+individualorganizationdeploysseveralPrimaryAgentsthat identification are defined in ISO/IEC 27035–1:2016 [39]
+directlyadministratetheirunderlyinglocalsystemsandnet- and ISO/IEC 27035–2:2016 [40] standards. ISO/IEC
+works, as well as one or more Supervisory Agents that 27035–1:2016 is the foundation of this multipart Interna-
+collect knowledge from the Primary Agents and perform tional Standard. It presents basic concepts and phases of
+organization-wide decision making. Also, the Supervisory information security incident management and combines
+Agents from different organizations in a supply-chain or these concepts with principles in a structured approach for
+other collaborative environments, participate in a network detecting,reporting,assessing,andrespondingtoincidents,
+andexchangehigh-levelpiecesofknowledge.CTIdatacould while applying the lessons learnt. The principles given in
+alsobecollectedfromotherexternalcollaboratedcommuni- ISO/IEC27035–1:2016aregenericandintendedtobeappli-
+tiesortheDarkWeb[34–36].Theagentsutilizeelementsfor cabletoallorganizations,regardlessoftype,size,ornature.
+ArtificialIntelligence(AI)reasoningandMachineLearning Organizations can adjust the guidance given in ISO/IEC
+(ML) inference to automate some of the underlying sub- 27035–1:2016 according to their type, size, and nature of
+procedures(e.g.,evaluationofongoingevents,processCTI business in relation to the information security risk situa-
+resourceswithhuman-readabledata,etc.)[35,36]. tion.Itisalsoapplicabletoexternalorganizationsproviding
+Therestofthepaperisorganizedas:Sect.2reviewsthe informationsecurityincidentmanagementservices.ISO/IEC
+backgroundtheoryandstandardizedmethodologiesforcyber 27035–2:2016 provides the guidelines to plan and prepare
+securitymanagement.Section3presentstheproposedsolu- forincidentresponse.Theguidelinesarebasedonthe“Plan
+tionforriskassessmentandincidenthandlingthatwasimple- andPrepare”phaseandthe“LessonsLearned”phaseofthe
+mented under the EU funded project AI4HEALTHSEC. “Information security incident management phases” model
+Section 4 details the application of AI4HEALTHSEC in a presentedinISO/IEC27035-1.
+piloting environment for the protection of the healthcare TheNISTcyber-securityframework(NISTCSF)[41,42]
+organization FHG-IBMT. Section 5 provides discussions offersaquantitativeandmeasurableriskreductionguideon
+anddirectionsforfutureworksofmodernCTIapproaches. how organizations can incorporate cyber security activities
+Finally,Sect. 6concludesthiswork. aspartoftheirriskmanagementprocess,includingincident
+identificationprocedures.Theframeworkprovidesguidance
+that is useful and applicable to any organization, therefore
+2 Background&relatedworks offers a common, consistent, and comparable set of guide-
+linesandpractices.
+In2019,theWorldEconomicForum’sGlobalRisksReport Anotherapproachforincidentidentificationandmanage-
+stated cyber-attacks in its list for the top-ten most impact- mentreliesonComputerSecurityIncidentResponseTeam
+fulglobalrisks.Towardsthisdirection,inthesameyearthe (CSIRT), whose main function is to react in a timely fash-
+Ponemon Institute reported that 90% of organizations sup- ion to cyber security threats. The CSIRT will typically be
+portingnationalcriticalinfrastructures(i.e.,manufacturing, called into action by a notification or a triggered event but
+industry,transportation,health,andenergy)facedatleastone canalsobecalledintoactionbyarelevantdiscoverywhile
+assaultwithin2017–2019thatcausedsignificantoperational performing one of many passive services. The latter case
+disruptionsordatabreaches[37].Thosearetwoofthemany may also include incident identification tasks. Frameworks
+reportsandstudiesthatwereheldduringthelastdecadeon for defining CSIRT services, roles, policies, standards, as
+thelandscapeofcyber-security[7,23].Everyyearthevol- well as procedures in case of incidents have been widely
+ume and impact of malicious campaigns keeps increasing, studiedinliterature[43–46].
+1232954 G.Hatzivasilisetal.
+TheEuropeanUnionAgencyforCybersecurity(ENISA) TheAI4HEALTHSECprojectteam,aftercarefullyinves-
+has provided a Good Practice Guide for Incident Manage- tigating the relevant methodologies, defined and imple-
+ment [47], which complements the existing set of ENISA mented a practical methodology described below. To help
+guidesthatsupportCSIRT[48,49].Theguidedescribesgood with the visualization of the common points between
+practicesandprovidespracticalinformationandguidelines the basic methodologies and to show the basis of the
+for the management of network and information security AI4HEALTHSECproposedmethodology,Table1hasbeen
+incidents with an emphasis on incident handling. In par- created.
+ticular,itincludestheidentificationoftheincidentsandits Initiality,mostmethodologiesstartwiththecyber-security
+characteristicsinthesuggestedproceduresandhandlingpro- preparation of the organization to establish an incident
+cess.Other existing standards that are also related with the response capability. This involves developing and imple-
+variousaspectsofincidenthandlinginclude: menting an incident response plan, setting up an incident
+response team, and providing training and awareness for
+• ISO/IEC 27039 [50]: Information technology—Security staff. Preparation is key to effective incident management,
+techniques—Selection, deployment, and operations of asitensuresthatthenecessarytools,roles,andprocedures
+intrusiondetectionandpreventionsystems(IDPS), areinplacebeforeanincidentoccurs.
+• ISO/IEC 27041 [51]: Information technology—Security Thereupon,thedeployeddefensesarestartingtoidentify
+techniques—Guidance on assuring suitability and ade- anddetectpotentialsecurityincidents.Thisphaseordinarily
+quacyofincidentinvestigativemethod, includes the monitoring of systems and networks for signs
+• ISO/IEC 27042 [52]: Information technology—Security of an incident, the establishment of detection mechanisms,
+techniques—Guidelinesfortheanalysisandinterpretation andtheproceduresforreportingpotentialincidents.Timely
+ofdigitalevidence, detection is crucial for minimizing the impact of security
+• CRRSupplementalResourceGuide[53]:Volume5Inci- incidents.
+dent Management Version 1.1, Carnegie Mellon Univer- Once an incident is detected, it needs to be assessed
+sity, to understand its nature and scope. These phases involve
+• ITU-T X.1216 Telecommunication Standardization Sec- triagingevents,evaluatingtheseverityoftheincident,deter-
+tor of ITU (09/2020) Series X [54]: Data Networks, miningitsimpact,anddecidingontheappropriatecourseof
+Open System Communications and Security Cyberspace action.Thisstepiscriticalforprioritizingandrespondingto
+security—CybersecurityRequirementsforcollectionand incidentseffectively.
+preservationofcyber-securityincidentevidence. After the detection and assessment, the core incident
+• SANS Institute [55]: Computer Security Incident Han- responseisperformed.Theorganizationtakesactiontocon-
+dling: Step by Step, a Survival Guide for Computer tain, eradicate, and recover from the incident. This may
+SecurityIncidentHandling. includemeasurestolimitthespreadoftheincident,remove
+thecauseoftheincident,andrestoreaffectedsystemsordata.
+The response actions are based on the type and severity of
+2.2 Analysisandcomparison theincident.
+Finally, when managing the incident, the organization
+Consideringalltheabove,manywell-documentedmethod- should review and analyze it, as well as the response to it.
+ologiesthatdescribethesecurityincidentresponseprocess, Thisphaseaimstoidentifylessonslearned,improvetheinci-
+have already been proposed and applied in the healthcare dentresponseplan,andenhancesecuritymeasurestoprevent
+domain.Asmentionedbefore,themajoraimofthesestrate- futureincidents.Itisacrucialstepforcontinuousimprove-
+giesistoanalyzeaprocedureforrapiddetectionofincidents, mentinincidentmanagementandoverallsecurityposture.
+along with minimizing the effects, mitigating the causes, Theprinciples[46]thatthestate-of-the-artmethodology
+and restoring the affected resources. In fact, the popular shouldhave,are:(1)Preparationsandreceiving,(2)Triage,
+Incident Handling recommendations proposed by ENISA (3)Analysis,(4)Response,and(5)Post-incidentactivities.
+[47–49],NIST[42],ISO/IEC27035–1[39],andCSIRTand
+CERT/CC[44,45]. 2.3 AI4HEALTHSECincidenthandlingphases
+As shown already above, all approaches share common
+characteristics, and it seems possible to derive a general Taking into account the previous analysis, a new deriva-
+methodology which would cover the entire procedure by tive methodology can be developed by adapting the NIST
+the conjunction of the practices introduced by the various methodologytotheswarm-intelligencearchitecturescheme
+sources. However, these methods might exhibit deviations of AI4HEALTHSEC [42]. Hence, the incident handling
+concerning the definition and coverage of the terminology framework of AI4HEALTHSEC consists of four steps, as
+used. theyareproposedbyNIST[42](seeFig.1):
+123Swarm-intelligenceforthemodernICTecosystems 2955
+sehcaorppaesnopsertnedicniniscitsiretcarahcnommoC
+1elbaT
+1–53072OSI
+CC/TREC
+ASINE
+SNAS
+TSIN
+selpicnirPdetsegguS
+eraperpdnanalP
+gnitroperdnagnitceteD
+stropertnedicnignivieceR
+noitaraperP
+noitaraperP
+gniviecerdnanoitaraperP
+gnitroperdnanoitceteD
+egairT
+noitaulavetnedicnI
+sisylanadnanoitceteD
+sisylanadnanoitceteD
+egairT
+noisiceddnatnemssessA
+sisylanA
+sisylanA
+sesnopseR
+esnopsertnedicnI
+snoitcA
+tnemniatnoC
+yrevocerdna,noitacidare,tnemniatnoC
+esnopseR
+noitacidarE
+yrevoceR
+tnraelsnosseL
+ytivitcatnedicni-tsoP
+ytivitcatnedicni-tsoP
+ytivitcatnedicni-tsoP
+Fig.1 NIST&AI4HEALTHSECIncidentRespondLifeCycle
+• Preparation(Step1):Itcontainsthestepsthataretaken
+beforeanincidentoccurs,suchastraining,writingincident
+responsepoliciesandprocedures,andprovidingtoolssuch
+aslaptopswithsniffingsoftware,crossovercables,origi-
+nalOSmedia,removabledrives,etc.Infact,preparation
+shouldincludeanythingthatmayberequiredtohandlean
+incident or will make incident response faster and more
+effective.
+• Detectionandanalysis(Step2):Itisthephaseinwhich
+events are analyzed in order to determine whether these
+eventsmightcompriseasecurityincident(triageprinciples
+areincludedinthisstep).
+• Containment, eradication and recovery (Step 3): The
+containment phase of incident response is the point at
+whichtheincidentresponseteamattemptstokeepfurther
+damagefromoccurringasaresultoftheincident(i.e.,tak-
+ingasystemoffthenetwork,isolatingtraffic,poweringoff
+thesystem,etc.).Theeradicationphaseinvolvesthepro-
+cessofunderstandingthecauseoftheincident,sothatthe
+systemcanbereliablycleanedandultimatelyrestoredto
+operationalstatuslaterintherecoveryphase.Therecovery
+phaseinvolvescautiouslyrestoringthesystemorsystems
+tooperationalstatus.
+• Post-incident activity (step 4): It includes the creation
+ofafollow-upreport,whicheachincidentresponseteam
+shouldevolvetoreflectnewthreats,improvedtechnology,
+andlessonslearnedaimingtoreducetheprobabilityofa
+similarincidenthappeningagainandtoimproveincident
+handlingprocedures.
+3 TheAI4HEALTHSECapproach
+As aforementioned, AI4HEALTHSEC forms a swarm-
+intelligence framework that can protect the systems of
+distinctorganizationsandtheirsupply-chains.Thisisimple-
+mentedintheformoftwomainproceduresforriskassess-
+mentandincidenthandling,respectively.
+TheriskassessmentelementsarebasedontheMITIGATE
+platform (see details below). The system: (1) records the
+organizationalassets,(2)disclosestheirknownvulnerabili-
+tiesandthreats(e.g.,fromtheCommonVulnerabilitiesand
+1232956 G.Hatzivasilisetal.
+Exposures(CVE)[56]orotherdatabases[57]),and(3)esti- ofkeystakeholders,suchasoperationsmanagers,ITand
+mates the levels of individual and cumulative risks of the security managers, and business analysts, is essential to
+evaluated components. ML is used in order to enable the preciselydefinethisscope.Theoutcomesofthisphaseare:
+processing of human language and the automatic ingestion 91)thespecificationofthecybersecurityriskmanagement
+ofinformationfromrelevantresources(e.g.,[35,36]).This scope,and(2)theidentificationoftheorganizationalcon-
+risk assessment procedure with MITIGATE is presented in text,whichencompassesbothinternalandexternalfacets,
+[58, 59] and it is not covered further in the current paper. aswellasoutliningtheriskmanagementstrategy.
+Nevertheless, an outline of MITIGATE is provided in the • Phase 2: Following the determination of risk manage-
+sub-Sect. 3.1forcompletion. ment scope and context, the subsequent phase entails an
+This study details the incident handling process. Smart analysisofthehealthcareorganization’senvironmentand
+agents are collecting data from the monitored devices and theexistinghealthcareecosystemitoperatesin.Theout-
+networks,exchangefruitfulinformationorgatherCTIfrom comesofthisphaseare:(1)alistofallavailablehealthcare
+opensources(similarlywiththeabovementionedriskassess- servicesoftheorganization,classifiedbasedontheircrit-
+mentelements),andbuildknowledgeconcerningtheoverall icalitylevel,(2)thelistoftheunderlyingassetswiththeir
+operationalenvironment.This“CTIofThings”concept[60] CPEidentification,theservicesthateachassetparticipates
+permits the secure administration of the whole ecosystem, in, and the dependency and criticality values for each of
+with AI/ML automating several of these steps and mitigat- theassetsandservices,and(3)theidentificationofhealth-
+ingsometypeofzero-dayattacks(e.g.,[61–63]). careecosystemdependenciesaswellastheproductionof
+aHealthcareEcosystemDependencyGraph.
+3.1 OutlineofriskassessmentwithMITIGATE • Phase3:Thisphaseaimstoidentifyallpotentialindivid-
+ualrisksthatmayaffecttheassessedassets.Itcomprises
+The AI4HEALTHSEC Risk Assessment methodology that fourstepsthatprovideacomprehensive insightintovul-
+is implemented with MITIGATE [58, 59], comprises five nerabilitiesandthreatsrelevanttotheserisks.Thisprocess
+systematic phases for managing cyber-security risks in aids in analyzing risks from a holistic perspective of the
+healthcareoperations.Itoutlinesaprocessthatguidesorga- healthcareecosystemandformulatingappropriatecontrol
+nizations in comprehending and controlling risks, focusing measures to mitigate the identified risks. The outcomes
+on crucial aspects like the healthcare supply-chain, assess- of this phase are: (1) the identification of the individual
+ing critical assets, threat profiling, risk evaluation, and threats along with their occurrence level (ranging from
+prioritizing controls. By following MITIGATE, healthcare veryhightoverylow)basedonthelinksofassets’CPE
+institutions can gain insights into individual and cascad- ontheCAPEClist,therelatedCVEsandtheirriskscores
+ing risks, enabling them to implement appropriate controls viatheCVSS,(2)theproductionofarelatedassetvulner-
+for a secure and robust healthcare ICT infrastructure. This ability inventory and the identification of the Individual
+methodology provides a structured approach for healthcare VulnerabilityLevels(IVLs)foralloftheentries,(3)alist
+organizationstoenhanceoverallcyber-security.MITIGATE of impacts per relevant asset that operates in the context
+aligns with established risk management standards such as ofeachidentifiedhealthcareservice,and(4)acalculated
+ISO-31000:2018 [64] and ISMS standard ISO-27001:2013 riskvalueforeachvulnerabilityofeachrecordedassetof
+[65],aswellassecuritystandardsliketheCenterforInternet eachrecordedservice.
+Security(CIS)CriticalSecurityControls(CSC)(CIS_CSC) • Phase 4: In this phase, the methodology focuses on
+[66] and Common Vulnerability Scoring System (CVSS) recognizing and evaluating cascading risks associated
+[67]. Additionally, it incorporates recognized security best with assets and services in the healthcare supply-chain.
+practicesandmethodologies,includingCVSS4.0forvulner- RA4Health specifically takes into consideration vulnera-
+abilityassessment[67],theCommonPlatformEnumeration bilities that could be exploited due to interdependencies
+(CPE)[68]forassetmapping,CommonAttackPatternEnu- among assets. The outcomes of this phase are: (1) the
+merationandClassification(CAPEC)forthreatidentification estimation of the Individual Chain Vulnerability Level
+[69], Coordinated Vulnerability Disclosure (CVD) for vul- (ICVL), the Entry’s Chain Vulnerability Level (ECVL),
+nerability identification [70], consideration of healthcare the Cumulative Vulnerability Level (CVL), and the con-
+sectorassets,andtheintegrationofsuitableMLmodels[35], struction of vulnerability dependency chains, (2) the
+makingitapplicableacrossvarioussupply-chaindomains. generatedpropagatedvulnerabilitychainsfromtheexpo-
+Thesefiveriskassessmentphasesare: sure of a specific vulnerability in an asset entry point,
+theestimationoftheIndividualPropagatedVulnerability
+• Phase1:Theinitialphaseinvolvesestablishingtheoverall Levels(IPVLs)andthecalculationofthePropagatedVul-
+scope of risk management within the healthcare organi- nerabilityLevels(PVLs),(3)theCumulativeImpactLevel
+zation and its supply-chain context. Active participation (CIL)foreachvulnerabilitychain,iv)theestimationofthe
+123Swarm-intelligenceforthemodernICTecosystems 2957
+IndividualPropagatedChainImpact(IPCI)andtheProp- TheformalaspectsofArtificialIntelligence(AI)arebased
+agated Impact Level (PIL), v) the Cumulative Risk level ontheEventCalculus(EC)[74]andtheimplementationof
+ofeachtargetasset,and(4)thePropagatedRisklevelof thisreasoningbehaviorisdevelopedwiththeDroolsreason-
+eachassetconsideredasanentrypointofanattackfora ing engine [75]. Apart from a simple rule-based logic, the
+specificthreat. reasoning process can be enhanced with ML features that
+• Phase 5: The final phase of the MITIGATE methodol- furtherevaluateongoingeventsandfeedtheresultsbackto
+ogy implements an effective risk management strategy the AI reasoning. ML and AutoML modules are built for
+toaddressbothidentifiedindividualandcascadingrisks, this purpose, which are based on the Keras and AutoK-
+ensuringaresilienthealthcareservicedelivery[71].This eras system [76], respectively. The capturing of ongoing
+involves a decision-making process, based on existing eventsfromtherunningsystemisbasedeitheroncustomized
+risks,toselectthemostsuitablestrategyandrecommended eventcaptorsand/ortheElasticsearch,Logstash,andKibana
+controls within various constraints (e.g., healthcare con- (ELK) Beats [77]. ELK may also act as an internal knowl-
+text, budget, and resource availability). The phase also edge base for the agents within an organization. Also, the
+revisitsvulnerabilitiesandthreatsidentifiedinpriorstages agents can interchange messages between them and other
+to pinpoint appropriate control measures. Additionally, AI4HEALTHSEC elements (e.g.,theriskassessmentcom-
+it aligns with established standards to demonstrate the ponents) via a Kafka Broker [78]. The privacy module,
+broader applicability of these controls. The resulting implementedwithCHIMERA[79],canbealsoexecutedto
+guidance aids the healthcare entity in implementing the anonymizemessages’contentwithpersonaldata.CTIcollec-
+identifiedcontrols,managingrisks,andenhancingoverall tionwithintheorganizationandexchangewithotherentities
+securityandresilience.Theoutcomeofthisphaseandthe or communities is developed in the Malware Information
+final result of the risk assessment procedure is a control Sharing Platform (MISP) [80]. Finally, the user can access
+register. It establishes a connection between the identi- the AI4HEALTHSEC platform via a unified web interface
+fiedcontrol,thevulnerability,threat,andassets,enabling and the Forensics Visualization Toolkit (FVT) [81], where
+acleartraceabilitypathfromcontroltothreatsandvulner- he/she can find the details for each recorded event and its
+abilities. analysiselements.Figure2illustratesthemaincomponents
+fortheinstallationofAI4HEALTHSECinasingleorganiza-
+tionwithmanylocalPAs(Metadon)andoneSA(Assurance
+3.2 Overviewoftheswarm-intelligencenetwork Platform)atthebackend.
+forincidenthandling
+3.3 Preparation
+TheAI4HEALTHSECsystemiscomposedofasetofsmart
+agents.EachorganizationhasatleastoneSupervisoryAgent Duringtheinitialdeploymentoftheplatformtoanorganiza-
+(SA),whichmanagestheunderlyingsystemsandnetworks, tion,theauditedsystemelementsarerecordedintheAssets
+exchanges information with SAs from other collaborative Inventory (e.g., asset ID, vendor, version, correlation with
+organizations, and collects CTI from open sources. Then, other assets, etc.). Then, the risk assessment analysis with
+withineachorganizationandundertherelevantSA,therecan MITIGATEdisclosesthecurrentlyknownvulnerabilitiesof
+beseveralPrimaryAgents(PAs)thatdirectlyauditsystems thesecomponentbasedonthelatestCTI,whichiscollected
+and networks. For example, there can be specialized PAs fromvariousresources,likegeneralCVEs,sectorialreposito-
+thatmonitortrafficinanetworkinggatewayortheoperation ries(e.g.,withvulnerabilitiesformedicaldevices),andDark
+ofnodes(e.g.,computers,mobileormedicaldevices,etc.). Web. Usually, repositories contain machine readable data,
+ThemainincidenthandlingoperationsforaSAaremainly and their consumption can be facilitated with STIX/TAXII
+administratedbytheAssurancePlatform[71]componentand compatible services [82]. Human-readable sources can be
+foraPAbytheMetadon[73]component(seethefollowing also incorporated (e.g., CVEs’ description part or cyber-
+paragraphsfordetails). security blogs) with the help of the Natural Language
+Both agents are self-organized, in the sense that they Processing(NLP)module[35,36].
+havetheknowledgetohandlesometypesofeventsbytheir Thereupon,theorganizationliststhemostcriticalthreats
+own. They also exchange information to achieve collabo- andprioritizethedefenses.Theincidenthandlingelements
+rative tasks. The SA is higher in this hierarchy. It collects areapplied,andthesmartagentsareconfiguredaccordingly.
+informationfromallsourcesandhastheholisticviewofthe Capturingmechanismsaredeployedtocontinuouslysending
+organization’s system. It is also the main interaction point data to the agents, which will evaluate all events based on
+withthehumanoperatorforincidenthandling,whocanalso theimplementedArtificialIntelligence(AI)rule-basedlogic.
+accessthePAsinordertoperformdirecthuman-drivenanal- IffurtherMachineLearning(ML)evaluationsarerequired,
+ysis(ifrequired). theinitialconstructionofdatasetsandtrainingactivitiesare
+1232958 G.Hatzivasilisetal.
+Fig.2 InteractionsbetweentheAssuranceplatformandotherinternalcomponents
+performed in this step. Afterwards, the platform becomes The AI4HEALTHSEC platform prioritizes effective log
+ready for the monitoring and management of the runtime managementtohandlevastamountsofdata,enablingsecu-
+operationofthesystem. rityanalyststoconductqueriesandcorrelationsthataidinthe
+detection phase. Specifically, it emphasizes Security Infor-
+mationManagement(SIM)andSecurityEventManagement
+(SEM).Theseproceduresutilizeastandardizedtaxonomyfor
+3.4 Detectionandanalysis
+securityeventsandincidents,alongwithasharedinformation
+model aligned with governmental and industrial standards
+ThephaseofDetectionandAnalysisincorporatesautomated
+[83,84].
+processingtoolsandintelligentoperationsconductedbythe
+Variousmethodsareemployedforlogcollectionconnec-
+AI4HEALTHSEC agents. Additionally, the Analysis phase
+tors, which include data ingestion to the manager through
+involvestheexaminationandanalysisperformedbythesys-
+HTTP,TCP,andsyslogstandards,aswellasmonitoringspe-
+temoperatorsituatedattheSA’sside.
+cificlog/textfiles.Atransformationprocessisimplemented
+to convert input formats from a domain-specific language
+into a standardized and uniform field taxonomy. Elastic-
+3.4.1 Gatheringofinformation
+search [85] serves as the storage solution for the data. A
+web-based user interface facilitates security analytics and
+The detection phase involves utilizing various techniques
+enables the execution of queries using a high-level query
+andtoolstocaptureandidentifycyberincidents.Information
+language. Events and alerts are generated when abnormal
+sources include log management tools, antivirus software,
+system behaviors or operations occur. To enhance search
+intrusion detection systems, network monitoring tools, and
+queries, visual analytics techniques are utilized to visu-
+vulnerabilityscanners,amongothers.Loggingstandardsand
+ally represent patterns such as unusual network behavior,
+procedures play a crucial role in ensuring the collection of
+unexpected configuration changes, and anomalous account
+informationfromlogsandsecuritysoftware.
+activities,aidinghumanoperatorsineffectivelyidentifying
+Bothagenttypes(PAsandSAs)implementmechanisms
+cyberincidents.
+thatcandeployCustomizedEventCaptorstogatherandfetch
+Once security- and privacy-related data has been col-
+informationfromtheabovementionedinformationsources.
+lected,primarilyusingElasticsearch,threetypesoftoolsare
+Additionally, the Assurance Platform of the SA can uti-
+employed to process this information during the detection
+lizeELKBeatsandtheircapabilitieswhicharepopularand
+phase of the AI4HEALTHSEC methodology. These tools
+widelyknownfortheexpertsinthefield.
+123Swarm-intelligenceforthemodernICTecosystems 2959
+Table2 Capturedmaliciousactivities definequeriesonthecollectedlogsusingalanguagethatis
+notspecifictoanyparticulardomain.Correlationtaskscan
+Maliciousactivity
+beperformedbyleveragingthedata.Byschedulingqueries,
+Bruteforceattempts Attemptoflogtampering itbecomespossibletotriggeralerts,notifyingusersthrough
+email, initiating a service, or executing a shell script when
+Multiplefailedauthenticationsto Sensitivefilepermissions specificconditionsaremet.Anylogsourcecanbeutilizedas
+differentaccountsbysameIP change
+input,encompassingauditinglogs,firewalllogs,routerlogs,
+Accesstothesameaccountfrom Sensitivegroupchange
+DNStraffic,ornetworkflows.Thesystemsupportsmultiple
+differentIPs
+dataformats,includingCSV,JSON,andrawdatainlegacy
+PasswordchangeafternewIP Suspicioususerelevation
+formats,accommodatingnearlyalltypesofdata.
+access
+Accessfrom/toblacklistedIP Suspiciousnumberof
+3.4.2 Reasoningevaluationandresponse
+VM/dockeractivity
+Possiblemaninthemiddle HighNXDomainenumeration
+(MitM) Aftercapturingandfetchingeventsfromthemonitoredsys-
+Toomanyerrors404,403,500, HighreverseDNSenumeration tems and networks, the smart agents can process all these
+501 piecesofinformationandreasonabouttheirlegitimacyand
+Exposedendpointsusedfrom Failedaccesstohostbut incidenthandlingpolicies.
+publicIP successfulaccesstosystem Thecorereasoningproceduresareimplementedinarule-
+Detectionofaccessestosensitive Multipleusersemail based logic. Event Calculus (EC) is mainly used in order
+protocols forwardingtosame to model the reasoning behaviors and provide the theoretic
+destination
+foundationsfortheformalverificationoftheevaluationpro-
+Anomaloustrafficdetection Anomaloussensitiveservice
+cess. EC is implemented in the rule engine Drools and the
+(leveragingfromintrusion execution
+AI procedures are implemented in JAVA. Set of rules are
+detectionsystems),
+defined,witheachrule-setevaluatingaspecifictypeofsecu-
+CommonlyabusedURLs Usercreatedanddeleted
+within10minutes rityorprivacyincident.
+Distributedbruteforceattempt Processexecutedfrombinary Thereupon,theusercandeployAssessmentProfiles.Each
+hiddeninBase64encoded profile contains information about the deployment of the
+file relatedcapturingmechanismstospecifiedsystemassets,as
+wellaswhichrule-setswillbeusedfortheevaluationofthe
+collected events. Each incoming event triggers the reason-
+consist of: (1) an Intrusion Detection System (IDS) based ingbehaviortoevaluatetosituation.Theusercanreviewthe
+on Snort [86], (2) a Data Fusion module and CHIMERA resultsandthewholeprocessviaauser-friendlywebinter-
+[79] for privacy protection, and (3) Metadon [73] for PAs face.Moreover,theseAIprocedurescanexecuteautomated
+ortheContinuousMonitoringandAssurancePlatform[71] responseactions,whicharedefinedinthedeployedrule-sets,
+for SAs. Snort fulfills the primary functionality of the toresponseandmitigateongoingmaliciousoperations(see
+IDS. The Data Fusion module stores pertinent information thefollowingparagraphs).
+for this phase, handles intricate data transformations, and
+appliessemanticannotationstofacilitateknowledgesharing 3.4.3 IncorporationofreasoningwithMLevaluation
+andreuse.CHIMERAmayapplyadditionalanonymization
+transformationsincaseswherepersonaldataareprocessed. Whilerule-basedAIproceduresarequitepowerfulandcan
+MetadonandtheAssurancePlatformutilizesallthegathered cope with a wide range of problematic situations, there are
+information to validate the compliance of the operational complexproblemsthatcannotbeeasilyexpressedandmod-
+environment with established security policies/strategies, eled with them. Machine Learning (ML) elements are also
+identifyinganyviolationsorpotentialcyberincidents. requiredinordertoprovideevaluationofcomplexwilyactiv-
+The Table 2 summarizes the main type of malicious itiesaswellasanomalydetection.
+activitiesthatcanbedetectedbytheAI4HEALTHSECcom- Therefore, enhanced reasoning behaviors are developed
+ponents. forAI4HEALTHSEC,wheretheAIprocedurescanaskfor
+In an indicative use case, the detection process can be MLcomponentstoevaluateseriesofevents.Whenarelevant
+exemplified by employing a security appliance, such as a rule-setistriggeredbyoneormoreincomingevents,oneof
+firewall, that generates logs. These logs are then collected theunderlyingrulescansendamessagetoanMLcomponent
+andparsedintoastandardizedformatusingasyslogserver. askingforevaluation.TheMLcomponentrespondswiththe
+The resulting data is transmitted to the log storage, which evaluationresult,whichisprocessedbyoneormorerulesof
+utilizesElasticsearch.Subsequently,usershavetheabilityto therule-set.
+1232960 G.Hatzivasilisetal.
+Context-wise,usuallyPAsprocessmorespecializedand reference. Incidents can be prioritized based on their func-
+technicaldatasets(e.g.,specificnetworkmonitoring,devices tional and informational impact, as well as the system’s
+profiling,etc.),whileSAsprocessdatasetsformorecommon recoverabilitylevel.Theincidentprioritizationprocessmay
+servicesandfunctionalitythatisfoundinbackendinfrastruc- involveuser-drivenorautomatedsimulationsandAI-based
+ture.InthecurrentprototypeofAI4HEALTHSEC,MLand recommendations.Onceanincidentisidentifiedasapoten-
+AutoMLmodules[62]areembodiedbytheagentsbasedon tial attack, the initial level of incident response is initiated,
+KerasandAutoKerassolutions.TheMLsolutionismainly involving the notification of all affected parties. This noti-
+used by the PAs and concentrates in datasets for local sys- fication process includes generating alerts and identifying
+temsandnetworkingtraffic.TheAutoMLmoduleismostly the recipients who should be notified based on established
+usedbytheSAs.Thissolutionisalsobetterfittedforusers securitypolicyconditions(e.g.,notificationperiod,levelof
+who have no or low expertise in ML and are not aware of informationtobeshared).
+howtochooseaproperMLalgorithmfortheirproblem. Moreover, this stage can involve an interplay of the
+AlthoughthesetwoMLcomponentswereselectedforthe incident handling procedure and the risk assessment one.
+proof-of-concept implementation of AI4HEALTHSEC, the Therefore,theanalystcanutilizetheofferingsofMITIGATE
+overallapproachisgenericenoughandcaneasilyincorporate [58, 59] to further evaluate the potential side-affects. For
+otherMLsolutionsaswell. example, an attacker may have infiltrated the system from
+somepointandtheattackisdetectedatsometime-pointina
+specificpartofthesystem.Theexpertcanruntheattacksim-
+3.4.4 Human-drivenanalysis ulationmodule inanattempttoexamine thedefined Chain
+Vulnerability paths (already defined during the initial risk
+Theproposedsolutionreliesnotonlyontheaccuracyofsys- assessmentphase)andhowthevulnerabilitymayhavebeen
+temindicatorsorprecursorsbutalsoonhumanjudgmentin propagatedinthesystem,tryingthetracebackwardandfor-
+certaincases[87].Indicatorsmaynotalwayssignifyanactual wardthehackerandmitigatingtheside-affects.
+incident, and the complexity of interconnected ecosystems Whentheincidenthasbeenhandled,theanalystcandeter-
+resultsinvaryingtypesandquantitiesofindicators,whether mine the overall feedback, updating and re-performing the
+user-defined or not. Identifying genuine security incidents risk assessment to estimate the new protection level. This
+fromthemultitudeofindicatorsandassociatedeventscanbe may include the update of the vulnerability database, the
+achallengingtask.Tofacilitatetheseprocessesandexamine vulnerabilitypaths,andtheaffectedrisklevels[71].More-
+different signs and events within the system, incident han- over,theusercouldannotatetherelevantevents,indicating
+dlersutilizetoolssuchastheForensicsVisualizationToolkit alsopotentialfalsepositives/negatives,andre-traintheML
+(FVT)[81]. modelsthatareutilizedinvulnerableassessmentsandinci-
+During the Incident Analysis process, a security expert dent/anomalyidentificationandarebrieflydescribedinthe
+examinesincomingeventsbyinvestigatingthesystem’ssta- Sect.4.4.
+tus through different visualizations and dashboards. These
+visualizationsprovidediverseperspectivesbasedonpoten- 3.4.5 Containment,eradication,andrecovery
+tialevent/incidentcorrelations.Theexplorationschemascan
+be pre-configured for specific event types or customized Containment is the phase where the incident is controlled,
+basedontheinvestigator’srequirements.Variousvisualiza- eitherthroughtheresponseteam’sactionsorautomatedpro-
+tionsanddashboardschemascorrespondtodifferentsystem cesses,byisolatingnetworkandassetvariationsthatcouldbe
+metrics (e.g., device monitoring, network monitoring) or affectedbytheoriginalattack.Thisphasealsoinvolvespre-
+event-related information (e.g., incident entry point, poten- dictingpotentialfuturetargetsthattheincidentmayimpact.
+tially affected nodes). The security expert can also request Attack propagation graphs are valuable in capturing and
+and analyze a variety of data from individual event pro- extracting the necessary information to guide the isolation
+cessing and analysis services, leveraging knowledge from tasks(linktoMITIGATEanalysis).Thegoalofcontainment
+all available sources. This knowledge includes previously istolimitthedamagecausedbytheincidentandsubsequently
+identified incidents,theirsemanticdescriptionsintheform eradicateorremoveanymaliciousartifacts,followedbysys-
+of Data Reference Models, and correlations with ongoing tem recovery as outlined in NIST 800–61 guidelines [88,
+investigations or historical events. Filtering and comparing 89].Inessence,containmentaimstominimizetheincident’s
+this data facilitate network-system profiling, understanding impactandpreventfurthercontaminationofthesystem.Dur-
+normalbehaviors,anddiscoveringnewattackpatterns. ingthecontainmentprocess,evidencemustbecollectedand
+Throughout the incident analysis process, the security analyzed. The eradication phase involves removing suspi-
+expert can explore and modify the incident profile, which cious artifacts based on Indicators of Compromise (IOCs),
+isdocumentedandstoredinknowledgedatabasesforfuture whiletherecoveryphasefocusesonrestoringthesystemto
+123Swarm-intelligenceforthemodernICTecosystems 2961
+normaloperationandcontinuouslymonitoringitsstateafter similarattacksarecrucial.Iftheincidentinvolvesarootkit,
+theincident[90]. the process involves identifying and recovering the origi-
+Containmentisaninterdependenttaskthatencompasses nalsystemimagefrompreviousbackupsorreinstallingthe
+security, policy, and network management [91]. Security infectedOSfromscratch.Inallcases,itisessentialtovali-
+operations handle compromised devices, assets, or attacks datethatnomaliciousartifacts,processes,orconfigurations
+by transitioning to a secure domain using security con- relatedtotheincidentarestillpresent[89].
+trollers [92]. Containment methods can range from simple Once the malicious code is removed and the system
+actionslikedisconnectinganetworkcableorshuttingdown services are restored, it is important to perform iterative
+processestomorecomplexmeasuressuchasisolatingcom- vulnerabilityassessmentstoensurethatsecurityandconfigu-
+promised machines through Domain Name System (DNS) rationflawshavebeenaddressed.Areviewshouldbecreated
+or firewall rule changes [93]. The containment phase relies based on this vulnerability assessment, ensuring a success-
+heavilyontheinformationgatheredduringthedetectionand fulrecoveryphasethatbuildsuponsuccessfulcontainment
+analysisphase,whichisusedtoidentifyanddefineIOCsfor anderadicationefforts.Understandingthefullextentofthe
+systemneutralization. damageiscrucial,andvariouslogssuchassystemlogs,IDS
+The specific nature of attacks determines the technical logs,configurationlogs,andincidentdocumentationcanbe
+aspectsofcontainment,consideringattributeslikemalware, utilizedtosupportthisendeavor.
+rootkits,DenialofService(DoS),assetloss,datatheft,unau- Concerningrecovery,twomainmethodsexistfor:back-
+thorized access, and misuse of assets [94]. IOCs play a wardrecoveryandforwardrecovery[95].Backwardrecov-
+crucialroleinmatchingthemtotheincidentandproceeding ery involves restoring a system to a previous state that is
+with containment and system isolation for further analy- knowntobeuncompromised.Insuchcases,backupscreated
+sis. Research has focused on containing malware attacks, close to the incident time are used to minimize restoration
+proposing strict or flexible rules to restrict the attacks. The time. Backward recovery is particularly useful when the
+chosencontainmentstrategymayinvolvecompleteisolation, extentofthedamageisdifficulttodetermineorwhenthereis
+filtering, or emulation procedures. Therefore, containment alackofconfidence,especiallyduringtheeradicationphase.
+strategies vary based on the incident type, and specific Ontheotherhand,forwardrecoveryinvolvesundoingtasks
+criteria have been proposed to determine the appropriate basedonloggedinformation.Byexaminingsystemlogsthat
+approach.Toverifyandvalidatethecompromisedhost,inci- haverecordedmaliciousactivities,attemptscanbemadeto
+denthandlersshouldconsidercontainment-specificactivities reversetheeffectscausedbythoseactivities.
+foridentifyingtheattackhost.
+Withinthecontextofthisproject,containmentprocesses
+encompassconfiguringandupdatingfirewallrulesandiso- 3.4.6 Incident-relatedinformationsharing
+latingcompromisedmachinesbychangingDNSsettingsand
+restrictingthemtoavirtualnetwork.Thisprocessistriggered 3.4.6.1 Outline As part of the core functionality that is
+by event matching and correlation, where specific rule-sets performed by the Supervisory Agent (SA), the Assurance
+aremonitored.Thealertingsystemthentriggerscommands Platform facilitates the information sharing operations of
+toupdatefirewallrules,effectivelyredirectingthecompro- the incident handling process. These include internal com-
+miseddevicetoadifferentnetwork.Thecompromiseddevice munications within a healthcare organization, as well as
+remains isolated while retaining Internet connectivity and external interactions with other entities. Internal commu-
+accessingadifferentnetworkenvironment.Itoperatesunder nications involve: 91) the exchange information with the
+monitoredactionstogatherdatathatwillaidtheeradication underlying Primary Agents (PAs) (via relevant Metadon
+phase. instances), (2) fusion of events from various resources and
+Critical post-containment actions include analyzing and potential reasoning (by the Assurance Platform itself) con-
+extractingIOCs,focusingoncontainmentandpreparingfor cerningtheoverallstatus,and(3)notificationofthebackend
+eradication.IOCscanincludevirussignatures,changesinfile user/analyst regarding high level events and incidents with
+integritywithinsystemregistries,inboundandoutboundnet- high severity (through the FVT component of the Unified
+worktraffic,orpreviouslyreportedmaliciousdomainnames. Dashboard).Externalinteractionsinvolve:(1)theexchange
+The actions taken to eradicate the effects of an incident ofinformationwithotherSupervisoryAgents(instancesof
+depend on the type of attack. For instance, in the case of the Assurance Platform in other organizations) concerning
+malwareorransomwareattacks,itisnecessarytodeletethe high level events or recorded incidents on interconnected
+malicious files, restore file integrity changes, and reverse assets (i.e., assets that are used in common or participate
+any registry modifications. In a DoS attack, updating rule- inacollaborativeservicebetweentheorganizations),aswell
+sets in firewalls and intrusion detection/prevention systems as (2) the filtering of captured events that are related with
+andimplementingnewtechnologiesortaskstopreventfuture Cyber Threat Intelligence (CTI) (e.g., identified malicious
+1232962 G.Hatzivasilisetal.
+IPs, domains, and spam emails or signatures of malicious
+code)andaredisseminatedintheMISPAI4HEALTHSEC.
+3.4.6.2 Internalinformationsharingbetweenthedifferent
+nodeswithinthesameorganization Asmentionedbefore,
+the Assurance Platform at the backend (acting as the SA) Fig.3 Information sharing between different organizations of the
+swarmnetwork
+collectsinformationfromtheunderlyingMetadoninstances
+attheedgesystems(actinglikethePA)andorchestratesthe
+internalswarm-intelligencefunctionality(betweentheSAof
+• Command Metadon instances to perform pre-defined
+anorganizationanditsunderlyingPAs).
+responsiveactionstotheirlocalsystem(e.g.,increasesecu-
+Regarding thelog collection byusing PAs,theMetadon
+ritylevelproactivelyduetoattacksand/oranomaliesthat
+agentscollectdatafrommultipleresourcesanddistributethe
+arecurrentlyobservedinothersystemareas)
+dataeithertotheMetadonortodifferentnodes.
+• Inform collaborating entities (other nodes of the
+Metadonagentscansenddatabetweenthem,meaningthat
+swarm-intelligence network) regarding on-going
+in whichever system the agents are deployed the logs can
+attacks/anomaliesontheirinterconnectedassets.
+be retrieved there or the opposite. Furthermore, the Meta-
+don agents retrieve logs that can be sent to the Metadon
+serviceandstoretheindexesappropriatelythere.Therefore,
+TheFig.2illustratestheseinteractionsoftheinternalcom-
+theMetadonagentscanbeusedforstoringandmanagingthe
+ponentswithinanorganization.
+logstothecloudserviceofAI4HEALTHSECortodistribute
+to other third parties by using a peer-to-peer connection
+between the agents. The communication is encrypted, and
+3.4.6.3 External information sharing with other organiza-
+the connection is using regular HTTP protocol in order to
+tions in the swarm network This subsection documents
+bypass security limitations and maintain flexibility on the
+thelastactionofsharinginformationbetweenthedifferent
+deployment.
+nodesoftheswarm-intelligencenetwork.Thisisperformed
+Listeners are used to inserting the logs collected on the
+in the form of information exchange between the different
+AI4HEALTHSECcomponentsintotheMetadon’sdatabase.
+SAs.Eachnode/entityhasinstalledinitsbackendarelevant
+ConfiguringalistenerisbasicallydefiningachannelofHTTP
+instanceoftheAssurancePlatform,performingthemainrea-
+or Kafka type, where the components will put through the
+soningbehavioroftheSA.TheAssurancePlatforminstances
+data collected on each component. Moreover, all data will
+communicate by exchanging messages via Kafka brokers.
+be normalized according to the pre-defined rules, and then
+Eachinstancehasitsownbroker(whichalsofacilitatesthe
+insertedintoMetadon’sdatabase.
+above-mentionedinternalcommunications)and‘listens’toa
+The formal aspects of the reasoning behavior of the
+queue,whereotherinstancescansendmessagescontaining
+PlatformarebasedonEventCalculus(EC),whichisimple-
+ECevents.Then,theprocessingofknowledgeisperformed
+mentedwiththeDroolsreasoningengineandtheJavageneral
+as described before and the aforementioned actions can be
+programming language. The Platform exchanges messages
+executed/triggered (i.e., store information, perform respon-
+withtherestAI4HEALTHSECcomponentsviaabroker.The
+siveactions,commandPAs,notifyuser,orshareinformation
+contentofthemessagesincludesECeventsthatrepresentthe
+totheswarm-intelligencenetwork).Theinformationsharing
+security/privacyevents/incidentsthathavebeenidentified.
+betweendifferentnodesisdepictedinFig.3.
+Thereupon, the SA processes and reasons about these
+The information in-transit is protected with Transport
+piecesofknowledgeandcanperformaseriesofactions:
+LayerSecurity(TLS).Self-signedcertificateshavebeenpro-
+ducedforeachinstanceandthesystemadministratorinstalls
+thecertificatesofthetrustedentitiesintheAssurancePlat-
+• StoretheinformationintheKnowledgeBase forminstanceofhis/herorganization.Theinstanceslistenin
+• Sendinformationforselectedtypeofevents(e.g.,incidents pre-definedbrokerqueuesforincomingmessagesfromthose
+withhighseverity,metrics,etc.)totheUnifiedDashboard trustednodes,applyingalsoauthorizationproperties.Infor-
+• Send information for selected type of events con- mationaboutthecontentoftransmittedmessagescannotbe
+cerning Cyber Threat Intelligence (CTI) to the MISP disclosed by adversaries and captured messages cannot be
+AI4HEALTHSEC retransmitted(replayattack).Moreover,non-trustedentities
+• Perform pre-defined responsive actions (e.g., send email cannot send information (the authentication fails, and their
+tothesystemadministratorforanon-goingattack) messagesaredropped).
+123Swarm-intelligenceforthemodernICTecosystems 2963
+Fig.4 InformationsharingbetweenAI4HEALTHSECandCONCOR-
+DIAcommunity
+3.4.6.4 Information sharing to external stakeholders
+andcommunities AI4HEALTHSECwillalsosupportinfor-
+Fig.5 MainarchitectureofthepilotingtestbedofFHG-IBMT
+mation sharing with external stakeholders. Specifically, the
+human operator of a SA will be able to collect CTI data
+and disseminate it in the MISP AI4HEALTHSEC, which
+for research purposes. FHG-IBMT also collects and stores
+is responsible to provide functionalities related to CTI
+human samples from specific cohorts of donors to monitor
+exchange,integrationwiththeEU-fundedmulti-disciplinary
+people’s exposure to contaminants in the environment on
+researchandinnovationprojectCONCORDIA[96].TheSA
+behalf of the German Environment Agency UBA. Users of
+deploysaMISPcontributorservicewhichgathersCTIdata
+thesystemthataccessthemainFHG-IBMTweb-application
+fromtheunderlyingsystemandthefinalmessagecanbesent
+viaInternet.
+to the MISP AI4HEALTHSEC and therefore to the CON-
+TheFig.5illustratesthemainsystemarchitectureofthe
+CORDIA’scommunity.
+piloting testbed that was provided by FHG-IBMT and was
+CONCORDIA is part of the Cybersecurity Competence
+utilizedfortheevaluationoftheAI4HEALTHSEC.Thesys-
+Network of EU. CONCORDIA strives for excellence and
+temimplements5mainservices:
+leadership in technology, processes, and services to cre-
+ateauser-centeredEU-integratedcyber-securityecosystem,
+• Manage Application Users (e.g., create, update, delete
+aimingtopromotedigitalsovereigntyinEurope.Thecyber-
+simpleusers,admins,etc.);
+securitycommunityincludesCTIsharingorganizations,such
+• Storesamples’data;
+asER-ISAC,EE-ISAC,EA-ISAC,theEUCSIRTsNetwork,
+• Storesamples’logistics;
+ENISA,andEUROPOL[96].Oneoftheproject’soutcomes
+• Storedataforsamplestorage;and
+includes a service to automatically detect a threat in the
+• Storeuserdata(e.g.,sampleowners,relatedsampleoper-
+network using indicators of compromise provided via an
+ators/researchers,etc.).
+instanceoftheMISPplatform.
+Asmentionedintheprevioussubsections,theAssurance
+Platform collects information concerning the underlying Fortheimplementationofthemainfunctionality,thecore
+system of a healthcare organization, as well as the swarm- UBA-PVSservercanrunWindowsorLinuxOSanddeploys
+intelligencenetwork.Then,thePlatformcanreasonaboutthe Apache Tomcat v7 Webserver, PostgresSQL v9.2 or 9.3,
+collected pieces of knowledge and perform related actions. pgAdmin Tool, and JRE7. The user logins the system via
+One such action is to filter the recorded events and notify a web browser (i.e., IE 11 (or higher) and Firefox 32 (or
+the MISP Contributor. This module provides the corre- higher)).
+sponding functionality that the Assurance Platform calls Moreover,4userrolesaremodelled.TheStandardUser
+everytimearelevanteventisidentified.Figure4illustrates onlyreadsdata(e.g.,viewdataandexport,executequeries,
+theinformationsharingbetweenAI4HEALTHSECandthe etc.). The Sample Agent writes on selected data sets (e.g.,
+CONCORDIAcommunity. samples). The Sample Manager writes on sample-specific
+basis data (e.g., sample repository, sample kind, etc.) or
+deletes samples. The Application Administrator writes on
+4 DemonstrationinFHG-IBMT thebasisdataandactsasasuperuserofthesystem.
+4.1 Pilotingsystemdescription 4.2 Demodeployment
+FHG-IBMT is the main organization that is examined In this demonstration, possible cyberattacks were executed
+underthisriskassessmentprocess.Itcollectsandmaintains to the piloting assets. The security events were monitored
+important biorepositories and provides human biomaterial usingtheEventCaptors,theinformationwasdistributedto
+1232964 G.Hatzivasilisetal.
+if required. Also, there are general rules that digest alerts
+comingfromSnort(orotherintrusiondetectionandalerting
+mechanisms).
+4.3.1 Confidentialitypropertycriterion—theusersaccess
+aservicefromasetofwhite-listedIPs
+AFilebeatorAuditbeatcapturestheuserinteractionwitha
+service(orotherresource).Ifauseraccessisrecordedfrom
+a different IP, it can be due to some attack that manage to
+overcomethedeployeddefenses(e.g.,firewall)andinfiltrate
+Fig.6 Demodeployment the system. The EC theory for this assessment is consisted
+of2rules:
+therelatedagents(PAs/SAs).Metadonaggregatesthedata,
+capabletotransformthepayloadsandstoresthemtotheElas- • Rule1: if there is a call request of the service (_service-
+ticsearch.ThatwaytheIDSalertsarepossibletobeparsed Name) at some timepoint (_t) from a user (_userName)
+bytheAssurancePlatformandtheotherAI4HEALTHSEC whoaccessthesystemfromanIP(_IP),andthisIPisalso
+components. denotedinthewhitelistwiththelegitimateIPs(definedas
+Adepictionoftheuse-casescenarioispresentedinFig.6. afluent),thenrecordasuccess.
+Severalcyberattacksareperformed,including:theexecution
+ofaDoSattackusinghping3,anUDPPortScanningusing Happens(Event(_e, call (_serviceName, _userName,
+Nmap,on-linepasswordguessing,identitytheft,encrypting _IP), _t, [_t, _t]) ∧ HoldsAt( Fluent(_f, IPsWL (_service-
+files with ransomware, etc. All these actions were success- Name,_IPsList),_t,[_t,_t])∧Contains(_IPsList,_IP)
+fullydetectedandmitigatedbythesystem. =>Initiates(Event(_e),Fluent(SuccessfullUse),_t)
+The alerts generated by the intrusion detection mecha-
+nismsareretrievedandcollectedtotheAI4HEALTHSECas
+• Rule2: if there is a call request of the service (_service-
+explainedbefore.ThentheeventsareparsedtotheAssurance
+Name) at some timepoint (_t) from a user (_userName)
+PlatformandarevisualizedtotheMainDashboard.TheIDS
+who access the system from an IP (_IP), and this IP has
+alerts are defined using the following rules. The rules can
+not been denoted in the whitelist with the legitimate IPs
+be configured according to the needs, and the intention of
+(definedasafluent),thenrecordaviolation.
+theintegrationwastotestabasicrulesetandthenextendtoa
+largerruledataset.Automatedresponsescanbealsodefined,
+aswellasthealertingofaffectedorganizationsintheswarm Happens(Event(_e, call (_serviceName, _userName,
+networkandthesharingofCTIwithcollaboratingcommu- _IP), _t, [_t, _t]) ∧ HoldsAt( Fluent(_f, IPsWL (_service-
+nities.
+Name,_IPsList),_t,[_t,_t])∧¬Contains(_IPsList,_IP)
+=>Initiates(Event(_e),Fluent(ViolatedUse),_t)
+4.3 Corereasoningwithrule-basedlogic
+4.3.2 Confidentialityproperty&privacy
+criterions—asystemresource(e.g.,fileorservicecall)
+Asmentionedbefore,mainautomateddetectionandanalysis
+isaccessedonlybyalistofauthorizedusers
+processesisperformedbythesmartagents.Datagathering
+is accomplished via Beats and customized Event Captors.
+A Filebeat or Auditbeat captures the resource interaction
+Then,theagentsprocessthesepiecesofknowledgeandrea-
+withthesystem’susers.Ifanunauthorizeduseraccessesthe
+sons about the current status of the system. This includes
+resource, it can be due to some attack (e.g., privilege esca-
+theassessmentofcriteriaorpoliciesforsecurity,privacy,or
+lation)thatmanagetoovercomethedeployedauthorization
+otherproperties,compliancewithServiceLevelAgreements
+techniques. The EC theory for this assessment is consisted
+(SLAs),computationofmetrics(e.g.,serviceup-time,mean
+of2rules:
+timetoresponse(MTTResp),meantimetorestoreMTTRest,
+etc.),aswellasattackassessment.
+Indicative use case scenarios are described below. The • Rule1:ifthereisanaccesstoaresource(_resourceName)
+description is in EC and their implementation in Drools. atsometimepoint(_t)fromauser(_userName)andthis
+Alltheseexamplesareassessedsimultaneouslyandcanbe user has also the access privileges to do so (defined as a
+customized or combined in order to tackle more use cases fluent),thenrecordasuccess.
+123Swarm-intelligenceforthemodernICTecosystems 2965
+Happens(Event(_e, access (_resourceName, _user- 4.3.4 Integritypropertycriterion—thereisonlyoneactive
+Name), _t, [_t, _t]) ∧ HoldsAt( Fluent(_f, authorizedUsers loginsessionforeachuseronaservice
+(_resourceName, _usersList), _t, [_t, _t]) ∧ Con-
+tains(_usersList,_userName) AFilebeatreadsthelogfileofamonitoredservice.Thereis
+Initiates(Event(_e),Fluent(SuccessfullUse),_t) acriterionthateachusercanhaveonlyoneactivelogin.Ifa
+userhasmorethanoneactivesessions,thiscouldbedueto
+• Rule2:ifthereisanaccesstoaresource(_resourceName) anattackerthathasgainaccesstothesystemandiscurrently
+atsometimepoint(_t)fromauser(_userName)andthis on-line.Thesessionsmustbefurthercheckedbythesystem
+user has not the access privileges to do so (defined as a operator.TheECtheoryforthisassessmentisconsistedof2
+fluent),thenrecordaviolation. rules:
+Happens(Event(_e,access(_resourceName,_userName), • Rule1: if there is a new login in the service (_service-
+_t, [_t, _t]) ∧ HoldsAt( Fluent(_f, authorize- Name) for a specific user (_userName), there must have
+dUsers (_resourceName, _usersList), _t, [_t, _t]) ∧ beenrecordedalogouteventforeveryprevioussuccessful
+¬Contains(_usersList,_userName) login.
+=>Initiates(Event(_e),Fluent(SuccessfullUse),_t)
+Happens(Event(_e1, login (_serviceName, _userName,
+4.3.3 Integritypropertycriterion—foreveryrequest _session1), _t1, [_t1, _t1]) ∧ Happens( Event(_e2, login
+onaspecifiedserviceS2,theremusthavebeencalled (_serviceName, _userName, _session2), _t2, (_t1, _t2]) ∧
+theserviceS1first Happens( Event(_e3, logout (_serviceName, _userName,
+_session1),_t3,(_t1,_t2))
+A Filebeat reads the logfile of two monitored services S2 =>Initiates(Event(_e2),Fluent(SuccessfullCall),_t2)
+and S1, respectively. There is a criterion that the S1 must
+alwaysbecalledbeforeS2.IfS2hasbeencalledwithoutthe • Rule2:ifthereisanewloginintheservice(_serviceName)
+priorexecutionofS1,itcanbeduetoanattackthatmanaged
+foraspecificuser(_userName)andthereisapastloggedin
+to bypass the defined workflow or sequence (e.g., an SQL
+sessionthathasnotbeenendedyet,thenrecordaviolation.
+injection that requests data for users who are not logged in
+thesystem).TheECtheoryforthisassessmentisconsisted
+Happens(Event(_e1, login (_serviceName, _userName,
+of2rules:
+_session1), _t1, [_t1, _t1]) ∧ Happens( Event(_e2, login
+(_serviceName, _userName, _session2), _t2, (_t1, _t2]) ∧
+• Rule1:ifthereisacallrequestoftheserviceS2atsome ¬Happens( Event(_e3, logout (_serviceName, _userName,
+timepoint(_t2)andthereisalsoarelevantcallonS1(thisis
+_session1),_t3,(_t1,_t2))
+checkedviatheothereventargumentswhicharethesame
+=>Initiates(Event(_e2),Fluent(ViolationCall),_t1)
+forbothevents)atapasttimepoint(_t1+SLA_Threshold),
+thenrecordasuccess.
+4.3.5 AvailabilitypropertySLA—Foreveryrequest
+onaspecifiedservice,thereisaresponse
+Happens(Event(_e2, call(_S2, _opInst, _arg1, _arg2), withinaspecifiedtimewindow
+_t2, [ _t2, _t2]) ∧ Happens( Event(_e1, call(_S1, _opInst,
+_arg1,_arg3),_t1,(_0,_t2] A Filebeat reads the logfile of a monitored service. There
+=>Initiates(Event(_e2),Fluent(SuccessfullCall),_t2) is a Service Level Agreement (SLA) that the service must
+respond each request within a specified period. Failure to
+• Rule2: if there is a call request of the service (_service- deliver the service on time could be to congestion, sys-
+Name)atsometimepoint(_t1)andthereisnotarelevant temfailureorbreakdown,and/ormaliciousdisruption(e.g.,
+response (this is checked via the other event arguments floodingattacks).TheECtheoryforthisassessmentiscon-
+whicharethesameforbothevents)withintheacceptable sistedof2rules:
+timewindow(_t1+SLA_Threshold),thenrecordaviola-
+tion. • Rule1: if there is a call request of the service (_service-
+Name)atsometimepoint(_t1)andthereisalsoarelevant
+Happens(Event(_e2, call(_S2, _opInst, _arg1, _arg2), response (this is checked via the other event arguments
+_t2,[_t2,_t2])∧¬Happens(Event(_e1,call(_S1,_opInst, whicharethesameforbothevents)withintheacceptable
+_arg1,_arg3),_t1,(_0,_t2] timewindow(_t1+SLA_Threshold),thenrecordasuc-
+=>Initiates(Event(_e2),Fluent(ViolationCall),_t2) cess.
+1232966 G.Hatzivasilisetal.
+Happens(Event(_e1, call (_serviceName, _serviceInst, =>Initiates(Event(_e),Fluent(UnavailableService,_ser-
+_arg1, _arg2), _t1, [_t1, _t1]) ∧ Happens( Event(_e2, res viceName),_t)
+(_serviceName, _ serviceInst, _arg1 , _arg2), _t2, [_t1,
+_t1+SLA_Threshold])
+• Rule3:iftheservice(_serviceName)wasunavailableand
+=> Initiates(Event(_e2), Fluent(SuccessfullResponse),
+theoperationwasrestoredwithinthepre-definedtimewin-
+_t2)
+dow (_PreDefinedThreshold) of the SLA, then record a
+success.
+• Rule2: if there is a call request of the service (_service-
+Name)atsometimepoint(_t1)andthereisnotarelevant
+Happens(Event(_e,serviceStatus(_serviceName,“Avail-
+response (this is checked via the other event arguments
+able”), _t2, [_t2, _t2]) ∧ HoldsAt( Fluent(_f, Unavail-
+whicharethesameforbothevents)withintheacceptable
+ableService (_serviceName), _t1, [_t1, _t2]) ∧ eval(_t2-
+timewindow(_t1+SLA_Threshold),thenrecordaviola-
+_t1<=_PreDefinedThreshold)
+tion.
+=> Terminates(Event(_e), Fluent(_f), _t2) ∧ Initi-
+ates(Event(_e), Fluent(SuccessfulServiceRestore, _service-
+Happens(Event(_e1, call (_serviceName, _serviceInst,
+Name),_t2)
+_arg1, _arg2), _t1, [_t1, _t1]) ∧ ¬Happens( Event(_e2,
+res (_serviceName, _ serviceInst, _arg1 , _arg2), _t2, [_t1,
+_t1+SLA_Threshold]) • Rule4:iftheservice(_serviceName)wasunavailableand
+=>Initiates(Event(_e2),Fluent(ViolatedResponse),_t2) theoperationwasnotrestoredwithinthepre-definedtime
+window(_PreDefinedThreshold)oftheSLA,thenrecord
+aviolation.
+4.3.6 AvailabilitypropertySLA—Aservicemustbe
+availableandmustnotbedownformore
+thanapre-definedthreshold Happens(Event(_e,serviceStatus(_serviceName,“Avail-
+able”), _t2, [_t2, _t2]) ∧ HoldsAt( Fluent(_f, Unavail-
+AHeartbeatorcustomizedEventCaptor(i.e.,gettheHTTP ableService (_serviceName), _t1, [_t1, _t2]) ∧ eval(_t2-
+status) that checks the status of a service. There is a Ser- _t1>_PreDefinedThreshold)
+vice Level Agreement (SLA) that the service must be up => Terminates(Event(_e), Fluent(_f), _t2) ∧ Initi-
+andrunning,andincaseofunavailability,theserviceadmin- ates(Event(_e), Fluent(ViolatedServiceRestore, _service-
+istrator/operator has a maximum pre-defined time window Name),_t2)
+(e.g.,1h)tofixtheproblemandrestoretheproperoperation.
+Serviceunavailabilitycouldbetocongestion,systemfailure
+4.3.7 IntegrityandAvailabilityproperty—Observe
+or breakdown, and/or malicious disruption (e.g., Denial of
+potentialransomwareactivityonsystemresources
+Service(DoS)attack).TheECtheoryforthisassessmentis
+consistedof4rules:
+Whenaransomwareisactivated, itwillstarttorecursively
+readandencrypthighvolumesofdata.AcustomizedEvent
+• Rule1:ifthestatuscheckforaservice(_serviceName)at Captorperiodicallyobserves(e.g.,1min)thevolumeoffiles
+sometimepoint(_t1)isnormal,thenrecordasuccess. inafolderthatareaccessedwithinthecurrenttimewindow.
+Ifthisvolumegoesbeyondapre-definedthreshold(e.g.,100
+accesses),notifyforapotentialransomwareactivity.TheEC
+Happens(Event(_e,serviceStatus(_serviceName,“Avail-
+theoryforthisassessmentisconsistedof1rule:
+able”),_t,[_t,_t])
+=> Initiates(Event(_e), Fluent(AvailableService, _servi-
+ceName),_t) • Rule1:ifthefileaccessvolumecheckforafolderwithvalu-
+abledata(_folderName)atsometimepoint(_t)isbeyonda
+• Rule2:ifthestatuscheckforaservice(_serviceName)at pre-definethreshold(_PreDefinedThreshold),thenrecord
+sometimepoint(_t1)isunavailable,thenrecordaviolation aviolation.
+andstartcheckingagainsttheSLAthreshold(Rules3and
+4).
+Happens(Event(_e, accessVolume (_folderName, _mea-
+suredVolume),_t,[_t,_t])∧eval(_measuredVolume>_Pre-
+Happens(Event(_e, serviceStatus (_serviceName, DefinedThreshold)
+“Unavailable”), _t, [_t, _t]) ∧ ¬HoldsAt( Fluent(_f, =>Initiates(Event(_e),Fluent(SuspiciousRansomwareActions,
+UnavailableService(_serviceName),_t,[_t,_t]) _folderName),_t)
+123Swarm-intelligenceforthemodernICTecosystems 2967
+4.3.8 Metrics—Computeusagemetric • Rule2: if there is a new response (_res) on a pre-
+vious call (_call) for a service (_serviceName), then
+Thepreviousrulescanbefurtherextended(mostlytheAvail- updatetheMTTRespaccordingly(maintainedasthefluent
+abilitycriterions)inordertoestimatemeasurable variables MTTResp).
+forsystemorserviceusage.Indicativeexamplesinclude:(1)
+thetotalup-timeforamonitoredperiod,(2)themeantime
+Happens(Event(_e2,res(_serviceName,sessionID),_t2,
+torespond,and(3)themeantimetorestore.TheECtheory [_t2,_t2])∧Happens(Event(_e1, call(_serviceName, ses-
+fortheseassessmentsisconsistedof6rules,respectively. sionID),_t1,[_t1,_t2))∧HoldsAt(Fluent(_f,MTTR,_ser-
+viceName,_value),_t1)
+4.3.8.1 Totalup-timeforaservice => Terminates(Event(_e2), Fluent(_f), _t2) ∧ Ini-
+tiates(Event(_e2), Fluent(MTTResp, _serviceName, (
+• Rule1:ifthereisanewmonitoringperiod(e.g.,everyyear func_UpdateMTTResp(_serviceName,_t2—_t1)),_t2)
+(func_UpdateMTTRespisamethodinJavafortheobject
+or month), then initiate the total up-time (maintained as
+that maintains the response times of the service (_service-
+thefluenttotalUpTime)fortheservice(_serviceName).
+Name) in an internal data structure, adds the new response
+time(_t2—_t1),andcalculatestheMTTResp).
+Happens(Event(_e, newPeriod (_serviceName), _t, [_t,
+_t]) ∧ HoldsAt(Fluent(_f, totalUpTime, _serviceName,
+4.3.8.3 Mean time to restore (MTTRest)—in combination
+_value),_t)
+withavailabilitycriteriaofthesubsection4.3.6)
+=> Terminates(Event(_e), Fluent(_f), _t) ∧ Initi-
+ates(Event(_e),Fluent(totalUpTime,_serviceName,0),_t)
+• Rule1:ifthereisanewunavailabilityperiodforaservice
+(_serviceName),theninitiatetheMTTRest(maintainedas
+• Rule2: if an examined service (_serviceName) is up and thefluentMTTRest)metric.
+running at some timepoint (_t) within the current mon-
+itoring period (e.g., running year), then update the total Happens(Event(_e, serviceStatus (_serviceName,
+up-time metric accordingly (maintained as the fluent “Unavailable”), _t, [_t, _t]) ∧ ¬HoldsAt( Fluent(_f1,
+totalUpTime). UnavailableService (_serviceName), _t, [_t, _t]) ∧ Hold-
+sAt(Fluent(_f2,MTTRest,_serviceName,_value),_t)
+=> Terminates(Event(_e), Fluent(_f2), _t) ∧ Ini-
+Happens(Event(_e,serviceStatus(_serviceName,“Avail-
+tiates(Event(_e), Fluent(MTTRest, _serviceName,
+able”), _t2, [_t2, _t2]) ∧ HoldsAt(Fluent(_f, totalUpTime,
+func_InitMTTRest(_serviceName,_t)),_t)
+_serviceName,_value),_t1)
+(func_InitMTTRestisamethodinJavathatinitializesan
+=>Terminates(Event(_e), Fluent(_f), _t) ∧ Initi-
+objectthatmaintainsaninternaldatastructurefortheunavail-
+ates(Event(_e), Fluent(totalUpTime, _serviceName,
+ableperiodsoftheservice(_serviceName).Themetricstarts
+(_t2—_t1+_value),_t)
+tocountwhentheunavailableperiodisobserved(_t)andwill
+calculatetheMTTRestwhentheserviceislaterrestored).
+4.3.8.2 Meantimetorespond(MTTResp)
+• Rule2:ifapreviouslyunavailableservice(_serviceName)
+• Rule1:ifthereisanewmonitoringperiod(e.g.,everyyear is now restored, then update the MTTResp accordingly
+ormonth),theninitiatetheMTTResp(maintainedasthe (maintainedasthefluentMTTResp).
+fluentMTTResp)fortheservice(_serviceName).
+Happens(Event(_e,serviceStatus(_serviceName,“Avail-
+Happens(Event(_e, newPeriod (_serviceName), _t, [_t, able”), _t2, [_t2, _t2]) ∧ HoldsAt( Fluent(_f, Unavail-
+_t])∧HoldsAt(Fluent(_f,MTTResp,_serviceName,_value), ableService (_serviceName), _t1, [_t1, _t2]) ∧ Hold-
+_t) sAt(Fluent(_f,MTTR,_serviceName,_value),_t1)
+=>Terminates(Event(_e), Fluent(_f), _t) ∧ Ini- => Terminates(Event(_e2), Fluent(_f), _t2) ∧ Ini-
+tiates(Event(_e), Fluent(MTTRep, _serviceName, tiates(Event(_e2), Fluent(MTTResp, _serviceName, (
+func_InitMTTResp(_serviceName)),_t) func_UpdateMTTRest(_serviceName,_t2—_t1)),_t2)
+(func_InitMTTResp is a method in Java that initializes (func_UpdateMTTRestisamethodinJavafortheobject
+an object that maintains an internal data structure for the that maintains the unavailable times of the service (_servi-
+responsetimesoftheservice(_serviceName)andcalculates ceName)inaninternaldatastructure,addsthenewrestore
+theMTTResp.Initially,itis0). time(_t2—_t1),andcalculatestheMTTRest).
+1232968 G.Hatzivasilisetal.
+4.4 EnhancereasoningwithML maybeperforminganon-lineguessingattackforausername
+ononeofthemonitoredservices.Thiscouldbecapturedin
+Attackspredictionconcernstheidentificationofpossiblesce- the form of several subsequent failed login attempts (e.g.,
+nariosoffutureattacksthroughforecastingmodels.Asithas admin/admin,admin/12345678,etc.).Theagentwillraisea
+alreadymentioned,thissubphaseincludesreasoningonthe warningforthespecificusername(i.e.,admin).Iftheattack
+fuseddataandidentificationofon-goingandfutureattacks. is successful, eventually the attacker will discover a valid
+During this phase, the fused data about the situation of the username/passwordpairandtherewillbeasuccessfullogin
+systemareevaluatedbycomparingthemwithmodelsofnor- attempt.Withoutanalyticsfunctionality,wewouldhaverea-
+maloperationandattackscenarios. soned that this final event constitutes a legitimate login, as
+An analysis of threats and vulnerabilities was carried theusedcredentialsarethecorrectones.However,withthe
+out using ML algorithms [35], including the BERT neural on-lineguessingattackraisedfortheusernameadminduring
+language model and XGBoost. These models were uti- thecurrenttime-window,thesystemsuccessfullyidentifies
+lized to gather current information from Natural Language thatthisisanattack.Mitigationactionscouldbeperformed
+documents widely accessible online, while simultaneously afterwards(e.g.,blocktheusernameaccountandtheattacker,
+assessingtheseverityofthedetectedthreatsandvulnerabili- inform the platform operator and the user for the compro-
+tiesaffectingthehealthcaresystem.Thepracticalapplication misedcredentials,etc.).
+ofthismethodinvolvedanalyzingcybersecuritynewsfrom
+theHackerNewswebsiteandexaminingreportsonCVEs.
+4.7 AttackforecastingbasedonAnomalydetection
+Concerningnetworkandcomputersecurity,opendatasets
+andUEBA
+wereutilizedfrom[97],coveringdatasetsforintrusiondetec-
+tionfrom1999to2020,liketheonesfromWUSTLEHMS
+TheintegratedAssurancePlatformwiththerule-basedmon-
+2020 [98] and DARPA [99]. These datasets contain traces
+itoring and the ML enhancements can be also utilized for
+from IP, TCP, UPD, and ICMP protocols, including sev-
+anomaly detection activities. The modern User and Entity
+eral types of attack, like Denial of Service (DoS), User to
+Behavior Analytics (UEBA) is such a case. UEBA models
+Root (U2R), Remote to Local (R2L), and Probe or Scan.
+aretrainedinordertodetecttheactivitiesofauserorother
+Therefore, ML models were trained based on Neural Net-
+systementity.Iftheruntimebehavioralpatternsdonotcom-
+works (Multilayer Perceptron Classifier), which could be
+ply with the previous behavior, an anomaly is detected. As
+utilized for the evaluation of network traffic. Moreover,
+anindicativescenarioforAI4HEALTHSEC,itisconsidered
+modelsfromthenormaloperationoftheAI4HEALTHSEC
+theprotectionSSHloginserviceoftheuserstoplatformor
+pilotingsystemswereused,includingUserandEntityBehav-
+piloting healthcare services. Usually, the employees of an
+iorAnalytics(UEBA).
+organization or the users of a service (e.g., email) access
+Thereupon, the analysis and decision-making aspects of
+theservicefromspecificdevices,locations,and/orworking
+the AI4HEALTHSEC can be further enhanced with sys-
+hours. For example, the web services of public hospital in
+temandsecurityanalytics.TheAgentscanleverageitsML
+Heraklion in Greece should be accessed by IP locations in
+elementsinordertosupportfaultandattackpredictionfunc-
+Heraklion. Based on his/her routine, if a user or employee
+tionality.
+logins a service from another region or country (i.e., Mal-
+dives,China),thiscouldbeasuspiciousevent.Popularsites
+4.5 Systemfaultsforecasting
+(Google, Facebook, LinkedIn, etc.) detect such events for
+their services. At initialization, the ML parses the organi-
+Forexample,oncethereareadequateMLdata(i.e.,fortrain-
+zation’s logfiles and discloses the usual IPs, devices (e.g.,
+ing and evaluation), the ML and AutoML modules could
+basedontheMACdetails),workinghours,andotherpieces
+forecast service or component breakdowns and upcoming
+ofinformationthatareutilizedbythecurrentusers,aswell
+unavailability events based on the historic information that
+asotherUEBA-relatedinformation.Atruntime,theMonitor
+has been recorded for the specific service or component.
+willexamineeverysuccessfulserviceloginandrequestthe
+The prediction of such incidents could further fortify the
+AutoMLmoduletocheckiftheloginactionforthespecific
+abovementionedincidentassessmentproceduresandtrigger
+user is complying with the related UEBA profile. The EC
+proactiveactionstoreducetheiroccurrence.
+theoryfortheseassessmentsisconsistedof3rules.
+4.6 AttackforecastingbasedonIOA
+• Rule1:ifthereisanewlogintotheservice(_serviceName),
+Similarly,theagentscouldevaluatetheongoingsystemoper- theninformtheAutoMLmoduletoassesstheevent.This
+ation and identify Indicators Of Attack (IOA), prior the isperformedbytheExecutiveEvent‘Apply_ML’,which
+IndicatorsOfCompromised(IOC).Forinstance,anattacker will examine in the internal database if there is a ready
+123Swarm-intelligenceforthemodernICTecosystems 2969
+MLmodelforthisuser(_userName)andservice(_service-
+Name),andifyes,thenitwillsendarelevantevent/request
+totheAutoML.
+Happens(Event(_e1, login (_serviceName, _userName,
+_loginTime,_IP,…),_t,[_t,_t])
+=>HappensExec(Event(_e2, Apply_ML (_serviceName,
+_userName,_loginTime,_IP,…),_t,[_t,_t]))
+• Rule2: If there is a service login for a username (_user-
+Name) and a ML check login confirmation with high
+Fig.7 FVTandUnifiedDashboard
+confidence (probability > (cid:3) 0.9), then record a success-
+fullogin.
+Indicativeresponseactionsthatareconsideredforthefirst
+implementationoftheincidenthandlingprocess,include:
+Happens(Event(_e1, login (_serviceName, _userName,
+_loginTime, _IP, …), _t, [_t, _t])) ∧ Happens(Event(_e2,
+MLCheckLogin (_serviceName, _probability), _t2, [_t2, • Metadon(PAs):
+_t2])∧eval(_probability> (cid:3)0.9)
+o Script to change firewall rules and mitigate Denial of
+=>Initiates(Event(_e2), Fluent(SuccessfulLogin, _servi-
+Service (DoS) attacks or isolate compromised equip-
+ceName,_userName),_t)
+ment.
+o Sendemailtolocalsystemuser/operatorwhenaspec-
+• Rule3: If there is a service login for a username (_user- ifiedmaliciousorsuspiciousactionisobserved.
+Name) and a ML check login confirmation with low
+• AssurancePlatform(SAs):
+confidence (probability < 0.9), then record a suspicious
+login. o Sendemail/messagetoplatformuser/operatorwhena
+specifiedmaliciousorsuspiciousactionisobserved.
+o Inform collaborating organizations of the swarm net-
+Happens(Event(_e1, login (_serviceName, _userName,
+_loginTime, _IP, …), _t, [_t, _t])) ∧ Happens(Event(_e2, work.
+o Gatherinformationforidentifiedsecurityincidentsand
+MLCheckLogin (_serviceName, _probability), _t2, [_t2,
+_t2])∧eval(_probability<0.9) prepareadraftCTImessage.
+=>Initiates(Event(_e2),Fluent(ViolatedLogin,_service- • Enduser:
+Name,_userName),_t)
+o UtilizeFVTtoperformadigitalforensicsanalysisfor
+identifiedsecurityincidents.
+4.8 Incidenthandlingactions
+o FinalizetheCTIelementsandauthorizetheirdistribu-
+tiontotherestcommunity(e.g.,viatheMISPservice).
+Towards the first prototype of the incident handling pro-
+o Performforwardorbackwardrecoveryactionsonmain
+cess,MetadonandtheAssurancePlatformcanautomatically
+computerizedassets.
+perform some pre-defined response strategies to specific
+problematicormaliciouscases.Assketchedintheintroduc-
+torysections,thiscomesintheformofparameterizedscripts TheFig.7depictstheoutputofFVTandtheUnifiedDash-
+for Metadon and routines of JAVA code for the Assurance board,wheretheusercanreviewallthesedetails.
+Platform.Moreover,theAssurancePlatform,whenperform-
+ingpartoftheinternalswarmintelligence,cancommandthe 4.9 CTIReasoning
+local Metadon instances and trigger some of these actions.
+In a semi-automated fashion, this process can be also acti- TheMISPAI4HEALTHSECmodule,aMISPinstance,pro-
+vated by the end user of the AI4HEALTHSEC platform vides functionalities related to cyber-security information
+via the provided GUI. Eventually, the user can combine anddeploystheconnectionbetweenAI4HEALTHSECwith
+informationfromtheincidenthandlingandriskassessment the central MISP instance managed by the CONCORDIA
+processesandperformmanuallycomplexcontainment,erad- project,whichisthelargestmajorEuropeancyber-security
+ication,andrecoveryproceduresthatarenotcoveredbythe consortiumandhasamissiontoestablishanEU-integrated
+automated/semi-automatedmodules. cyber-securityecosystemfordigitalsovereigntyinEurope.
+1232970 G.Hatzivasilisetal.
+TheECtheoryforthefilteringofMISP-relatedeventsis
+consistedof3rules.Rules1and2maintainalistofMISP-
+related events, by adding and removing event types in the
+list, respectively. Rule 3 is performing the actual filtering
+functionalityforeachoccurredeventandthecalloftheMISP
+ContributorinternalAPItosharetheinformation.
+• Rule1:ifthereisanewrequest(add_to_MISP_events_list)
+to include an event type (_eventName) in the filtering
+mechanism, then update the list (_hashset) accordingly.
+Thelistisahashsetandwilladdtheeventtypeonlyonce.
+Fig.8 Sharing Events between MISP AI4HEALTHSEC and MISP
+Happens(Event(_e,add_to_MISP_events_list(_eventName),
+CONCORDIA
+_t,[_t,_t]))∧HoldsAt(Fluent(_f,MISP_events_list(_hash-
+set))
+=>_hashset.add(_eventName)
+stakeholdersandtacklecyber-threatsproactivelyratherthan
+• Rule2: if there is a new request
+reactively [100]-[101]. Organizations may be required to
+(remove_to_MISP_events_list) to remove an event
+adopt a threat intelligence program and share information
+type (_eventName) from the filtering mechanism, then
+tosurvivecurrentandfutureattacks.Failuretoshareinfor-
+updatethelist(_hashset)accordingly.Thelistisahashset
+mationaboutknownthreatsmayresultinstakeholdersbeing
+datatypeandwillremovetheeventtypeonlyifithasbeen
+held responsible for breaches caused by those threats. The
+previouslyadded.
+primary objective of sharing threat intelligence is to pro-
+mote situational awareness among stakeholders, enabling
+Happens(Event(_e,remove_to_MISP_events_list(_eventName),
+themtoswiftlyimplementremediesforemergingthreatsand
+_t,[_t,_t]))∧HoldsAt(Fluent(_f,MISP_events_list(_hash-
+vulnerabilities. CTI can also help stakeholders in making
+set))
+tactical decisions. However, implementing a CTI program
+=>_hashset.remove(_eventName)
+that can consume and disseminate information in a timely
+manner is a significant challenge for practitioners. Further-
+• Rule3:Ifthereisrecordedanewevent(_e)anditsevent more,stakeholdersfacedifficultiesinmakingCTIrelevantto
+type (_e.name) is included in the MISP-related events theirsystem.Oneofthemostsignificantchallengesfacedby
+(_f._hashset),thencalltheMISPContributorclientinter- practitionersbeforesharingtheirCTIishowtocomprehend
+nalAPItosharetherelatedinformation. theinformationandapplyitsremedy.Stakeholderspreferan
+automatedandeffectivesharingprocess,butlackofmodels
+Happens(Event(_e), _t, [_t, _t])) ∧ Hold- and tools makes it difficult [102]. However, sharing infor-
+sAt(Fluent(_f, MISP_events_list (_hashset)) ∧ mationaboutvulnerabilitiesthroughmanualmeans,suchas
+eval(_hashset.contains(_e.name)) stakeholder-to-stakeholdersharingorthroughtrustedgroups
+=>{CallMISPclientinternalAPItosend_e} like an ISAC, is still a common approach to create situa-
+Whenrelevanteventsarerecordedbytheagents,theevent tion awareness among stakeholders and quickly alert them
+isdisseminatedautomaticallytotheAI4HEALTHSECMISP to threats. Yet, manual sharing can be ineffective due to
+module.Theeventscanbealsodisseminatedautomatically slowsharing,errorsduringprocessing,orsubjectivefiltering.
+to the CONCORDIA MISP, but in general it is preferred Automating some processes could enhance the effective-
+thattheanalystwillreviewtheoverallinformation,forman ness of CTI sharing. CTI sharing occurs on a global scale,
+incidentreport,anddefinethesharingapproach. but different laws and regulations across countries create
+TheFig.8depictsthedisseminationofinformationfrom challenges.Thesurveyin[29]identifiescurrentchallenges
+AI4HEALTHSECtotheCONCORDIAcommunity. that impede the sharing process, such as trust, reputation,
+relevance, anonymity, timeliness, and data interoperability.
+Before critical threat intelligence is shared, trusted rela-
+5 Discussionandfuturedirections tionships must be established. Governance, management,
+policies, and legal factors may also impact CTI sharing.
+Sharing Cyber Threat Intelligence (CTI) has emerged as a Thoughmostsharingoccursonanationallevel,international
+promising approach to raise situational awareness among exchanges are gaining momentum. Challenges regarding
+123Swarm-intelligenceforthemodernICTecosystems 2971
+human behavior, cultural and language barriers, and incen- couldpotentiallyhelpinidentifyingnewattacksandhacker
+tivesarealsodiscussed.Organizationsneedtoinvesttimeand tactics.Theautomatedandsemi-automatedprocessforanal-
+resourcesintounderstandingtheimportanceofCTIsharing ysis and information sharing could enhance the robustness
+programsandbuildingthemforthefuture[29]. of supply-chains, even when small organizations with low
+More and more, cyber-attacks are causing harm to busi- securitybudgetandexpertiseareengaged.
+nesses by exploiting vulnerabilities in networked manufac- Moreover,modernapproachesarehighlightingtheneedto
+turing machines. Incertaininstances, theseattacks on vital sharemaliciouspatternsandbehavioralmodels,notjustdata
+industrialequipmenthavetheabilitytocompromisetheover- orinformationoflowvalue[104,105].Thisisalsosomething
+allbusinessmodel.Itisacompetitiveadvantagetoidentify thatcouldbesupportedbyourmethodologyinthemodern
+and assess in advance the primary assets that are at risk of CyberThreatIntelligencefor“Things”landscape[60,106].
+cyber-attacksandthepotentialbusinessconsequences[2]. SHERPAisanEUfundedproject[107]whichinvestigates
+Theprivateandpublicsectorsareincreasinglyinterested the role of AI and Big Data analytics in Smart Informa-
+in using AI to address cyber-security challenges. Market tion Systems (SIS) and how they are impacting ethics and
+projections suggest that the AI cyber-security market will human rights. They use of SIS in cyber-security is one of
+experience tremendous growth, rising from $1 billion in the examined domains. It is concluded that currently there
+2016 to an estimated $34.8 billion by 2025. AI is specif- is comparatively little work on this aspect, for reasons like
+ically mentioned in the latest national cyber-security and thedangeroffalsepositivesandnegatives,therelativelylow
+defensestrategiesofvariousgovernments.Effortstoestab- intelligence of existing systems, and the high diversity of
+lishnewstandardsandcertificationprocedurestobuildtrust attacksandmalicioustactics.
+inAIarealsounderwayworldwide.However,trustingAIin Moreover,severalethicalissuesareraisedfromtheadap-
+security/privacyisadouble-edgedsword[102].AIincyber- tation and automation of cyber-security with AI, such as:
+securityhasitsadvantagesanddisadvantages.Whileitcan thedifficultyissupportingtheproperinformedconsentpro-
+enhance cyber-security, it can also expose AI applications cedures forusersorotherinvolved people, protection from
+tonewformsofattacks(e.g.,semanticattacks[103]),creat- harm,disclosureofvulnerabilities,biases,thenatureofhack-
+ingserioussecuritythreats.Wesuggestthathavingcomplete ing, trust and transparency of the AI/ML algorithms, the
+trustinAIforcyber-securityisnotjustified,andtominimize necessityforariskassessmentincybersecurity,responsibil-
+security risks, it is essential to have some form of control itybetweencompanies,governmentandusers,lackofclear
+toguaranteetheuseof’reliableAI’forcyber-security.The codesforinternationalpractice,aswellastheissueofmone-
+studyin[102]suggeststhreeroadmapsinordertoimprove tization(howfarcanoneethicallygotomonetizecustomer’s
+the AI applications for cyber-security and improve their data).
+robustnessagainstwilymanipulation:(1)promotein-house Despite these issues, there are valid reasons to consider
+development as most common types of attacks are accom- employing SIS in cybersecurity. Their primary utility lies
+modatedbytheuseofcommercialsolutions,(2)enhancethe in examining systems for recognized attacks or unusual
+datasets with adversarial training, and (3) perform parallel behaviorpatternsthatstronglysuggestacyber-attack.When
+anddynamicmonitoring.AI4HEALTHSECstipulateswith pairedwithahumanoperatorwhoreviewsanywarningsto
+theseideasandimplementssuchfunctionality(i.e.,in-house decideontheappropriateresponse,thisintegratedhuman—
+development, MLprocedures and AI decision-making pro- machinesecuritysystemcanbequiteeffective.However,it
+cedures that takes into account the potential infiltration by stillencounterschallengesrelatedtoautomationbiasanda
+adversaries,andcontinuousmonitoringoftheinvolvedsys- highnumberoffalsealarms.
+temcomponents). AI4HEALTHSEC is also concerning about those issues
+Nonetheless,CTIcannotresolveallcybersecurityprob- and have come in similar conclusions in terms of biased
+lems.ThearemanylimitationsofcurrentCTIsolutions(i.e., andfalseinferenceresultsoffullyautomatedsystems,lack
+countering zero-day attacks [61–63]), as well as obstacles of well-established methodologies for international coop-
+thatneedtobeovercome(e.g.,CTIincorporationrate,espe- eration, privacy concerns, as well as security and new
+ciallyfororganizationswithloworverylowcyber-security opportunities and options for attackers on the AI counter-
+budget and culture that can be found in a supply-chain parts themselves [87, 108, 109]. Therefore, the proposed
+ecosystem, timely sharing of information for wily actions solutionforincidenthandlingismostlyfocusedinidentify-
+andtrends).TheAI4HEALTHSECapproachtriestotackle ingknownvulnerabilitiesandabnormalities,whilekeeping
+these issues. The overall incident handling operation can the human operator in the security loop. Well-established
+detectmaliciouscampaignsfromtheirearlyreconnaissance methodologiesforCTImodellingandsharingaresupported
+phase to their actual execution and exploitation functions. inanattempttoenhancetheeffortofinternationalcollabora-
+The organization is becoming aware of the danger and the tionandinteroperablepractices.Anonymizationofdatacan
+humanoperatoralongwiththeautomatedanalysiselements beperformedwiththeCHIMERAmodule,whilethesecurity
+1232972 G.Hatzivasilisetal.
+oftheAI4HEALTHSECPlatformitselfhasalsobeentaken Authorcontributions G.H.,E.L.,M.A.,S.P.,S.K.,A.A.,D.A.,andS.K.
+intoaccount. wrotethemainmanuscript.G.K.,M.C.,S.K,A.A.,G.H.implementthe
+solutionandD.A.andS.K.setthepilotingenvironment.Allauthors
+Finally, AI4HELATHSEC adopted rule-based methods
+reviewed the manuscript. S.P., S.I., and G.S. supervise the research
+fortheimplementationofthecoreAIreasoning.Otheralter-
+activitiesandreviewthedocument.
+nativescanbeexaminedaswell,likepolicy-basedlanguages
+(e.g.,[110–112]).Thesemayincludeprogrammingorspeci- Funding Fundingisdetailedinthe‘Acknowledgement’sectionbelow.
+ficationlanguagesdesignedtodefinepoliciesthatgovernthe
+Dataavailability Thedatasetsgeneratedduringand/oranalyzedduring
+behaviorofAIsystems.Suchlanguagesarecrucialincon-
+thecurrentstudyarenotpubliclyavailableduetoconfidentialityterms
+textswhereAIsystemsneedtomakedecisionsbasedonaset ofthefundingprojectsGrandAgreementsbutareavailablefromthe
+ofpredefinedrulesorpolicies,ensuringthattheAIbehaves correspondingauthoronreasonablerequest.
+inamannerthatisconsistent,predictable,andalignedwith
+Declarations
+organizational or ethical guidelines. They are particularly
+important in areas such as access control, network man-
+Conflictofinterest Theauthorshavenocompetingintereststodeclare
+agement, autonomous systems, and any domain where AI
+thatarerelevanttothecontentofthisarticle.
+systemsinteractwithhumansormakeautonomousdecisions.
+Therefore, incorporating such solutions in AI development HumansorAnimalsResearch Noresearchonhumansoranimalstook
+helps in imposing a structured framework for AI behavior, placeduringthisresearch.Therefore,noinformedconsentprocedures
+wereneeded.
+ensuringthatAIsystemsadheretospecifiednormsandreg-
+ulations,andfacilitatingtransparencyandaccountabilityin
+AIoperations.
+References
+1. Nankervis,A.,Connell,J.,Montague,A.,Burgess,J.:TheFourth
+6 Conclusion IndustrialRevolution.Springer,Singapore,pp.1–239.
+2. Corallo,A.,Lazoi,M.,Lezzi,M.:Cybersecurityinthecontextof
+Industry4.o:Astructuredclassificationofcriticalassetsandbusi-
+Cyber-security is one of the hot research topics at the
+nessimpacts.ComputerinIndustry,Elsevier,114,1–15(2020)
+time. Warfare and continuous attacks on global supply- 3. Mukhopadhyay,I.:Cyberthreatslandscapeoverviewunderthe
+chains and networks are making the protection of critical newnormal,ICTanalysisandapplications.pp.729–736Springer,
+(2022)
+andotherICTinfrastructuresessential.Thispaperpresents
+4. Ding, J. et al., Cyber threats to smart grids: review, taxonomy,
+a swarm-intelligence approach for the automation of: (1)
+potential solutions, and future directions. Energies, MDPI, 15,
+CTI incorporation, (2) dynamic risk assessment, (3) con- 1–37.
+tinuous monitoring, evaluation, and response to ongoing 5. Ramakrishna,K.:Theglobalthreatlandscapein2020.Counter
+TerroristTrendsAnal,RSIS13(1),1–13(2021)
+events, and iv) post-incident actions and feedback. Recent
+6. Tounsi,W.,Rais,H.:Asurveyontechnicalthreatintelligencein
+advancementsofCTItechnologiesandmodelsaremarshaled
+theageofsophisticatedcyberattacks.ComputSecurElsevier72,
+(i.e., MISP, CVEs, STIX, etc.) with AI/ML automating the 212–233(2018)
+decision-makingprocesses.Thedemonstrationonhealthcare 7. Morrison,A.:Cybersecuritylandscape2022.Deloitte,February,
+pp.1–15(2022)
+settingsreveals theeffectiveness ofthesystemindetecting
+8. Sclette,D.,Caselli,M.,Pernul,G.:Acomparativestudyoncyber
+and responding to attacks. Incorporating in a fast pace the
+threat intelligence: the security incident response perspective.
+latest distributed CTI,helps inadvancing an organization’s IEEECommunSurvTutorIEEE23(4),2525–2556(2021)
+intelligenceveryquickanddecreasingthetimetodetectand 9. Fortune Business Insights, Cyber security market size, share
+& COVID-19 impact analysis, fortune business insights
+mitigatenew(known)attacks.Moreover,theintegratedML
+2022.Availableon-lineat:https://www.fortunebusinessinsights.
+solutions(e.g.,UEBAmodels)candefendthesystemagainst
+com/industry-reports/cyber-security-market-101165 (Access on
+somezero-dayattacks,disclosingwilyactivityelementsina 16/10/2022).
+semi-automatedfashion,whichareimmediatelysharedwith 10. Lella,I.etal.,ENISAThreatLandscape2023.ENISA,October,
+pp1–161(2023)
+CTI communities, limiting the attacker’s effectiveness and
+11. Ertan,A.etal.,CyberthreatsandNATO2030:horizonscanning
+benefits.Although,thesolutionhasbeendeployedandtested
+andanalysis.NATOCCDCOEPublications,pp1–267(2020)
+inthehealthcaredomain,itisgeneralandcanbeappliedin 12. Singleton,C.etal.,X-forcethreatintelligenceindex2022.IBM,
+othersectorsaswell. February,pp1–59(2022)
+13. RajSamani,etal.,McAfeeLabsThreatReport04.21.McAfee
+Acknowledgements Thiswork has received funding from the Euro- Corporation,April,2021,pp1–24.
+peanUnion’sHorizon2020researchandinnovationprogrammesunder 14. ESET, Cybersecurity trends 2021: Staying secure in uncertain
+grant agreements No. 883273 (AI4HEALTHSEC), No. 101021659 times.ESET,March,pp1–19(2021)
+(SENTINEL), No. 957337 (MARVEL), and No. 101070599 (Sec- 15. Sharwood,S.:USDojrevealsRussiansupplychainattacktarget-
+OPERA). ingenergysector.TheRegister,March,(2022)
+123Swarm-intelligenceforthemodernICTecosystems 2973
+16. Wang,P.,Johnson, C.:Cybersecurityincidenthandling: acase 37. PonemonInstituteLLC,Cybersecurityinoperationaltechnology:
+StudyoftheEquifaxdatabreach.IssuesInformSystIACIS19(3), 7insightsyouneedtoknow,march2019.PonemonInstituteLLC,
+150–159(2018) (2019)
+17. Shafqat,N.,Masood,A.:Comparativeanalysisofvariousnational 38. Taddeo,M.:Iscybersecurityapublicgood?MindMachSpringer
+cybersecuritystrategies.IntJComputSciInformSecur 14(1), 29,349–354(2019)
+129–136(2016) 39. ISO/IEC (2016). ISO/IEC 27035–1:2016. Available on-
+18. Carr, M.: Public-private partnerships in national cyber-security line at: https://www.iso.org/standard/60803.html (Access on
+strategies.IntAffairsWily92(1),43–62(2016) 23/10/2023).
+19. A.Unwala,S.Ghori,“BrandishingtheCyberedBear:Informaiton 40. ISO/IEC (2016). ISO/IEC 27035–2:2016. Available on-
+warandtheRussia-Ukraineconflict,”MilitaryCyberAffairs,vol. line at: https://www.iso.org/standard/62071.html (Access on
+1,issue1,article7,2015,pp.1–11. 23/10/2023).
+20. Willett, M.: The cyber dimension of the Russia-Ukraine war. 41. Barrett, M. P.: Framework for improving critical infrastructure
+GlobalPoliticsStrateg,Taylor,Francis64(5),7–26(2022) cybersecurity.NationalInstituteofStandardsandTechnology,
+21. Stitilis, D., Pakutinskas, P., Malinauskaite, I.: EU and NATO Gaithersburg,Version1.1,MD,USA(2018)
+cybersecuritystrategiesandnationalcybersecuritystrategies:a 42. Scarfone,K.,Grance,T.,Masone,K.:Computersecurityincident
+comparativeanalysis.SecurJSpringer30,1151–1168(2017) handlingguide.NISTSpec.Publ.800(61),38(2008)
+22. Eggers, S.: A novel approach for analyzing the nuclear supply 43. West-Brown,M.J.,Stikvoort,D.,Kossakowski,K.P.,Killcrece,
+chaincyber-attacksurface.NuclearEngTechnolElsevier53(3), G.,Ruefle,R.:Handbookforcomputersecurityincidentresponse
+879–887(2021) teams(CSIRTs).Carnegie-MellonUnivPittsburghPaSoftware
+23. Urciuoli, L., Mohanty, S., Hintsa, J., Bockesteijn, E.G.: The EngineeringInst(2003)
+resilienceofenergysupplychains:amultiplecasestudyapproach 44. West-Brown,M.,Stikvoort,D.,Kossakowski,K.,Killcrece,G.,
+onoilandgassupplychaintoEurope.SupplyChainManage:An Ruefle, R.: Handbook for computer security incident response
+IntJ19(1),46–63(2014) teams(csirts).DTICDocument,Tech.Rep.,(2003)
+24. Ramsdale,A.,Shiaeles,S.,Kolokotronis,N.:Acomparativeanal- 45. Alberts,C.,Dorofee,A.,Killcrece,G.,Ruefle,R.Zajicek,M.:
+ysisofcyber-threatintelligencesources,formatsandlanguages. Defining incident management processes for csirts: a work in
+Electron,MDPI9,1–22(2020) progress.(2004)
+25. Schlette,D.,etal.:Measuringandvisualizingcyberthreatintel- 46. Hashemi,SayedHadi,etal.:Acomprehensivesemi-automated
+ligencequality.Int.J.Inf.Secur.20,21–38(2021) incident handling workflow. 6th International Symposium on
+26. Mavroeidis,V.,Bromander,S.:Cyberthreatintelligencemodel: Telecommunications(IST).IEEE,(2012)
+an evaluation of taxonomies, sharing standards, and ontologies 47. ENISA (2010) The European union agency for cybersecurity
+within cyber threat intelligence. Eur Intell Secur Inform Conf (ENISA)haveprovidedagoodpracticeguideforincidentman-
+(EISIC)(2017).https://doi.org/10.1109/EISIC.2017.20 agement.Availableon-lineat:https://www.enisa.europa.eu/publ
+27. Bahrami, P.N., et al.: Cyber kill chain-based taxonomy of ications/good-practice-guide-for-incident-management (Access
+advancedpersistentthreatactors:analogyoftactics,techniques, on23/10/2023).
+and procedures. J Inform Process Syst KIPS 15(4), 865–889 48. Network,Europe."Informationsecurityagency."Goodpractice
+(2019) guideforincidentmanagement110(2010)
+28. Dargahi,T.,etal.:Acyber-kill-chainbasedtaxonomyofcrypto- 49. Sadoddin,R.,Ghorbani,A.:Alertcorrelationsurvey:framework
+ransomwarefeatures.JComputVirolHackingTechSpringer15, andtechniques.InProceedingsofthe2006InternationalConfer-
+277–305(2019) enceonPrivacy,SecurityandTrust:BridgetheGapBetweenPST
+29. Wagner,T.D.,Mahbub,K.,Palomar,E.,Abdallah,A.E.:Cyber TechnologiesandBusinessServices.ACM,2006,pp.37.
+threatintelligencesharing:surveyandresearchdirections.Com- 50. ISO/IEC27039(2015).Informationtechnology—Securitytech-
+putSecurElsevier87,1–27(2019) niques—Selection, deployment, and operations of intrusion
+30. Barnum, S. (2014) Structured threat information expression detectionsystems(IDPS).Availableon-lineat:https://www.iso.
+(STIXTM).MITRECorporation1–22 org/standard/56889.html(Accesson23/10/2023).
+31. Yeng, P.K., et al.: Data-driven and artificial intelligence (AI) 51. ISO/IEC27041(2015)Informationtechnology—Securitytech-
+approachformodellingandanalyzinghealthcaresecurityprac- niques—Guidanceonassuringsuitabilityandadequacyofinci-
+tice:asystematicreview.IntellSystApplSpringerAISC1250, dentinvestigativemethod.Availableon-lineat:https://www.iso.
+1–18(2020) org/standard/44405.html(Accesson23/10/2023).
+32. Yeng,P.K.etal.,(2019)Frameworkforhealthcaresecurityprac- 52. ISO/IEC27042(2015).Informationtechnology—Securitytech-
+ticeanalysis,modelingandincentivization.IntConfonBigData niques—Guidelinesfortheanalysisandinterpretationofdigital
+(BigData)IEEE3242–3251 evidence. Available on-line at: https://www.iso.org/standard/44
+33. Health-ISAC,Collaboratingforresilienceinhealthcare—annual 406.html(Accesson23/10/2023).
+report 2022. Health-ISAC, 2022, pp. 1–28. Available on-line 53. CRR Supplemental resource guide (2016). Volume 5 incident
+at: https://h-isac.org/wp-content/uploads/2023/04/2022_Health- managementVersion1.1,CarnegieMellonUniversity.Available
+ISAC-Annual-Report-sm.pdf(Accesson23/10/2023). on-line at: https://www.cisa.gov/publication/crrsupplemental-re
+34. Basheer,R.,Alkhatib,B.:Threatsfromthedark:areviewover source-guides(Accesson23/10/2023).
+dark web investigation research for cyber threat intelligence. J 54. ITU-T X.1216 TELECOMMUNICATION STANDARDIZA-
+ComputNetworksCommunHindawi2021,1–21(2021) TION SECTOR OF ITU (09/2020) SERIES X (2020). DATA
+35. Silvestri, S., et al.: A machine learning approach for the NLP- NETWORKS, OPEN SYSTEM COMMUNICATIONS AND
+basedanalysisofcyberthreatsandvulnerabilitiesofthehealthcare SECURITYCyberspacesecurity—CybersecurityRequirements
+ecosystem.SensorsMDPI23(2),1–26(2023) forcollectionandpreservationofcybersecurityincidentevidence.
+36. Silvestri,S.,etal.:Cyberthreatassessmentandmanagementfor Available on-line at: https://www.itu.int/rec/T-REC-X.1216-20
+securinghealthcareecosystemsusingnaturallanguageprocess- 2009-I/en(Accesson23/10/2023).
+ing.IntJInformSecurSpringer23,31–50(2024) 55. Northcutt,S.Institute,S.:Computersecurityincidenthandling:
+stepbystep,asurvivalguideforcomputersecurityincidenthan-
+dling.SansInstitute,(2001)
+1232974 G.Hatzivasilisetal.
+56. CommonVulnerabilitiesandExposures(CVE),MITRE,2023. 79. PDMFC,“CHIMERA—AnonymizationFramework,”Available
+Availableon-lineat:cve.mitre.org(Accesson23/10/2023) on-lineat:https://pdmfc.com/bias.html?key=chimera(Accesson
+57. Tundis, A. Ruppert, S. Muhlhauser, M.: On the automated 23/10/2023)
+assessment of open-source cyber threat intelligence sources. 80. MISP, Available on-line at: https://www.misp-project.org/
+InternationalConferenceonComputationalscience(ICC),Com- (Accesson23/10/2023)
+putationalscience—ICCS2020,Springer,LNTCS,vol.12138, 81. AEGIS IT Research, “AEGIS Forensics Visualization Toolkit
+2020,pp.453–467. (FVT)”. Available on-line at: https://aegisresearch.eu/solutions/
+58. Papastergiou,S.,Polemi,N.:MITIGATE:adynamicsupplychain forensics-visualization-toolkit-fvt/(Accesson23/10/2023)
+cyber risk assessment methodology. Smart Trends Syst, Secur 82. Islam,S.,Grigoriadis,C.,Papastergiou,S.Informationsharing
+SustainSpringer,LNNS18,1–9(2017) for creating awareness for securing healthcare ecosystem. 19th
+59. Schauer,S.,Polemi,N.,Mouratidis,H.:MITIGATE:Adynamic InternationalConferenceontheDesignofReliableCommunica-
+supply chain cyber risk assessment methodology. J Transport tionNetworks(DRCN),IEEE,VilanovailaGeltru,Spain,pp.1–5
+Secur,Springer12,1–35(2019) (2023)
+60. Wagner, T. D. Cyber threat intelligence for “Things”. Interna- 83. Cho, S., et al., Cyber kill chain based threat taxonomy and its
+tionalconferenceoncybersituationalawareness,dataanalytics applicationoncybercommonoperationalpicture.International
+andassessment(CyberSA),IEEE,Oxford,UK,(2019)pp.1–6 ConferenceonCyberSituationalAwareness,DataAnalytics,and
+61. Kumar,V.,Sinha,D.:Arobustintelligentzero-daycyber-attack Assessment(CyberSA2018),June2018,Glasgow,UK.
+detectiontechnique.ComplexIntellSystSpringer7,2211–2234 84. Montesino,R.,etal.:SIEM-basedframeworkforsecuritycon-
+(2021) trolsautomation.InformManageComputSecurEmerald20(4),
+62. Zoppi,T.,Ceccarelli,A.,Bondavalli,A.:Unsupervisedalgorithms 248–263(2012)
+todetectzero-dayattacks:strategyandapplication.IEEEAccess 85. Zamfir,V.A.,Carabas,M.,Carabas,C.,Tapus,N.:Systemsmon-
+IEEE9,90603–90615(2021) itoringandbigdataanalysisusingtheElasticsearchsystem.Int
+63. Duessel,P.,etal.:Detectingzero-dayattacksusingcontext-aware ConfControlSystComputSci(CSCS),IEEE(2019).https://doi.
+anomaly detection at the application-layer. Int J Inform Secur org/10.1109/CSCS.2019.00039
+Springer16,475–490(2017) 86. Cisco and Sourcefire, “Snort IPS tool”. Available on-line at:
+64. ISO-31000:2018: Risk management, ISO, 2018. Available on- https://www.snort.org/(Accesson23/10/2023).
+lineat:www.iso.org/iso-31000-risk-management.html(accessed 87. Kioskli,K.,etal.:Theimportanceofconceptualisingthehuman-
+on23/10/2023). centric approach in maintaining and promoting cybersecurity-
+65. ISO-27001:2022: Information security management system, hygieneinhealthcare.AppliedSciencesMDPI13(6),1–16(2023)
+ISO/IEC, 2022. Available on-line at: www.iso.org/standard/ 88. Cichonski,K.S.P.,Millar,T.,Grance,T.:Computersecurityinci-
+27001(accessedon23/10/2023). denthandlingguide:recommendationsofthenationalinstituteof
+66. CISCriticalsecuritycontrols,CIS.Availableon-lineat:https:// standardsandtechnology,”NISTSpec.Publ.,vol.800–61,p.79,
+www.cisecurity.org/controls(accessedon23/10/2023). 2012,[Online].Available:https://nvlpubs.nist.gov/nistpubs/Spec
+67. Common vulnerability scoring system (CVSS) v4.0, FIRST, ialPublications/NIST.SP.800-61r2.pdf(Accesson23/10/2023)
+2023. Available on-line at: https://www.first.org/cvss/v4-0/ 89. Garzón,F.:Cybersecurityincidentresponse.4(2020)
+(accessedon23/10/2023). 90. Ahmad, A., Desouza, K.C., Maynard, S.B., Naseer, H.,
+68. Commonplatformenumeration(CPE),NIST,2023.Availableon- Baskerville,R.L.:Howintegrationofcybersecuritymanagement
+lineat:nvd.nist.gov/products/cpe(accessedon23/10/2023). andincidentresponseenablesorganizationallearning.J.Assoc.
+69. Commonattackpatternenumerationandclassification(CAPEC), Inf.Sci.Technol.71(8),939–953(2020).https://doi.org/10.1002/
+MITRE,2019.Availableon-lineat:capec.mitre.org(accessedon asi.24311
+23/10/2023). 91. A. Castiglione, et al., (2010) An enhanced firewall scheme for
+70. Coordinatedvulnerabilitydisclosure(CVD),UKnationalcyber dynamicandadaptivecontainmentofemergingsecuritythreats.
+securitycentre(NCSC),2018.Availableon-lineat:https://www. Proc2010 Int Conf Broadband Wirel Comput Commun Appl
+enisa.europa.eu/news/member-states/WEB_115207_Brochure Bwcca475–481https://doi.org/10.1109/BWCCA.2010.117
+NCSC_EN_A4.pdf(accessedon23/10/2023). 92. Adamov,A.,Carlsson,A.:Cloudincidentresponsemodel.Proc.
+71. Islam,S.,Papastergiou,S.,Kalogeraki,E.-M.,Kioskli,K.:Cyber- 2016IEEEEast-WestDes.TestSymp.EWDTS20161–3(2016)
+attackpathgenerationandprioritisationforsecuringhealthcare https://doi.org/10.1109/EWDTS.2016.7807665.
+systems.ApplSciMDPI12,1–22(2022) 93. Baliga, A. Chen, X. Iftode, L.: Paladin: automated detection
+72. Hatzivasilis,G.etal.,Continuoussecurityassuranceofmodern and containment of rootkit attacks. 20, (2014) [Online]. Avail-
+supply-chainecosystemswithapplicationinautonomousdriving. able:https://pdfs.semanticscholar.org/f51f/9be6b02d2c2ec2a414
+IEEECSRWorkshoponCyberResilienceandEconomics(CRE), a14dde4979765f6670.pdf(Accesson23/10/2023).
+IEEE,Venice,Italy,31July—2August(2023),pp.1–6 94. Ceron, J.M., Margi, C.B., Granville, L.Z.: MARS: from traffic
+73. CyberSANE, D2.1: Cyber Incident handling Trend Analysis. containmenttonetworkreconfigurationinmalware-analysissys-
+pp.1–76,(2020) tems.Comput.Networks129,261–272(2017).https://doi.org/10.
+74. E.T. Muller, Commonsense reasoning: an event calculus based 1016/j.comnet.2017.10.003
+approach.2ndedn.M.Kaufmann,(2015) 95. Lamis,T.:Aforensicapproachtoincidentresponse.Proc.2010
+75. Droolsreasoningengine.Availableon-lineat:https://drools.org/ InfSecurCurricDevAnnuConfInfoSecCD10,177–185(2010).
+(accessedon23/10/2023) https://doi.org/10.1145/1940941.1940975
+76. AutoKeras.Availableon-lineat:https://autokeras.com/(accessed 96. CONCORDIA EU project, 2019–2022. Available on-line at:
+on23/10/2023) https://www.concordia-h2020.eu/(accessedon23/10/2023).
+77. ELKStack.Availableon-lineat:https://www.elastic.co/what-is/ 97. Chou,D.,Jiang,M.:Asurveyofdata-drivennetworkintrusion
+elk-stack(accessedon23/10/2023) detection.ACMComputSurvACM54(9),1–36(2021)
+78. Apache,“Kafka3.0Documentation,”Availableon-lineat:https:// 98. Jain, R.:WUSTL EHMS 2020 dataset for internet of medical
+kafka.apache.org/documentation.htm(Accesson23/10/2023) things(IoMT)cybersecurityresearch.WashingtonUniversityin
+St.Louis,2020.Availableon-lineat:https://www.cse.wustl.edu/
+~jain/ehms/index.html(accessedon23/10/2023)
+123Swarm-intelligenceforthemodernICTecosystems 2975
+99. Lippmann,R.,Haines,J.,Fried,D.,Korba,J.,Das,K.:The1999 108. Kioskli,K.,Mouratidis,H.,Polemi,N.:Bringinghumansatthe
+DARPAofflineintrusiondetectionevaluation.ComputNetworks coreofcybersecurity:Challengesandfutureresearchdirections.
+Elsevier34(2000),579–595(2000) Human Factors Cybersecurity AHFE Open Access 91, 82–92
+100. Sigholm,J.,Bang,M.:TowardsOffensiveCyberCounterintelli- (2023)
+gence:AdoptingaTarget-CentricViewonAdvancedPersistent 109. Kioskli, K., Dellagiacoma, D., Fotis, T., Mouratidis, H.: The
+Threats.IntellSecurInformConf(EISIC),2013EuropeanIEEE supplychainofaLivingLab:Modellingsecurity,privacy,and
+(2013).https://doi.org/10.1109/EISIC.2013.37 vulnerabilityissuesalongsidewiththeirimpactandpotentialmit-
+101. Vazquez,D.F.,Acosta,O.P.,Spirito,C.,Brown,S.,Reid,E.,Con- igation strategies. J Wirel Mob Networks Ubiquitous Comput
+ceptualframeworkforcyberdefenseinformationsharingwithin DependAppl13(2),147–182(2022)
+trustrelationships.4thInternationalConferenceonCyberCon- 110. Frank,L.,etal.:Policy-basedidentificationofIoTdevices’ven-
+flict,CyCon2012,Tallinn,Estonia,June5–8,(2012)2012,1–17 dorandtypebyDNStrafficanalysis.Policy-BasedAutonData
+102. Taddeo,M.,McCutcheon,T.,Floridi,L.:Trustingartificialintel- GovernSpringerLNISA11550,180–201(2019)
+ligenceincybersecurityisadouble-edgedsword.NatMachIntell 111. Jiang, H., Bouabdallah, A.: JACPoL: a simple but expressive
+SpringerNat1(12),557–560(2019) JSON-basedaccesscontrolpolicylanguage.11thIFIPInterna-
+103. Hatzivasilis, G. et al., Secure semantic interoperability for IoT tionalConferenceonInformationSecurityTheoryandPractice,
+applicationswithlinkeddata.IEEEGlobalCommunicationsCon- IFIP,(2017)Heraklion,Crete,Greece56–72
+ference(GLOBECOM2019),IEEE,Waikoloa,HI,USA,9–13 112. Ahmed, A.J. et al., Policy-based QoS management framework
+December,(2019)pp.1–7. forsoftware-definednetworks.InternationalSymposiumonNet-
+104. Krasznay,C.Gyebnar,G.Possibilitiesandlimitationsofcyber works,ComputersandCommunications(ISNCC),1–7(2018)
+threatintelligenceinenergysystems.13thInternationalConfer-
+ence on Cyber Conflict, NATO CCDCOE Publications, Talin,
+Estonia,(2021)pp.171–188
+Publisher’sNote SpringerNatureremainsneutralwithregardtojuris-
+105. Ring, T.: Threat intelligence: why people don’t share. Comput
+dictionalclaimsinpublishedmapsandinstitutionalaffiliations.
+FraudSecurElsevier2014(3),5–9(2014)
+106. Guo, L. et al., (2021) Overview of cyber threat intelligence
+SpringerNatureoritslicensor(e.g.asocietyorotherpartner)holds
+description.InternationalConferenceonApplicationsandTech-
+exclusiverightstothisarticleunderapublishingagreementwiththe
+niques in Cyber Intelligence (ATCI), Fuyang, China, Springer
+author(s)orotherrightsholder(s);authorself-archivingoftheaccepted
+AISC1398:343–350
+manuscriptversionofthisarticleissolelygovernedbythetermsofsuch
+107. Macnish, K., FernandezInguanzo, A., Kirichenko, A.: Smart
+publishingagreementandapplicablelaw.
+informationsystemsincybersecurity.ORBITJ2(2),1–26(2019)
+AuthorsandAffiliations
+George Hatzivasilis1·Eftychia Lakka1·Manos Athanatos1,2·Sotiris Ioannidis2·Grigoris Kalogiannis2·
+Manolis Chatzimpyrros2·George Spanoudakis2·Spyros Papastergiou3·Stylianos Karagiannis4·
+Andreas Alexopoulos5·Dimitry Amelin6·Stephan Kiefer6
+B
+GeorgeHatzivasilis AndreasAlexopoulos
+hatzivas@ics.forth.gr andreas.alexopoulos@aegisresearch.eu
+EftychiaLakka DimitryAmelin
+elakka@ics.forth.gr dmitry.amelin@ibmt.frauhofer.de
+ManosAthanatos StephanKiefer
+athanat@ics.forth.gr stephan.Kiefer@ibmt.frauhofer.de
+SotirisIoannidis
+1 InstituteofComputerScience,FoundationforResearchand
+sotiris@ics.forth.gr
+Technology—Hellas(FORTH),Heraklion,Greece
+GrigorisKalogiannis
+2 InnovationDepartment,SphynxTechnologySolutionsAG,
+g.kalogiannis@sphynx.ch
+Zug,Switzerland
+ManolisChatzimpyrros
+3 InnovationDepartment,FocalPoint,Brugge,Belgium
+m.chatzimpyrros@sphynx.ch
+4 InnovationDepartment,PDMFC,Lisbon,Portugal
+GeorgeSpanoudakis
+spanoudakis@sphynx.ch 5 InnovationDepartment,AegisItResearchGmbH,
+Brunswick,Germany
+SpyrosPapastergiou
+spyros.papastergiou@focalpoint-sprl.be 6 FraunhoferGesellschaftZurFoerderungDerAngewandten
+ForschungE.V.,Munich,Germany
+StylianosKaragiannis
+Stylianos.karagiannis@pdmfc.com
+123

@@ -1,0 +1,747 @@
+Sustainable Cities and Society 115 (2024) 105785
+Contents lists available at ScienceDirect
+Sustainable Cities and Society
+journal homepage: www.elsevier.com/locate/scs
+Multi-region models built with machine and deep learning for predicting
+several heat-related health outcomes
+J´ er´ emie Boudreaulta,b,*, Annabel Rufa, C´ eline Campagnaa,b,c, Fateh Chebanaa
+aCentre Eau Terre Environnement, Institut national de la recherche scientifique, 490 de la Couronne, Qu´ebec, QC G1K 9A9, Canada
+bDirection de la sant´e environnementale, au travail et de la toxicologie, Institut national de sant´e publique du Qu´ebec, 945 avenue Wolfe, Qu´ebec, QC G1V 5B3, Canada
+cD´epartement de m´edecine sociale et pr´eventive, Facult´e de m´edecine, Universit´e Laval, 2300 rue de la Terrasse, Qu´ebec, QC G1V 0A6, Canada
+A R T I C L E I N F O A B S T R A C T
+Keywords: As a result of climate change, populations worldwide will be exposed to more heat episodes. To ensure a sus-
+Temperature tainable future, cutting-edge tools must be developed to predict the health effects of heat and limit its conse-
+Extreme heat events quences. However, current research has mainly focused on one health outcome in a single city/region, thus
+Mortality providing limited knowledge to improve society’s resilience to extreme heat. In this study, a machine learning
+Morbidity
+(ML) framework is introduced to predict several heat-related health outcomes in multiple regions simulta-
+Ensemble tree-based methods
+Deep neural networks neously, using the province of Quebec (Canada) as a case study. Five ML models including penalized regression,
+ensemble tree-based models and deep neural networks were considered and compared. Models were trained to
+predict these health outcomes using various meteorological, regional and temporal predictors across all regions.
+Our results showed that deep learning models were the most promising, with out-of-sample R2 of >60 % for most
+of the studied health outcomes. However, ensemble tree-based approaches also had the best performance for
+some health outcomes, and were more sensitive to weather variables and to heatwaves. By introducing novel ML-
+based tools for predicting heat risks in several regions, this study can guide climate change adaptation and help
+cities and society to become more healthy, resilient and sustainable.
+1. Introduction 2020; Wiemken & Kelley, 2019), optimize green infrastructures
+(Shaamala et al, 2024) and mitigate urban heat (Li et al., 2023), among
+Climate change is recognized as one of the greatest threats to human others. Indeed, ML can exploit larger datasets than ever (i.e., big data),
+health of the current century (Watts et al., 2021). Among its conse- model complex interactions and non-linear relationships, learn from
+quences are heat episodes that will occur earlier, last longer, be more multiple data points simultaneously and does not require strong as-
+frequent and intense (Meehl & Tebaldi, 2004). Extreme heat already sumptions on data distribution, leading to enhanced performance over
+affects population health worldwide, both in terms of mortality (e.g., traditional methods (Bi et al., 2019). In the context of climate change
+Basu, 2009; Bi et al. 2023; Gosling et al., 2009; Kotharkar et al, 2024; and increasing extreme heat events, various ML-based models were
+Son et al., 2019) and morbidity (e.g., Li et al., 2015; Lin et al., 2023; proposed to predict heat-related health impacts (e.g., Boudreault et al.
+Seong et al., 2024; Ye et al., 2012), but its consequences will be even 2023, Boudreault et al., 2024a, Ke et al. 2023, Kim and Kim 2022, Lee
+more devastating in the future (Curtis et al., 2017; Huang et al., 2011; et al. 2022, Navares et al. 2018, Nishimura et al. 2021, Ogata et al. 2021,
+2013). Yet state-of-art tools still need to be developed (or improved) to Park et al. 2020, Wang et al. 2019, Zhang et al. 2014). However, the
+better allocate health resources and adequately target interventions that aforementioned studies have shortcomings that need to be
+will, ultimately, reduce heat effects and lead to more a sustainable future acknowledged.
+(Ebi & Schmier, 2005; Kotharkar & Ghosh, 2022; McGregor et al., 2015). First, most studies modelled a single health outcome such as mor-
+With this in mind, recent developments in artificial intelligence (AI) tality (Boudreault et al., 2023; Kim & Kim, 2022; Lee et al., 2022; Zhang
+and, specifically, machine learning (ML), have opened the door to a wide et al., 2014) or heat-related illnesses (Ke et al., 2023; Nishimura et al.,
+variety of novel applications towards sustainability, for example to 2021; Ogata et al., 2021; Wang et al., 2019). Knowing that heat affects
+improve population health (Fisher & Rosella, 2022; Morgenstern et al., both mortality and morbidity, these models need to target multiple
+* Corresponding author at: Centre Eau Terre Environnement, 490 de la Couronne, Qu´ebec, QC G1K 9A9 Canada.
+E-mail address: jeremie.boudreault@inrs.ca(J. Boudreault).
+https://doi.org/10.1016/j.scs.2024.105785
+Received 14 February 2024; Received in revised form 23 July 2024; Accepted 27 August 2024
+Available online 10 September 2024
+2210-6707/© 2024 The Author(s). Published by Elsevier Ltd. This is an open access article under the CC BY-NC-ND license ( http://creativecommons.org/licenses/by-
+nc-nd/4.0/) .J. Boudreault et al. S u s t a i n a b l e C i t i e s a n d S o c i e t y 115 (2024) 105785
+health variables to provide a representative portrait of the heat-related weather, socio-environmental and temporal predictors in a transparent
+burden for public health authorities. Second, existing studies have way and were thoroughly validated. Finally, models’ explainability was
+mainly focussed on a single city/region (Kim & Kim, 2022; Lee et al., also provided, giving valuable insights for health authorities’ pre-
+2022; Navares et al., 2018) or on multiple cities by (re)fitting the same paredness and surveillance activities of extreme heat events to foster
+model across locations (Boudreault et al., 2024a; Ogata et al., 2021; climate adaptation and act towards more resilient cities.
+Zhang et al., 2014). This limits the potential use of big data in population
+health and ML’s ability to take advantage of more data from multiple 2. Material and methods
+locations to improve its performance. Third, the few multi-region studies
+found in the literature often lacked appropriate validations during 2.1. Study design and health outcomes
+particular events of interest such as heatwaves (Kim & Kim, 2022; Ogata
+et al., 2021; Park et al., 2020; Wang et al., 2019). This can lead to An ML-based framework was proposed to predict several heat-
+selecting a model that will under-perform during periods when the most related health outcomes in multiple regions simultaneously (herein-
+important health effects are observed (i.e., heatwaves). Fourth, most after referred to “multi-region models”), instead of creating individual
+studies have only considered one ML model, mainly ensemble tree-based models for each region, thus leveraging information and data from all
+methods (Ke et al., 2023; Kim & Kim, 2022; Wang et al., 2019; Zhang available regions. The 15 southernmost health regions in the province of
+et al., 2014). This completely ignores the neural networks family (i.e., Quebec, Canada, were considered (top-right of Fig. 1), excluding regions
+deep learning) that could be more effective. Moreover, the lack a #10, #17 and #18 due to their different climatology and their smaller
+benchmark/comparison model (e.g., linear regression) limits the ability population compared to the other regions (Boudreault et al., 2024b).
+to conclude on the gain of ML over more traditional approaches. Finally, The spatial scale of the health region (referred to simply as region for the
+some ML models in the literature were literally presented as “black rest of the paper) was chosen for this study as a trade-off between
+boxes”, with no indications on models’ explainability (Lee et al., 2022; relevance for decision-makers (i.e., each region has its own public health
+Navares et al., 2018) or on how to adequately tune these models (Ke team and director) and statistical power (i.e., having a large enough
+et al., 2023; Park et al., 2020; Zhang et al., 2014). population in each region). These 15 regions represented over 99 % of
+These drawbacks can lead to an incomplete picture of heat-related the Quebec population in 2021, i.e. around 8.5M inhabitants. The
+health impacts, suboptimal predictions and a lack of confidence in summer season was defined as May to September. This project received
+these models by non-AI experts, thus limiting the ability of cities and ethics approval from the Human Research Ethics Committee of the
+society to become more resilient and sustainable in a climate change National Institute of Scientific Research (CER-22-693). Fig. 1presents an
+context. In this study, a ML-based framework is proposed to model both overview of the methodology.
+mortality and morbidity (5 health variables) in two populations (general Health data was made available by the Institut national de sant´e
+and elderly) during summer in multiple regions simultaneously. To that publique du Qu´ebec (INSPQ). Studied health variables were the daily
+end, five ML models based on penalized regression, ensemble tree-based numbers in each region of all-cause: (1) deaths, (2) hospitalizations, (3)
+models and deep neural networks were considered and applied to the emergency department visits (EDV), (4) ambulance transports and (5)
+province of Quebec, Canada. These models were calibrated with various Info-Sant´e 811 calls (a free telephone consultation service for non-urgent
+Fig. 1. Overview of the methodology.
+2J. Boudreault et al. S u s t a i n a b l e C i t i e s a n d S o c i e t y 115 (2024) 105785
+health issues) (Table 1). All-cause health variables were chosen over extreme heat events on the basis of the weather variables provided, as
+cause-specific variables (e.g., cardiovascular diseases, heat-related ill- shown in a previous study (Boudreault et al., 2023).
+nesses) because they are more readily available in Quebec and already Regional predictors included demographic, socioeconomic, envi-
+tracked by public health authorities through the health surveillance ronmental and climatological characteristics (Table 2). Total population
+system of extreme weather events called SUPREME (Toutant et al., (used as an offset in the models), proportion of elderly (i.e., people aged
+2011). In addition, all these health variables were shown to be 65 years and more) and proportion of women were provided by the
+heat-related in previous epidemiological studies performed in the same Minist`ere de la Sant´e et des Services Sociaux (MSSS) du Qu´ebec from 1996
+study area (Boudreault et al., 2024b; Lebel et al., 2019) and in inter- to present (MSSS, 2022). The Material and Social Deprivation Index
+national literature reviews (Campbell et al., 2018; Cheng et al., 2019; Ye (MSDI) developed by INSPQ from data of the canadian census at the
+et al., 2012). Health variables were provided for two populations: (1) the dissemination area level was used (INSPQ, 2024). MSDI values for the
+general population (of all ages), and (2) the elderly sub-population social and material component of the index were aggregated at the re-
+(aged 65 and over), known to be more vulnerable to the effects of gion level by weighting the MSDI with the population in each dissemi-
+heat (Benmarhnia et al., 2015). This led to 9 studied health outcomes for nation area. Then, a linear interpolation was performed to obtain values
+this study (i.e., 5 health variables in two populations), as the data for between each census years (1996, 2001, 2006, 2011 and 2016) for the
+811 calls was only available for the general population (Table 1). Mor- whole studied period. Two built environment variables related to urban
+tality and hospitalization data were available from 1996, EDV and heat were considered: the Normalized Difference Vegetation Index
+ambulance transports from 2014 and 811 calls from 2008. All health (NDVI), a commonly known index of density of vegetation ranging from
+outcomes were considered until 2019, prior to the COVID-19 pandemic. -1 to 1, and a measure of the Urban Heat Island (UHI), computed as the
+difference between surface temperature and a surrounding milder rural
+reference value, both provided by the Centre d’enseignement et de
+2.2. Weather, regional and temporal predictors
+recherche en foresterie de Sainte-Foy (CERFO, 2022). NDVI and UHI values
+available at 15m x 15m resolution in 2013 were weighted by the number
+Three types of predictors were considered to model the 9 health
+of units in each pixel (with a buffer of 15 m) to obtain NDVI and UHI
+outcomes of interest: (1) meteorological predictors, for the short-term
+population-weighted values in all regions (same as what was done for
+effect of weather on health, (2) regional predictors, to account for the
+weighting meteorological variables above). The 2013 values of NDVI
+socioeconomic and environmental differences between regions, and (3) and UHI were applied to the whole studied period (i.e., 1996–2019) as
+temporal predictors, to consider potential temporal patterns or trends in
+done previously (Pascal et al., 2021). Finally, 20-year averages of mean
+the modelled health outcomes (Table 2).
+temperature and relative humidity by region during summer (May to
+For weather predictors, gridded daily data at 1 km ×1 km over North
+September) were considered as climatological predictors. They were
+America from 1980 to 2021 from NASA’s Daymet database were used
+calculated from daily Daymet values, centred on the years 1980, 1990,
+(Thornton et al., 2022). Pixel values of minimum (tmin) and maximum
+2000, 2010 and 2020 (only 10 and 11 years were used respectively for
+(tmax) temperature, as well as vapour pressure, were extracted and
+1980 and 2020, as Daymet data was only available from 1980 to 2021).
+aggregated at the region level by weighting each pixel with the number
+Then, a linear interpolation was performed to get smooth yearly values
+of units located in each pixel using the AQg´eobaˆti database (Adresses
+between these 10-year periods. Mean values of regional predictors for
+Qu´ebec, 2023). This led to population-weighted weather times series for
+each region are reproduced in Table S1.
+each region. Mean temperature was computed from the average of daily
+Regarding temporal predictors, they included days of the week (one
+maximum and minimum temperatures. Various humidity metrics
+binary variable for each day), public holiday (0 or 1), month (one var-
+related to different health outcomes such as relative humidity, dew point
+iable for each month from May to September) and year (as a numeric
+and humidex (Davis et al., 2016) were computed from vapour pressure
+variable) (Table 2). In total, there were 47 predictors considered for the
+and temperature using MetPy in Python (May et al., 2022). Lagged
+different models.
+values of meteorological predictors up to 7 days were considered using
+the value at lag 0, the mean of values at lags 1 to 3 days and the mean of
+values at lags 4 to 7 days (Boudreault et al., 2024a). Temperature 2.3. Machine learning models
+variation variables were also considered including Mean Temperature
+Change (MTC), computed from (tmean0 – tmeand), where tmean0 is the Predicting each of the 9 health outcomes (Table 1) based on weather,
+current mean temperature and tmeand is the mean temperature at d =1, regional and temporal predictors (Table 2) can be seen as supervised
+3 and 7 previous days, and Diurnal Temperature Range (DTR), learning problem. Hence, five machine learning (ML) models adapted to
+computed from (tmax – tmin) at lags 0, 1, 2 and 3 days. Air pollution that end were considered: Least Absolute Shrinkage and Selection Op-
+could not be included in this study because daily data was only available erators (Lasso), Random Forest (RF), Light Gradient Boosting Machine
+in a few regions throughout the study period. No explicit heatwave (LGBM), Multi-Layer Perceptron (MLP) and Long Short-Term Memory
+variables (e.g., intensity, duration, etc.) were included in the models. (LSTM). These models were selected to represent a diversity of archi-
+Indeed, ML models should be able to develop their own understanding of tectures, amounts of data required, potential performance and novelty of
+Table 1
+Overview of the studied health outcomes.
+Health outcome Age Abbreviation Mean ± SD Range Years
+1 Mortality All MOR 0.2 ±0.1 0.0–1.2 1996–2019
+2 Hospitalizations All HOS 2.4 ±0.7 0.6–6.4 1996–2019
+3 EDV All EDV 16.0 ±7.8 6.0–45.1 2014–2019
+4 Ambulance transports All AMB 2.1 ±0.5 0.4–5.1 2014–2019
+5 811 calls All 811 5.4 ±1.3 1.3–10.9 2008–2019
+6 Mortality (65þ) 65+ MOR (65+) 1.0 ±0.5 0.0–9.9 1996–2019
+7 Hospitalizations (65þ) 65+ HOS (65+) 6.0 ±2.2 0.0–27.0 1996–2019
+8 EDV (65þ) 65+ EDV (65+) 20.9 ±8.7 8.2–63.9 2014–2019
+9 Ambulance transports (65þ) 65+ AMB (65+) 6.1 ±1.3 0.8–14.4 2014–2019
+Values are expressed in daily counts per 104 inhabitants across all regions for the May to September period. SD =Standard deviation. Range =Minimum and maximum
+daily values. EDV =Emergency department visits. 811 =Telephone consultation line for non-urgent health issue.
+3J. Boudreault et al. S u s t a i n a b l e C i t i e s a n d S o c i e t y 115 (2024) 105785
+Table 2 on the residual of the last fitted tree(s) (Friedman, 2001; Ke et al., 2017).
+Weather, regional and temporal predictors considered in this study. MLP and LSTM both belong to the family of deep learning models. MLP
+Units Abbreviation Mean Range Source is the vanilla feedforward neural network that is characterized by
+± SD multiple layers of fully connected nodes (neurons) inspired by the ar-
+chitecture of the human brain (Chapter 6 in Goodfellow et al. 2016).
+Weather predictors
+Mean ◦C tmean 16.0 ± -2.6–29.6 Daymet LSTM is a type of recurrent neural networks, which are naturally
+temperature 4.8 adapted for time series data, with the addition of memory cells than can
+Minimum ◦C tmin 10.5 ± -6.5–24.3 Daymet retain information over long sequences (Hochreiter & Schmidhuber,
+temperature 4.9
+Maximum ◦C tmax 21.5 ± -0.9–35.9 Daymet 1997). More information about these models can be found in the above
+temperature 5.4 references or in Boudreault et al. (2023).
+Mean humidex - hmdx 21.5 ± -10.7–44.5 Daymet Following the holdout method for time series, ML models were
+8.1 calibrated using the first 70 % of available years of data (training) and
+Mean dew point ◦C tdew 10.3 ± -10.6–24.2 Daymet validated using the remaining 30 % of years of data (test). Training years
+5.1
+Relative % relh 69.6 ± 19.8–95.7 Daymet (and test years) were 1996–2012 (2013-2019) for mortality and hospi-
+humidity 9.8 talizations, 2014–2018 (2019) for EDV and ambulance transports, and
+MTC over 1 day ◦C mtc01 0.0 ± -15.3–11.8 Daymet 2008–2016 (2017–2019) for 811 calls in both populations. Given this
+2.6 split of data, the models were thus validated in a close to reality context,
+DTR ◦C dtr 11.1 ± 1.3–29.4 Daymet
+i.e. with weather, regional and temporal predictors over years of data
+3.8
+Regional predictors that the models have never seen in their training. It should be noted here
+Total population 104 poptot 51.6 ± 9.0–206.6 MSSS that all regions were used in the training of the models. In other words,
+(offset) hab. 46.4 there is no external validation of the models on new regions. This was
+Elderly % pop65p 15.2 ± 7.4–27.6 MSSS intended because the models developed here are meant to be used in
+population 3.6
+(65+) Quebec only, and not in other provinces/countries where the adminis-
+Women % popsexf 50.2 ± 48.7–52.0 MSSS trative structure of healthcare may differ.
+population 0.6 In Lasso, MLP and LSTM, predictors were first scaled to the 0-1 range
+MSDI – Social - msdisoc -0.6 ± -2.6–1.8 INSPQ as these models require scaled predictors. Then, given the low evidence
+component 1.0
+found about optimal tuning of ML models in our specific context, an
+MSDI – Material - msdimat 0.9 ± -2.1–6.3 INSPQ
+extensive grid search was performed. Tested hyperparameters
+component 1.8
+NDVI - ndvi 0.48 ± 0.36–0.60 CERFO (including models’ architectures) are reported in Table S2. The training
+0.06 dataset was used to find the hyperparameters that minimize the mean
+UHI ◦C uhi 7.3 ± 3.3–10.5 CERFO square error (MSE) in a 5-fold cross-validation grouped by years for
+measurement 1.9
+Historical ◦C hsumtemp 16.0 ± 12.2–18.5 Daymet Lasso, RF, LGBM and MLP and in a holdout validation of 30 % of years of
+summer 1.8 the training dataset for LSTM (because of the time series nature of this
+temperature model). Models’ fitting was performed in Python using scikit-learn for
+Historical % hsumhum 69.5 ± 64.4–73.8 Daymet Lasso, RF, LGBM and MLP (Pedregosa et al., 2011) and keras for LSTM
+summer rel. 2.3 (Gulli & Pal, 2017).
+humidity
+Temporal predictors
+Day of week - dow_1 to dow_7 - 0 or 1 - 2.4. Models’ performance and explainability
+Holiday - hol - 0 or 1 -
+Month - month_5 to - 0 or 1 -
+month_9 Models’ performance was assessed in three different ways using the
+Year - year Depends on health - test dataset and based on two performance metrics: coefficient of
+outcomes determination (R2) (1) and decrease in Mean Absolute Error (dMAE)
+All data span from 1996 to 2019 across all regions for May to September months. compared to a non-informative model (i.e., a model containing only an
+Lagged variables were also used in the models, but not shown in the table (i.e., intercept) (2):
+tmean13 [at lags 1 to 3 days], tmean47 [lags 4 to 7 days], tmin13, tmin47, ∑
+tmax13, tmax47, hmdx13, hmdx47, tdew13, tdew47, relh13, relh47, mtc03, R2= 1(cid:0)
+∑(yi(cid:0) ̂yi)2
+(1)
+mtc07, dtr1 [dtr at lag 1 day], dtr2, dtr3). Total population by region was used as (yi(cid:0) y)2
+an offset for the response variable (i.e., daily count / total population) rather ∑
+t
+v
+Mh
+a
+Sa
+lu
+Dn
+e
+Ia
+s =.
+p Mr Me Td aCi tc e=t ro iar M.
+l
+S
+e
+aaD
+nn
+d
+=
+t se
+oS
+m
+ct ia
+p
+an
+e
+l
+d
+r
+daa etr
+u
+pd
+r
+r
+e
+id
+v
+e
+c
+av
+h
+tii
+a
+oa nt ni
+g
+o ien
+n.
+.
+d
+D
+eR
+T
+xa .Rn
+N
+g =e
+D
+V=
+D Ii
+uM =rnin Nai
+l
+om
+rt
+mu emm
+alp
+ia
+e
+zn erad
+dt
+um
+dr
+iea
+ff
+x eri ram
+en
+nu
+g
+cm
+e e.
+dMAE=MAE M0 A(cid:0) EM
+0
+AE = 1(cid:0) ∑| |y yi i(cid:0)
+(cid:0)
+̂y yi || (2)
+sv ee rg ve it ca et si o sn
+oc
+i in ad ue xx
+.
+.
+I
+NU SH PI
+Q
+= =U Ir nb sa tn
+it
+uh te na at ti is ola nn ad
+l
+.
+d
+M
+e
+sS aS nS
+t
+´e= pM ubin lii qs ut`e er de ud e
+Q
+ula
+´e
+bsa en ct
+.
+´e
+C
+e Et
+R
+d Fe Os where yi is the observed response variable, ̂yi is the predicted response
+=Centre d’enseignement et de recherche en foresterie de Sainte-Foy.
+variable, MAE is the mean absolute error of the model, MAE0 is the mean
+absolute error of a non-informative model and y is the mean response
+variable in the training dataset (equivalent to the intercept in a null
+approach. In addition, most of these models were used in previous
+model).
+related studies, thus allowing for comparisons of our results with the First, the overall model’s performance across all summer days of test
+latter (e.g., Boudreault et al. 2023, 2024a, Lee et al. 2019, Nishimura
+years of data and regions was computed. Second, performance metrics
+et al. 2021, Ogata et al. 2021, Park et al. 2020, Wang et al. 2019).
+were computed separately across the 15 regions to see how the perfor-
+Lasso is a multiple regression model that automatically performs
+mance was distributed among regions (again, on the test years of data
+variable selection and regularization by penalizing the absolute size of
+only). These two first performance metrics correspond to the perfor-
+the coefficients during model training (Tibshirani, 1996). RF is an mance for the “heat-related” effect, as they are computed over all
+ensemble tree-based method in which a forest of fully developed deci-
+summer days. Third, the behaviour of the models during two well-
+sion trees is built using bootstrapped datasets (Breiman, 2001). LGBM is
+known heatwaves in Quebec was visually inspected: the 2018 heat-
+also an ensemble tree-based method, but it uses trees with fewer leaves
+wave from June 30th to July 5th (Lebel et al., 2019) and the 2021
+(called weak learners) that are sequentially added to the ensemble based
+heatwave from June 6th to June 9th (Lamothe et al., 2023) (Fig. S1).
+4J. Boudreault et al. S u s t a i n a b l e C i t i e s a n d S o c i e t y 115 (2024) 105785
+Note that the 2018 heatwave was part of the training set for EDV and and 811) with out-of-sample R2 values of 60–95 % for both general and
+ambulance transports, while the 2021 heatwave occurred during the elderly populations (Table 3, left side). However, mortality in both
+COVID-19 pandemic that had an important effect on reported numbers populations and ambulance transports in the elderly population were
+(Lamothe et al., 2023). These two heatwaves had to be selected due to less well predicted with R2 values of ~10 % and ~30 %, respectively,
+the absence of heatwaves in 2019. Health and predictors data in 2021 indicating weaker performance of all models to predict these health
+were only used for this specific heatwave validation (i.e., they were not outcomes. Overall, ensemble tree-based methods (RF, LGBM) and neural
+used in models’ calibration nor in other types of evaluation). Validation networks (MLP and LSTM) outperformed Lasso. However, the difference
+during heatwaves was presented for daily mortality/morbidity values in performance depended on the modelled health outcome. For example,
+aggregated across the 15 regions (i.e., for the whole province of there was a 10–15 % increase in R2 for hospitalizations and a 5 % in-
+Quebec). This last validation of the models during specific extreme heat crease for EDV in both populations for RF, LGBM, MLP and LSTM
+episodes was added to validate models’ performance for the “heatwave” compared to Lasso. The highest increase in R2 was 15–20 % for 811 calls
+effect. in neural networks (MLP and LSTM) compared to Lasso. For mortality
+In addition to performance, models’ explainability was also pro- and ambulance transports, the difference between Lasso and other
+vided. Although many methods exist to that end and are still emerging models was <5 %. A few combinations of models and health outcomes
+(see Rasheed et al. (2022) for a review), feature importance (FI) was had slightly worse performance compared to Lasso (e.g., RF, LGBM and
+chosen for the current study as it can give a quick overview of the most LSTM for mortality in the elderly population; RF, LGBM and MLP for
+important predictors for any type of model, thus allowing to compare ambulance transports in the general population). These findings were
+results of various modelled health outcomes (n=9), machine learning similar when looking at the decrease in Mean Absolute Error (dMAE)
+models (n=5) and tested predictors (n=47) at a glance (e.g., Boudreault performance criteria (Table 3, right side), although some slight differ-
+et al. 2023, Zhang et al. 2014). FI was computed based on permutation, ences were noted. For example, RF was the best model for mortality
+which consists of randomly shuffling each predictor and quantifying the based on dMAE, while it was MLP based on R2. Across all health out-
+increase in mean square error (MSE) on the training dataset after shuf- comes, LSTM and MLP were overall the most performing models for both
+fling. The more the MSE increases, the more the predictor was important performance criteria, but RF and LGBM were also sometimes the best
+to the model’s predictive power. This process was repeated 100 times for approaches.
+each predictor and the average increase of MSE was taken. FI metrics
+were converted to ranks, rank #1 being the most important predictor
+3.2. Performance by region
+and #p (i.e., the number of predictors) the least important one. Only the
+15 most important variables were reported (out of a total of 47).
+The performance metrics were also reported separately for each of
+the 15 regions in terms of R2 for the general population (Fig. 2). dMAE
+3. Results values by region were also analyzed but were not shown because the
+same regional patterns were observed. Results for mortality (a) showed
+The obtained results are described below, while their discussion and that R2 reached up to 30–35 % for regions #1 and #4 in all models. In
+interpretation are presented in the Discussion (Section 4). Sections 3.1 other regions, R2 was closer to the overall value of 10 % found in Section
+and 3.2 present respectively the performance of the models across 3.1. For hospitalizations (b), only region #8 was less well predicted by
+Quebec and by region through the summer. Overall, deep learning all models. Hospitalizations in regions #6 and #13, respectively Mon-
+models (MLP and LSTM) seemed to outperform other approaches for treal and Laval (which are highly populated regions, recall Table S1),
+most health outcomes in terms of out-of-sample R2 and dMAE values. In were not well modelled by Lasso (R2 of ~30 %), but had a much better
+section 3.3, performance during two major heatwaves (2018 and 2021) performance with the other ML models (R2 >80 %). The same behav-
+are reported. LGBM was the most sensible model to extreme heat events iour was also observed for EDV (c) in regions #1 and #12 where per-
+and better predicted the health effects during these two periods. Finally, formance was weaker for Lasso than for the other ML models. There was
+Section 3.4highlights the most important predictors for all models and a high variability of performance in the modelled ambulance transports
+health outcomes. Overall, regional and temporal predictors were the (d), with R2 values ranging 0–80 %. Finally, 811 calls (e) were poorly
+most important variables, followed by weather factors such as temper- modelled in regions #2, #3, #4 and #5, but regions #3 and #5 were
+ature metrics. Optimal hyperparameters found for each ML model and improved with Lasso, MLP and LSTM models compared to RF and LGBM.
+health outcomes were reported in Supplementary Material (Table S3). Results in the elderly population were comparable to the ones
+observed in the general population, with notable improvements in some
+3.1. Performance across all regions regions by ensemble tree-based models and neural networks compared
+to Lasso (Fig. S2). The greatest regional variability of performance was
+Models’ performance in terms of R2 and dMAE was computed on the observed for mortality (a) and ambulance transports (d) in the elderly
+test years of data across all regions in Table 3. All ML approaches per- population, as also observed in the general population. In terms of
+formed well to predict daily morbidity variables (i.e., HOS, EDV, AMB hospitalizations (b) and EDV (c), these two health variables were slightly
+Table 3
+Performance metrics during out-of-sample test years in terms of R2 (left side) and decrease in Mean Absolute Error (dMAE) (right side) across all regions.
+Health outcomes R2 (%) dMAE (%)
+Lasso RF LGBM MLP LSTM Lasso RF LGBM MLP LSTM
+MOR 11.5 11.1 12.2 13.0 12.9 2.8 4.8 4.7 4.5 4.7
+HOS 66.4 73.1 74.2 71.8 71.2 43.0 51.0 52.6 50.5 49.2
+EDV 92.5 95.4 96.9 97.8 97.4 73.5 79.6 83.0 87.0 86.0
+AMB 57.4 56.8 57.2 55.8 59.7 33.5 33.8 34.5 30.8 36.7
+811 65.9 59.1 59.8 82.1 82.7 46.9 35.8 36.4 60.5 61.2
+MOR (65þ) 11.0 8.8 9.3 11.3 10.4 9.5 7.4 7.5 10.1 9.8
+HOS (65þ) 50.9 63.8 65.3 65.1 63.9 32.0 45.2 46.2 46.3 45.5
+EDV (65þ) 87.1 90.9 91.3 90.4 91.4 64.3 72.6 72.2 71.3 72.9
+AMB (65þ) 28.9 31.4 31.2 30.4 29.5 16.5 18.3 17.9 17.9 17.1
+Best performance metrics are in bold for each health outcome.
+5J. Boudreault et al. S u s t a i n a b l e C i t i e s a n d S o c i e t y 115 (2024) 105785
+Fig. 2. Regional performance in terms of R2 in the 15 regions for all models in the general population for (a) mortality, (b) hospitalizations (c) emergency department
+visits, (d) ambulance transports and (e) 811 calls. Each region is represented by a hexagon of equal size, irrespective of the actual area of the region. The geographical
+position of the regions has been preserved. The number in the hexagon indicates the region code as in Fig. 1. Note that the scale of R2 values is different across health
+outcomes as the goal is to compare regional performance for each health outcome, rather than to compare health outcomes with each other (refer to Table 3to
+that end).
+less well predicted in some regions for the elderly population compared hospitalizations (i.b) and EDV (i.c) in 2018 in the elderly population
+to the general population. compared to the general population.
+The 2021 heatwave was highly influenced by changes in mortality
+3.3. Validation during heatwaves and morbidity due to the COVID-19 pandemic. Indeed, most models
+were no longer aligned with the observed values (Fig. 3ii). Still, the
+Observed and predicted values during 2018 and 2021 heatwaves patterns in the models during that heatwave could be analyzed. For
+across the province of Quebec were reproduced in Fig. 3. The 2018 example, the mortality peaked less in 2021 than in 2018 and none of the
+heatwave showed a high increase in observed daily mortality and models predicted an increase in mortality during that period (ii.a). It is
+ambulance transports, but no clear increasing trend in hospitalizations, worth recalling that this heatwave was not as hot and long as the 2018
+EDV and 811 calls (solid black lines in Fig. 3i). For mortality (i.a), LGBM one (Fig. S1). The hospitalizations were still insignificantly impacted by
+predicted with the greatest accuracy the increased mortality, followed the heatwave and all models reproduced that behaviour well (ii.b). The
+by MLP. For hospitalizations (i.b) and 811 calls (i.e), all models pre- peak of EDV (ii.c) and ambulance transports (ii.d) observed in 2021 was
+dicted well the trends in daily counts, but there was not an increased well detected by most models, except RF for ambulance transports.
+heatwave effect. For EDV (i.c), only RF predicted a peak in visits, while Finally, 811 calls were predicted to increase by all models, but not such
+the observed data did not show any. For ambulance transports (i.d), the an increase was observed (ii.e). There was no noteworthy difference in
+two peaks also seemed better modelled with these two models (LGBM the results for the elderly population during the 2021 heatwave
+and MLP) compared to others (Lasso, RF and LSTM), even though the compared to the general population (Fig. S3ii).
+second peak was slightly underestimated by all models at different
+levels. During the 2018 heatwave, same results were generally found in 3.4. Models’ explainability
+the elderly population (Fig. S3i) with some exceptions. For example, RF
+also modelled the peak of mortality well in the elderly population in The 15 first most important predictors (out of 47) for all studied
+2018 along with LGBM (i.a). Also, only LGBM and LSTM reproduced the health outcomes and models were extracted for the general population
+first increase in ambulance transports during 2018 heatwave in the (Table 4). Overall, regional predictors, such as pop65p (percentage of
+elderly population, but all models underestimated the second peak later population 65 and over), hsumtemp (historical summer temperature),
+during that heatwave (i.d). There was no notable difference in hsumhum (historical summer humidity) and msdisoc (social deprivation
+6J. Boudreault et al. S u s t a i n a b l e C i t i e s a n d S o c i e t y 115 (2024) 105785
+Fig. 3. Observed (solid black line) and predicted (dashed coloured lines) daily counts of (a) mortality, (b) hospitalizations (c) emergency department visits, (d)
+ambulance transports and (e) 811 calls in all studied regions for the general population during (i) 2018 and (ii) 2021 heatwaves. Heatwaves’ periods are highlighted
+in grey.
+index), appeared in the first 5 ranks for all health outcomes and models. mortality and mtc07, tmax47 (maximum temperature at lags 4 to 7
+These variables can account for regional differences in the modelled days), tmax13 and hmdx13 for ambulance transports, according to Lasso,
+health outcomes. Temporal predictors were also among the most RF and LGBM. For hospitalizations (b), temperature exposures at 4 to 7
+important variables in ranks 1 to 15, depending on the health outcome previous days appeared in ranks 13 to 15 in RF, but these variables did
+and/or model. The most important temporal variables were associated not seem important in the other models. For EDV (c), tmax13, mtc07 and
+with daily (dow_), yearly (year) and, less frequently, monthly (month_) tmax47 were the most important weather predictors (ranks 14–15) in RF
+patterns in the modelled health outcomes. It is worth nothing that Sat- and LGBM. For 811 calls (e), 4 to 7 days lagged humidex (hmdx47) and
+urday (dow_6) and Sunday (dow_7) were the two most important pre- dew point (tdew47) exposure were among the 15 most important pre-
+dictors in hospitalizations for all models (Table 4b). dictors in Lasso and LGBM, while tdew and tmin (minimum temperature)
+Weather variables seemed less important (at ranks 7 and above) than were found in MLP.
+regional and temporal predictors across all models (Table 4). However, In the elderly population, similar results as above were found, i.e.
+major differences between models and health outcomes were noted. In regional and temporal variables were the most important predictors
+terms of models, weather variables were generally more important in followed by weather variables (Table S4). Weather variables were again
+Lasso, RF and LGBM than in MLP and LSTM. In terms of health out- more important for mortality (a) and ambulance transports (d) in the
+comes, weather predictors were more important for mortality (a) and elderly population, but with some notable differences. Change of tem-
+ambulance transports (d), at ranks 7 to 10 approximately. They were perature over 3 (mtc03) and 7 (mtc07) days seemed more important than
+respectively tmax (maximum temperature), mtc07 (mean temperature direct temperature exposure in the elderly population compared to the
+change over 7 days), tmean (mean temperature) and hmdx (humidex) for general population for these two health outcomes. Even though weather
+7Table 4
+Top 15 most important predictors for all models in the general population for (a) mortality, (b) hospitalizations, (c) emergency department visits, (d) ambulance transports and (e) 811 calls.
+Weather variables are in light orange, temporal predictors in blue and regional predictors in grey. Refer to Table 2for a description of each abbreviation.
+8
+J.
+Boudreault
+et
+al.
+S
+u
+s t a
+i n
+a
+b
+l e
+C
+i t i e s
+a
+n
+d
+S
+o
+c i e t y
+115
+(2024)
+105785J. Boudreault et al. S u s t a i n a b l e C i t i e s a n d S o c i e t y 115 (2024) 105785
+variables were less important for hospitalizations (b), the 4 to 7 days during heatwaves presented a more complete picture of models’ per-
+lagged temperature exposure was consistent in the two populations. For formance. First, the performance by regions showed that some regions
+EDV (c), temperatures with longer lags were found to be more important were considerably better modelled by neural networks models
+in the elderly compared to the general population. compared to Lasso, while some regions remained poorly modelled by all
+approaches (recall Figs. 2and S2). The 2018 heatwave showed sharp
+4. Discussion increases in mortality and ambulance transports that were well pre-
+dicted by LGBM (for mortality), LGBM/RF (elderly mortality) and
+This study considered 5 machine learning (ML) models to predict LGBM/MLP (ambulance transports) (recall Figs. 3and S3). These results
+several heat-related health outcomes in 15 regions in the province of were consistent during the 2021 heatwave, although COVID-19 had a
+Quebec (Canada). ML models trained with weather, regional and tem- strong influence on the reported numbers (e.g., mortality displacement,
+poral predictors from multiple locations allowed to predict a health lower use of health services) and that heatwave was not as hot and long
+outcome in each of the regions simultaneously, without the need to (re) as 2018’s (recall Fig. S1). These additional validations, that have not
+fit the same model to different locations (e.g., Ogata et al. 2021, Zhang been computed nor presented in previous studies, have highlighted
+et al. 2014, Boudreault et al., 2024a) or being limited to a single-location some key information that overall performance metrics cannot reveal.
+study (e.g., Boudreault et al. 2023, Lee et al. 2022, Navares et al. 2018). They thus opened the door to future improvements to these multi-region
+The models’ calibration (initial and final hyperparameters, packages models. For example, weighting observations when training models
+and software used), validation (overall, by regions and during heat- could ensure more accurate predictions in the most densely populated
+waves) and explainability (with feature importance) was transparent regions, or in those with the weakest performance. Furthermore, as the
+and comprehensive, which contrasts with the existing literature in best model may vary depending on how performance is evaluated as
+population health (Morgenstern et al., 2020) and previous studies (e.g., seen above and in a previous study (Boudreault et al., 2023), stacked
+Lee et al. 2022, Navares et al. 2018, Park et al. 2020, Wang et al. 2019, models could be considered in the future to “pool” the strengths of
+Zhang et al. 2014). To our knowledge, this is the first study to consider different approaches and result in a model likely to work better in
+such a wide range of ML approaches, including deep learning, to model 9 various situations (e.g., Lu and Qiu 2023, Navares et al. 2018).
+health outcomes in several locations simultaneously. To supplement these validations, some models’ explainability was
+In all the considered models, morbidity variables in both populations also provided, limiting the “black-box” feeling of the ML methodology
+were well modelled with out-of-sample R2 values of >60 %, while when this information is not provided (e.g., Lee et al. 2022, Navares
+mortality and ambulance transports in 65+population were less accu- et al. 2018). Feature importance (FI) showed that regional and temporal
+rately predicted with R2 values of <30 % (recall Table 3). This may be predictors were more important than weather variables for all health
+explained by different reasons, such as (1) the use of all-cause indicators variables, underlining the presence of strong regional and temporal
+instead of heat-related illnesses, (2) the presence of more noise/ patterns in the modelled health variables (recall Tables 4and S4). This
+randomness in these health outcomes compared to the other ones, (3) a result was expected given that the raw daily counts of the different
+change of relationship in the test vs. the training period, and (4) a lack of health outcomes (adjusted by population) were modelled, which is
+predictors to correctly capture the relationship. Unfortunately, the focus commonly done in the literature (e.g., Lee et al. 2022, Navares et al.
+on modelling a single health outcome in the literature limited the pos- 2018, Ogata et al. 2021, Park et al. 2020, Wang et al. 2019). Modelling
+sibility to compare our results on different health outcomes with other raw daily data is an advantage as it limits the data preparation steps such
+studies. In terms of modelling approaches, deep neural networks (MLP as trends/patterns removal required in other studies (e.g., Boudreault
+and LSTM) were overall the best-performing approaches across the 9 et al. 2023, 2024a, Masselot et al. 2018, Zhang et al. 2014). The lower
+health outcomes modelled, followed by ensemble tree-based approaches importance found for weather variables can also be explained by the
+(RF and LGBM) when looking at the overall summer period. For some inclusion of highly correlated temperature variables in the models. This
+health outcomes, increases in out-of-sample R2 of up to 20 % were noted may have prevented the detection of these variables with
+for neural networks compared to Lasso. Lasso was never the best permutation-based FI metrics. For example, if tmean is no longer avail-
+modelling approach in our study. able to the model, but tmax and tmin are, the model can still perform
+In the literature, a few other studies compared the results of various relatively well, leading to a lower FI value for tmean (the same also
+ML models to predict heat-related health outcomes. For example, Lee occurs for the other temperature variables, following the same logic).
+et al. (2022) found that penalized regression and tree-based methods However, considering all these temperature variables (even if highly
+outperformed LSTM for all-cause and cause-specific mortality pre- correlated) was important as they can contribute to a better under-
+dictions in Seoul, South Korea. Boudreault et al. (2023)reported that standing of weather patterns and, consequently, improve the predictive
+ensemble tree-based models had better performance than neural net- power of heat-related health outcomes by these models.
+works and statistical models for mortality prediction during summer in Regarding weather, some key meteorological information for public
+Montreal, Canada. LSTM was found to be more efficient than RF and health planning and surveillance was revealed. First, mortality and
+non-linear equations to model heat-related illnesses in the study of ambulance transports in the general population were the most sensitive
+Nishimura et al. (2021)in Nagoya, Japan. Navares et al. (2018)found to short-term heat exposure (recall Tables 4 and S4) and heatwaves
+the best performance with the Auto-Regressive Integrated Moving (recall Figs. 3and S3), supporting their use as early indicators of heat
+Average (ARIMA) model and neural networks compared to tree-based effects. Second, hospitalizations, EDV and 811 calls were found to be
+methods for hospital admissions prediction in Madrid, Spain. These associated with more delayed temperature effects. Finally, temperature
+comparisons with international studies should be made with caution changes could potentially be more important than direct temperature
+given the differences in study population, healthcare management, exposure in the elderly population. These divergent results highlight the
+models used and studied health outcome. In addition, all the above need for differentiated analyses by population strata, which can lead to
+studies were conducted with data of only one region/city and for a single better-targeted heat-related prevention actions. These potentially new
+health outcome. Indeed, other past multi-region studies mainly insights were made possible because of the introduced ML models
+employed a single tree-based approach (e.g., Ke et al. 2023, Park et al. combining weather information from multiple regions and by the large
+2020, Wang et al. 2019) instead of various machine and deep learning number of health outcomes studied. They could help health authorities
+models as in our study, an important novelty. Thus, this can explain the to better plan the health burden during heatwaves and deliver appro-
+differences in performance observed in other studies and why deep priate messages to different vulnerable populations. However, explain-
+learning was found to be superior in ours. ing the pathways by which these weather variables may be linked to
+In addition to overall performance, further validations by region and health effects is beyond the scope of the current study and will need to be
+9J. Boudreault et al. S u s t a i n a b l e C i t i e s a n d S o c i e t y 115 (2024) 105785
+confirmed by further research. a climate change context. They therefore contribute directly to making
+As the proposed models were trained with readily available pre- cities more resilient and, more broadly, to create a more sustainable and
+dictors, they can be used to monitor health effects of heat over different healthier society. Finally, this general framework can also be used in
+time horizons in future applications, thus acting towards more resilient, other regions of the world experiencing the negative effects of heat, as
+healthier and sustainable cities. On the one hand, used in combination well as extended to study the joint effect of multiple exposures such as
+with weather forecasts, they can predict the short-term effects of heat on extreme heat and air pollution.
+various health indicators and limit the heat effect on population through
+prevention. On the other hand, by leveraging climate and socioeconomic Data availability
+projections, these models can assess the long-term heat-related health
+burden in the coming decades, helping authorities to better plan climate Authors do not have permission to share health data. Socio-
+change adaptation measures to reduce the heat burden. With these new environmental data are freely available from the following organization:
+tools in hand, public health authorities and decision-makers will have a NASA for weather data, Minist`ere de la Sant´e et des Services Sociaux du
+better understanding of complex interactions between climate and Qu´ebec (MSSS) for demographic data and Institut national de la sant´e
+health and a clearer portrait of the heat impacts in multiple locations publique du Qu´ebec (INSPQ) for socio-economic and built environment
+and for several health outcomes. Ultimately, adopting these approaches data.
+will increase the resiliency of the society considering climate change
+ahead. CRediT authorship contribution statement
+The strengths of the study must be highlighted. First, five ML models
+were considered and compared, including penalized regression (Lasso), Je´re´mie Boudreault: Writing – review & editing, Writing – original
+ensemble tree-based methods (RF and LGBM) and deep learning (MLP draft, Visualization, Software, Methodology, Funding acquisition,
+and LSTM). Second, these models were trained using a comprehensive Formal analysis, Data curation, Conceptualization. Annabel Ruf:
+database of meteorological (e.g., temperature exposure and changes, Writing – review & editing, Visualization, Software, Funding acquisi-
+humidity), regional (e.g., demographic, socioeconomic, built environ- tion, Formal analysis. Ce´line Campagna: Writing – review & editing,
+ment, climatology) and temporal (e.g., day, month and year) predictors. Supervision, Project administration, Funding acquisition, Conceptuali-
+Third, these models allowed for health outcomes predictions simulta- zation. Fateh Chebana: Writing – review & editing, Supervision, Project
+neously in multiple locations without the need to create one model per administration, Funding acquisition, Conceptualization.
+location, as it would be the case for traditional statistical/ML models.
+Fourth, 9 health outcomes, including both mortality and morbidity
+Declaration of competing interest
+(hospitalizations, EDV, ambulance transports and 811 calls) in two
+populations (general and the elderly), were modelled, providing a more
+The authors declare that they have no known competing financial
+complete picture of the heat effects than in other studies. Finally, our
+interests or personal relationships that could have appeared to influence
+study was thoroughly transparent in terms of ML models’ calibration,
+the work reported in this paper.
+validation and explainability, which contrasted with existing literature.
+Some drawbacks must also be noted. First, only all-cause health
+variables were modelled as they were more readily available informa- Acknowledgments
+tion. This could explain the low performance obtained for some health
+outcomes. Studying cause-specific mortality or morbidity, such as heat- The authors would like to thank Denis Hamel and Louis Rochette
+related illnesses that may be more closely related to temperature vari- from the Bureau d’information et d’´etude de la sant´e de la population
+ables, could lead to better performance and is left for future research. (BIESP) of INSPQ for the help with the health data extraction, Antoine
+Second, the models were developed using data from all southernmost Saint-Amand, Mathieu Tandonnet and Nathalie Gravel from the Geo-
+regions of Quebec, Canada. Developing models for each region indi- matics team at INSPQ for their help with the geospatial data extraction,
+vidually could also be of interest to compare with the results obtained as well as Yohann Chiu, Magalie Canuel, Ray Bustinza, Felix Lamothe
+here, but was deemed out-of-scope for the current study. Third, the and Ernest Lo, also from INSPQ, for their comments on early versions of
+validation of the models was performed on out-of-sample years of data, this work. The authors would also like to thank the editor, the associate
+but not on out-of-sample regions. This latter validation was less relevant editor, the guest editor and two anonymous reviewers for their
+in our study, since the developed models were intended to be used only constructive comments that helped improve this manuscript.
+in Quebec’s regions. Fourth, not all predictors could be included in our
+models (such as air pollution due to data unavailability), which can Funding
+explain the weaker performance obtained for some health outcomes.
+Finally, other models’ explainability techniques, in addition to pre- The first author would like to acknowledge funding from the Natural
+dictions during heatwaves and feature importance already presented, Sciences and Engineering Research Council of Canada (Vanier Scholar-
+could have been explored to further explain ML models, such as the ship #CGV-180821), the Canadian Institute of Health Research (Health
+predicted responses for different temperature values (e.g., 10◦C, 20◦C or System Impact Fellowship #IF1-184093), Ouranos (Real-D´ecoste
+30◦C) or SHAP values. Excellence Scholarship #RDX-317725) and the National Institute of
+Public Health of Quebec (no grant number). Annabel Ruf received
+5. Conclusion funding from the German Academic Exchange Service (DAAD) through
+the Mitacs Globalink internship program (#57679026).
+Deep learning models (MLP and LSTM) were the most promising
+tools to predict several heat-related health impacts in multiple regions of Supplementary materials
+Quebec (Canada) during summer, with out-of-sample R2 of >60 % for
+most of the health outcomes studied. However, tree-based methods (RF Supplementary material associated with this article can be found, in
+and LGBM) also performed best for some health outcomes, and LGBM the online version, at doi:10.1016/j.scs.2024.105785.
+was found to be more accurate during heatwaves. These new tools based
+on machine and deep learning can be used by decision-makers to better References
+predict the heat burden during summer, plan resources and actions
+appropriately, and limit the consequences of increasing heat episodes in Adresses Qu´ebec. (2023). AQg´eobˆati. https://adressesquebec.gouv.qc.ca/aqgeobati.asp.
+10J. Boudreault et al. S u s t a i n a b l e C i t i e s a n d S o c i e t y 115 (2024) 105785
+Basu, R. (2009). High ambient temperature and mortality: A review of epidemiologic Lee, W., Lim, Y. H., Ha, E., Kim, Y., & Lee, W. K. (2022). Forecasting of non-accidental,
+studies from 2001 to 2008. Environmental Health, 8(1), 1–13. cardiovascular, and respiratory mortality with environmental exposures adopting
+Benmarhnia, T., Deguen, S., Kaufman, J. S., & Smargiassi, A. (2015). Vulnerability to machine learning approaches. Environmental Science and Pollution Research, 29(58),
+heat-related mortality. Epidemiology, 26(6), 781–793. 88318–88329.
+Bi, Q., Goodman, K. E., Kaminsky, J., & Lessler, J. (2019). What is machine learning? A Li, F., Yigitcanlar, T., Nepal, M., Nguyen, K., & Dur, F. (2023). Machine learning and
+primer for the epidemiologist. American Journal of Epidemiology, 188(12), remote sensing integration for leveraging urban sustainability: A review and
+2222–2239. framework. Sustainable Cities and Society, 96, Article 104653.
+Bi, X., Wu, C., Wang, Y., Li, J., Wang, C., Hahs, A., Mavoa, S., Song, C., Konrad, C., & Li, M., Gu, S., Bi, P., Yang, J., & Liu, Q. (2015). Heat waves and morbidity: Current
+Emch, M. (2023). Changes in the associations between heatwaves and human knowledge and further direction-a comprehensive literature review. International
+mortality during two extreme hot summers in Shanghai, China. Sustainable Cities and Journal of Environmental Research and Public Health, 12(5), 5256–5283.
+Society, 95, Article 104581. Lin, X., Tian, T., Shi, C., Wang, P., Chen, S., Guo, T., Li, Z., Liang, B., Zhang, W., & Qin, P.
+Boudreault, J., Campagna, C., & Chebana, F. (2023). Machine and deep learning for (2023). What are the individual and joint impacts of key meteorological factors on
+modelling heat-health relationships. Science of the Total Environment, 892, Article the risk of unintentional injuries? A case-crossover study of over 147,800 cases from
+164660. a sentinel-based surveillance system. Sustainable Cities and Society, 91, Article
+Boudreault, J., Campagna, C., & Chebana, F. (2024a). Revisiting the importance of 104413.
+temperature, weather, and air pollution variables in heat-mortality relationships Lu, X., & Qiu, H. (2023). Explainable prediction of daily hospitalizations for
+with machine learning. Environmental Science and Pollution Research, 31(9), cerebrovascular disease using stacked ensemble learning. BMC Medical Informatics
+14059–14070. and Decision Making, 23(1), 1–13.
+Boudreault, J., Lavigne, E´ ., Campagna, C., & Chebana, F. (2024b). Estimating the heat- Masselot, P., Chebana, F., B´elanger, D., St-Hilaire, A., Abdous, B., Gosselin, P., &
+related mortality and morbidity burden in the province of Quebec, Canada. Ouarda, T. B. (2018). Aggregating the response in time series regression models,
+Environmental Research, 257, Article 119347. applied to weather-related cardiovascular mortality. Science of the Total Environment,
+Breiman, L. (2001). Random forests. Machine Learning, 45(1), 5–32. 628, 217–225.
+Campbell, S., Remenyi, T. A., White, C. J., & Johnston, F. H. (2018). Heatwave and May, R. M., Goebbert, K. H., Thielen, J. E., Leeman, J. R., Camron, M. D., Bruick, Z.,
+health impact research: A global review. Health & Place, 53, 210–218. Bruning, E. C., Manser, R. P., Arms, S. C., & Marsh, P. T. (2022). MetPy: A
+CERFO. (2022). Cartographie des îlots de chaleur et de fraîcheur dans le Qu´ebec urbain a` meteorological Python library for data analysis and visualization. In Bulletin of the
+l’aide d’imagerie satellitaire Landsat-8 (2013-2014). Centre d’enseignement et de American Meteorological Society, 103 pp. E2273–E2284).
+recherche en foresterie de Sainte-Foy. https://www.donneesquebec.ca/recherche McGregor, G. R., Bessmoulin, P., Ebi, K., & Menne, B. (2015). Heatwaves and health:
+/dataset/ilots-de-chaleur-fraicheur-urbains-et-ecarts-de-temperature-relatifs-2013-2 Guidance on warning-system development. World Meteorological Organization and
+014/resource/a33969ba-143a-4524-88c3-8ec7485676b1. World Health Organization.
+Cheng, J., Xu, Z., Bambrick, H., Su, H., Tong, S., & Hu, W. (2019). Impacts of exposure to Meehl, G. A., & Tebaldi, C. (2004). More intense, more frequent, and longer lasting heat
+ambient temperature on burden of disease: A systematic review of epidemiological waves in the 21st century. Science, 305(5686), 994–997.
+evidence. International Journal of Biometeorology, 63, 1099–1115. Morgenstern, J. D., Buajitti, E., O’Neill, M., Piggott, T., Goel, V., Fridman, D., Kornas, K.,
+Curtis, S., Fair, A., Wistow, J., Val, D. V., & Oven, K. (2017). Impact of extreme weather & Rosella, L. C. (2020). Predicting population health with machine learning: A
+events and climate change for health and social care systems. Environmental Health, scoping review. BMJ Open, 10(10), Article e037860.
+16(1), 23–32. MSSS. (2022). Estimations et projections de population par territoire sociosanitaire. Minist`ere
+Davis, R. E., McGregor, G. R., & Enfield, K. B. (2016). Humidity: A review and primer on de la sant´e et des services sociaux du Qu´ebec. https://publications.msss.gouv.qc.
+atmospheric moisture and human health. Environmental Research, 144, 106–116. ca/msss/document-001617/.
+Ebi, K. L., & Schmier, J. K. (2005). A stitch in time: Improving public health early Navares, R., Díaz, J., Linares, C., & Aznarte, J. L. (2018). Comparing ARIMA and
+warning systems for extreme weather events. Epidemiologic Reviews, 27(1), 115–121. computational intelligence methods to forecast daily hospital admissions due to
+Fisher, S., & Rosella, L. C. (2022). Priorities for successful use of artificial intelligence by circulatory and respiratory causes in Madrid. Stochastic Environmental Research and
+public health organizations: A literature review. BMC Public Health, 22(1), 2146. Risk Assessment, 32, 2849–2859.
+Friedman, J. H. (2001). Greedy function approximation: A gradient boosting machine. Nishimura, T., Rashed, E. A., Kodera, S., Shirakami, H., Kawaguchi, R., Watanabe, K.,
+Annals of Statistics, 1189–1232. Nemoto, M., & Hirata, A. (2021). Social implementation and intervention with
+Goodfellow, I., Bengio, Y., & Courville, A. (2016). Deep learning. MIT press. estimated morbidity of heat-related illnesses from weather data: A case study from
+Gosling, S. N., Lowe, J. A., McGregor, G. R., Pelling, M., & Malamud, B. D. (2009). Nagoya City, Japan. Sustainable Cities and Society, 74, Article 103203.
+Associations between elevated atmospheric temperature and human mortality: A Ogata, S., Takegami, M., Ozaki, T., Nakashima, T., Onozuka, D., Murata, S., Nakaoku, Y.,
+critical review of the literature. Climatic Change, 92(3), 299–341. Suzuki, K., Hagihara, A., & Noguchi, T. (2021). Heatstroke predictions by machine
+Gulli, A., & Pal, S. (2017). Deep learning with Keras. Packt Publishing Ltd. learning, weather information, and an all-population registry for 12-hour heatstroke
+Hochreiter, S., & Schmidhuber, J. (1997). Long short-term memory. Neural Computation, alerts. Nature Communications, 12(1), 1–11.
+9(8), 1735–1780. Park, M., Jung, D., Lee, S., & Park, S. (2020). Heatwave damage prediction using random
+Huang, C., Barnett, A. G., Wang, X., Vaneckova, P., FitzGerald, G., & Tong, S. (2011). forest model in Korea. Applied Sciences, 10(22), 8237.
+Projecting future heat-related mortality under climate change scenarios: A Pascal, M., Goria, S., Wagner, V., Sabastia, M., Guillet, A., Cordeau, E., Mauclair, C., &
+systematic review. Environmental Health Perspectives, 119(12), 1681–1690. Host, S. (2021). Greening is a promising but likely insufficient adaptation strategy to
+Huang, C., Barnett, A. G., Xu, Z., Chu, C., Wang, X., Turner, L. R., & Tong, S. (2013). limit the health impacts of extreme heat. Environment International, 151, Article
+Managing the health effects of temperature in response to climate change: 106441.
+Challenges ahead. Environmental Health Perspectives, 121(4), 415–419. Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O.,
+INSPQ. (2024). Index of material and social deprivation compiled by the Bureau Blondel, M., Prettenhofer, P., Weiss, R., & Dubourg, V. (2011). Scikit-learn: Machine
+d’information et d’´etudes en sant´e des populations (BIESP) from 1991, 1996, 2001, learning in Python. The Journal of Machine Learning Research, 12, 2825–2830.
+2006, 2011, 2016 and 2021 Canadian Census data. Institut national de sant´e publique Rasheed, K., Qayyum, A., Ghaly, M., Al-Fuqaha, A., Razi, A., & Qadir, J. (2022).
+du Qu´ebec. https://www.inspq.qc.ca/en/deprivation/material-and-social-deprivatio Explainable, trustworthy, and ethical machine learning for healthcare: A survey.
+n-index. Computers in Biology and Medicine, Article 106043.
+Ke, D., Takahashi, K., Takakura, J., Takara, K., & Kamranzad, B. (2023). Effects of Seong, K., Jiao, J., Mandalapu, A., & Niyogi, D. (2024). Spatio-temporal patterns of heat
+heatwave features on machine-learning-based heat-related ambulance calls index and heat-related Emergency Medical Services (EMS). Sustainable Cities and
+prediction models in Japan. Science of the Total Environment, 873, Article 162283. Society, 111, Article 105562.
+Ke, G., Meng, Q., Finley, T., Wang, T., Chen, W., Ma, W., Ye, Q., & Liu, T. Y. (2017). Shaamala, A., Yigitcanlar, T., Nili, A., & Nyandega, D. (2024). Algorithmic green
+Lightgbm: A highly efficient gradient boosting decision tree. Advances in Neural infrastructure optimisation: Review of artificial intelligence driven approaches for
+Information Processing Systems, 30. tackling climate change. Sustainable Cities and Society, Article 105182.
+Kim, Y., & Kim, Y. (2022). Explainable heat-related mortality with random forest and Son, J. Y., Liu, J. C., & Bell, M. L. (2019). Temperature-related mortality: A systematic
+SHapley Additive exPlanations (SHAP) models. Sustainable Cities and Society, 79, review and investigation of effect modifiers. Environmental Research Letters, 14(7),
+Article 103677. Article 073004.
+Kotharkar, R., Dongarsane, P., Ghosh, A., & Kotharkar, V. (2024). Numerical analysis of Thornton, M.M., Shrestha, R., Wei, Y., Thornton, P.E., Kao, S., & Wilson, B.E. (2022).
+extreme heat in Nagpur city using heat stress indices, all-cause mortality and local Daymet: Daily surface weather data on a 1-km grid for North America, Version 4.
+climate zone classification. Sustainable Cities and Society, 101, Article 105099. ORNL DAAC, Oak Ridge, Tennessee, USA.
+Kotharkar, R., & Ghosh, A. (2022). Progress in extreme heat management and warning Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. Journal of the
+systems: A systematic review of heat-health action plans (1995-2020). Sustainable Royal Statistical Society Series B: Statistical Methodology, 58(1), 267–288.
+Cities and Society, 76, Article 103487. Toutant, S., Gosselin, P., B´elanger, D., Bustinza, R., & Rivest, S. (2011). An open source
+Lamothe, F., Dub´e, M., & Bustinza, R. (2023). Surveillance des impacts sanitaires des vagues web application for the surveillance and prevention of the impacts on public health
+de chaleur extrˆeme au Qu´ebec – Bilan de la saison estivale 2021. Institut national de of extreme meteorological events: The SUPREME system. International Journal of
+sant´e publique du Qu´ebec. Health Geographics, 10(1), 1–11.
+Lebel, G., Dub´e, M., & Bustinza, R. (2019). Surveillance des impacts des vagues de Wang, Y., Song, Q., Du, Y., Wang, J., Zhou, J., Du, Z., & Li, T. (2019). A random forest
+chaleur extrˆeme sur la sant´e au Qu´ebec `a l’´et´e 2018. Bulletin d’information en sant´e model to predict heatstroke occurrence for heatwave in China. Science of the Total
+environnementale, 1, 1–10. Environment, 650, 3048–3053.
+Lee, J. Y., Kim, H., Gasparrini, A., Armstrong, B., Bell, M. L., Sera, F., Lavigne, E., Watts, N., Amann, M., Arnell, N., Ayeb-Karlsson, S., Beagley, J., Belesova, K.,
+Abrutzky, R., Tong, S., & Coelho, M. D. S. Z. S. (2019). Predicted temperature- Boykoff, M., Byass, P., Cai, W., & Campbell-Lendrum, D. (2021). The 2020 report of
+increase-induced global health burden and its regional variability. Environment the Lancet Countdown on health and climate change: Responding to converging
+International, 131, Article 105027. crises. The Lancet, 397(10269), 129–170.
+11J. Boudreault et al. S u s t a i n a b l e C i t i e s a n d S o c i e t y 115 (2024) 105785
+Wiemken, T. L., & Kelley, R. R. (2019). Machine learning in epidemiology and health Zhang, K., Li, Y., & Schwartz, J. D. (2014). What weather variables are important in
+outcomes research. Annual Review of Public Health, 41, 21–36. predicting heat-related mortality? A new application of statistical learning methods.
+Ye, X., Wolff, R., Yu, W., Vaneckova, P., Pan, X., & Tong, S. (2012). Ambient temperature Environmental Research, 132, 350–359.
+and morbidity: A review of epidemiological evidence. Environmental Health
+Perspectives, 120(1), 19–28.
+12

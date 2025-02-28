@@ -1,0 +1,1115 @@
+JOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 1
+The Prompt Alchemist: Automated LLM-Tailored
+Prompt Optimization for Test Case Generation
+Shuzheng Gao1, Chaozheng Wang1, Cuiyun Gao2∗, Xiaoqian Jiao2, Chun Yong Chong3,
+Shan Gao4, Michael R. Lyu1
+1 The Chinese University of Hong Kong, Hong Kong, China
+2 Harbin Institute of Technology, Shenzhen, China
+3 School of Information Technology, Monash University Malaysia, Malaysia
+4 Independent Researcher, China
+szgao23@cse.cuhk.edu.hk, adf111178@gmail.com, gaocuiyun@hit.edu.cn, 210110210@stu.hit.edu.cn,
+chong.chunyong@monash.edu, gaoshan cs@outlook.com, lyu@cse.cuhk.edu.hk
+Abstract—Test cases are essential for validating the reliabil- Generation, Large Language Models.
+ity and quality of software applications. Recent studies have
+demonstrated the capability of Large Language Models (LLMs)
+to generate useful test cases for given source code. However, the I. INTRODUCTION
+existing work primarily relies on human-written plain prompts,
+Test cases play a crucial role in validating the reliability which often leads to suboptimal results since the performance
+of LLMs can be highly influenced by the prompts. Moreover, and quality of software applications [1], [2]. By allowing
+theseapproachesusethesamepromptforallLLMs,overlooking developerstoidentifyandrectifybugsanddefectsattheearly
+the fact that different LLMs might be best suited to different developmentstage,itremarkablyenhancestheoverallstability
+prompts.Giventhewidevarietyofpossiblepromptformulations,
+of the software [3]. However, manually writing test cases is a
+automatically discovering the optimal prompt for each LLM
+challenging and time-consuming task. Consequently, the task
+presents a significant challenge. Although there are methods
+on automated prompt optimization in the natural language of test case generation, which aims at creating high-quality
+processing field, they are hard to produce effective prompts test cases automatically, has attracted both developers’ and
+for the test case generation task. First, the methods iteratively researchers’ attention in recent years [4]–[6].
+optimize prompts by simply combining and mutating existing
+Traditional test case generation methods such as Evo-
+ones without proper guidance, resulting in prompts that lack
+diversity and tend to repeat the same errors in the generated suite [7] and Randoop [4] mainly employ search-based and
+test cases. Second, the prompts are generally lack of domain constraint-based techniques to craft test suites. Recent ad-
+contextual knowledge, limiting LLMs’ performance in the task. vancements in deep learning have introduced many learning-
+In this paper, we introduce MAPS, an LLM-tAilored Prompt basedtestgenerationapproaches.Forinstance,AthenaTest[5]
+generation method for teSt case generation. MAPS com-
+fine-tunes BART [8]on a dataset designed fortest generation.
+prisesthreemainmodules:Diversity-guidedPromptGeneration,
+A3Test [9] further incorporates assertion knowledge and a
+Failure-driven Rule Induction, and Domain Contextual Knowl-
+edge Extraction. Specifically, in the Diversity-Guided Prompt test signature verification mechanism for achieving better
+Generation module, MAPS creates varied prompts by exploring results. These models aim at leveraging general program-
+diverse modification paths during the optimization process. It ming knowledge acquired from extensive developer-written
+prevents the optimization process from converging to local
+codecorporatogeneratemorecomprehensiveandmeaningful
+optima. The Failure-driven Rule Induction module aims at iden-
+tests. Recently, Large Language Models (LLMs), such as
+tifying promising optimization direction by reflecting common
+failures in generated test cases, in which the reflection outputs ChatGPT [10], have gained widespread adoption in various
+aresoftlyintegratedintopromptsbasedonaruletransformation Software Engineering (SE) tasks, including test case genera-
+method. The Domain Contextual Knowledge Extraction module tion, and show promising results. Due to their powerful zero-
+aimsatenrichingthepromptswithrelateddomainknowledgeby
+shot capabilities, LLMs can be directly deployed for down-
+incorporating both in-file and cross-file context information. To
+stream tasks through prompt engineering without requiring
+evaluatetheeffectivenessofMAPS,wecompareitwithfourstate-
+of-the-art prompt optimization methods across three popular fine-tuning [11]. For example, ChatUniTest [12] harnesses the
+LLMs. The experimental results demonstrate that our method capabilities of LLMs and employs a generation-validation-
+outperforms baseline methods by a large margin, achieving a repair mechanism to rectify errors in generated test cases.
+6.19% higher line coverage rate and a 5.03% higher branch
+Yuan et al. [13] evaluate ChatGPT’s performance in test case
+coverage rate on average. Moreover, experiments on different
+generation and enhance it through an iterative test refinement
+LLMsshowthatourmethodcaneffectivelyfindthemostsuitable
+prompt for each LLM. process.
+However, the existing LLM-based work primarily relies on
+Index Terms—Software testing and debugging, Test Case
+human-writtenplainprompts,whichoftenleadstosuboptimal
+results since the performance of LLMs can be highly influ-
+∗ Corresponding author. The author is also affiliated with Peng Cheng
+Laboratory. encedbytheprompts[14],[15].Additionally,differentLLMs
+5202
+naJ
+2
+]ES.sc[
+1v92310.1052:viXraJOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 2
+TABLE I: Comparison of test case generation prompts and
+different LLMs through three key modules: diversity-guided
+their line coverage rates across different LLMs using the
+prompt generation, failure-driven rule induction, and domain
+Defects4J [16] benchmark.
+contextual knowledge extraction. The diversity-guided prompt
+Prompt ChatGPT Llama-3.1 generation module creates varied prompts by exploring di-
+WriteunittestsfortheprovidedJavaclassesto verse modification paths during prompt optimization. This
+21.92% 26.45%
+testthemethodsandfunctionalitiesofeachclass.
+approach prevents premature convergence to local optima, en-
+WriteunittestsforthegivenJavaclassesto
+24.46% 24.07%
+ensureproperfunctionalityofthemethods. suringamorecomprehensiveexplorationofthepromptspace.
+WritetestcasesforthegivenJavaclassto
+22.90% 25.80% The failure-driven rule induction module aims at identifying
+ensurethecorrectbehaviorofitsmethods.
+promising optimization direction by reflecting common errors
+in generated test cases and guide the optimization process
+maybebestsuitedtodifferentprompts.Forinstance,asshown by transforming the reflection results into rules. These rules
+in Table I, our preliminary experiments of three prompts on a are then incorporated into the prompt to prevent recurring er-
+subset of Defects4J [16] reveals varying performance across rors.Furthermore,thedomaincontextualknowledgeextraction
+different LLMs. Specifically, the best prompt on ChatGPT moduleprovidesLLMswithbothin-fileandcross-filecontext
+achieves a 24.46% line coverage rate, while the worst one information, such as inheritance relationship information, to
+achieves only 21.92%, indicating that prompt choice can helpthemgenerateaccuratetestcases.Theoptimizedprompt,
+greatly influence the performance of LLMs for test case gen- induced rules, and extracted context information are then
+eration and plain prompts may not yield satisfactory results. integrated together to form the final prompt for test case
+Furthermore, our analysis reveals that the prompt performing generation.ToevaluatetheeffectivenessofMAPS,weconduct
+best with ChatGPT actually performs worst when applied experiments on a popular benchmark Defects4J [16]. We
+to Llama-3.1 [17]. Therefore, given the considerable time apply MAPS to three popular LLMs including ChatGPT [10],
+required for manual prompt design, the automated generation Llama-3.1 [17], and Qwen2 [23] and compare it with four
+of tailored prompts for different LLMs is worth studying but state-of-the-art prompt optimization approaches. The experi-
+has not received adequate attention. mental results demonstrate that MAPS outperforms baseline
+To achieve LLM-tailored prompts, one potential approach methods by a large margin, achieving a 6.19% higher line
+is to leverage prompt optimization methods from the Natural coverage rate and a 5.03% higher branch coverage rate on
+Language Processing (NLP) field [18], [19]. These methods average. Besides, experiments on different LLMs reveal that
+typically use LLMs and evolutionary algorithm [20], [21] MAPS can effectively generate the most suitable prompt for
+to iteratively search the discrete natural language space for each LLMs, surpassing manually designed prompts.
+effective prompts through a generate-and-validate approach. Contributions. In summary, the main contributions of this
+However, when applied to test case generation, these methods work are as follows:
+fallshortofachievingpromisingresultsduetothreemainlimi- 1) Tothebestofourknowledge,thispaperpresentsthefirst
+tations:(1)Lowdiversityingeneratedprompts.Thesemethods study on automatically producing LLM-tailored prompt
+optimize prompts by simply combining and mutating existing for test case generation.
+ones using LLMs, while ignoring the diversity in generated 2) We propose a novel method MAPS that effectively im-
+prompts, which potentially leads to insufficient exploration proves the prompt optimization process by integrating
+of the vast natural language search space. Consequently, the diversity-guided prompt generation, failure-driven rule
+optimization process may converge prematurely to local op- induction and domain contextual knowledge extraction.
+tima, hindering the discovery of the most suitable prompt. (2) 3) Extensive experiments on three popular LLMs demon-
+Lackofproperguidanceonavoidingcommonerrors.Existing strate that our method substantially outperforms baseline
+methods generate new prompts based solely on existing ones approaches and effectively generate tailored prompts for
+without considering the recurring errors. As a result, test different LLMs.
+cases produced by optimized prompts often exhibit the same
+Organization.Therestofthispaperisorganizedasfollows.
+issues as those generated by unoptimized prompts. Therefore,
+Section II describes the background ans shows our motivating
+it is important to effectively guide the optimization process
+examples. Section III details the three components in the
+with directed improvement and prevent LLMs from making
+proposed MAPS, including the domain contextual knowledge
+recurringerrors.(3)Absenceofdomaincontextualknowledge.
+extraction, diversity-guided prompt generation and failure-
+Existing LLM-based test case generation approaches [13],
+driven rule induction. Section IV describes the evaluation
+[22] typically utilize only the focal method or limited in-file
+methods, including the research questions, datasets, baselines,
+context information. They lack necessary domain contextual
+andimplementationdetails.SectionVpresentstheexperimen-
+knowledge such as subclass inheritance and class invocation
+tal results. Section VI discusses some cases and threats to
+information,whichiscrucialforgeneratingaccuratetestcases.
+validity. Section VIII concludes the paper.
+Given the complex inheritance and invocation relationships
+between classes and functions in real-world projects, it is
+II. BACKGROUNDANDMOTIVATINGEXAMPLE
+difficult for LLMs to infer such information.
+A. Background
+In this paper, we propose MAPS, the first LLM-tAilored
+Prompt generation method for teSt case generation. MAPS In this work, we concentrate on black-box LLM-based
+effectively and automatically generates suitable prompts for Automatic Prompt Optimization (APO) [18], [24], given theJOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 3
+TABLE II: Examples of prompts generated by OPRO [25] in the optimization process. The underlined part represents the
+similar pattern among the prompts.
+Prompt
+1. Create unit tests to verify the correctness of method implementations in the provided Java classes.
+2. Create unit tests to validate the functionality of specific methods within the provided Java classes.
+3. Create unit tests to ensure that the methods in the supplied Java classes behave as expected.
+4. Create unit tests to confirm that the methods behave as expected and produce the correct results.
+widespread adoption and powerful capabilities of black-box // Focal method:
+LLMs. APO utilizes LLMs to optimize prompts by iteratively public class TimeSeries extends Series implements
+Cloneable,Serializable{
+searchingforthemosteffectiveoneswithinthediscretespace
+public TimeSeries createCopy(int start, int end)
+of natural language. Formally, for a task, we work with a throws CloneNotSupportedException {
+black-box model M, a small development set D , a test set if(start < 0){throw new IllegalArgumentException
+dev
+("Requires start >= 0.");}
+D ,andascoringfunctions(·).APOaimsatdiscoveringan
+test if(end < start){throw new
+advanced prompt p based on D dev from the natural language IllegalArgumentException("Requires start <= end.
+space that maximizes the performance of M on the test set ");}
+...
+D . The prompt p is expected to guide the model directly
+test // Test case generated by seed prompt:
+generate high-quality responses instead of time-consuming public void testCreateCopy_empty() {
+multi-iteration generation during test time. A typical APO TimeSeries timeSeries = new TimeSeries("Test");
+framework operates as follows. First, it begins with a set TimeSeries copy = timeSeries.createCopy(0,
+of seed prompts which can be obtained either manually or timeSeries.getItemCount()-1);
+...
+throughautomatictechniques.Thentheseedpromptsareused
+// Test case generated by optimized prompt:
+to generate responses for D dev via M and the responses are public void testCreateCopy_empty() {
+evaluated using the scoring function s(·), such as the line TimeSeries timeSeries = new TimeSeries("EmptyTest"
+);
+coverage rate in test case generation. Prompts that perform
+TimeSeries copy = timeSeries.createCopy(0,
+well are retained, while those that do not are discarded.
+timeSeries.getItemCount()-1);
+Using the retained prompts, the APO methods query M to
+...
+generate new prompts. For example, a representative method
+Listing 1: One example showing recurring errors made by
+OPRO [25] generates new prompts by prompting LLMs with
+the seed prompt and optimized prompt. The error lines are
+the prompt “Generate an instruction that is different from all
+highlighted in red.
+theinstructionsandhasahigherscorethanalltheinstructions
+above”. The newly generated prompts will be integrated with
+Observation 2 [Recurring Common Errors Across It-
+the retained prompts for next iteration optimization. After
+erations]: Additionally, by analyzing the generated test cases
+several iterations, the best prompt on D will be used as
+dev
+on D in different iterations, we find that the test cases
+the final optimized prompt for D . dev
+test
+generated by optimized prompts tend to exhibit the same
+errors as the unoptimized ones. For example, as shown in
+B. Motivating Examples
+Listing1,boththetestcasesgeneratedbytheseedpromptand
+We first conduct a preliminary study by applying existing the optimized prompt lack exception handling statements and
+APO methods to real-world test case generation on Defects4J encounter the same runtime errors. Existing prompt optimiza-
+and find that it struggles to produce well-performing prompts. tion methods rely solely on current prompts without proper
+By analyzing its optimized prompts and generated test cases, guidance,makingitdifficulttoachievedirectedimprovements
+we identify three main problems of current APO methods. and address the errors made by current prompts. To tackle
+Observation 1 [Low Diversity of Prompts Generated these challenges, we propose to leverage failed test cases
+during Optimization Process]: First, upon inspection of the to identify shortcomings in current prompts. Specifically, we
+prompts generated during the optimization process, we find make LLMs reflect common errors in generated test cases
+that they tend to exhibit similar phrases and lack diversity. and softly incorporate the reflection outputs into prompts as
+Table II presents some examples of prompts generated by concise rules to help LLMs avoid making recurring errors.
+OPRO[25]whichcontainsimilarphrasessuchas“Createunit
+// Focal method:
+tests to” and “the provided Java classes”. The low diversity
+public abstract class AbstractCategoryItemRenderer
+constrains the optimization process to a small portion of the extends AbstractRenderer implements
+discrete natural language search space, limiting exploration CategoryItemRenderer,
+Cloneable, PublicCloneable, Serializable {
+of potentially more effective alternative phrases. This makes
+public CategoryItemLabelGenerator
+the search process susceptible to convergence at local optima getItemLabelGenerator
+and yielding suboptimal performance. Therefore, to deal with ...
+// Test case:
+this problem, the first key idea of our method is to improve
+public void testFindRangeBoundsValidDataset() {
+the diversity of generated prompts by enforcing them to use AbstractCategoryItemRenderer renderer =
+different modification methods in the optimization process. new AbstractCategoryItemRenderer();JOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 4
+Seed ① Domain Contextual Knowledge Extraction ② Diversity-guided Prompt Generation
+Prompts
+Prompts Cov rate Modification methods Search Space
+Class D
++ + Class A C Cl la as ss s B C ① ② W Wr ri it te e u un ni it t . .. .. . 2 25 7. .6 29 5% % 1 2. . i ed xe pn oti sfy e e px oc tee np tt ii ao ln ba ul gs sc e ..n .arios ... n pe row m pts
+Focal Method Local Context Global Context ③ Write test ... 21.41% 3. cover both typical and atypical ... selected
+④ Write unit ... 26.05% ... prompts
+Domain Prompts Selection Modification Generation New Prompts Generation
+Initialization Knowledge
+Augmentation
+③ Failure-driven Rule Induction
+Current Prompts Test Cases & Reflection:
+Feedback 2×0.88 This error is induced by
+Write diverse unit tests for a [xxx]. To avoid this
+Java class by ...
+xN
+3×0.91
+p Tr ro ab nle sm
+fo
+w rme ac ta in
+o
+n[x :xx] T pe rom mp po tr a 1l T pe rom mp po tr a 2l T pe rom mp po tr a 3l
+S fop lle oc wif inic ga l rly u, l ep sle a .s ..e follow the Generation & 4×0.15 w sae mig ph lt ie nd g [ .r ..ule 1]:
+Evaluation 2 1 3
+public void
+setTickLabelInsets ... Failure Information Selection Error Reflection Rule Validation
+Update
+Fig. 1: Overview of MAPS ’s workflow.
+Algorithm 1 Algorithm of MAPS
+...
+Listing2:Oneexampleillustratingtheissueoflackingdomain Input: Iteration number I, Seed prompt P, Domain contex-
+context information. The error lines are highlighted in red. tual knowledge C, LLM M
+Output: Final prompt
+Observation 3 [Lack of Domain Contextual Knowl- 1: R←∅, H ←∅ ▷ Initialize the set of rules R and
+edge]: Finally, we thoroughly analyzed the focal meth- handled failures H in previous iteration
+ods where all prompts and LLMs failed to generate 2: for each i in I do
+correct test cases. The primary issue identified is the 3: Evaluate FORMAT(P,R,C) on the sampled develop-
+lack of domain contextual knowledge. As illustrated in ment set
+Listing 2, the given focal method is from an abstract 4: P,NR,NH =PROMPTIMPROVEMENT(P,R,H,M,
+class “AbstractCategoryItemRenderer”. The gener- C)
+ated test case directly initialize with an abstract class which 5: R←R∪NR, H ←H ∪NH
+leads to the error: “AbstractCategoryItemRenderer 6: p← SELECTTOP(P,1) ▷ Select the best prompt from P
+is abstract; cannot be instantiated”. Without knowledge of 7: return FORMAT(p,R,C) ▷ Formalize the final prompt
+its subclasses, LLMs cannot generate test cases that correctly
+initialize this class and invoke the method. Therefore, another
+keyideaofMAPSistoextracttherelevantdomaincontextual Finally, the best-optimized instruction from diversity-guided
+information and provide it to the LLMs for capturing contex- prompt generation, induced rules, and extracted context infor-
+tual knowledge. mationareintegratedtoconstructthefinalpromptfortestcase
+generation. Fig. 2 illustrates the format of the final prompt. In
+III. PROPOSEDAPPROACH the following sections, we will introduce these three modules
+in details.
+A. Overview
+We provide an overview of MAPS’s workflow in Fig. 1.
+B. Domain Contextual Knowledge Extraction
+MAPS starts with a set of seed prompts and augments
+the focal methods with both in-file and cross-file context The domain contextual knowledge extraction module aims
+information through the 1 domain contextual knowledge to provide LLMs with related project-level context infor-
+extraction module. In each iteration, MAPS first evaluates mation, enabling them to generate accurate test cases. As
+the performance of the current prompts on the small de- illustrated in Fig. 2, the contextual knowledge is divided
+velopment set. The 2 diversity-guided prompt generation into two categories: in-file contextual knowledge and cross-
+module then selects the top-performing prompts and infers file contextual knowledge.
+diversemodificationmethods,whichareusedtohelpgenerate • In-file Contextual Knowledge contains the class sig-
+createsvariedprompts.Inthe 3 failure-drivenruleinduction nature, focal method, and the signatures of member
+module, MAPS aggregates and selects representative failure methods. The class signature includes the type and name
+information from failed test cases and induces concise rules of the class containing the focal method, which could
+to avoid such failures using a reflection-validation method. helpLLMsavoiddirectinitializationofabstractorprivate
+As shown in Algorithm 1, this iterative optimization process classes. The focal method is the specific method to gen-
+continues until reaching the maximum iteration number I. erate test cases. Following previous research [5], [9], weJOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 5
+Optimized Write diverse unit tests for a Java class by covering a wide range of scenarios, including normal cases,
+Instruction edge cases, failure cases, and boundary cases to ensure high test coverage ...
+Specifically, please follow the following rules when generating test cases:
+Induced 1. Ensure that all necessary classes are imported at the beginning of the test file to prevent errors ...
+Rules 2. Ensure that classes have constructors that match the required parameter types and consider ...
+...
+public abstract class Axis implements Cloneable, Serializable { Class signature
+public void setTickLabelInsets(RectangleInsets insets) { Focal method
+if(insets==null) {
+throw new IllegalArgumentException("Null 'insets' argument.");
+} Focal
+if (!this.tickLabelInsets.equals(insets)) { method
+this.tickLabelInsets = insets;
+notifyListeners(new AxisChangeEvent(this)); with In-file
+} Context
+}
+Focal Method RectangleInsets getTickLabelInsets(); Member methods
+With Domain void setTickLabelInsets(RectangleInsets insets);
+...
+Contextual
+Knowledge // Avaible SubClasses: Inheritance
+// public class CategoryAxis extends Axis implements Cloneable, Serializable {
+// Class definition of input parameters: Invocation
+// public class RectangleInsets implements Serializable { Cross-file
+public RectangleInsets(double top, double left, double bottom, double right) {
+this(UnitType.ABSOLUTE, top, left, bottom, right); Context
+}
+public RectangleInsets(UnitType unitType, double top, double left, double bottom, double right)
+...
+Fig. 2: An illustration of the format of final prompt and extracted context information.
+also incorporate the function signatures of other member constant prompt number following previous work [18]. These
+methodswithintheclass,asthefocalmethodmayinvoke modification methods serve as diverse exploration directions
+them,andthesesignaturescanguidethecorrectusageof within the discrete natural language search space. MAPS
+these functions. then leverages LLM M to generate new prompts based on
+• Cross-file Contextual Knowledge refers to the con- each modification method sequentially (Lines 5-7). Finally,
+text information from other files within the project. We the selected prompts and the newly generated prompts are
+propose to extract two types of cross-file information combined to serve as the new prompts for the next iteration
+that are critical for test case generation but ignored in of optimization.
+previous work, namely class inheritance information and
+class invocation information. For focal methods from
+D. Failure-driven Rule Induction
+abstract or private classes, we scan the entire project to
+locate their subclasses and extract the class signatures. Thefailure-drivenruleinductionmoduleaimsatidentifying
+This subclass information enables LLMs to properly promising optimization direction by avoiding LLMs to make
+instantiatetheclasswithinthetestcase.Furthermore,for recurringerrors.Itleveragescommonfailuresingeneratedtest
+the class invocation information, we identify the types cases to identify the parts where existing prompts most need
+of arguments in the focal method, trace the definitions improvement and induces rules to optimize the prompt using
+of user-defined types, and extract their signatures and a reflection-validation method. As shown in Fig. 1 3 , this
+constructors. This invocation information aids LLMs in process contains three phases: failure information selection,
+using correct input arguments for the focal method. error reflection, and rule validation. The details are illustrated
+in Algorithm 2.
+1) FailureInformationSelection: Toidentifyshortcomings
+C. Diversity-guided Prompt Generation
+in current prompts, we propose to delve into the failed test
+The diversity-guided prompt generation module aims at cases generated by current prompts and select their common
+producing diverse prompts to foster a more comprehensive errors. Specifically, MAPS first collects the failed test cases
+exploration of the prompt space by enforcing them to use generated by the selected prompts SP associated with the
+different modification methods. As illustrated in Fig. 1 2 correspondingfocalmethodanderrormessages.Then,MAPS
+and Algorithm 2, after evaluating the performance of current aggregates those failure information F based on the typical
+prompts on the evaluation set, MAPS selects the top-K DBSCAN [26] clustering algorithm (Lines 8). To determine
+prompts with the highest average line coverage and branch which failures to address in each iteration, we employ a
+coverage. Using these selected samples, MAPS first leverages weighted sampling method. The weight of each cluster is
+the LLM M to generate N distinct modification methods for based on two factors: its size and the similarity of its failure
+the current prompts based on a modification prompt template information to handled failures H in previous iterations. A
+shown in Fig. 3 (a) (Lines 4), where N = SIZE(P)−K and larger cluster size indicates a higher probability of the failure
+SIZE(P) indicates the number of seed prompts, to maintain a type, so we assign a larger weight to it. As for the similarityJOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 6
+Algorithm 2 PROMPTIMPROVEMENT
+Input: PromptsP,ExistingrulesER,HandledfailuresH,LLMM,DomaincontextualknowledgeC,Newpromptsnumber
+N
+Output: Optimized prompts OP, New induced rules NR, New handled failures NH
+1: OP ←∅, NR←∅
+// Diversity-guided Prompt Generation
+2: SP ← SELECTTOP(P,SIZE(P)−N) ▷ Select the top K prompts from P
+3: D ← generate N different modification methods using M
+4: for each d in D do
+5: p← generate new prompt using M based on SP and d
+6: OP.insert(p)
+7: OP ←OP ∪SP
+// Failure-driven Rule Induction
+8: F ← CLUSTERFAILUREINFO(SP) ▷ Clustering by DBSCAN
+9: F i ← SAMPLEREPRESENTATIVECLUSTER(H,F) ▷ Sample by Eq. 2
+10: (E,S)← REFLECTION(F i) ▷ Prompt M to get explanations and solutions
+11: R← SUMMARIZE(E,S) ▷ Prompt M to transform them into rules
+12: for each r in R do
+13: if FORMAT(SELECTTOP(P,1),ER∪r,C) > FORMAT(SELECTTOP(P,1),ER,C) then
+14: NR.insert(r)
+15: NR← SELECTTOP(NR,1), NH ←F i ▷ Select the best rule from NR if NR is not empty
+16: return OP, NR, NH
+with H, to prevent the model from getting stuck on the 3) Rule Validation: To maintain the quality of the induced
+same difficult-to-solve issues, MAPS measures the similarity rules,thispartaimsatretainingonlythemosteffectiveonesby
+betweenthefailuresineachclusterandthoseinH,andassigns validatingeachnewlygeneratedruleandincorporatingthebest
+a lower weight to clusters with higher similarity. Specifically, one into the prompt. To this end, as shown in Lines 12 to 14
+the weight is calculated as follows: of Algorithm 2, MAPS first constructs temporary prompts for
+each newly generated rule. The optimized instruction part of
+ED(f ,h)
+sim =1−max( i ) (1) the temporary prompts is from the best-performing one in P,
+i h∈H max(len(f i),len(h)) and the induced rules part of the temporary prompts includes
+size(f )·sim both the existing rules ER and each newly generated rule
+weight = i i (2)
+i (cid:80)n size(f )·sim r. MAPS then evaluates the performance of the temporary
+j=1 j j
+prompts on the sampled development set and incorporates the
+where ED(·) denotes edit distance, and size(·) denotes the
+rule corresponding to the temporary prompt that achieves the
+corresponding cluster size. f and T denote the failure infor-
+i highest performance into the final prompt (Lines 15).
+mation of the ith cluster’s center sample and handled failures
+H in previous iterations, respectively.
+2) Error Reflection: With the selected failure information IV. EXPERIMENTALSETUP
+F i, this part aims to enhance prompts by incorporating ef- A. Research Questions
+fective mitigation strategies to prevent LLMs from repeating
+In the evaluation, we focus on the following four research
+the same errors. First, MAPS chooses a few test cases whose
+questions:
+failure information exhibits the lowest Euclidean Distance to
+the cluster center of F to construct the reflection prompt as RQ1: How effective is MAPS compared with existing
+i
+depicted in Fig. 3 (b). The reflection prompt is then used prompt optimization methods?
+to instruct the LLM M to provide detailed explanations and RQ2: Is MAPS able to generate tailored prompts for dif-
+solutions for the failure information (Lines 10). Additionally, ferent LLMs?
+to ensure that the solutions can be applied to more examples RQ3: What is the impact of each module on the perfor-
+andnotjustthegivenones,thereflectionpromptalsorequires mance of MAPS?
+the model to remove example-specific information and make RQ4: How does MAPS’s performance vary under different
+thesolutionsapplicabletoothersimilarcases.Toavoidpoten- experimental settings?
+tialperformancedegradationbroughtbylengthyprompts[27], To study RQ1, we conduct a comprehensive evaluation
+[28], we propose a soft incorporation of reflection outputs by of MAPS by comparing it with four representative prompt
+converting them into concise rules. Specifically, MAPS tasks optimization methods on three popular LLMs. For RQ2, we
+LLM M with transforming the explanations and solutions assess MAPS’s ability to generate LLM-tailored prompts for
+into structured rules R based on the transformation prompt different LLMs by evaluating the performance of optimized
+template as shown in Fig. 3 (c) (Lines 11). prompts produced by MAPS and manually designed promptsJOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 7
+(a) Modification Prompt Template (b) Reflection Prompt Template (c) Transformation Prompt Template
+System Prompt System Prompt System Prompt
+You are a tutor and now you will help to write You are a software engineer and now you will help to
+You are a tutor and now you will help to write rules.
+suggestions. Please wrap each suggestion with analyze the program and give suggestions.
+Directly give the content of the rules.
+<START> and </END>. User Prompt
+User Prompt
+User Prompt Here are some examples of buggy unit tests along Here are some examples of common mistakes
+Here are some prompts for Java unit test generation. with their error messages. Please identify the causes students make when writing unit tests and their
+Please write {N} different modification suggestions of these errors and provide a strategy to avoid such solutions. Based on these examples, please select
+for those prompts to make the modified prompt can errors in the future. Ensure that your one most effective rule and rewrite it into one
+better help students understand this task and write recommendation is broadly applicable to similar precise sentence with the format "Ensure that ..."
+diverse unit tests with a high coverage rate. types of errors. to help these students avoid these mistakes in
+{selected prompt 1} {test case 1} {error information 1} future unit tests.
+... ... {explanation and solution}
+Fig. 3: The prompt templates of MAPS. The complete ones can be found in our replication package [29].
+TABLE III: Statistics of the Defects4J benchmark.
+C. Baselines
+Project Abbr. Bugnumber Focalclass Focalmethod To provide a comprehensive evaluation, we experiment on
+three popular LLMs and compare MAPS with four represen-
+Commons-Cli Cli 29 13 645
+Commons-Csv Csv 15 5 373 tative prompt optimization methods, with details as below.
+Gson Gson 17 15 220 ForLLMs,weselectthefollowingpowerfulLLMsincode-
+Jfreechart Chart 26 24 1,318
+related tasks for evaluation:
+Commons-Lang Lang 60 28 2,712
+All 147 85 5,278 • ChatGPT[10]isapopularmodelknownforitsversatile
+capabilitiesacrossvariousfieldssuchascodegeneration.
+It is a closed-source model developed by OpenAI and
+on different LLMs. For RQ3, we remove different modules of we use the latest version gpt-3.5-turbo-0125 in our ex-
+MAPStoevaluatetheirindividualcontributions.ForRQ4,we periments.
+investigate MAPS’s performance under different experimental • Llama-3.1[17]isafamilyofstate-of-the-artopen-source
+settings,includingthenumberofseedprompts,thenumberof LLMs that have different sizes including 7B, 70B, and
+generatedpromptsperiterationN,andthemaximumiteration 405B. In this paper, we use the instruction-tuned Llama-
+number I. 3.1-70B-Instruct for experiments.
+• Qwen2 [23] is an open-source large language model that
+B. Datasets and Metrics achievespromisinginavarietyofcodeintelligencetasks.
+We evaluate MAPS on the widely-used Defects4J [16] Ithasa128kcontextlengthtodealwithproject-levellong
+dataset. Following previous studies [5], [9], we use five code.Specifically,wechooseQwen2-72B-Instructinthis
+commonly used Java projects from this dataset including paper.
+ApacheCommonsCLI,ApacheCommonsCSV,GoogleGson, As for prompt optimization methods, we compare MAPS
+JFreeChart,andApacheCommonsLang.Foreachproject,we with the basic prompt and four state-of-the-art prompt opti-
+usethefixedversionsusedbyexistingwork[9]forevaluation. mization methods:
+These projects span diverse domains, including command- • Basicdenotestheperformanceofthebestseedprompt.It
+line interface, data processing, serialization, visualization, and isusedtomeasurehowmuchimprovementscouldprompt
+utility libraries, respectively. Table III presents the overall optimization methods to achieve.
+information on the dataset and the detailed information such • APE[19]isatypicalpromptoptimizationmethodthatdi-
+as specific versions and commit hashes can be found in rectlyasksLLMstogeneratevariantsforcurrentprompts
+our replication package [29]. As for evaluation metrics, we that can keep their semantic meanings in each iteration.
+follow previous work [22], [30] and adopt two most popular • OPRO [25] further incorporates the performance infor-
+metricstoevaluatetheperformanceofMAPSandthebaseline mation and lets the LLM generate new prompts that can
+approaches: enhance the test accuracy based on existing prompts and
+• Line coverage (%) measures the percentage of code their performance.
+linesexecutedduringtesting.Itcheckswhethereachline • EVOPROMPT [18] is the state-of-the-art prompt opti-
+of the source code is executed at least once, i.e., Line mization method that generates new prompts based on
+Coverage(%) = Nu Tm otb ae lr no uf me bx ee rcu ot fe ld inl ein ses ×100. Only the lines evolutionaryoperators.Ithastwoversions: EVOPROMPT
+covered by passed test cases are used for calculation. (GA) and EVOPROMPT (DE), which use the Genetic
+• Branch coverage (%) measures the percentage of Algorithm, and Differential Evolution, respectively.
+branches executed during testing. It checks whether each
+branch in control structures is executed, i.e., Branch
+Coverage(%) = Numberofexecutedbranches × 100. Only the D. Implementation
+Totalnumberofbranches
+branches covered by passed test cases are used for Inourexperiments,thenumberofseedprompts,thenumber
+calculation. of generated prompts per iteration N, and the maximumJOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 8
+TABLE IV: Comparison with prompt optimization methods on ChatGPT. The number in “()” denotes the standard deviation.
+Projects Chart Cli Csv Gson Lang Average
+LineCoverage
+Basic 47.41 36.76 37.49 22.42 57.58 45.56
+APE 43.34 39.43 39.32 23.42 54.92 44.58
+OPRO 44.52 42.49 38.96 25.71 53.70 45.13
+EVOPROMPT(GA) 48.47 45.71 38.59 21.82 56.34 46.63
+EVOPROMPT(DE) 49.60 42.88 39.87 24.17 53.39 45.89
+MAPS 51.56(0.66) 58.88(1.14) 50.05(1.02) 25.17(0.60) 61.35(0.42) 53.80(0.04)
+BranchCoverage
+Basic 33.07 23.27 32.39 14.21 46.19 34.24
+APE 33.72 24.30 34.32 15.53 44.59 34.25
+OPRO 33.86 28.26 32.78 16.94 42.46 34.28
+EVOPROMPT(GA) 34.36 31.64 34.18 14.53 45.07 35.88
+EVOPROMPT(DE) 35.70 29.32 34.24 16.04 43.27 35.11
+MAPS 38.68(0.25) 41.54(1.58) 39.53(1.75) 16.20(0.40) 51.11(0.40) 41.84(0.26)
+iteration number I are set to 5, 2, and 5, respectively. simply combining and mutating existing prompts is difficult
+The impact of different experimental settings is discussed to produce effective prompts for test case generation.
+in Section V-D. We repeat MAPS three times and report
+its average results and variance to eliminate the influence MAPS achieves substantial improvement over baseline
+of sampling and fluctuations in LLM. During the prompt methods. As can be seen in Table IV-VI, MAPS consid-
+optimization stage, we randomly sample ten bugs from the erably outperforms the baseline methods across all LLMs.
+Defects4JbenchmarkasourdevelopmentsetD dev anduseall For example, compared with the strongest baseline method,
+bugs as test set D test. We present the sampled development EVOPROMPT (GA), MAPS achieves an average improvement
+set D dev in our replication package [29]. To save manual of 6.19% and 5.03% in line coverage and branch coverage,
+efforts,weobtaintheseedpromptsautomaticallybyChatGPT respectively. These results demonstrate the effectiveness of
+and the existing Automatic Prompt Engineer method [19]. MAPS in finding effective prompts within the vast search
+To ensure a fair comparison, we use the same development space.
+set and seed prompts for our tool and all baseline methods.
+The seed prompts, and all prompt templates used in our work
+TheperformanceofdifferentLLMsondifferentprojects
+can be found in our replication package [29]. We conduct all
+varies. By comparing the performance on different projects
+experiments on an Ubuntu 20.04 server with a 112-core Intel
+acrossdifferentLLMs,wefurtherobservethatdifferentLLMs
+Xeon Platinum CPU.
+tend to perform well on different projects. For instance,
+as shown in Table IV-VI, although the overall performance
+V. EXPERIMENTALRESULTS of ChatGPT and Llama-3.1 with basic prompts are similar,
+their performance on individual projects exhibits large differ-
+A. RQ1: Performance Evaluation
+ences.Specifically,ontheLangproject,ChatGPToutperforms
+To evaluate the effectiveness of MAPS in test case gen- Llama-3.1 and Qwen2 by 4.69% and 15.47% in terms of
+eration, we compare it with four representative prompt op- line coverage, respectively; while on the Csv project, the
+timization methods across three popular LLMs. Tables IV- performance of ChatGPT is much worse than Llama-3.1 and
+VI present the performance of MAPS along with baseline Qwen2, with a decrease of 5.70% and 3.24% in terms of
+methods on Defects4J. For each method, we provide the line coverage, respectively. This indicates that different LLMs
+average performance across all bugs, as well as detailed tend to excel in different domains and also demonstrates the
+average results for each project. Based on these results, we importance of building tailored prompts for different LLMs.
+derive the following findings.
+Existing prompt optimization methods struggle to pro- MAPS could achieve higher improvements on the
+duce effective prompts for test case generation. By com- projects that the seed prompts do not perform well. At
+paring the performance of the basic prompt and four baseline last, as shown in Table IV-VI, we find that the improvements
+methods,wecanobservethatexistingmethodsstruggletopro- achieved by MAPS on different projects also vary across
+duceeffectivepromptsfortestcasegeneration.Specifically,as different LLMs. For instance, in the Lang project, the relative
+showninTableIV,thebest-performingbaseline,EVOPROMPT improvementonChatGPTandQwen2are6.55%and14.98%,
+(GA), can only achieve 1.07% and 1.64% improvements over respectively; whereas in the Csv project, the improvement on
+thebasicpromptinlinecoverageandbranchcoverage,respec- ChatGPT and Qwen2 are 33.50% and 22.27%, respectively.
+tively. Moreover, methods like APE and OPRO even perform These results demonstrate that MAPS can achieve a higher
+worse than the basic prompt in terms of line coverage, with increase on projects where LLMs do not excel, and it can
+decreasesof0.98%and0.43%,respectively.Thissuggeststhat provide directed improvements tailored to different LLMs.JOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 9
+TABLE V: Comparison with prompt optimization methods on Llama-3.1. The number in “()” denotes the standard deviation.
+Projects Chart Cli Csv Gson Lang Average
+LineCoverage
+Basic 46.52 45.99 43.19 22.81 52.89 45.93
+APE 45.05 46.26 42.17 21.56 50.98 44.70
+OPRO 45.45 44.39 42.81 23.39 54.09 45.95
+EVOPROMPT(GA) 45.95 45.82 42.70 24.70 54.24 46.52
+EVOPROMPT(DE) 45.70 44.96 43.24 22.77 52.29 45.34
+MAPS 49.68(0.21) 51.83(1.54) 44.05(0.19) 26.38(0.96) 58.56(1.49) 50.59(0.56)
+BranchCoverage
+Basic 35.46 28.55 36.92 16.83 42.73 35.06
+APE 34.54 28.49 35.52 16.37 41.58 34.22
+OPRO 34.85 26.61 37.25 16.86 43.20 34.80
+EVOPROMPT(GA) 34.71 29.28 35.51 16.74 43.01 35.03
+EVOPROMPT(DE) 34.82 29.28 36.95 17.00 42.62 35.07
+MAPS 37.73(0.68) 35.06(0.27) 39.02(1.14) 19.36(0.65) 48.24(1.69) 39.50(0.68)
+TABLE VI: Comparison with prompt optimization methods on Qwen2. The number in “()” denotes the standard deviation.
+Projects Chart Cli Csv Gson Lang Average
+LineCoverage
+Basic 39.75 36.80 40.73 26.51 42.11 38.70
+APE 39.52 34.76 45.73 23.83 44.44 39.41
+OPRO 40.84 38.51 38.94 26.41 33.41 35.49
+EVOPROMPT(GA) 39.08 36.49 37.50 21.23 43.56 38.17
+EVOPROMPT(DE) 39.08 36.49 37.50 21.23 43.56 38.17
+MAPS 44.37(3.56) 47.56(0.40) 49.80(3.48) 29.75(1.29) 48.42(2.16) 45.51(1.28)
+BranchCoverage
+Basic 30.88 23.79 32.55 18.18 30.55 28.05
+APE 31.07 21.35 36.22 16.79 33.27 28.92
+OPRO 32.47 26.76 29.58 19.92 25.26 26.66
+EVOPROMPT(GA) 30.81 22.16 29.71 13.84 33.14 27.98
+EVOPROMPT(DE) 30.81 22.16 29.71 13.84 33.14 27.98
+MAPS 30.58(3.26) 31.73(1.44) 36.30(2.83) 18.98(2.01) 37.11(1.51) 32.71(1.43)
+TABLE VII: Evaluation of MAPS in generating tailored prompts for different LLMs.
+Approach ChatGPT Llama-3.1 Qwen2 ChatGPT Llama-3.1 Qwen2
+LineCoverage BranchCoverage
+ChatGPT’sfinalprompt 53.80 41.92 35.98 41.84 32.31 26.87
+Llama-3.1’sfinalprompt 51.35 50.59 44.94 40.05 39.50 34.43
+Qwen2’sfinalprompt 51.14 43.98 45.51 38.39 32.97 32.71
+Manually-designedprompt 48.55 48.46 42.85 37.55 37.60 31.88
+Answer to RQ1: MAPS effectively enhances prompts for package [29]. Based on the results, we have the following
+test case generation. It consistently outperforms all baseline observations:
+methods across various LLMs, achieving a 6.19% higher
+The performance of different prompts varies a lot. By
+line coverage rate and a 5.03% higher branch coverage rate
+comparing the performance of each final prompt on different
+compared to the strongest baseline.
+models.Wecanfindthattheperformanceofdifferentprompts
+on the same LLM varies a lot. Specifically, the line coverage
+B. RQ2: LLM-Tailored Prompt Generation Evaluation rate and branch coverage rate of Llama-3.1 on different final
+prompts range from 41.92%-50.59% and 32.31%-39.50%,
+InthisRQ,westudywhetherMAPScouldgeneratetailored
+respectively, which further demonstrates the importance of
+prompts for different LLMs. To achieve this, we evaluate
+automated generating tailored prompts for different LLMs.
+the performance of the three final prompts obtained by three
+models on each model. Additionally, we also compare the MAPS effectively produces tailored prompts for dif-
+prompt used in [13] to validate whether the prompt built ferent LLMs. As in Table VII, we can observe that each
+by MAPS could outperform the manually-designed prompt. model tends to achieve the best performance on their own
+The experimental results are depicted in Table VII. The finalprompt.Forexample,theperformanceofChatGPT’sfinal
+detailedresultsoneachprojectcanbefoundinourreplication prompt outperforms the final prompt obtained by Llama-3.1JOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 10
+TABLE VIII: Ablation Study of MAPS.
+Approach LineCoverage BranchCoverage
+MAPS 53.80 41.84
+w/oDomaincontextualknowledgeextraction 44.16 33.31
+ChatGPT w/oDiversity-guidedpromptgeneration 45.59 34.04
+w/oFailure-drivenruleinduction 46.86 37.08
+Onlydomaincontextualknowledgeextraction 48.03 35.76
+MAPS 50.59 39.50
+w/oDomaincontextualknowledgeextraction 45.37 34.73
+Llama-3.1 w/oDiversity-guidedpromptgeneration 49.68 38.35
+w/oFailure-drivenruleinduction 49.73 38.88
+Onlydomaincontextualknowledgeextraction 49.48 37.95
+MAPS 45.51 32.71
+w/oDomaincontextualknowledgeextraction 42.12 29.73
+Qwen2 w/oDiversity-guidedpromptgeneration 43.81 32.10
+w/oFailure-drivenruleinduction 43.92 31.58
+Onlydomaincontextualknowledgeextraction 40.56 30.21
+and Qwen2 by 2.45% and 2.66% in terms of line coverage on which demonstrates the importance of prompt diversity in the
+ChatGPT.ThisindicatesthatMAPScouldeffectivelyproduce search space exploration process.
+tailored prompts for each LLM. Failure-drivenruleinduction.Weconductthisexperiment
+Prompts optimized by MAPS outperform manually- by removing the induced rules in the final prompt. From
+designed prompts. Additionally, the prompt obtained by Table VIII, we can observe that without failure-driven rule
+MAPS also outperforms the line coverage of manually- induction, the performance of MAPS drops a lot across all
+designed prompt by 5.25%, 2.13%, and 2.66% on ChatGPT, LLMs. Specifically, in ChatGPT, the line coverage decreases
+Llama-3.1, and Qwen2, respectively. These results demon- by 6.94% and branch coverage by 4.76%, respectively. This
+strate MAPS’s efficacy in automatically crafting effective, indicatesthebenefitsofusingLLM-inducedrulestoguidethe
+LLM-tailored prompts. optimizationprocessandavoidLLMsmakingrecurringerrors.
+We further show some cases in Section VI-A for illustration.
+Answer to RQ2: The performance of different prompts Only domain contextual knowledge extraction. As the
+varies a lot and MAPS could effectively produce tailored domain contextual knowledge extraction module provides the
+prompts for different LLMs. most significant performance gains, we further evaluate how
+much could this module only bring to the basic prompt to
+ensurefairnessincomparison.Weconductthisexperimentby
+removingboththediversity-guidedpromptgenerationmodule
+C. RQ3: Ablation Study
+and the failure-driven rule induction module. As shown in
+We conduct ablation studies to validate the effectiveness of Table VIII, removing both these two parts lead to substantial
+eachmoduleinourmethod,i.e.domaincontextualknowledge performance to MAPS. Specifically, solely involving the do-
+extraction, diversity-guided prompt generation, and failure- main contextual knowledge extraction can only bring limited
+drivenruleinduction.Theaverageresultsforeachmethodare improvement over the basic prompt, i.e., improving the line
+presented in Table VIII, with detailed results for each project coverage and branch coverage for Qwen2 by 1.86% and
+available in our replication package [29]. 2.16%, respectively. Its performance still falls behind MAPS
+Domain contextual knowledge extraction. We conduct by a large margin, which indicates that simply combining
+thisexperimentbyremovingthecross-filecontextinformation basic prompt and the context information without further
+in the final prompt. As can be seen in Table VIII, excluding optimization can not achieve satisfactory performance.
+the cross-file context information dramatically degrades per-
+Answer to RQ3: All modules in MAPS contribute to the
+formance across all LLMs. Specifically, the branch coverage
+performance. Removing the domain contextual knowledge
+rate drops by 8.53%, 4.77%, and 2.98% on ChatGPT, Llama-
+extraction part leads to the largest performance decreases.
+3.1, and Qwen2, respectively. These results demonstrate the
+effectivenessofintegratingprojectcontextinformationtohelp
+LLMs generate accurate test cases.
+D. RQ4: Parameter Analysis
+Diversity-guidedpromptgeneration.Tovalidatetheeffec-
+tivenessofdiversity-guidedpromptgeneration,weexperiment In this section, we study how different experimental set-
+byreplacingtheoptimizedinstructionpartofthefinalprompt tings affect the performance of MAPS and baseline methods,
+withtheoneproducedbythebestbaselinemethod.Asshown including the number of seed prompts, the number of gener-
+in Table VIII, removing the diversity-guided prompt genera- ated prompts N, and the maximum iteration number I. As
+tion leads to a consistent drop in all tasks and metrics. For these parameters primarily influence the prompt optimization
+example, the line coverage rate decreases by 8.21%, 1.01%, process,wereporttheirperformanceonthedevelopmentsetin
+and 1.70% on ChatGPT, Llama-3.1, and Qwen2, respectively, this section. In each study, we vary only the parameter underJOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 11
+42
+37
+32
+27
+EVOPROMPT(GA) MAPS
+22
+3 4 5 6
+egarevoC
+eniL
+42
+37
+32
+27
+EVOPROMPT(GA) MAPS
+22
+1 2 3
+(a) NNuummbebreor fosfe sedeepdro pmrpotms.pt
+egarevoC
+eniL
+(b) NumNbuemrboferg eonfe sraeteedd pprroommpptst.
+Fig. 4: Parameter analysis of number of seed prompts and generated prompts on ChatGPT.
+42
+APE
+OPRO
+37 EVOPROMPT(GA)
+EVOPROMPT(DE)
+MAPS
+32
+27
+22
+0 1 2 3
+Iteration
+egarevoC
+eniL
+40
+APE
+OPRO
+36 EVOPROMPT(GA)
+EVOPROMPT(DE)
+MAPS
+32
+28
+24
+0 1 2 3
+Iteration
+(a) ChatGPT.
+egarevoC
+eniL
+40
+APE
+OPRO
+36 EVOPROMPT(GA)
+EVOPROMPT(DE)
+MAPS
+32
+28
+24
+0 1 2 3
+Iteration
+(b) Llama-3.1.
+egarevoC
+eniL
+(c) Qwen2.
+Fig. 5: Parameter analysis of the Iteration number.
+analysis and keep others constant. For the analysis on number the performance of the basic prompt without optimization
+of seed prompts and generated prompts, we only present the by MAPS. As shown in Fig. 5, MAPS achieves the best
+results on ChatGPT; the complete results are available in our performance in most cases. Specifically, MAPS outperforms
+replicate package [29]. baseline methods by at least 7.94% in line coverage when the
+Number of seed prompt. We conduct experiments to maximum iteration number is set to three. Additionally, due
+evaluate how MAPS and baseline methods perform under dif- to low prompt diversity, baseline methods tend to converge
+ferent numbersof seedprompts. Specifically,we use thebest- to local optima in the first iteration and fail to achieve
+performingbaselineEVOPROMPT(GA)andsetthenumberof furtherimprovement.Incontrast,MAPScontinuallyenhances
+seed prompts to 3, 4, 5, and 6 respectively. From Fig. 4 (a), performance with each iteration.
+wecanobservethatMAPSconsistentlyachievesbetterperfor-
+Answer to RQ4: MAPS consistently achieves the best
+manceacrossdifferentnumbersofseedprompts.Additionally,
+performance across different parameter settings. Our hyper-
+bycomparingtheperformanceunderdifferentnumbersofseed
+parameter settings, with the number of seed prompts set to
+prompts,wecanfindthatMAPSand EVOPROMPT (GA)tend
+5, N to 2, and I to 5, achieve effective results.
+to achieve better performance with a larger number of seed
+prompts, and the improvements over five seed prompts are
+VI. DISCUSSION
+marginal. Therefore, we set the number of seed prompts to
+A. Case study
+five in this paper.
+Number of generated prompt. We also study the effect To better understand how MAPS improves test case gen-
+of a number of generated prompts by varying it from 1 to 3. eration, we present two examples of the final prompts cre-
+As shown in Fig. 4 (b), MAPS consistently achieves better ated by MAPS and the resulting test cases from these
+performance across different numbers of generated prompts. final prompts. First, Fig 6 (a) shows the final prompt
+Whilealargernumberofgeneratedpromptscanleadtobetter for Llama-3.1, along with the generated test case based
+performance, it also increases costs. Therefore, we set the on the focal method in Listing 1. We can find that by
+number of generated prompts to two in this experiment. following the second induced rule, Llama-3.1 correctly
+Maximum iteration number. In this study, we vary the generates a test case that uses the “try {...} catch
+number of maximum iteration number from 1 to 3 and inves- (IllegalArgumentException e)” in the test method.
+tigatetheperformanceofpromptsineachiteration.Wepresent Second, Fig 6 (b) illustrates another example using Chat-
+the results of the best prompt generated by MAPS and each GPT, where the focal method is taken from Listing 2. Com-
+baselinemethodonthedevelopmentset.Iteration0represents pared to the incorrect test case generated by the baselineJOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 12
+Final prompt of Llama-3.1 Final prompt of ChatGPT
+Write a comprehensive set of unit tests for the given Write diverse unit tests for a Java class by covering a wide range of
+Java class, covering both happy paths and edge scenarios, including normal cases, edge cases, failure cases, and
+cases, to ensure that all methods behave correctly boundary cases to ensure high test coverage and validation of the
+under various input scenarios, aiming for a minimum methods' correctness.
+code coverage of 90%. Specifically, please follow the following rules when writing test cases:
+Specifically, please follow the following rules when 1. Ensure that all necessary classes are imported at the beginning of
+writing test cases: the test file to prevent errors ...
+1. Ensure that all necessary classes, methods, and 2. Ensure that classes have constructors that match the required
+fields are properly imported and correctly spelled and parameter types and consider using factory methods or the builder
+capitalized ... pattern for flexibility in object creation ...
+2. Ensure that when calling a method that throws a // Focal method:
+checked exception ... either wrap the call in a try- public abstract class AbstractCategoryItemRenderer {
+catch block to handle the exception or declare the public Range findRangeBounds(CategoryDataset dataset) {
+exception to be thrown by the test method using the ...
+`throws` keyword. // Avaible SubClasses:
+// Focal method ... // public class AreaRenderer extends AbstractCategoryItemRenderer
+implements Cloneable, PublicCloneable, Serializable
+// ...
+Test case generated by final prompt
+public void
+Test case generated by final prompt
+testCreateCopyEmptyItemTimeSeries()
+throws CloneNotSupportedException{ public void testAreaRendererFindRangeBoundsEmptyDataset()
+TimeSeries series = new TimeSeries(); {
+int start = 0; AreaRenderer areaRenderer = new AreaRenderer();
+int end = timeSeries.getItemCount()-1; CategoryDataset dataset = new DefaultCategoryDataset();
+Range range = areaRenderer.findRangeBounds(dataset);
+try {series.createCopy(start, end);}
+assertNull(range);
+catch (IllegalArgumentException e) {
+}
+...
+(a) Case study on Llama-3.1. (b) Case study on ChatGPT.
+Fig. 6: Two cases showing the difference of optimized prompts from different models and how the optimized prompt help
+generate correct test case.
+TABLE IX: Comparison of Randoop, A3Test, ChatTESTER,
+prompt in Listing 2, the cross-file contextual knowledge in
+and MAPS.
+the optimized prompt allows the model to correctly ini-
+tialize the “AbstractCategoryItemRenderer” class.
+Projects LineCoverage BranchCoverage
+Additionally, by comparing two final prompts obtained by
+Randoop 49.51 34.45
+MAPS, we observe that the induced rules for Llama-3.1 and
+A3Test 34.11 15.72
+ChatGPT are different. The first rules of these two methods
+ChatGPT+Basic 45.56 34.24
+are similar, but Llama-3.1’s second rule focuses on exception
+ChatGPT+MAPS 53.80 41.84
+handling, whereas ChatGPT’s concerns method parameters.
+This indicates that these models tend to make different types
+of errors, and MAPS can effectively introduce tailored rules unitintonoteworthystates.A3Test[9]isastate-of-the-artnon-
+for different LLMs. LLM-baseddeeplearningmodelthatfine-tunesPLBART[31]
+Moreover, by calculating the average edit distance of for test case generation. For Randoop, we reproduce it based
+prompts obtained in each optimization iteration by MAPS, on the “gen_tests.pl” script provided in Defects4J. For
+we find that it generates more diverse prompts during the A3Test, we reproduce the results based on A3Test’s replicate
+optimization process. Specifically, the average edit distance package [32].
+of prompts from MAPS is 27.0, remarkably larger than that Table IX presents the experimental results in terms of line
+ofOPRO,whichaveragesonly9.3edits,asshowninTableII. coverage and branch coverage. Compared to three baseline
+This further demonstrates MAPS’s effectiveness in generating methods, ChatGPT+MAPS achieves the highest line coverage
+diverse prompts during the optimization process. (i.e.,53.80%)andbranchcoverage(i.e.,41.84%),outperform-
+ing traditional methods by at least 4.29% and 7.39%, re-
+B. Comparison with Other Methods
+spectively.ThisdemonstratesMAPS’seffectivenessinhelping
+To comprehensively study the advantages and limitations LLMs generate test cases with high coverage. Besides, when
+of LLMs-based test case generation methods compared with comparing the performance of Randoop, ChatGPT+basic, and
+traditional approaches and previous deep learning-based ap- ChatGPT+MAPS, we can find that the performance of Chat-
+proaches, we compare ChatGPT+MAPS with two baseline GPT+basicislowerthantraditionalmethodRandoop,meaning
+methods including Randoop [4] and A3Test [9]. Randoop [4] that simply prompting LLMs can not achieve satisfactory
+is a widely used automated software testing tool that employs results, while MAPS can produce suitable prompts for LLMs
+randomfuzzingonunitAPIstoconstructprefixesthatleadthe and make LLMs outperform traditional methods.JOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 13
+Although these are also other LLM-based methods such as models to convert target methods into their corresponding test
+ChatUniTest [13], we do not compare with them because our cases or assertions. A series of recent studies [5], [36] have
+research is orthogonal to them. MAPS focuses on optimizing employed deep learning techniques for test case generation
+tailored prompts for test case generation. It can be further by formulating the test case generation as a neural machine
+combined with existing methods such as incorporating static translation task and train models to convert target methods
+information [22] or multi-turn refinement method [13] and into their corresponding test cases or assertions. For example,
+achieve better performance. AthenaTest [5] fine-tunes BART [8] on a dataset designed
+for test generation. A3Test [9] further incorporates assertion
+knowledge and a test signature verification mechanism for
+C. Threats to Validity
+achieving better results. Recently, leveraging advancements in
+We identify two main threats to the validity of our study:
+LLMs, test case generation approaches based on LLMs have
+Limited LLMs. Given the rapid development of large
+alsobeenproposedandshownpromisingresults.Forexample,
+language models, some models are not covered in this paper.
+CodaMOSA [37] leverages LLMs to provide example test
+To mitigate this issue, we select the three most representative
+cases for under-covered functions when search-based testing
+and popular LLMs that contain both open-source models
+hitsacoveragestall.ChatTESTER[13]incorporatesChatGPT
+and closed-source models. Additionally, MAPS is model-
+along with an iterative test refiner to generate tests. Different
+agnosticanddoesnotrequireaccesstothemodel’sparameters.
+from those works, our method serves as the first LLM-
+Therefore, we believe MAPS can also achieve improvements
+tailoredpromptgenerationmethodfortestcasegenerationand
+on other LLMs.
+can be further combined with existing methods to enhance
+Limited Programming Languages. In this paper, we con-
+their performance. Besides, our method aims at to directly
+duct experiments using the Defects4J benchmark, which only
+avoid generating low-quality test cases with an optimized
+contains Java projects. This benchmark is popular and widely
+prompt instead of time-consuming multi-iteration generation
+used in previous work. Furthermore, our method is language-
+and fixing during test time.
+agnostic and can be easily adapted to other programming
+languages. In the future, we plan to conduct experiments on
+C. LLMs for Software Engineering
+more datasets including those with languages such as Python.
+LargeLanguageModelshaverecentlybeenwidelyadopted
+VII. RELATEDWORK for various software engineering tasks due to their impressive
+performance in both code generation and understanding [38]–
+A. Automatic Prompt Optimization
+[41]. For example, Yuan et al. [13] evaluate the performance
+Automatically discovering optimal prompts has emerged as ofChatGPTfortestcasegenerationandimproveitbyiterative
+animportantchallengeintheeraofLLMs[19],[33].Mostex- testrefiner.Gaoetal.[14]investigatehowtosetthein-context
+istingmethodsfollowaniterativepromptoptimizationprocess. demonstration for ChatGPT for code summarization and code
+Theystartwithasetofseedpromptsanditerativelysynthesize generation tasks. CHATRepair [42] iteratively evaluates pro-
+new prompt candidates, evaluating their performance to select grams on test cases and feeds the error messages to LLMs
+thetoponesforthenextiteration.Forexample,APE[19]isa for further patch generation. Self-edit [43] utilizes compiler
+typical prompt optimization method that directly asks LLMs error messages to enhance the correctness of code generation.
+to generate variants of current prompts while maintaining Li et al. [44] investigates the feasibility of slicing commer-
+their semantic meanings in each iteration. OPRO [25] further cial black-box LLMs using medium-sized backbone models.
+incorporates the performance information and lets the LLM SBLLM [45] combines search-based methods and LLMs to
+generatenewpromptsthatcanenhancethetestaccuracybased iterativelyimprovecodeefficiency.DeepSeek-Coder[46]isan
+onexistingpromptsandtheirperformance. EVOPROMPT [18] open-source Mixture-of-Experts (MoE) code language model
+is the state-of-the-art prompt optimization method that gen- that achieves state-of-the-art performance across various code
+erates new prompts based on evolutionary operators. It has intelligence tasks. StarCoder 2 [47] is an advanced LLM
+two versions: EVOPROMPT (GA) and EVOPROMPT (DE), trained in 600+ programming languages. It is trained on the
+which use the Genetic Algorithm, and Differential Evolution, Stack2[47]datasetandnaturallanguagetextfromWikipedia,
+respectively.Differentfromthoseworks,thispaperfocuseson Arxiv, and GitHub issues. Magicoder [48] is a recent model
+LLM-tailoredpromptoptimizationfortestcasegenerationand trained on synthetic instruction data enhanced with open-
+investigates improving the exploration of the search process. source code snippets. It proposes OSS-INSTRUCT which
+produces diverse and realistic instruction tuning data from
+B. Test Case Generation open-sourcecodesnippetstoaddressthebiasestypicallyfound
+in synthetic data generated by LLMs.
+Traditional methods like Randoop [4] utilize random
+fuzzing on unit APIs to construct prefixes that lead the
+unit into noteworthy states. Evosuite [7] is a search-based
+VIII. CONCLUSION
+test generation strategy that employs evolutionary algorithms Inthispaper,weintroducedanovelautomaticLLM-tailored
+to autonomously craft test suites for Java classes aimed at prompt generation method MAPS for test case generation.
+improving coverage rate. A series of recent studies [5], [34], During the optimization process, MAPS generates diverse
+[35] have employed deep learning techniques by training candidate prompts to facilitate the exploration of the promptJOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 14
+search space and induces rules from failure cases to avoid [17] A. Dubey, A. Jauhri, A. Pandey, A. Kadian, A. Al-Dahle, A. Letman,
+recurring errors. Additionally, MAPS integrates various do- A. Mathur, A. Schelten, A. Yang, A. Fan, A. Goyal, A. Hartshorn,
+A.Yang,A.Mitra,A.Sravankumar,A.Korenev,A.Hinsvark,A.Rao,
+maincontextualknowledgeforgeneratingcorrecttestcasesin
+A.Zhang,A.Rodriguez,A.Gregerson,A.Spataru,B.Rozie`re,B.Biron,
+practical projects. Extensive experiments on Defects4J show B. Tang, B. Chern, C. Caucheteux, C. Nayak, C. Bi, C. Marra,
+that MAPS outperforms existing prompt optimization meth- C. McConnell, C. Keller, C. Touret, C. Wu, C. Wong, C. C. Ferrer,
+C.Nikolaidis,D.Allonsius,D.Song,D.Pintz,D.Livshits,D.Esiobu,
+ods. The replicate package of this work is publicly available
+D. Choudhary, D. Mahajan, D. Garcia-Olano, D. Perino, D. Hupkes,
+at https://zenodo.org/records/14287744. E. Lakomkin, E. AlBadawy, E. Lobanova, E. Dinan, E. M. Smith,
+F.Radenovic,F.Zhang,G.Synnaeve,G.Lee,G.L.Anderson,G.Nail,
+G. Mialon, G. Pang, G. Cucurell, H. Nguyen, H. Korevaar, H. Xu,
+REFERENCES H.Touvron,I.Zarov,I.A.Ibarra,I.M.Kloumann,I.Misra,I.Evtimov,
+J.Copet,J.Lee,J.Geffert,J.Vranes,J.Park,J.Mahadeokar,J.Shah,
+[1] D.M.Rafi,K.R.K.Moses,K.Petersen,andM.Ma¨ntyla¨,“Benefitsand J. van der Linde, J. Billock, J. Hong, J. Lee, J. Fu, J. Chi, J. Huang,
+limitations of automated software testing: Systematic literature review J.Liu,J.Wang,J.Yu,J.Bitton,J.Spisak,J.Park,J.Rocca,J.Johnstun,
+and practitioner survey,” in 7th International Workshop on Automation J.Saxe,J.Jia,K.V.Alwala,K.Upasani,K.Plawiak,K.Li,K.Heafield,
+ofSoftwareTest,AST2012,Zurich,Switzerland,June2-3,2012. IEEE andK.Stone,“Thellama3herdofmodels,”CoRR,vol.abs/2407.21783,
+ComputerSociety,2012,pp.36–42. 2024.
+[2] M. M. Almasi, H. Hemmati, G. Fraser, A. Arcuri, and J. Benefelds, [18] Q.Guo,R.Wang,J.Guo,B.Li,K.Song,X.Tan,G.Liu,J.Bian,and
+“Anindustrialevaluationofunittestgeneration:Findingrealfaultsina Y. Yang, “Connecting large language models with evolutionary algo-
+financial application,” in 39th IEEE/ACM International Conference on rithmsyieldspowerfulpromptoptimizers,”inTheTwelfthInternational
+Software Engineering: Software Engineering in Practice Track, ICSE- Conference on Learning Representations, ICLR 2024, Vienna, Austria,
+SEIP2017,BuenosAires,Argentina,May20-28,2017. IEEEComputer May7-11,2024. OpenReview.net,2024.
+Society,2017,pp.263–272. [19] Y. Zhou, A. I. Muresanu, Z. Han, K. Paster, S. Pitis, H. Chan, and
+[3] P. Runeson, “A survey of unit testing practices,” IEEE Softw., vol. 23, J. Ba, “Large language models are human-level prompt engineers,” in
+no.4,pp.22–29,2006. The Eleventh International Conference on Learning Representations,
+[4] C. Pacheco and M. D. Ernst, “Randoop: feedback-directed random ICLR2023,Kigali,Rwanda,May1-5,2023. OpenReview.net,2023.
+testing for java,” in Companion to the 22nd Annual ACM SIGPLAN
+[20] J. H. Holland, Adaptation in natural and artificial systems: an intro-
+ConferenceonObject-OrientedProgramming,Systems,Languages,and
+ductory analysis with applications to biology, control, and artificial
+Applications,OOPSLA2007,October21-25,2007,Montreal,Quebec,
+intelligence. MITpress,1992.
+Canada. ACM,2007,pp.815–816.
+[21] R. Storn and K. Price, “Differential evolution–a simple and efficient
+[5] M.Tufano,D.Drain,A.Svyatkovskiy,S.K.Deng,andN.Sundaresan,
+heuristic for global optimization over continuous spaces,” Journal of
+“Unit test case generation with transformers and focal context,” arXiv
+globaloptimization,vol.11,pp.341–359,1997.
+preprintarXiv:2009.05617,2020.
+[22] G. Ryan, S. Jain, M. Shang, S. Wang, X. Ma, M. K. Ramanathan,
+[6] J.Wang,Y.Huang,C.Chen,Z.Liu,S.Wang,andQ.Wang,“Software
+and B. Ray, “Code-aware prompting: A study of coverage-guided test
+testingwithlargelanguagemodels:Survey,landscape,andvision,”IEEE
+generation in regression setting using LLM,” Proc. ACM Softw. Eng.,
+Trans.SoftwareEng.,vol.50,no.4,pp.911–936,2024.
+vol.1,no.FSE,pp.951–971,2024.
+[7] G. Fraser and A. Arcuri, “Evosuite: automatic test suite generation
+[23] A.Yang,B.Yang,B.Hui,B.Zheng,B.Yu,C.Zhou,C.Li,C.Li,D.Liu,
+forobject-orientedsoftware,”inSIGSOFT/FSE’1119thACMSIGSOFT
+F. Huang, G. Dong, H. Wei, H. Lin, J. Tang, J. Wang, J. Yang, J. Tu,
+Symposium on the Foundations of Software Engineering (FSE-19) and
+J.Zhang,J.Ma,J.Yang,J.Xu,J.Zhou,J.Bai,J.He,J.Lin,K.Dang,
+ESEC’11:13thEuropeanSoftwareEngineeringConference(ESEC-13),
+K. Lu, K. Chen, K. Yang, M. Li, M. Xue, N. Ni, P. Zhang, P. Wang,
+Szeged,Hungary,September5-9,2011. ACM,2011,pp.416–419.
+R. Peng, R. Men, R. Gao, R. Lin, S. Wang, S. Bai, S. Tan, T. Zhu,
+[8] M.Lewis,Y.Liu,N.Goyal,M.Ghazvininejad,A.Mohamed,O.Levy,
+T. Li, T. Liu, W. Ge, X. Deng, X. Zhou, X. Ren, X. Zhang, X. Wei,
+V. Stoyanov, and L. Zettlemoyer, “BART: denoising sequence-to-
+X. Ren, X. Liu, Y. Fan, Y. Yao, Y. Zhang, Y. Wan, Y. Chu, Y. Liu,
+sequence pre-training for natural language generation, translation, and
+Z.Cui,Z.Zhang,Z.Guo,andZ.Fan,“Qwen2technicalreport,”CoRR,
+comprehension,” in Proceedings of the 58th Annual Meeting of the
+vol.abs/2407.10671,2024.
+AssociationforComputationalLinguistics,ACL2020,Online,July5-10,
+[24] R. Ma, X. Wang, X. Zhou, J. Li, N. Du, T. Gui, Q. Zhang, and
+2020. AssociationforComputationalLinguistics,2020,pp.7871–7880.
+X.Huang,“Arelargelanguagemodelsgoodpromptoptimizers?”CoRR,
+[9] S. Alagarsamy, C. Tantithamthavorn, and A. Aleti, “A3test: Assertion-
+vol.abs/2402.02101,2024.
+augmentedautomatedtestcasegeneration,”CoRR,vol.abs/2302.10352,
+[25] C. Yang, X. Wang, Y. Lu, H. Liu, Q. V. Le, D. Zhou, and X. Chen,
+2023.
+“Large language models as optimizers,” in The Twelfth International
+[10] ChatGPT,“Chatgpt,”https://chat.openai.com/,2024.
+Conference on Learning Representations, ICLR 2024, Vienna, Austria,
+[11] T. Kojima, S. S. Gu, M. Reid, Y. Matsuo, and Y. Iwasawa, “Large
+May7-11,2024. OpenReview.net,2024.
+language models are zero-shot reasoners,” in Advances in Neural
+Information Processing Systems 35: Annual Conference on Neural [26] M. Ester, H. Kriegel, J. Sander, and X. Xu, “A density-based algo-
+InformationProcessingSystems2022,NeurIPS2022,NewOrleans,LA, rithm for discovering clusters in large spatial databases with noise,”
+USA,November28-December9,2022,2022. in Proceedings of the Second International Conference on Knowledge
+[12] Z. Xie,Y. Chen,C. Zhi,S. Deng,and J.Yin, “Chatunitest:a chatgpt- DiscoveryandDataMining(KDD-96),Portland,Oregon,USA. AAAI
+basedautomatedunittestgenerationtool,”CoRR,vol.abs/2305.04764, Press,1996,pp.226–231.
+2023. [27] N.F.Liu,K.Lin,J.Hewitt,A.Paranjape,M.Bevilacqua,F.Petroni,and
+[13] Z. Yuan, M. Liu, S. Ding, K. Wang, Y. Chen, X. Peng, and Y. Lou, P.Liang,“Lostinthemiddle:Howlanguagemodelsuselongcontexts,”
+“Evaluatingandimprovingchatgptforunittestgeneration,”Proc.ACM Trans.Assoc.Comput.Linguistics,vol.12,pp.157–173,2024.
+Softw.Eng.,vol.1,no.FSE,pp.1703–1726,2024. [28] G. Kamradt, “Needle in a haystack - pressure testing llms,” https:
+[14] S. Gao, X. Wen, C. Gao, W. Wang, H. Zhang, and M. R. Lyu, //github.com/gkamradt/LLMTest NeedleInAHaystack,2024.
+“Whatmakesgoodin-contextdemonstrationsforcodeintelligencetasks [29] MAPS, “Replication package,” https://zenodo.org/records/14287744,
+withllms?”in38thIEEE/ACMInternationalConferenceonAutomated 2024.
+SoftwareEngineering,ASE2023,Luxembourg,September11-15,2023. [30] M. Ivankovic, G. Petrovic, R. Just, and G. Fraser, “Code coverage at
+IEEE,2023,pp.761–773. google,”inProceedingsoftheACMJointMeetingonEuropeanSoftware
+[15] H. Gonen, S. Iyer, T. Blevins, N. A. Smith, and L. Zettlemoyer, EngineeringConferenceandSymposiumontheFoundationsofSoftware
+“Demystifying prompts in language models via perplexity estimation,” Engineering,ESEC/SIGSOFTFSE2019,Tallinn,Estonia,August26-30,
+in Findings of the Association for Computational Linguistics: EMNLP 2019. ACM,2019,pp.955–963.
+2023,Singapore,December6-10,2023. AssociationforComputational [31] W. U. Ahmad, S. Chakraborty, B. Ray, and K. Chang, “Unified pre-
+Linguistics,2023,pp.10136–10148. training for program understanding and generation,” in Proceedings of
+[16] R. Just, D. Jalali, and M. D. Ernst, “Defects4j: a database of existing the2021ConferenceoftheNorthAmericanChapteroftheAssociation
+faults to enable controlled testing studies for java programs,” in Inter- forComputationalLinguistics:HumanLanguageTechnologies,NAACL-
+nationalSymposiumonSoftwareTestingandAnalysis,ISSTA’14,San HLT 2021, Online, June 6-11, 2021. Association for Computational
+Jose,CA,USA-July21-26,2014. ACM,2014,pp.437–440. Linguistics,2021,pp.2655–2668.JOURNALOFLATEXCLASSFILES,VOL.18,NO.9,SEPTEMBER2020 15
+[32] A3Test,“A3testreplicationpackage,”https://github.com/awsm-research/
+A3Test ShowCase,2023.
+[33] R.Pryzant,D.Iter,J.Li,Y.T.Lee,C.Zhu,andM.Zeng,“Automatic
+prompt optimization with ”gradient descent” and beam search,” in
+Proceedingsofthe2023ConferenceonEmpiricalMethodsinNatural
+LanguageProcessing,EMNLP2023,Singapore,December6-10,2023.
+AssociationforComputationalLinguistics,2023,pp.7957–7968.
+[34] H. Yu, Y. Lou, K. Sun, D. Ran, T. Xie, D. Hao, Y. Li, G. Li, and
+Q.Wang,“Automatedassertiongenerationviainformationretrievaland
+itsintegrationwithdeeplearning,”in44thIEEE/ACM44thInternational
+ConferenceonSoftwareEngineering,ICSE2022,Pittsburgh,PA,USA,
+May25-27,2022. ACM,2022,pp.163–174.
+[35] W.Sun,H.Li,M.Yan,Y.Lei,andH.Zhang,“Revisitingandimproving
+retrieval-augmented deep assertion generation,” in 38th IEEE/ACM In-
+ternationalConferenceonAutomatedSoftwareEngineering,ASE2023,
+Luxembourg,September11-15,2023. IEEE,2023,pp.1123–1135.
+[36] S. Gao, W. Mao, C. Gao, L. Li, X. Hu, X. Xia, and M. R. Lyu,
+“Learninginthewild:Towardsleveragingunlabeleddataforeffectively
+tuningpre-trainedcodemodels,”inProceedingsofthe46thIEEE/ACM
+InternationalConferenceonSoftwareEngineering,ICSE2024,Lisbon,
+Portugal,April14-20,2024. ACM,2024,pp.80:1–80:13.
+[37] C.Lemieux,J.P.Inala,S.K.Lahiri,andS.Sen,“Codamosa:Escaping
+coverage plateaus in test generation with pre-trained large language
+models,”in45thIEEE/ACMInternationalConferenceonSoftwareEn-
+gineering,ICSE2023,Melbourne,Australia,May14-20,2023. IEEE,
+2023,pp.919–931.
+[38] S. Gao, H. Zhang, C. Gao, and C. Wang, “Keeping pace with ever-
+increasingdata:Towardscontinuallearningofcodeintelligencemodels,”
+in45thIEEE/ACMInternationalConferenceonSoftwareEngineering,
+ICSE2023,Melbourne,Australia,May14-20,2023. IEEE,2023,pp.
+30–42.
+[39] Z. Yang, F. Liu, Z. Yu, J. W. Keung, J. Li, S. Liu, Y. Hong, X. Ma,
+Z.Jin,andG.Li,“Exploringandunleashingthepoweroflargelanguage
+modelsinautomatedcodetranslation,”Proc.ACMSoftw.Eng.,vol.1,
+no.FSE,pp.1585–1608,2024.
+[40] S. Gao, C. Gao, Y. He, J. Zeng, L. Nie, X. Xia, and M. R. Lyu,
+“Code structure-guided transformer for source code summarization,”
+ACMTrans.Softw.Eng.Methodol.,vol.32,no.1,pp.23:1–23:32,2023.
+[41] Z.Li,C.Wang,S.Wang,andC.Gao,“Protectingintellectualproperty
+oflargelanguagemodel-basedcodegenerationapisviawatermarks,”in
+Proceedings of the 2023 ACM SIGSAC Conference on Computer and
+CommunicationsSecurity,CCS2023,Copenhagen,Denmark,November
+26-30,2023. ACM,2023,pp.2336–2350.
+[42] C.S.XiaandL.Zhang,“Keeptheconversationgoing:Fixing162out
+of337bugsfor$0.42eachusingchatgpt,”CoRR,vol.abs/2304.00385,
+2023.
+[43] K. Zhang, Z. Li, J. Li, G. Li, and Z. Jin, “Self-edit: Fault-aware code
+editorforcodegeneration,”inProceedingsofthe61stAnnualMeeting
+of the Association for Computational Linguistics (Volume 1: Long
+Papers), ACL 2023, Toronto, Canada, July 9-14, 2023. Association
+forComputationalLinguistics,2023,pp.769–787.
+[44] Z. Li, C. Wang, P. Ma, C. Liu, S. Wang, D. Wu, C. Gao, and Y. Liu,
+“Onextractingspecializedcodeabilitiesfromlargelanguagemodels:A
+feasibility study,” in Proceedings of the 46th IEEE/ACM International
+Conference on Software Engineering, ICSE 2024, Lisbon, Portugal,
+April14-20,2024. ACM,2024,pp.74:1–74:13.
+[45] S. Gao, C. Gao, W. Gu, and M. Lyu, “Search-based llms for code
+optimization,” in 2025 IEEE/ACM 47th International Conference on
+SoftwareEngineering(ICSE). IEEEComputerSociety,2024,pp.254–
+266.
+[46] D.Guo,Q.Zhu,D.Yang,Z.Xie,K.Dong,W.Zhang,G.Chen,X.Bi,
+Y. Wu, Y. K. Li, F. Luo, Y. Xiong, and W. Liang, “Deepseek-coder:
+Whenthelargelanguagemodelmeetsprogramming-theriseofcode
+intelligence,”CoRR,vol.abs/2401.14196,2024.
+[47] A. Lozhkov, R. Li, L. B. Allal, F. Cassano, J. Lamy-Poirier, N. Tazi,
+A. Tang, D. Pykhtar, J. Liu, Y. Wei, T. Liu, M. Tian, D. Kocetkov,
+A.Zucker,Y.Belkada,Z.Wang,Q.Liu,D.Abulkhanov,I.Paul,Z.Li,
+W.Li,M.Risdal,J.Li,J.Zhu,T.Y.Zhuo,E.Zheltonozhskii,N.O.O.
+Dade,W.Yu,L.Krauß,N.Jain,Y.Su,X.He,M.Dey,E.Abati,Y.Chai,
+N.Muennighoff,X.Tang,M.Oblokulov,C.Akiki,M.Marone,C.Mou,
+M. Mishra, A. Gu, B. Hui, T. Dao, A. Zebaze, O. Dehaene, N. Patry,
+C.Xu,J.J.McAuley,H.Hu,T.Scholak,S.Paquet,J.Robinson,C.J.
+Anderson,N.Chapados,andetal.,“Starcoder2andthestackv2:The
+nextgeneration,”CoRR,vol.abs/2402.19173,2024.
+[48] Y. Wei, Z. Wang, J. Liu, Y. Ding, and L. Zhang, “Magicoder: Source
+codeisallyouneed,”CoRR,vol.abs/2312.02120,2023.

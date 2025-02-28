@@ -1,0 +1,393 @@
+Leveraging the Learning Process in Health
+through Clinical Cases Simulator
+Cecilia D. Flores, Paulo Barros, Silvio Cazella Marta Rosecler Bez
+Graduate Program in Health Sciences
+Federal University of Health Sciences of Porto Alegre University of FEEV ALE
+Porto Alegre, RS, Brazil Novo Hamburgo, RS, Brazil
+{dtlores, pbarros, silvioc}@ufcspa.edu.br martabez@feevale.br
+Abstract-This paper presents a multi-agent learning system an interesting and practicable alternative for students in
+for health care practitioners named SimDeCS (Simulation for traditional classes.
+Decision Making in the Health Care Service). The main According to [9], medical teaching simulators may be
+contribution of this work is the system architecture, model­ understood as tools that permit educators to keep control in
+learning environment supported by artificial intelligence pre-selected clinical settings, discarding any potential risk to
+techniques, and its evaluation as a educational software. The the patient within this phase of learning. This affirmation
+SimDeCS was designed as a multi-agent system, composed by highlights the importance of the educator in creating
+three intelligent agents: Domain Agent, Learning Agent and simulations for the students in controlled environments.
+Mediator Agent. The Domain Agent implements the knowledge Once learning with real patients, different from conventional
+model by probabilistic reasoning (Bayesian networks), with the situations, not all variables can be controlled or measured.
+knowledge encoded by human experts. The pedagogical
+For this reason, simulations grant total control to the
+strategies emerge from an influence diagram, based on the educator with immediate feedback [10], reinforcing his
+student's conduct during the simulation. Some results related
+teaching in points that could have passed by unnoticed in
+with the SimDeCs evaluation are presented.
+case it attains a satisfactory conclusion.
+Keywords-SimDeCS; simulation; Artijiciallnteligence Kincaid et al. [11] present several advantages in the use
+of simulators for medical teaching such as: 1) aiding the
+student to comprehend complex relations that otherwise
+I. INTRODUCTION
+would demand expensive equipment or potentially
+It is regarded as a huge preoccupation among educators dangerous experiments; 2) bestow the application of
+to fill in the gaps between theoretical learning and the scientific and technological knowledge in an integrated and
+essential clinical practice for medical formation. The number simulated manner; 3) allow the student to search for new
+of necessary clinical situations in a real world to support the methods and strategies for the solution of a study case; 4)
+applied theory in courses in the medical area is quite large reduce the risk of authentic situations.
+and it is not always attainable in a practical way. Nowadays Besides the advantages in simulation, the emission of
+young people have a more interactive way to relate with the immediate feedback to the student strengthens his learning
+world, considering the internet as an indispensable part of and makes him ruminate and, as a consequence, forward
+their lives [1]. This technological insertion permits us to himself in the right direction when necessary. According to
+consider the use of informatics in this educational context. Botezatu [3], the feedback evaluation is a significant learning
+Instead of becoming mere appreciators of the technology, we tool.
+should associate with it by using it as a tool in the The UnA-SUS (Open University of the Health Care
+development of citizenship and in pedagogical activity [2]. System) is a project carried out by the Brazilian Ministry of
+To make use of simulation methods in clinical practice Health with the Pan-American Health Organization, along
+situations in order to reproduce difficult circumstances in the with the National School of Public Health, that tends to build
+real world, with the intent to educate, is a commotion that up conditions for the operation of a Brazilian network for
+arouses pedagogical interest [3][4][5]. Due to the fact that permanent education in health care, integrating academic
+they are techniques that imitate a real environment by means institutions that composes it with health services and the
+of analogies, the simulations become complementary to SUS management. UnA-SUS was created, by the year 2008,
+traditional teaching and present the advantage in training to fulfill the request in the formation of human resources in
+educators in the ability of experimenting an emergency state the Brazilian health care system.
+of affairs before they take place in clinical practice [6]. The UnA-SUS is a collaborative network of academic
+Authors as [7] point out that a computational simulation can institutions and, among its specific objectives, has as a
+improve learning procured in literature. According to [8], purpose to virtually offer qualification to those who work in
+asynchronous online education that figures with simulators is the health domain. The Federal University of Health
+978-1-4673-6165-1/13/$31.00 © 2013 IEEE
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:08:21 UTC from IEEE Xplore. Restrictions apply.Sciences of Porto Alegre (UFCSPA) in Brazil is one of the competition and negotiation [12]. A Multi-agent System is a
+teaching institutions that integrate UnA-SUS. computational system where two or more agents interact, or
+Simulation of real medical's cases in Web environment work together in a manner to carry out certain tasks or satisfy
+t
+as a support for the continuous formation of professionals a a set of objectives. The SimDeCS is composed of three
+service has a strategic importance as it makes possible in artificial agents and its interaction is represented in the Fig.
+upgrading the diagnostic reasoning of the student-workers 2.
+and makes them reflect.
+This paper introduces the simulator SimDeCS
+(Simulation for Decision Making in the Health Care
+Service)developed by the Research Group of Distance
+Education Teaching Health areas of the UFCSPA, which is a
+multi-agent intelligent learning environment developed as a
+serious game, with basis on probabilistic reasoning. An
+evaluation of simulator is presented.
+Next section will be devoted to present SimDeCS with
+special emphasis on general concepts on Bayesian Networks,
+Multi-agent Systems and Influence Diagram; the steps in the
+simulation construction of the SimDeCS; its interaction
+between the student and the simulator; and its evaluation
+while educational software. Finally, the paper ends with
+some fmal remarks and future work perspectives.
+II. SIMULA nON FOR DECISION MAKING IN THE HEALTH Fig. I. Bayesian Network for a headache
+CARE SERVICE
+Background
+A.
+Three important concepts that are Bayesian Networks,
+Multi-agent Systems and Influence Diagram in the area of
+Artificial Intelligence were employed for the construction of
+the Simulation for Decision Making in the Health Care Domain Agent
+Service (SimDeCS) as presented in this section.
+Due to its utility in modeling and treatment in
+uncertainty, Bayesian Networks (BN) has gained notable
+importance in the scientific world, mainly in the medical
+field [13]. Considering its frequent utilization and principally
+Actions -+
+its intimate link in the diagnostic area, Bayesian Networks -- Reports. -
+appear to be quite adequate in the use of clinical case Pedagogical
+incentives
+simulators. In a distinct direction, a discussion has been
+brought up by Pearl [14] where it is suggested that human Learning Agent Mediator Agent
+reasoning should adopt a different strategy that deviates the
+focus on the quantitative facet of the representation of Fig. 2. SimDeCS multi-agent environment
+probabilities in order to give more attention to dependency
+The Domain Agent is responsible for knowledge
+relations among variables. This brings it directly to the
+management. The fact of its being based on Bayesian
+conclusion that the structure of knowledge used for human
+networks and clinical cases of varying degrees of complexity
+evaluation is of the type of dependency graphs and that to go
+made it become modeled by expert clinicians and collected
+through the connections between its nodes consists on the
+in a repository. The Learner Agent represents the
+basic processes of research. Aligned with this impression
+leamer/user and his actions in the simulation. This agent is
+comes forward the concept of Bayesian Networks. An
+implemented by the environment interface and obtains
+example of part of a Bayesian Network for a headache used
+evidence concerning the status of the student's learning
+in the SimDeCS project is presented in Fig. 1.
+process in a way that the student can interact with the
+The Multi-agent Systems (MAS) are systems composed
+simulation. The Leamer Agent propagates collected evidence
+of multiple agents that show an autonomous behavior, but
+(signs and symptoms of patients) throughout the Bayesian
+interact at the same time with other agents present in the
+network administered by the Domain Agent that verifies the
+system. The agents exhibit two fundamental characteristics:
+course of the student's diagnostic reasoning. By means of
+1) ability to act in an autonomous way, making decisions that
+actions executed by the student as, for example, soliciting an
+head towards the satisfaction of its objectives; 2) ability to
+exam, the Domain Agent can infer the student's diagnostic
+interact with other agents by means of protocols of social
+hypothesis as well as the search for evidence in a wrong way.
+interaction inspired in humans and including at least some of
+The Mediator Agent manages the interaction between the
+the following functionalities: coordination, cooperation,
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:08:21 UTC from IEEE Xplore. Restrictions apply.two other agents and proposes Pedagogical Negotiation (PN) emerging one or more diagnosis with its respective conducts,
+[13], by means of pedagogical strategies when necessary. thus modeling the case that will be simulated by the students.
+This agent carries out decisions on how and when to interfere The clinical cases are stored in a database (DB) being
+during the student's interaction with the system. It will select composed by the selected nodes by a professor for diagnosis,
+the most appropriate pedagogical strategy to query and aid conduct and investigation stages. Additional information is
+students during their learning processes. The agent also stored in the DB regarding the clinical case, as well as
+supervises and evaluates student performance, guides the the patient's medical records. The network nodes that
+learner/user and produces assessment reports. The final compose the clinical case are stored in a format of questions
+generation of performance reports based on the corrections available during simulation. Once a question is made, the
+of investigative conducts (and not only diagnostic hits), simulator consults the BN propagated by the professor and
+wasted time and estimated cost, permits the professor to attains a reply that expresses the probability of the node at
+evaluate in these dimensions on the student's performance in that instant in a colloquial way.
+the SirnDeCS. Step 3: The Learner Agent interacts with students by
+An Influence Diagram (ID), according to [14] is visual means of a game. This game is the main form of interaction
+representation of the decision of a problem that provides an between SirnDeCS and its students, presenting clinical cases
+intuitive way and presents essential elements including and allowing students to model and submit their diagnostic
+decisions, uncertainties and objectives, and on how each one hypothesis.
+influences the other. An Influence Diagram is an acyclic Step 4: The SirnDeCS MAS architecture is shown in area
+graph directed with three types of nodes: decision (that 4, whose functionality is described in the previous
+represents decisions or alternatives), chance (representing subsection. The role of the Mediator Agent is to mediate the
+occurrences and uncertain results) and consequence interactions between the student (Learner Agent) and the
+(representing the consequence of decisions). An objective tutor (Domain Agent) at each stage of consultation with a
+combines multiple sub-objectives or attributes that can be in patient. This agent uses an ID, to select the strategy that will
+conflict such as energy costs, benefits and risk environments. display the best utility in different moments of the
+Generally the objective is uncertain where the analysis of interaction.
+decision suggests maximizing the expected value or,
+generically, an expected utility based on risk. In the
+o •
+SirnDeCS the ID is used in the selection of the best
+T
+pedagogical strategy to be offered to a student during the
+execution of a clinical case simulation. In order to select an -
+ideal message to be emitted to the student, the Mediator .. -....
+!-·��F·l
+agent of the SimDeCS analyzes two important aspects of the
+MAS.,- .,..
+student's behavior during simulation: confidence and .
+credibility. The ID represents the credibility of the simulator
+on the student which is calculated based on collected MiI@i3ah,h,iii.IGut·'3;,fifji.I. . ,M
+t t t
+variables during simulation such as creating a record of the
+=-- .... �
+patient, the number of questioned bogus nodes, and the
+investigation process, which takes into consideration the IW.. ....
+questions carried out during anamnesis, physical
+examination and complementary exams [15].
+Fig. 3. SimDeCS simulation construction process
+B. The Simulation Construction
+The steps in the simulation construction of the SirnDeCS
+Interface of the SimDeCS Simulator
+C.
+are presented in Fig. 3 where, in the sequence, each number
+The medical student can make use of the SirnDeCS as a
+refers to a specific step.
+complementary tool in order to facilitate the development of
+Step 1: the specialist structures the knowledge of the
+medical domain in a Bayesian Network (BN) by using his technical abilities and competence concerning formulated
+diagnosis by following his own learning rhythm. The
+Clinical Guidelines as a basic source. These guidelines
+attempt to compile the best available evidence in pertinent medical diagnosis formulation process can be seen composed
+by certain steps such as: medical interview, physical exam,
+clinical problems towards primary attention and are made
+available through the Brazilian Society of Family Medicine formulation of diagnostic hypothesis, and a requisition (or
+not) of complementary exams. Once with the diagnosis at
+and Community (SBMFC) in the form of texts, tables and
+hand, the physician elaborates the conduct that may be the
+flux sheets. Some of the SBMFC guidelines have been
+prescription of a certain medication, the solicitation of new
+adopted to be modeled by Bayesian networks within the
+exams, or forwarding to a specialist [16]. The interaction
+SimDeCS project.
+between the student and the SirnDeCS is done by means of a
+Step 2: Clinical cases are developed by a professor and
+virtual environment where the "dialog" is built amid the
+represented in a BN that was previously built by the domain
+student and the patient. The Fig. 4 presents the SirnDeCS
+expert. Once symptoms and signs are freely made available
+simulator interface.
+on the BN, the professor propagates probabilities by
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:08:21 UTC from IEEE Xplore. Restrictions apply.III. EVALUATION OF SIMDECS Aiming to evaluate the simulator tool SimDeCS as
+educational software, a workshop was held with the sample
+The SimDeCS was evaluated in terms of technical
+of 24 people, composed by 13 doctors, 05 teachers, 05
+quality and usability, complying with Brazilian standard
+undergraduate students and 01 graduate student. It should be
+ISO/IEC 14598-6 [17], which recommends a minimum of
+noted that this sample is in a non-probabilistic sample, i.e. it
+eight evaluators. This standard evaluates the software's
+was composed for the convenience of researchers. During
+functionality, reliability, usability, efficiency, maintainability
+the workshop, all reported having computer knowledge and
+and portability, while each characteristic is composed of sub­
+frequently used software like word processors, spreadsheets,
+characteristics that total the items evaluated by the experts.
+presentation software and Internet. A questionnaire was
+The evaluation instrument was developed based on two
+designed to allow data collection is divided in six blocks of
+previous studies that focused on the evaluation software for
+health care, [18][1 9].
+q� imI?estions seeking to assess: 1) the methodology used
+S eCS, 2) features, 3) reliability, 4) usability, 5)
+effiCIency and 6) learning provided by the simulator. A 5-
+point Likert scale was used in the questionnaire, and a value
+of 1 means "Strongly Disagree" and the value 5 means
+"Strongly Agree". Table I presents a compilation of
+responses from participants.
+Fig. 4. Interface ofthe SimDeCS
+TABLE\ , PARTICIPANTS' ANSWERS IN THE EVALUATION OF SIMDECS
+Strongly Agree Indifferent Disagree Totally
+A2ree disagree
+Methodolo2V applied in the simulator
+The simulator facilitates the thinking of a diagnosis based 24
+on evidence.
+The simulator provides an easy indication of conduct based 22 2
+on the evidence and diagnostics.
+The resources available are not sufficient for the study of a 21 I 2
+clinical case.
+The presentation of feedback allowing the student to return 22 2
+to a question and correct, facilitates learning,
+At the end ofthe service the simulator provides students 23 I
+with an opportunity to review the process of resolving the
+clinical case, allowing a better understanding and learning
+content.
+Features of the Simulator
+The initial description and sequential simulator is clear and 22 I I
+objective, leading the player to understand what must be
+done.
+The software has features that enable proper execution of 22 2 I
+the simulator.
+I realize the consistent and reliable information Simulator. 21 3
+The simulator is accurate in partial and final results. 17 4 3
+The simulator is available by internet. 20 3 I
+In the simulator are not met the ethical and moral health. 20 3 I
+The Simulator provides access security by passwords and 19 5
+different profiles.
+Reliability in the use of the Simulator
+The simulator has errors frequently. 14 6 4
+The simulator reports clearly when errors occur. 9 II 4
+The simulator informs the user about invalid data input. 14 7 3
+The simulator is able to recover data in case of failure. 6 15 3
+Usability of the Simulator
+The simulator's interface facilitates its use intuitive. 19 3 2
+The functions in the simulator are easy to perform. 21 3
+The simulator is easy to learn and use. 21 3
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:08:21 UTC from IEEE Xplore. Restrictions apply.Strongly Agree Indifferent Disagree Totally
+Aeree disaeree
+It is easy to operate and control the simulator. 20 I 3
+There is clarity in help content presented during the 19 I 4
+execution of the simulator.
+Efficienc of the Simulator
+The response time in interactions with the simulator is 21 3
+suitable.
+The execution time of each case is adequate. 21 I 2
+Learning using the Simulator
+The simulator allows the user to retain knowledge. 20 4
+The Simulator is a motivational tool for learning. 23 I
+The feedback from the simulator is suitable to the student. 19 I 4
+The simulator allows greater student participation, 21 3
+interfering in the pedagogical relationship teacher X
+student.
+The simulator does not encourage students to study 22 2
+independently.
+The simulator can be used as an effective resource in 22 2
+medical education.
+The Table II presents some comments about the project. The kernel of the simulation tools is therefore
+SimDeCS. composed by Bayesian networks where knowledge is
+modelled by professionals in the health care area through
+TABLE II. COMMENTS FROM PARTICIPANTS ABOUT THE EVALUATION clinical guidelines set up by the Brazilian Society of Family
+SIMDECS Medicine and Community.
+I "I really enjoyed taking part in this study. The simulator can The use of a multi-agent architecture in this type of
+greatly assist clinicians in resolving cases that require further situation makes its implementation possible, mainly in Web
+analysis, providing data in the literature to think. developing environments, modularizing development and
+Important also the literature reviews that are available, facilitating generating a final product of greater quality and scientific
+a quick search for information ... "
+relevance.
+2 "1 think it is very dynamic, and promotes learning. '
+Several works have been devoted to this purpose
+3 "It gives tips to really rethink what we set up as data makes us
+think of the proposed clinical situation ... " counting with professionals in the health care area to model
+4 "I really enjoyed, makes us imagine a real situation and to facilitate the specific knowledge in Bayesian networks, which also
+the diagnostic methodology used in everyday life." includes experts in the computational area modelling agents,
+and specialists in education, all working with pedagogical
+IV. FINAL REMARKS AND FUTURE WORK tactics to forward along with professionals in the area of
+Simulators have become widely adopted support tools for simulators in the front-end development or friendly user
+the education and continuing medical development of health interface.
+care professionals. Several aspects contribute to this, namely, As to the system itself, it is at its final stage of
+the simulation model is close to the clinical experience, users development with three networks (headache, dyspepsia and
+can interact with virtual characters (avatars) representing real parasitosis), making it possible to mold around 80 clinical
+life characters involved in a clinical history, and the cases by professors who care to delineate each personal case.
+interactive clinical case simulation directly observes and Ten clinical cases alone have been prepared for the headache
+records clinical decision-making in real time. Moreover, network for the students to exercise.
+interactive clinical case simulation can provide a safe In the evaluation of SirnDeCS observed that the sample
+environment for problem based learning as it simulates that participated in the Workshop believes that it presents
+virtually the diagnosis and treatment phases of the real quality when it comes to leaming. It appears that according
+clinical process. to assessments obtained, 84% of sampled believe that the
+The SimDeCS simulation tool has been developed to simulator enables the user to retain knowledge, 96% consider
+offer monitoring of the user/medical student during the the simulator as a motivational tool for learning, 86%
+simulation process, providing feedback and guidance on the consider that the simulator allows for greater student
+clinical decisions made, by means of intelligent agents, in participation, interfering the pedagogical relationship
+order to discharge pedagogical tactics, and recording teacher-student, 92% believe that the simulator can be used
+automatically the clinical reasoning of the user/learner as as an effective remedy in medical education. The average
+well as the time spent, thus allowing for assessment of the satisfaction with the methodology applied, according to the
+user/player performance. ratings obtained was 94% and the average satisfaction with
+Bayesian networks and Influence Diagram are adequate the implemented features was 84% and the average
+to model knowledge and to support reasoning under satisfaction with the usability was 79% and the average
+uncertainty knowledge modelling, under the purposes of the
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:08:21 UTC from IEEE Xplore. Restrictions apply.satisfaction with efficiency was 88%, and finally the average [8] N. Jong, D. M. L. Verstegen, F. E. S. Tan, and S. J. O'Connor, "A
+satisfaction with reliability was 45%. comparison of classroom and online asynchronous problem-based
+learning for students undertaking statistics training as part of a Public
+The results show the suitability of applying simulators
+Health Masters degree". Advances in Health Sciences Education,
+with the characteristics presented in the teaching-learning
+April 2012,. doi 10.1007/sI0459-012-9368-x.
+process in the medical area, becoming real and effective in [9] A. Ziv, S. Ben-David, and M. Ziv, "Simulation Based Medical
+augmenting the learning process in health. The results Education: an opportunity to learn from errors". Medical Teacher,
+described are to be interpreted based on the sample applied 2005, vol. 27, issue 3, pp.193-199.
+was not probabilistic. [10] A. Clay, 1. Que, E. Petrusa, M. Sebastian, and J. Govert, "Debriefing
+As future work we intend to validate the SimDeCS in the intensive care unit: a feedback tool to facilitate bedside
+simulator tool within the teaching-learning process, i.e., teaching". Critical Care Medicine, March 2007, vol. 35, issue 3, pp.
+738-754. doi: 10.10 97/0I.CCM.0000257329.22025.18
+include in the same subjects and use them as teaching tools,
+[II] 1. P. Kincaid, R. Hamilton, R. W. Tarr and H. Sangani "Simulation in
+filling in an efficient and productive, the gap between theory
+Education and Training" in Applied System Simulation:
+and practice in training physicians. Methodologies and Applications, Chapter 19, M. S. Obaidat, 1. P.
+Georgios Eds. Boston: Kluver, 2004, pp. 437-456.
+ACKNOWLEDGMENT [12] M. Wooldridge and N. Jennings, "Pitfalls of Agent-Oriented
+The authors gratefully acknowledge the Brazilian Development", Proc. International Conference on Autonomous
+Agents" New York: ACM Press, 1998. pp. 385-391. Available at:
+agencies, CAPES and Ministry of HealthlUnA-SUS, for the
+<http://portal.acm.org/citation.cfm?doid=280765.280867>.
+partial support to this research project.
+[13] C. D. Flores, L. Seixas, 1. C. Gluz, and R. M. Vicari, "A Model of
+Pedagogical Negotiation" in Progress in Artificial Intelligence:
+REFERENCES Lecture Notes in Computer Science, C. Bento, A. Cardoso, and G.
+[I] D. M. Cruz and L. F. KrugUer. "Games (virtual) simulation of life Dias Eds. Heidelberg:Springer, Volume 3808, 2005, pp. 488-499.
+(real): Generation Y and The Sims. (logos (virtuais) de simula<;ao da [14] 1. Pearl, "Probabilistic Reasoning in Intelligent Systems". San
+vida (real): a gera<;ao Yeo The Sims)". Proc. Congresso Brasileiro Francisco:Morgan Kaufmann ,. V. I. 2 ed. p.552.
+de Ciencias da Comunica<;ao, 27, 2004. Porto Alegre. Sao Paulo: [15] M. R. Bez, C. D. Flores, J. M. Fonseca, V. Maroni, P. R. Barros and
+Intercom, 2004. CD-ROM. R. M. Vicari, Influence Diagram for Selection of Pedagogical
+[2] P. Freire, Pedagogy of autonomy; knowledge necessary for Strategies in a Multi-Agent System Learning. Advances in Artificial
+educational practice (Pedagogia da autonomia; saberes necessarios il Intelligence-IBERAMIA 2012. Springer Berlin Heidelberg, 2012. pp.
+priltica educativa). Sao Paulo: Paz e Terra, 1996. 621-630.
+[3] M. Botezatu, H. Hult, and U. G. Fors, U. G., "Virtual patient [16] R. Epstein, Assessment in medical education. New England Journal
+simulation: what do students make of it? A focus group study", BMC of Medicine, 2007, vol. 356, issue 4, pp.387-396.
+Med Educ. 2010 Dec 4;1 0:91. doi: 10.1186/14 72-6920-10-9\. [17] Associa<;ao Brasileira de Norrnas Tecnicas (ABNT). NBR ISO/IEC -
+[4] A. Holzinger, W. Emberger, S. Wassertheurer, and L. Neal, 1. 14598-6. Software engineering: Product Review: Part 6:
+(2008). Design, development and evaluation of online interactive Documentation of evaluation modules. Rio de Janeiro: ABNT, 2004.
+simulation software for learning human genetics. e&i Elektrotechnik [18] R. Jensen, M. H. B. M. Lopes, P. S. P. Silveira and N. R. S. Ortega,
+und Informationstechnik, May 2008, vol. 125, issue 5, pp. 190-196. The development and evaluation of software to verify diagnostic
+[5] S. 1. Smith, and C. 1. Roehrs, "High-fidelity simulation: Factor accuracy. Rev. esc. enferm. USP [online], 2012, vo1.46, n.l, pp. 184-
+correlated with nursing student satisfaction and self-confidence". 191. Available at: <http://www.scielo.br/pdf/reeusp/v46nI /
+Nursing Education Perspectives, 2009, vol. 30, issue 2, pp. 77-78. en_v46nla25.pdf>
+[6] P. G. Stanford, "Simulation in Nursing Education: a review of the [19] M. Botezatu, H. Hult, M. Tessma and U. Fors, Virtual Patient
+research". The Qualitative Report. Nova Southeastern University - Simulation: knowledge gain or knowledge loss? Med Teach 2010,
+Florida -USA, 2010, vol. 15, Issue 14. vo1.32, issue 7, pp. 562-568.
+[7] N. Rutten, W. R. Joolingen, and J. T. Veen, "The learning efets of
+computer simulations in Science education", Computer & Education,
+Jan 2012, vol. 58, issue I, pp.136-153.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:08:21 UTC from IEEE Xplore. Restrictions apply.

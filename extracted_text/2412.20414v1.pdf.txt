@@ -1,0 +1,267 @@
+ComparativePerformanceofAdvancedNLPModelsandLLMsinMultilingualGeo-EntityDetection
+KALIN K. KOPANOV
+ModelingandOptimizationDepartment,InstituteofInformationandCommunicationTechnologies–BulgarianAcademyof
+Science,Sofia,Bulgaria,kalin.kopanov@iict.bas.bg
+TheintegrationofadvancedNaturalLanguageProcessing(NLP)methodologiesandLargeLanguageModels(LLMs)hassignificantlyenhanced
+the extraction and analysis of geospatial data from multilingual texts, impacting sectors suchasnationalandinternationalsecurity.Thispaper
+presentsacomprehensiveevaluationofleadingNLPmodels—SpaCy,XLM-RoBERTa,mLUKE,GeoLM—andLLMs,specificallyOpenAI'sGPT3.5
+andGPT4,withinthecontextofmultilingualgeo-entitydetection.UtilizingdatasetsfromTelegramchannelsinEnglish,Russian,andArabic,we
+examine the performance of these models through metrics such as accuracy, precision, recall,andF1scores,toassesstheireffectivenessin
+accuratelyidentifyinggeospatialreferences.Theanalysisexposeseachmodel'sdistinctadvantagesandchallenges,underscoringthecomplexities
+involvedinachievingprecisegeo-entityidentificationacrossvariedlinguisticlandscapes.Theconclusionsdrawnfromthisexperimentaimtodirect
+the enhancement and creation of more advanced andinclusiveNLPtools,thusadvancingthefieldofgeospatialanalysisanditsapplicationto
+globalsecurity.
+CCS CONCEPTS • Computing methodologies~Artificial intelligence~Natural language processing~Information extraction •
+Information systems~Information retrieval~Evaluation of retrieval results • Security and privacy~Human and societal aspects of
+securityandprivacy~Usabilityinsecurityandprivacy
+AdditionalKeywordsandPhrases:NaturalLanguageProcessing(NLP),LargeLanguageModels(LLMs),NamedEntityRecognition
+(NER),geospatialentityrecognition,F1Score,SpaCy,XLM-RoBERTa,mLUKE,GeoLM,OpenAIGPT3.5,OpenAIGPT4
+1 INTRODUCTION
+In recent years, the field of Artificial Intelligence (AI), with Natural Language Processing (NLP) as a pivotal branch, has seen a
+surge of innovation, driven by the emergence of cutting-edge models and computational techniques. These advancements have
+profoundly transformed our capacity to parse, comprehend, and infer from human language, marking asignificantleapforwardin
+both academic research and practical applications. A notable advance istheapplicationofNLPingeospatialanalysis,particularly
+geoparsingandeventdetection,whichunderscorestheutilityoftextualdatainextractinglocation-specificinformation.
+The introduction of transformer-based architectures, notably BERT and its derivatives, has been a cornerstone in NLP's
+evolution. These models leverage deep learning to process large datasets, capturing subtle nuances of language that were
+previously inaccessible. FormultilingualNLP,modelssuchasXLM-RoBERTarepresentasignificantmilestone,facilitatingaunified
+approach to processing multiple languages, reducing the need for language-specificresources,andfacilitatingmoreinclusiveand
+globalanalysisoftextualdata.
+Models like mLUKE andGeoLMextendNLP'scapabilitiesbyembeddingentityandgeospatialknowledgedirectlyintolanguage
+processing.Nevertheless,itisstillarguablehowthesemodelsperformagainstotheradvancedmodelslikeXLM-RoBERTainterms
+ofefficiencyinlocation-specifictasks.Thiscomparisonunderscorestheongoingdiscussionabouttheoptimalintegrationofspecific
+domainknowledge,suchasgeographicalinformation,withintheNLPfield.
+The integration of Large Language Models (LLMs) like OpenAI's GPT-3.5 and GPT-4 into workflows significantly enhances
+NLP's ability to detect geospatial references, showcasing sophisticated context understanding. These models can discern subtle
+cues that indicate location, making them invaluable for tasks such as monitoring real-time events or analyzing data from social
+mediaplatforms.
+This paper presents a pivotal case study that evaluates the performance of advanced NLP models and LLMs in identifying
+locations within multilingualTelegramdatarelatedtoongoingconflicts,suchasthoseintheMiddleEastandtheRussian-Ukrainian
+Conflict. By examining content in English, Russian, and Arabic, this research assesses the efficacy of current technologies in
+multilingual environments and explores their potential contributions to crisis management, humanitarian response, andsituational
+awareness.
+Furthermore, this examination ofconflict-basedcontentunderscoresthecriticalimportanceofadvancedNLPmodelsinthefield
+of national and international security. These technologies enhance our understanding and monitoring capabilities, holding the
+potential to inform and refine security monitoring, concerns, and actions on a global scale. Our goal is to assess these models
+based on accuracy and F-1 scores, providing a comprehensive analysis of their capabilities in geospatial and event-related
+informationextractionfromdiverselinguisticsources.
+2 RELATEDWORK
+Historically, Named Entity Recognition (NER) for locations relied on rule-based systems that utilized external sources, such as
+dictionaries and gazetteers [1]. These systems struggled with languageambiguityandlackedscalability,particularlyinmultilingualcontexts.TheshifttowardsadvancedNLPmodels,exemplifiedbySpaCy'shybridmethodthatmergesruleswithmachinelearning,
+hassignificantlyenhancedNER'sefficiencyandscalabilityacrosslanguages.
+Advancements in pretrained language models (PLMs), including XLM-RoBERTa [2], LUKE [3], and mLUKE [4], have enabled
+cross-lingual learning and entity-aware processing,therebyimprovingtheprecisionandcontextsensitivityessentialforNERtasks.
+Furthermore, the debut of GeoLM [5] has propelled NLP's ability torecognizegeospatialentitiesbyusinggeographicallyenriched
+training datasets. Likewise, the emergence of GPTmodels,suchasOpenAI’sGPT3.5andGPT4,hasbroadenedNLP'sscopein
+textgenerationandcomprehension,facilitatingthedetectionofsophisticatedgeo-entitiesamongotherapplications.
+3 MODELSANDDATA
+A critical component of our research involves selecting high-performing NLP models and LLMs that can provide robust and
+accurate entity detection. In pursuit of this goal, we have chosen to include a diverse array of models in our comparative study:
+SpaCy, XLM-RoBERTa, mLUKE, GeoLM, OpenAI's GPT 3.5, and GPT 4. These models have been selected for their advanced
+capabilitiesandproveneffectivenessinvariousNLPtasks,includingbutnotlimitedtoentitydetectionacrossmultiplelanguages.
+3.1 SpaCy
+Among the numerous options available,SpaCy,aleadingopen-sourcelibraryforadvancedNLP,standsoutasanexcellentchoice
+for several reasons. SpaCy is renowned for its speed and efficiency, making it highly suitable for large-scale NLP tasks.
+Furthermore, it offers a wide range of pre-trained models tailored for different languages [6], which are essential for our
+comparative study. The library's emphasis on providing models optimized for real-world applications aligns perfectly with our
+researchobjectives.
+For our study, we selected the following SpaCy language models: English (en_core_web_md, v3.7.1), Russian
+(ru_core_news_md, v3.7.0), and Multi-language (xx_ent_wiki_sm, v3.7.0). The latter is specifically designed for processing
+unsupportedlanguages,suchasArabic(presumably),withanexclusivefocusonNER.
+3.2 XLM-RoBERTa
+In our geo-entity detection research, we employ the“xlm-roberta-large-finetuned-conll03-english”[7]modelforitsNERcapabilities
+in English, derived from fine-tuning on the CoNLL-2003 dataset. This process leverages the model's extensive pretraining onthe
+2.5TBCommonCrawlcorpus,ensuringpreciseentityidentificationwithinEnglishtexts.
+For analyzing texts in other languages,includingRussianandArabic,thestudycontinuestoutilizethelattermodel.Despitethe
+fine-tuning on English NER tasks, the model's underlying performance for non-English languages is supported by the broad
+linguistic knowledge embedded in the original “xlm-roberta-large” architecture. This extensive pretraining provides a robust
+foundation for accurate geo-entity recognition across languages, allowing the model to apply its generalized cross-lingual
+capabilitiestoawiderangeoflinguisticcontexts.
+3.3 mLUKE
+Our methodology integrates mLUKE with SpaCy to enhance NER by leveraging SpaCy for initial entity detection and character
+span identification in unstructured texts. This integration allows for precise entity extraction, crucial for mLUKE's advanced
+entity-centricprocessingacrosslanguages.mLUKE,buildingonLUKE'sprinciplesandincorporatingXLM-RoBERTa'scross-lingual
+capabilities, extends its application to a broader linguistic scope. The process begins with language detection, where SpaCy's
+targeted models for detected language undertake efficient NER tasks. Subsequently, the character spans detected bySpaCyare
+aligned with mLUKE's required token spans, using the “studio-ousia/mluke-large-lite-finetuned-conll-2003” model [8], facilitating a
+seamlesstransitiontoin-depth,language-specificanalysis.
+3.4 GeoLM
+The GeoLM model plays a critical role inthefieldofgeospatiallyinformedNLPbyadvancingtheaccuracyoftoponymrecognition.
+Pre-trained on a rich amalgamation of datasets including OpenStreetMap (OSM), WikiData, and Wikipedia, and subsequently
+fine-tuned on the GeoWebNews dataset, the model is instantiated through the “zekun-li/geolm-base-toponym-recognition”
+implementation[9].TailoredspecificallyfortheEnglishlanguage,thismodeldemonstratesexceptionalproficiencyinidentifyingand
+classifying geographical names within English narratives, thereby showcasing its capability to process geospatial information
+embeddedinnaturallanguageeffectively.
+However, the model's English-centric optimization does pose limitations on its applicability to texts in other languages,
+attributable to the distinct linguistic structures, toponymic conventions, and geospatial nuances inherent to eachlanguage.These
+constraints underscore the need for adaptation or extension of the GeoLM model to ensure its utility across a broader linguistic
+spectrum.3.5 OpenAI'sGPT3.5andGPT4
+Our study utilizes OpenAI's LLM, GPT-3.5 and GPT-4, to automate the recognition of geographical entities in NER tasks. These
+models excel at identifying and classifying geographical names—such as cities, countries, and landmarks—across multiple
+languages, enhancing the extraction of location-based information from text. Their multilingual capabilities are particularly
+advantageous for geographical NER, allowing for broad application in global contexts without the need for language-specific
+optimizations.
+For empirical validation, the experiment employs “gpt-3.5-turbo-0125” and “gpt-4-0125-preview” models accessedviaAPI[10].
+A custom prompt directs these models to focus on geographical locations, ensuring output precision by filtering out irrelevant
+elements. This approach demonstrates themodels'abilitytoaccuratelyprocessandextractgeographicalentities,highlightingtheir
+significanceinadvancingNLP'sroleingeospatialanalysis.
+3.6 Data
+To evaluate the performance of NLP models and LLMs in detecting geo-entities across multiple languages, we curatedadataset
+from diverse, multilingual Telegram channels, focusing on January and February 2024. This dataset encompasses geopolitical
+discourse, news aggregation, and global event analysis in English, Russian, andArabic,providingacomprehensivelinguisticand
+culturalspectrum.
+Our dataset includes posts from the following languages: for English,weextracted840postsfromIntelSlavaZ[11],aRussian
+news aggregator focusing on global conflicts and geopolitics, and 214 posts fromTheRageX[12],whichanalyzesglobalevents.
+The Russian segment comprises 2,406 posts from Два майора (Dva Mayora) [13], providing extensive content for analysis. For
+Arabic, 1,065 posts were sourced from ةدﯾدﺣﻟا ﻲﻣﻼﻋﻹا زﻛرﻣﻟا (ALHodeidah Media Center) [14], the media wing of Ansar Allah in
+Yemen, offering continuous coverage of local developments. This diverse compilation from Telegramchannels,spanningEnglish,
+Russian, and Arabic, supplies a rich corpus for exploring linguistic and semantic nuances in geo-entity detection, crucial for
+understandingglobalconflictsandtheirimpactsthroughmediacoverage.
+It's essential to note that the channels selected for this study serve merely as a real-world sample and are not intended to
+measure their bias, reach or importance. Instead, they are used to visualize the importance of media coverage in creating
+awareness about conflict situations, showcasing the potential of advanced NLP and LLM technologies in processing and
+interpretingmultilingualdataforgeopoliticalanalysis.
+4 EVALUATION
+The empirical validation of our research isanchoredinadetailedevaluationframework,utilizingacustomPythonscripttoanalyze
+text data extracted from identified Telegram channels. This script leverages a suite of models—SpaCy, XLM-RoBERTa, mLUKE,
+GeoLM, OpenAI's GPT 3.5, and GPT 4—to parse multilingual content and identify geographical entities. These models were
+chosenfortheirprovenefficacyinNLPtasks,abilitytoprocessmultiplelanguages,andinnovativeentitydetectionmethodologies.
+4.1 DataProcessing
+Initially, the script preprocesses the raw data by applying normalization techniques. This step is crucial for mitigatingvariationsin
+formatting and encoding across languages, ensuring that all models operate on a uniform dataset. Subsequently, the script
+employs each model sequentially to identifylocationmentionswithinthecontent.Itensuresthattheobserveddifferencesinoutput
+accuratelyreflecttheinherentcapabilitiesandlimitationsofeachmodel.
+4.2 EvaluationMetrics
+In order to quantitatively assess the performance of the models in detecting geographical entities, our evaluation relies on three
+fundamental metrics: Precision, Recall, and F1 Score. Each metric provides a unique lens through which the effectivenessofthe
+modelscanbescrutinized:
+1. Precision: This metric measurestheaccuracyofthemodelinidentifyingpositiveinstances.Itquantifiestheratioofcorrectly
+identified geographical entities (True Positives) tothetotalnumberofentitiesthemodelidentified(sumofTruePositivesand
+FalsePositives).Highprecisionindicatesthatamodeliseffectiveinminimizingfalsepositives.Theformulaforprecisionis:
+Precision=(TruePositives)/(TruePositives+FalsePositives)
+2. Recall: This metric evaluates the model's ability to identify all relevant instances within the dataset. It is calculated as the
+ratio of True Positives to the total actual positives (sum of True Positives and False Negatives). High recall impliesthatthe
+model effectively minimizes false negatives, capturing a higher proportion of actual geographical entities. The formula for
+recallis:Recall=(TruePositives)/(TruePositives+FalseNegatives)
+3. F1 Score: Serving as the harmonic mean of Precision and Recall, the F1 Score provides a single metric to assess the
+balance between Precision and Recall. It is particularly useful when the cost of falsepositivesandfalsenegativesvariesor
+when one seeks a balance between identifying as many positives as possiblewhileminimizingincorrectidentifications.The
+F1Scoreisdefinedas:
+F1Score=2*(Precision*Recall)/(Precision+Recall)
+To ensure the accuracyofthesemetrics,eachgeographicalentityidentifiedbythemodelswassubjectedtomanualverification.
+Thisrigorousvalidationprocessallowedustoaccuratelycategorizetheresults,providingarobustfoundationforourcalculations.
+These metrics collectively offer a comprehensive view of each model's performance across the dataset,enablingustoidentify
+strengthsandweaknessesinthecontextofmultilingualgeo-entitydetection.
+4.3 AccuracyAssessment
+The accuracy of each model was evaluated based on its ability to correctly identify geographical entities acrossthedataset.This
+assessment involved calculating the precision, recall, and F-1 score for each model, thereby providing a balanced view of each
+model’sperformance.Thesecalculationshighlighttheirstrengthsandareasforimprovementingeo-entitydetection.
+4.4 ResultsInterpretation
+The results from this evaluation offer invaluable insights into the comparative performance of advancedNLPmodelsandLLMsin
+the domain of multilingual geo-entity detection. By analyzingtheTruePositives,FalsePositives,andFalseNegativesratesacross
+different models and languages, we discern patterns ofeffectiveness,biases,andlimitationsinherenttoeachmodel.Thisdetailed
+analysisnotonlybenchmarksthecurrentstate-of-the-artbutalsopavesthewayfortargetedimprovementsinNLPtechnologiesfor
+geospatialanalysis.
+In additiontoanarrativeinterpretation,theinclusionoftablesorgraphssummarizingtheevaluationresultsisplanned,makingit
+easier for readers tocomparetheperformancemetricsacrossmodels.Thefindingsfromthisevaluationareanticipatedtohighlight
+potential areas for improvement in model accuracy,processingefficiency,andmultilingualadaptability,guidingfutureresearchand
+developmentinNLPtechnologiesforenhancedgeospatialanalysis.
+5 ANALYSISANDRESULTS
+In this section, we delve into the comprehensive analysis of the performance of various NLP models and LLMs in recognizing
+location entities across English, Russian, and Arabic languages, as detailed in Table 1, to elucidate the nuanced capabilitiesand
+limitationsrevealedthroughourevaluationprocess.
+Table1:NERevaluationbasedonlocationentitiesforEnglish,RussianandArabic
+English Russian Arabic
+Model Precision Recall F1Score Precision Recall F1Score Precision Recall F1Score
+SpaCy 0.87 0.89 0.88 0.75 0.92 0.83 0.00 0.00 0.00
+XLM-RoBERTa 0.83 0.98 0.90 0.85 0.97 0.91 0.78 0.93 0.84
+mLUKE 0.87 0.87 0.87 0.84 0.87 0.86 0.00 0.00 0.00
+GeoLM 0.54 0.96 0.69 0.22 0.11 0.15 0.00 0.00 0.00
+OpenAI's GPT 0.73 0.48 0.58 0.48 0.66 0.55 0.38 0.16 0.23
+3.5
+OpenAI'sGPT4 0.86 0.94 0.90 0.85 0.96 0.90 0.77 0.71 0.74
+aThebestresultforeachmetricandlanguageishighlightedinbold,whilethesecond-bestresultisindicatedwithanunderlinetofacilitateeasycomparisonofthe
+models'performance.
+Our evaluation reveals insightful patterns regarding the performance of advanced NLP models and LLMs in detectinglocation
+entities across thethreelanguages.Notably,whiletheprecisionofXLM-RoBERTaandOpenAI'sGPT-4isn'tthehighestinEnglish,
+they both achieve the best F1 scores, indicating a balanced performance between precision and recall. This balance is criticalin
+practical applications where both identifying as many relevant entities as possible (high recall) and ensuringtheentitiesidentified
+are correct (high precision) are crucial. mLUKE and SpaCyalsodemonstratecommendableperformanceinEnglish,underscoring
+theireffectivenessinhandlinglocationentitieswithinthislanguage.
+In the Russian context, XLM-RoBERTa and GPT-4 continue to excel, showcasing their robustness and adaptability across
+different linguistic frameworks. mLUKE and SpaCy maintain good results, suggesting that their methodologies are somewhateffective in Russian language processing as well. However, it's important to highlightthecontrastinperformanceforSpaCywhen
+analyzing Arabic texts. The Multi-language Model of SpaCy, which significantly underperformed in Arabic, suggestsalimitationin
+the model's ability to handle the linguistic complexities of Arabic. This limitation also adversely affects mLUKE, as it relies on
+SpaCyforinitialspandetection,indicatingtheimportanceoftheunderlyingNERcapabilitiesinmulti-languagemodels.
+While GeoLM is designed to bridge the gap between NLP and geospatial sciences, ourresultsindicateanotableperformance
+disparity across languages, with significant dropsinF1scoresforRussianandArabiccomparedtoEnglish.Thisstarkcontrastnot
+only highlights the model's limitations in cross-lingualtransferforgeospatialentityrecognitionbutalsounderscoresthepreliminary
+nature of our findings. Further research is essential to fully understand these multilingual capabilities and toenhancethemodel's
+effectivenessacrossabroaderspectrumoflanguages.
+It's worth to note that both GeoLM and mLUKE are constrained by a 512-token limit, which significantly impactstheirabilityto
+process and accurately identify location entities in longer texts,alimitationevidenteveninourdatasetofbriefTelegrampoststhat
+occasionallyexceedthislength.
+OpenAI's GPT-3.5 presents a case of mediocre performance across the board. In separate tests, GPT-3.5 exhibited
+inconsistencies in detecting location entities, which we assess is the possible reason that led to lower overall scores. This
+inconsistency might be attributed to the model's general-purpose design,which,unlikemodelsfine-tunedforspecificNLPtasksor
+languages,maystrugglewiththenuancedrequirementsofgeospatialentityrecognition.
+An interesting observation from our evaluation pertains to the models' handling of multi-word location entities, unconventional
+terminology, andoffensivewords.Weencounterednumerousinstanceswherelocationswerecomposedofmultiplewords,suchas
+“Beirut RaficHaririInternationalAirport”ortheRussian“КрасноеШебекинскогогородскогоокруга”(Krasnoevillage,Shebekinsky
+District), posing a significant challenge for models to accurately recognize and classify these as single entities. Additionally, the
+detection of slang, made-up words, and offensive terms as locations further complicates the task. For example, the derogatory
+“Свинорейх” (acontemptuoustermforUkrainepost-Euromaidan)andtheArabicphraseﻲﻧﻮﯿﮭﺼﻟانﺎﯿﻜﻟا(commonlyusedtodenigrate
+the Israeli state by referring to it as a “Zionist entity” rather than a country) highlight another layer ofcomplexity.Theseinstances
+likely stem from the models' reliance on tokenization and the presence (or absence) of specific terms within their training
+dictionaries, rather than a comprehensive understanding of context or the ability to discern between standard, pejorative, and
+offensive geographic references. These findings underscore the importance of advanced tokenization techniques, context-aware
+processing, and ethical considerations in enhancing the accuracy of geospatial entity recognition across diverse linguistic and
+culturallandscapes.
+6 CONCLUSION
+Our findings highlight several important considerations for future NLP andLLMresearchandapplications.ThesuperiorF1scores
+of XLM-RoBERTa and GPT-4 underscore thevitalimportanceofachievingabalancebetweenprecisionandrecall.Thisbalanceis
+crucial for accurately identifying a broad spectrum of relevant entities while minimizing inaccuracies, which is indispensable in
+real-world cases across various contexts. Such scenarios include extracting locations from diverse internet sources as part of
+efforts in areas like national security, where the ability toquicklyandaccuratelyidentifyandanalyzegeospatialinformationcanbe
+pivotal. These capabilities allow for assessing threats, situation awareness, and informing decision-making processes in a timely
+andefficientmanner.
+The observed variability in model performance across languages underscores the inherent complexity of developing truly
+multilingual solutions. It signals an opportunity for substantial advancements through targeted research on cross-lingual training
+and architecture optimization. The potential to achieve even greater accuracy and recall by leveraging the complementary
+strengths of models like XLM-RoBERTa and GPT-4, whether through tandem use or enhanced coherence in their applications,
+represents a promising avenue for future work. Implementing such strategies could involve using XLM-RoBERTa for initial text
+understanding and entity recognition across languages, complemented by GPT-4 for tasks requiring advanced text generation,
+contextualnuance,ordecision-makingbasedontherecognizedentitiesandcontext.
+While integrating these models presents challenges, exploring strategies for effective synergy could revolutionize the
+development of more accurate, versatile, and culturally aware NLP and LLM systems. Additionally, the continuous improvement
+and testing of other models, including those like SpaCy's, GeoLM, and mLUKE, should not be overlooked. With the right
+enhancements and fine-tuning, these models have the potential to significantly contribute to the diversity and capability of NLP
+solutions, ensuring a comprehensive approach to addressing the wide range of linguistic and cultural challenges encountered in
+thefield.
+ACKNOWLEDGMENTS
+This work wassupportedbytheNationalScienceProgram“SecurityandDefense”,whichhasreceivedfundingfromtheMinistryof
+EducationandScienceoftheRepublicofBulgariaunderthegrantagreementno.Д01-74/19.05.2022.REFERENCES
+[1] Aldana-Bobadilla,E.,Molina-Villegas,A.,Lopez-Arevalo,I.,Reyes-Palacios,S.,Muñiz-Sanchez,V.,&Arreola-Trapala,J.(2020).AdaptiveGeoparsingMethodfor
+ToponymRecognitionandResolutioninUnstructuredText.RemoteSensing,12(18),3041.https://doi.org/10.3390/rs12183041
+[2] Conneau, A., Khandelwal, K., Goyal, N., Chaudhary, V., Wenzek, G., Guzmán, F., Grave, E., Ott, M.,Zettlemoyer,L.,&Stoyanov,V.(2020).Unsupervised
+Cross-lingual Representation Learning at Scale. In D. Jurafsky, J. Chai, N. Schluter, & J. Tetreault (Eds.), Proceedings of the 58th Annual Meeting of the
+AssociationforComputationalLinguistics(pp.8440–8451).AssociationforComputationalLinguistics.https://doi.org/10.18653/v1/2020.acl-main.747
+[3] Yamada,I.,Asai,A.,Shindo,H.,Takeda,H.,&Matsumoto,Y.(2020).LUKE:DeepContextualizedEntityRepresentationswithEntity-awareSelf-attention.InB.
+Webber,T.Cohn,Y.He,&Y.Liu(Eds.),Proceedingsofthe2020ConferenceonEmpiricalMethodsinNaturalLanguageProcessing(EMNLP)(pp.6442–6454).
+AssociationforComputationalLinguistics.https://doi.org/10.18653/v1/2020.emnlp-main.523
+[4] Ri,R.,Yamada,I.,&Tsuruoka,Y.(2022).mLUKE:ThePowerofEntityRepresentationsinMultilingualPretrainedLanguageModels.arXiv.arXiv:2110.08151v3
+[cs.CL]
+[5] Li, Z., Zhou, W., Chiang, Y.-Y., & Chen, M. (2023). GeoLM: Empowering Language Models for Geospatially Grounded Language Understanding. arXiv.
+arXiv:2310.14478v1[cs.CL]
+[6] ExplosionAI.(2024,March21).TrainedModels&Pipelines.SpaCy.RetrievedMarch21,2024,fromhttps://spacy.io/models/
+[7] Hugging Face. (2024, March 21). Model card for FacebookAI/xlm-roberta-large-finetuned-conll03-english. Retrieved March 21, 2024, from
+https://huggingface.co/FacebookAI/xlm-roberta-large-finetuned-conll03-english
+[8] Hugging Face. (2024, March 21). Model card for studio-ousia/mluke-large-lite-finetuned-conll-2003. Retrieved March 21, 2024, from
+https://huggingface.co/studio-ousia/mluke-large-lite-finetuned-conll-2003
+[9] Hugging Face. (2024, March 21). Model card for zekun-li/geolm-base-toponym-recognition. Retrieved March 21, 2024, from
+https://huggingface.co/zekun-li/geolm-base-toponym-recognition
+[10]OpenAI.(2024,March21).Models.RetrievedMarch21,2024,fromhttps://platform.openai.com/docs/models/
+[11]IntelSlavaZ.Telegramchannel.RetrievedMarch1,2024,fromhttps://t.me/intelslava
+[12]TheRageX.Telegramchannel.RetrievedMarch1,2024,fromhttps://t.me/theragex
+[13]Двамайора.Telegramchannel.RetrievedMarch1,2024,fromhttps://t.me/dva_majors
+[14]ةدﯾدﺣﻟاﻲﻣﻼﻋﻹازﻛرﻣﻟا.Telegramchannel.RetrievedMarch1,2024,fromhttps://t.me/ALHodeidahMC

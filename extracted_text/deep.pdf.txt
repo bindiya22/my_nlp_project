@@ -1,0 +1,711 @@
+DOI:10.1145/3623490
+HammingMesh: To view the accompanying Technical Perspective, tp
+visit doi.acm.org/10.1145/3656181
+A Network Topology for
+Large-Scale Deep Learning
+By Torsten Hoefler, Tommaso Bonoto, Daniele De Sensi, Salvatore Di Girolamo,
+Shigang Li, Marco Heddes, Deepak Goel, Miguel Castro, and Steve Scott
+Abstract be it matrix multiply units (“tensor cores”), specialized
+Numerous microarchitectural optimizations unlocked vector cores, or specific low-precision datatypes. Those
+tremendous processing power for deep neural networks optimizations can lead to orders of magnitude efficiency
+that in turn fueled the ongoing AI revolution. With the improvements. Yet, as we approach the limits of such mi-
+exhaustion of such optimizations, the growth of modern croarchitectural improvements, we need to direct our fo-
+AI is now gated by the performance of training systems, cus to the system level.
+especially their data movement. Instead of focusing on Today’s training jobs are already limited by data move-
+single accelerators, we investigate data-movement charac- ment.14 In addition, trends in deep neural networks
+teristics of large-scale training at full system scale. Based (DNNs), such as sparsity, further increase those band-
+on our workload analysis, we design HammingMesh, a width demands in the near future.9 Memory and network
+novel network topology that provides high bandwidth at bandwidth are expensive—in fact, they form the larg-
+low cost with high job-scheduling flexibility. Specifically, est cost component in today’s systems. Standard high-
+HammingMesh can support full bandwidth and isolation performance computing (HPC) systems with the newest
+to deep learning training jobs with two dimensions of par- InfiniBand adapters can offer 400Gb/s but modern deep-
+allelism. Furthermore, it also supports high global band- learning training systems offer much higher bandwidths.
+width for generic traffic. Thus, HammingMesh will power Google’s TPUv2, designed seven years ago, has 1Tbps off-
+future large-scale deep-learning systems with extreme chip bandwidth, AWS’ Trainium has up to 1.6Tbps per
+bandwidth requirements. Tm1n instance, and Nvidia A100 and H100 chips have
+4.8Tbps and 7.2Tbps (local) NVLINK connectivity, respec-
+tively. The chips in Tesla’s Dojo deep-learning supercom-
+1. MOTIVATION puter even have 128-Tbps off-chip bandwidth—more than
+Artificial intelligence (AI) is experiencing unprecedented a network switch. Connecting these extreme-bandwidth
+growth providing seemingly open-ended opportunity. chips at a reasonable cost is a daunting task and today’s
+Deep learning models combine many layers of operators solutions, such as NVLINK, provide only local islands of
+into a complex function trained by optimizing its param- high bandwidth.
+eters to large datasets. Given the abundance of sensor, We argue that general-purpose HPC and datacenter
+simulation, and human artifact data, this new model of topologies are not cost-effective at these endpoint injec-
+designing computer programs, also known as data-driven tion bandwidths. Yet, workload specialization, similar to
+programming or “software 2.0”, is mainly limited by the existing microarchitectural optimizations, can lead to an
+capability of machines to perform the compute- and data- efficient design that provides the needed high-bandwidth
+intensive training jobs. In fact, the predictive quality of networking. We begin with developing a generic model
+models improves as their size and training data grow to that accurately represents the fundamental data move-
+unprecedented scales.15 Building deep learning supercom- ment characteristics of deep-learning workloads. Our
+puters, to both explore the limits of AI and commoditize model shows the inadequacy of the simplistic view that
+it, is becoming not only interesting to big industry but the main communication in deep learning is allreduce.
+also humanity as a whole. In fact, we show that communication can be expressed
+A plethora of different model types exist in deep learn- as a concurrent mixture of pipelines and orthogonal re-
+ing and new major models are developed every two to three ductions forming toroidal data movement patterns. This
+years. Yet, their computational structure is similar—they formulation shows that today’s HPC networks, optimized
+consist of layers of operators and they are fundamentally for full global (bisection) bandwidth, are inefficient for
+data-intensive.14 Many domain-specific accelerators take deep-learning workloads. Specifically, their global band-
+advantage of peculiarities of deep-learning workloads width is overprovisioned while their local bandwidth is un-
+derprovisioned.
+We use our insights to develop HammingMesh, a flex-
+The original version of this paper was published in
+ible topology that can adjust the ratio of local and global
+Proceedings of the Intern. Conf. for High Performance Com-
+bandwidth for deep-learning workloads. HammingMesh
+puting, Networking, Storage and Analysis (Nov. 2022).
+combines ideas from torus and global-bandwidth topolo-
+DECEMBER 2024 | VOL. 67 | NO. 12 | COMMUNICATIONS OF THE ACM 97research highlights
+ence, Table 1 offers an overview of symbols used in this
+Figure 1. HammingMesh’s bandwidth-cost-flexibility trade-off.
+paper.
+Global Topology HammingMesh Local Topology
+(e.g., fat tree) (many configurations) (e.g., 2D Torus)
+2. COMMUNICATION IN
+DISTRIBUTED DEEP LEARNING
+One iteration of deep-learning training with Stochastic
+Gradient Descent (SGD) consists of two phases: the for-
+reduce bandwidth
+ward pass and the back-
+global bandwidth e
+placement flexibility - ward pass. The forward
+injection bandwidth - pass evaluates the net-
+L
+work function f(x) on a set
+gies (for example, fat tree) to enable a flexibility-cost trad- of M examples, also called
+eoff shown schematically in Figure 1. Inspired by machine a “minibatch”. The back-
+f(x)
+learning (ML) traffic patterns, HammingMesh connects ward pass of SGD com-
+local high-bandwidth 2D meshes using row and column putes the average loss L and propagates the errors e back-
+(blue and red) switches into global networks.a ward through the network to adapt the parameters P. This
+In summary, we show how deep-learning communica- training process proceeds through multiple (computa-
+tion can be modeled as sets of orthogonal and parallel tionally identical) iterations until the model achieves the
+Hamiltonian cycles to simplify mapping and reasoning. desired accuracy.
+Based on this observation, we define principles for net- Parallelism and data distribution can fundamentally
+work design for deep-learning workloads. Specifically, our be arranged along three axes: data parallelism, pipeline
+HammingMesh topology parallelism, and operator parallelism.5 The latter two are
+˲ Uses technology-optimized local (for example, PCB often summarized as model parallelism, and operator par-
+board) and global (optical, switched) connectivity. allelism is sometimes called tensor parallelism. We now
+˲ Uses limited packet-forwarding capabilities in the briefly discuss their main characteristics.
+network endpoints to reduce cost and improve flexibility.
+˲ Enables full-bandwidth embedding of virtual topolo- 2.1. Data parallelism.
+gies with deep-learning traffic characteristics. When parallelizing over the training data, we train D sep-
+˲ Supports flexible job allocation even with failed nodes. arate copies of the model, each with different examples.
+˲ Enables flexible configuration of oversubscription fac- To achieve exactly the same result as in serial training,
+tors to adjust global bandwidth. we sum the distributed gradients before applying them to
+With those principles, HammingMesh enables extreme the weights at the end of each iteration. If the network has
+off-chip bandwidths to nearest neighbors at more than 8x N parameters, then the communication volume of this
+P
+cheaper allreduce bandwidth compared to standard HPC step is WN.
+P
+topologies, such as fat trees. HammingMesh reduces the Modern deep neural networks have millions or billions
+number of external switches and cables and thus reduces of parameters, making this communication step expen-
+overall system cost. Furthermore, it provides significantly sive. Thus, many optimizations target gradient summa-
+higher flexibility than torus networks. HammingMesh tion22—some even change convergence properties during
+also enables seamless scaling to larger domains without the training process but maintain final result quality.2
+separation between on- and off-chassis programming Dozens of different techniques have been developed to op-
+models (like NVLINK vs. InfiniBand). And, we believe that timize this communication—however, all perform some
+HammingMesh topologies extend to other ML, (multi)lin- form of distributed summation operation like MPI_Allre-
+ear algebra, parallel solvers, and many other workloads duce. Data-parallelism differs thus mostly in the details,
+with similar traffic characteristics. such as invocation frequency, consistency, and sparsity.
+We start with a characterization of parallel deep learn-
+ing and the related data movement patterns. For refer- 2.2. Pipeline parallelism.
+Deep neural networks are evaluated layer by layer with
+a The name HammingMesh is inspired by the structural similarity to 2D the outputs of layer i feeding as inputs into layer i + 1.
+Hamming Graphs with Meshes as vertices. Back-propagation is performed along the reverse direc-
+tion starting at the loss function L after the last layer and
+Table 1. Symbols used in the paper. proceeding from layer i + 1 to layer i. We can model the
+Symbol Description network as a pipeline with P stages with one or more lay-
+ers per stage. Forward and backward passes can be inter-
+M Number of examples per minibatch
+leaved at each processing element to form a bidirectional
+NP Number of network parameters
+training pipeline. Pipelines suffer from characteristic
+W Size of a word start-up and tear-down overheads. These can be reduced
+D, P, O Degree of data, pipeline, operator parallelism by running two pipelines in both directions19 or by using
+a, b and x, y 2D HammingMesh board and global sizes asynchronous schemes that impact convergence.
+Overall, pipelining schemes can use P processors with
+98 COMMUNICATIONS OF THE ACM | DECEMBER 2024 | VOL. 67 | NO. 12Figure 3. HammingMesh structure: (left) x × y Hx2Mesh, (right) Hx4Mesh board, both with four planes.
+1,1 1,2 1,3 … 1,x
+…
+2,1 2,2 2,3 2,x
+3,1 3,2 3,3 … 3,x
+y,1 y,2 y,3 … y,x
+a nearest-neighbor communication volume proportional allel dimensions use nine simultaneous allreductions of
+to the number of output activations at the cut layers. size three each. The pipeline parallel dimension uses nine
+three-deep pipelines on three different model replicas,
+2.3. Operator parallelism. each split in three pieces.
+Very large layer computations (operators) can be distrib- While we can map such a logical torus to a full-band-
+uted to O processors. Most deep-learning layer operators width network topology, it seems wasteful to provide full
+follow computational schedules of (multi-)linear algebra bandwidth for sparse communication. For example, a
+and tensor contractions and require either (tightly cou- 400Gb/s nonblocking fat tree with 16,384 endpoints pro-
+pled) distributed reductions or nearest-neighbor commu- vides full bisection bandwidth of more than 1_6, 384.5 0GB / s =
+2
+nications. 410TB / s . A bi-directional 32x32x16 torus communication
+pattern requires at most 32 · 16 · 2 · 50GB/s= 51.2TB/s bisec-
+2.4. Overall communication pattern. tions (cutting one dimension of size 32)—a mere 12.5% of
+When all forms of parallelism are used, the resulting job the offered bandwidth. In other words, 88% of the available
+comprises D × P × O accelerators; each accelerator in a job bandwidth will remain unused and is wasted. Furthermore,
+has a logical address (1..D, 1..P, 1..O). The data-, pipeline-, it is not always simple to map such torus communication
+and operator-parallel communication can be arranged as patterns efficiently to full-bandwidth, low-diameter topol-
+one-dimensional slices (rings) by varying only one coor- ogies in practice.
+dinate of the Cartesian structure. Pipelines would leave
+one connection of the ring unused. For example, the data- 3. HAMMINGMESH
+parallel dimension consists of P · O rings of length D each. Based on the communication workload analysis, we now
+Each of those rings represents a single allreduce. We show design a flexible and efficient network topology. The basic
+efficient ring-based reduction and broadcast algorithms requirements are to support highest injection bandwidth
+for large data volumes in Section 4.1.2. for a set of jobs, each following a virtual toroidal com-
+The overall composition of communication patterns munication topology. We note that medium-size models
+forms a torus as illustrated in the right part of Figure 2 are often decomposed only in two dimensions in prac-
+for a 3×3×3 example: Both the operator and the data par- tice (usually data and pipeline or data and operator). Only
+DECEMBER 2024 | VOL. 67 | NO. 12 | COMMUNICATIONS OF THE ACM 99
+… … … …
+each plane fully-connected in x
+N1 N2 N3 N4
+four directions
+per plane (N,S,E,W) axb accelerators inexpensive
+per board short PCB four planes
+W1 E1 connections
+per accelerator
+on board
+W2 E2
+W3 E3
+W4 E4
+S1 S2 S3 S4
+4x4 board
+each
+plane
+fully-connected
+in
+y
+Figure 2. Distribution strategies for parallel deep neural network training.
+Data Parallelism Pipeline Parallelism Operator Parallelism 3D-Data, Pipeline, and
+Operator Parallelism
+allreduce ring
+communication D allreduce ring or
+2 pipeline communication neighborcommunication 1,1,D 1,2,D 1,P,D
+1,1,2 1,2,2 1,P,2
+1 1 2 P 1 1,1,1 1,2,1 1,P,1
+2,1,1 2,2,1 2,P,D
+2,1,1 2,2,1 2,P,2
+2
+2,1,1 2,2,1 2,P,1
+3,1,1 3,2,1 O,P,D
+3,1,1 3,2,1 O,P,2
+O
+O,1,1 O,2,1 O,P,1
+accelerator packet
+package switch
+2x2
+boardresearch highlights
+extreme-scale workloads require all three dimensions— square board topologies, we skip the first number, for ex-
+even then, communication along the data parallel dimen- ample, an H2x2Mesh that connects 10x10 boards is called
+sion only happens after one complete iteration. Thus, we a 10x10 Hx2Mesh.
+use a two-dimensional physical topology. HxMesh has a large design space: We can combine dif-
+As a case study, we assume a modern deep-learning ac- ferent board and global topologies, for example, 3D mesh
+celerator package with 16 400Gb/s off-chip network links, boards with global Slim Fly topologies.6 In this work, we
+a total network injection bandwidth of 800GB/s (top left consider 2D boards as most practical for PCB traces. The
+in Figure 3). Our topology design also takes technology board arrangement could be reduced to a 1D HxMesh,
+costs into account: Similar to Dragonfly, which combines where y = 1 and each Nk link is connected to the corre-
+local short copper cables with global long fiber cables to sponding Sk link (“wrapped around”). The same global to-
+design a cost-effective overall topology, we combine such pology can also span multiple rows or columns (for exam-
+local groups with a global topology. Different from Drag- ple, full boards in a single fat tree). For ease of exposition,
+onfly, we choose two quite distinct topologies: The local we limit ourselves to 2D HxMeshes using 2D boards and
+groups are formed by a local inexpensive high-bandwidth row/column-separated global topologies. We use two-level
+2D mesh using short metal traces on PCB boards. This is fat trees as global topologies to connect the boards col-
+the opposite of Dragonfly designs, which combine densely umn- and row-wise. If the boards can be connected with
+connected local groups (“virtual switches”) and connect a single 64-port switch, we use that instead of a fat tree.
+those fully globally. HammingMesh combines sparsely
+connected boards in a dimension-wise (not globally) fully 3.1. Bisection and global bandwidth.
+connected topology. Those boards are connected by a two- Bisection cut is defined as the minimal number of con-
+dimensional Hamming graph, in which each dimension nections that would need to be cut in order to bisect the
+is logically fully connected (for example, by a fat tree). All network into two pieces, each with an equal number of ac-
+accelerator ports are arranged in planes with four direc- celerators. The bisection bandwidth is the cut multiplied
+tions each. Our example accelerator has four planes (top by the link bandwidth. Let us assume a single-plane of an
+left in Figure 3), for example, plane 1 has ports E1, W1, N1, x × y HxaMesh (square board) with x ≤ y and y even, wlog.
+and S1. We assume each accelerator can forward packets We now consider the xy/2 “lower” half boards with y co-
+within a plane like any network switch. Accelerators do ordinates 1, 2, … y/2. We split the HxMesh into two equal
+not have to forward packets between planes, for example, pieces by cutting the 2a links in y direction of each of the
+packets arriving at N1 may only be forwarded to E1, W1, lower half of the boards. This results in a total cut width
+or S1 but none of the other ports. Thus, only simple 4x4 of axy. Each accelerator has four network links per plane,
+switches are needed at each accelerator. Figure 3 illus- a total injection bandwidth of 4a2 per board. We have xy/2
+trates the structure in detail. boards with a total injection bandwidth of 4a2xy/2 = 2xya2
+A 2D HammingMesh is parameterized by its number of in each partition. Thus, the relative bisection bandwidth
+planes and four additional numbers: (a, b), the dimensions is axy/2xya2 = 1/2a.
+of the board, and (x, y), the dimensions of the global topol- In a bisection traffic pattern, all traffic crosses the net-
+ogy. It connects a total of abxy accelerators. We abbreviate work bisection (any two communicating endpoints are in
+HammingMesh with HxMesh in the following. Further- different sets of the bisection). Such (worst-case) patterns
+more, an HxMesh with an a × b accelerator board is called are rare in practice. A more useful pattern, more often
+HaxbMesh, for example, for a 2x2 board, H2x2Mesh. For observed in practice is alltoall, where each process sends
+Table 2. Overview of our example networks (small and large cluster) using the cost model described in the full version of this paper.10 All
+bandwidths are the result of the packet-level simulations detailed in Section 4.1. Global alltoall bandwidth is reported as share of the in-
+jection bandwidth for large messages (1.6 Tb/s). Allreduce bandwidth is reported as share of the theoretical optimum (1/2 of the injection
+bandwidth) for large messages. The cost savings for global and allreduce bandwidth are relative to the corresponding network cost of the
+nonblocking fat tree.
+Small Cluster (≈1,000 accelerators) Large Cluster (≈16,000 accelerators)
+Topology cost glob. BW global ared. BW ared. diam. cost glob. BW global ared. BW ared. diam.
+[M$] [% inject] saving [% peak] saving [M$] [% inject] saving [% peak] saving
+nonbl. FT 25.3 99.9 1.0x 98.9 1.0x 4 680 98.9 1.0x 99.8 1.0x 6
+50% tap. FT 17.6 51.2 0.7x 98.9 1.4x 4 419 47.6 0.8x 99.8 1.6x 6
+75% tap. FT 13.2 25.7 0.5x 98.9 1.9x 4 271 24 0.6x 99.8 2.5x 6
+Dragonfly 27.9 62.9 0.6x 98.8 0.9x 3 429 71.5 1.2x 98.6 1.6x 5
+2D HyperX 10.8 91.6 2.1x 98.1 2.3x 4 448 95.8 1.5x 99.2 1.5x 8
+Hx2Mesh 5.4 25.4 1.2x 98.3 4.7x 4 224 25 0.8x 92.3 2.8x 8
+Hx4Mesh 2.7 11.3 1.0x 98.4 9.3x 843.3 10.5 1.7x 98 15.4x 8
+2D torus 2.5 2 0.2x 98.1 10.1x 32 39.5 1.1 0.2x 99.2 17.1x 128
+100 COMMUNICATIONS OF THE ACM | DECEMBER 2024 | VOL. 67 | NO. 12to all other processes. This pattern is the basis of paral-
+Figure 4. 3D workload mapping onto Hx2Mesh example.
+lel transpositions, Fast Fourier Transforms, and many
+Left: virtual 4x4x2 topology. Right: mapping on Hx2Mesh.
+graph algorithms. The achievable theoretical bandwidth
+for such alltoall patterns is often called “global band- 000 111 222 333 00 11 22 33 1166 1177 1188 1199
+width.” Some topology constructions take advantage of 16 17 18 19
+444 555 666 777 44 55 66 77 2200 2211 2222 2233
+the fact that global bandwidth is higher than bisection 20 21 22 23
+888 999 111000 111111
+bandwidth. Prisacari et al.21 shows that full-global band-
+24 25 26 27 88 99 1100 1111 2244 2255 2266 2277
+width (alltoall) fat trees can be constructed with 25% less 111222 111333 111444 111555
+switches than nonblocking fat trees. Dragonfly,17 Slim 28 29 30 31 1122 1133 1144 1155 2288 2299 3300 3311
+Fly,6 or other low-diameter topologies16 can further reduce 3D traffic Physical allocation on Hx2Melsh
+the number of switches in very large installations while (virtual topogy, 4x4x2) (3rd dimension traffic is routed over fat trees)
+maintaining full global bandwidth. As is customary for
+low-diameter topologies,6,17 we assess it using packet-level
+Figure 5. Subnetworks in the case of failures
+simulations of alltoall traffic.
+3.2. Example topologies. 1 1, ,1 1 1,2 1 1, ,3 2 1 8-- 93 :: 13 xx 23 ,; 14 0- -5 1: 92 :x 13 x, 1 6-7:1x3,
+We consider a small cluster with approximately 1,000 ac-
+celerators and a large cluster with approximately 16,000 2 2, ,1 1 2,2 2 2, ,3 2 [[ 11 11 11 22 44 22 22 44 ]]
+accelerators as specific design points to compare realis-
+2x4 job [ 1 1 1 2 -1 2 2 -1]
+tic networks. We compare various fat trees (nonblocking,
+3,1 3,2 [ 3 3 3 5 4 5 6 4]
+50%, 75% tapered), full bandwidth Dragonfly, two-dimen- 3x3 job [ 3 3 3 5 7 5 6 8]
+sional torus, and HyperX,b with Hx2Mesh and Hx4Mesh [ 3 3 3 5 7 5 6 -1]
+example topologies. 3 4, ,1 1 3,2 3 4, ,3 2 [-1 9 10 11 7 12 13 8]
+[-1 9 14 15 16 17 18 19]
+Table 2 summarizes the main cost and bandwidth re-
+sults. Global and allreduce bandwidths are determined
+using packet-level simulations (see Section 4) for large folding techniques to embed it into two-dimensional jobs.
+messages. For all experiments, we simulated a single plane Figure 4 shows an example of 3D virtual topology mapped
+of HammingMesh and four planes for all other topologies, on an Hx2Mesh physical topology. Processes can be sliced
+that is, a total injection bandwidth of 4×400Gb/s. We use in- on the third dimension and mapped on different boards.
+dustry-standard layouts and cable configurations for the Communications between different slices of the third
+cost estimates: Fat trees are tapered beginning from the dimension are routed over the per-column or per-row fat
+second level and connect all endpoints using DAC and all trees, depending how different slices are mapped. To min-
+switches using AoC. Dragonfly topologies use full-band- imize communication latency between slices, consecutive
+width groups with a = 16 routers each, p = 8 endpoints slices should be adjacent to each other.
+per router, and h = 8 links to other groups with DAC links It is easy to see that any consecutive u × v block of
+inside the groups and AoC links between groups. The to- boards in a 2D HxMesh has the same properties as a full
+rus uses 2 × 2 board topologies with discounted local PCB u × v HxMesh. We call such subnetworks virtual sub-Hx-
+connectivity, similar to Hx2Mesh and only DAC cables Meshes. They are a major strength of HxMesh compared
+between the boards. For HxMeshes, we use DAC links to to torus networks in terms of fault tolerance as well as for
+connect endpoints to switches along one dimension, and allocating jobs. In fact, HxMeshes major strength com-
+AoC links for the other dimension. All inter-switch links pared to torus networks is that virtual subnetworks can
+are AoC as in fat trees. be formed with non-consecutive sets of boards (not only
+blocks): Any set of boards in an HxMesh where all boards
+3.3. Logical job topologies and failures in HxMesh. that are in the same row have the same sequence of col-
+As we discussed in Section 2.4, communication patterns umn coordinates can form a virtual subnetwork. We will
+in deep learning can be modeled as sets of cycles. Typi- show examples below together with a motivation for sub-
+cal learning jobs use either logical 1D cycles for small networks—faults.
+models with only data parallelism or 2D tori that combine Fault-tolerance. We assume that a board is the unit of
+data and pipeline parallelism for medium-scale models or failure in an HxMesh, that is, if an accelerator or link in a
+combining pipeline and model parallelism for very large board fail, the whole board is considered failed. This sim-
+models. Each specific training job will have a different plifies system design and service. Partial failure modes
+optimal decomposition resulting in 1D, 2D, or sometimes (for example, per plane) are outside the scope of this work.
+even 3D logical communication topologies. The left part of Figure 5 shows a 4x4 Hx2Mesh and
+We use logical 2D topologies for our training jobs. Each three board failures. We show two different subnetworks
+job uses several boards and requests a u × v layout (that (many more are possible): a 2x4 subnetwork (blue) with
+is, a, b divides u, v, respectively). If the application topol- the physical boards (1, 1), (1, 4), (2, 1), (2, 4), (3, 1), (3, 4),
+ogy follows a 1D or 3D scheme, then users use standard (4, 1), (4, 4) and a 3x3 subnetwork (yellow) with the physi-
+cal boards (1, 1), (1, 2), (1, 4), (2, 1), (2, 2), (2, 4), (4, 1), (4, 2),
+b Note that a 2D HyperX is identical to an Hx1Mesh. (4, 4). We also annotate the new coordinates of boards in
+DECEMBER 2024 | VOL. 67 | NO. 12 | COMMUNICATIONS OF THE ACM 101research highlights
+the virtual subnetworks. Remapping can be performed terns as they are rare on deep-learning traffic.
+transparently to the user application, which does not ob- Alltoall: Alltoall sends messages from each process to
+serve a difference between a virtual and physical HxMesh all other processes. In our implementation, each of the
+in terms of network performance. The right part of the p processes performs p − 1 iterations. In each iteration i,
+figure shows the output of our automatic mapping tool process j sends to process j + i mod p in a balanced shift
+(described in detail in the full version of this paper10) for a pattern.
+more complex configuration of jobs (top, read job ids 1-3 Table 2 shows the results for 1MiB messages while Fig-
+are 3 × 3 logical jobs etc.). ure 6 shows the global bandwidth at different message
+sizes. Small Hx2 and Hx4Meshes achieve bandwidths
+4. RESULTS AND COMPARISON around the cut width of 1/4 and 1/8, respectively (cf. Sec-
+We now evaluate HxMesh topology options compared tion 3.1). This is because not all global traffic crosses the
+with all topologies listed in Table 2. We use the Structural bisection cuts, especially for smaller clusters. The large
+Simulation Toolkit (SST),1 a packet-level network simula- cluster configuration performs closer to those bounds
+tor, which has been validated against the Cray Slingshot and loses some bandwidth due to adaptive routing over-
+interconnect.8 SST enables us to reproduce the behavior heads. Despite its lower bandwidth, even large HxMeshes
+of full MPI applications directly in the simulation envi- remain competitive in terms of cost-per global bandwidth
+ronment where they react to dynamic network changes (for and some are even more cost effective on global band-
+example, congestion). In total, we ran simulations of more width than fat trees.
+than 120 billion packets using more than 0.6 million core Random permutation: In permutation traffic, each
+hours with parallel simulations. We select various repre- accelerator selects a unique random peer to send to and
+sentative microbenchmarks and scenarios for deep-learn- receive from. Here, the achieved bandwidth also depends
+ing jobs and publish the full simulation infrastructure such on the location of both peers. Figure 7 shows the distribu-
+that readers can simulate their own job setup. tions of receive bandwidths across all the 1k accelerators
+in the small cluster configurations.
+4.1. Microbenchmarks. Our results indicate that all topologies have significant
+We start by analyzing well-known microbenchmark traf- variance across different connections (between different
+fic patterns to assess and compare achievable peak band- node pairs), which makes job placement and locality sig-
+width. nificant. HxMeshes are among the most cost effective to-
+pologies.
+4.1.1. Global traffic patterns.
+We first investigate global traffic patterns such as alltoall 4.1.2. Reduction traffic patterns.
+and random permutations as global-traffic workloads. We We distinguish three fundamental algorithm types:
+note that HammingMesh is not optimized for those pat- trees, pipelines, and near-optimal full-global bandwidth
+algorithms.
+Figure 6. Alltoall on the small topologies. Simple trees: For small data, simple binary or binomial
+tree reductions are the best choice. They perform a reduc-
+tion of S bytes on p processors in time T ≈ log
+2
+(p)α + log
+2
+1500 (p)Sβ.c This algorithm sends each data item a logarithmic
+1250 number of times. It is thus inefficient for the large data
+1000 sizes in deep-learning training workloads and we do not
+consider trees in this work.
+750
+Pipelined rings: With a single network interface, large
+500
+data volumes can be reduced in a simple pipelined ring.
+250 Here, the data at each process is split into p segments. The
+0 operation proceeds in two epochs and p − 1 rounds per ep-
+32B 128B 512B 2KB 8KB 32KB 128KB 512KB
+och. In the first reduction epoch, each process i sends seg-
+Message Size
+ment i to process i + 1 mod p and receives a segment from
+process i − 1 mod p. The received segment is added to the
+local data and sent on to process i + 1 mod p in the next
+round. After p − 1 such rounds, each process has the full
+sum of one segment. The second epoch is simply send-
+ing the summed segments along the pipeline. The overall
+time Tp ≈ 2pα + 2Sβ is bandwidth optimal because each
+process only sends and receives each segment twice.4
+We propose bidirectional pipelined rings to use two
+c We define with α the latency and with β the inverse of the bandwidth.
+With ≈, we omit additive constants and minor lower-order terms
+for clarity.
+102 COMMUNICATIONS OF THE ACM | DECEMBER 2024 | VOL. 67 | NO. 12
+)s/bG(
+tuphguorhT
+AllToAll – Small Topologies (~1,000 nodes)
+nonblocking
+fat tree 2D HyperX
+Dragonfly
+fat tree 50% (1004 Gb/s at 4MiB)
+tapered
+fat tree 75%
+tapered
+Hx2Mesh
+Hx4Mesh
+2D Torus
+Figure 7. Bandwidth distribution per accelerator.
+Random Permutation (2×32 MiB)—Small Topologies (~1,000 nodes)
+)s/bG(
+htdiwdnaB
+1500
+1000
+500
+0
+nonblocki fn ag
+t
+f tra et et r 5e 0e f%
+at
+t ta rep ee r 7e 5d % taper 2e Dd D r Ha yg po en rfl X y (H×1 Mesh) H×2 Mesh H×4 Mesh 2D Torusproblem along all dimensions. This means that the larg-
+Figure 8. Global allreduce using different algorithms.
+est allreduce or broadcast would only be on 32 processes
+where ring algorithms would perform efficiently.
+Full system allreduce job: This experiment shows a
+single job using the last two allreduce algorithms on vari-
+ous topologies. In Dragonfly and fat tree, each accelerator
+connects with a single NIC to each of the four planes and
+we use the standard “ring” algorithm. For the single allre-
+2D HyperX
+(Bucket) duce on the large HxMesh clusters, we use both the two bi-
+directional rings (“rings”) as well as the bucket (“bucket”)
+algorithm. Figure 8 shows the achieved bandwidths.
+We see that all topologies deliver nearly full bandwidth
+for the ring algorithms. For large messages, HxMesh is
+2.8x to 14.5x cheaper per bandwidth than a nonblocking
+network interfaces by splitting the data size in half and fat tree (Table 2). On networks with a Cartesian structure
+sending each half along a different direction. The laten- (HammingMesh, Torus, and HyperX), the bucket algo-
+cy stays unchanged because each segment travels twice rithm outperforms the ring algorithm at any message
+through the whole ring but the data is half in each direc- size. The only exception is for jobs where one of the two
+tion, leading to a runtime of T
+bp
+≈ 2pα + Sβ. Here and in the dimensions is much smaller than the other, where the
+following, β is the time per byte of each interface, that is, ring algorithm outperforms the bucket algorithm (not
+a system with k network interfaces can inject k/β bytes/s. shown), highlighting the importance of using multi-algo-
+We now extend this idea to four network interfaces per rithms to optimize performance, similar to established
+HxMesh plane: We use two bidirectional rings, each re- practice in MPI.25
+ducing a quarter of the data across all accelerators. The
+two rings are mapped to two disjoint Hamiltonian cycles 4.2. DNN workloads.
+covering all accelerators of the HxMesh.3 The overall time We now proceed to define accurate communication pat-
+for this scheme is T
+rings
+≈ 2pα + _ 2s β . terns, including computation times for real DNN mod-
+Bucket: Pipelined rings are bandwidth-optimal if they els. For this, we choose four large representative models:
+can be mapped to Hamiltonian cycles on the topology. ResNet-152, CosmoFlow, DLRM, and Transformers (GPT3)
+However, we find that for large HxMeshes and moder- trained in FP32. We discuss only DLRM and Transform-
+ate message sizes, the latency component can become ers; a more detailed discussion covering the other mod-
+a bottleneck. We thus use the state-of-the-art bucket els can be found in the full version of this paper.10 We use
+algorithm.23,d The bucket algorithm arranges communi- NVIDIA’s A100 GPU to benchmark runtimes of operators
+_
+cations in 2D toroidal communication patterns with √ p and we model communication times based on the data
+latency and good bandwidth usage. Each process executes volumes.
+first a reduce-scatter with the other processes on the same
+_
+row ( cost √ pα + _ 2s β ) . Then each process runs an allreduce 4.2.1. Communication traffic characterization.
+with the other processes on the same column, on the pre- All example models are constructed of a sequence of iden-
+_
+viously reduced chunk of size _ √s _ p ( cos 2 ( √ pα + _ 2 √s _ p β ) ) and, tical layers containing multiple operators. Each paral-
+eventually, an allgather with the other processes on the lel dimension carries a different volume, depending on
+_
+same row ( cost √ pα + _ 2s β ) . To use all four network inter- the details of the model, training hyperparameters, and
+faces at the same time, four of these allreduce can be ex- the other dimensions. We assume the most general case
+ecuted in parallel, each starting from a different port and where the network can use all three forms of parallelism
+working on a quarter of the data.23 Thus, the overall time running on D × P × O accelerators.
+_ _
+for this scheme is T ≈ 2 ⋅ 2 √ pα + Sβ (_ 1 4+ √2 _ p √ p ) . Data dimension: If we only have data parallelism (O = P
+Summary: The pipeline ring and bucket algorithms = 1), then each process needs to reduce all gradients. If we
+have sparse communication patterns: Each process only distribute the model between O or P dimension processes,
+communicates with two or four direct neighbors that can then the total allreduce size is V D = _ W O N P P . The reduction hap-
+be mapped perfectly to HxMesh. Broadcast and other col- pens once at the end of each iteration after processing a
+lectives can be implemented similarly (for example, as the full minibatch and draining the pipeline. It can be over-
+second part of our allreduce) and follow similar trade- lapped per layer using nonblocking allreduce.13
+offs. Furthermore, each dimension of a logical job topol- Pipeline dimension: If we only have pipeline parallel-
+ogy is typically small as the total number of accelerators ism (D = O = 1) and NA output activations at the “cut” layer
+is the product of all dimensions. For example, even for
+a very large system with 32,768 accelerators, each of the
+dimensions could only be of size 32 if we decompose the
+d Compared to the original version of this paper,10 we replaced the torus
+algorithm with the better bucket algorithm.
+DECEMBER 2024 | VOL. 67 | NO. 12 | COMMUNICATIONS OF THE ACM 103
+)s/bG(
+tuphguorhT
+AllReduce—Large Topologies (~16K nodes)
+800
+Fat Tree
+600
+(Rings) H×2Mesh
+(Bucket) H×4Mesh
+400 (Rings)
+H×4Mesh
+(Bucket) H×2Mesh
+(Rings)
+200 2D Torus
+2D HyperX (Rings)
+2D Torus(Rings) Dragonfly
+(Rings) (Rings)
+0
+2MiB 8MiB 32MiB 128MiB 512MiB 2GiB
+AllReduce Size
+Figure 9. Overlap in pipelined-parallel execution.
+op[i-1] op[i] op[i+1] op[i+2] time
+…/recv[i] send[i-1]/recv[i+1] send[i]/recv[i+2] send[i+1]/…research highlights
+Figure 10. HxMesh cost savings relative to other topologies.
+Relative Cost Savings (Communication Overheard of DNN Workloads)
+H×2Mesh
+ResNet
+MOE
+then each process sends all M_ N output values to the next 3’s7 feed-forward layers multiply 49,152×12,288 with
+P A
+process in the forward pass and the same volume of errors 12,288×2,048 matrices per example in each layer.
+during the backward pass. If the layer and its inputs and GPT-3 has a total of 96 layers and each layer has activa-
+outputs are distributed to O PEs, then the total send vol- tions of size N = 4 · 2,048 × 12, 288 ≈ 100MB per example as
+A
+ume in this dimension is V P = _ M DW P O N A . This communication input and output. We choose P = 96, such that each pipe-
+can be hidden at each accelerator as shown in Figure 9 by line stage processes one layer, and no data parallelism (D
+overlapping nonblocking send/receive operations (bot- = 1). For operator parallelism, we use O = 4 and the scheme
+tom, blue) with operator computation (top, green). outlined by Megatron-LM,24 which performs one allreduce
+Operator dimension: For operator parallelism, each for FF and one for MHA in forward and backward passes.
+process’s send volume depends only on the operator par- All operations are the same size as the layer input/
+allelization itself and is not influenced by either D or P. output. Thus, the volume for both pipeline communica-
+The operator can be seen as the “innermost loop” in this tion and operator-dimension allreduce is N per example
+A
+sense. Each operator distribution scheme will have its for forward and backward passes. One iteration of GPT-3
+own characteristics that we capture by V = WN . The op- computes for 31.8ms. Total runtimes on the three fat-tree
+O O
+erator communication volume during each forward and variants are 34.8ms, 36.4ms, and 37.5ms, respectively. On
+backward pass is a function of the local minibatch size M/ torus, the code executes for 72.2ms per iteration. HyperX
+DP per process. is at 40.9ms. Hx2 and Hx4Mesh are at 41.7ms and 49.9ms,
+respectively.
+4.2.2. DLRM. For GPT-3 with Mixture-of-Experts (MoEs),18 we use 16
+DLRM20 uses a combination of model parallelism and data experts. In GPT-3, the FFs have 1.8B parameters. There-
+parallelism for its embedding and MLP layers, respective- fore, each expert has 1.8B/16 ≈ 113M parameters. MoEs
+ly. Two alltoall operations aggregate sparse embedding perform two alltoalls for FF in both the forward and
+lookups in the forward pass, and their corresponding gra- backward passes, and all operations are the same size
+dients in backward pass. Allreduce is required to synchro- as the input/output. The computation time on an A100 is
+nize the gradients of the data-parallel MLP layers. The 49.9ms. Total runtime on the fat trees varies from 52.2ms
+parallelism of DLRM is limited by both the mini-batch to 52.9ms depending on tapering. On torus, the code exe-
+size and the embedding dimension. DLRM is trained with cutes for 73.8ms per iteration. HyperX takes 53.9ms while
+up to 128 GPU nodes. The total runtimes on the fat tree Hx2 and Hx4Mesh are at 58.3ms and 63.3ms, respectively.
+variants are 2.96ms, 2.97ms, and 2.99ms, respectively. On Figure 10 shows the relative cost savings of HxMesh
+torus, the code executes for 3.12ms. HyperX is at 2.94ms. compared to other topologies. These are calculated as the
+Hx2Mesh and Hx4Mesh are at 2.97ms and 3.00ms, respec- ratio of the network costs in Section 2 times the inverse of
+tively. On A100, DLRM computes around 95us, 209us, and the ratio of communication overheads presented in this
+796us for the embedding, feature interaction, and MLP section.
+layers respectively, and communicates 1MB per alltoall We conclude that both Hx2 and Hx4Mesh signifi-
+and 2.96MB per allreduce. cantly reduce network costs for DNN workloads. While
+some torus network configurations can be cheaper than
+4.2.3. Transformers. Hx2Mesh, they provide significantly less allocation and
+Transformers are the most communication inten- management flexibility, especially in the presence of fail-
+sive.14 A transformer block consists of multi-head at- ures. Moreover, we also conclude that even in the presence
+tention (MHA) and two feed-forward (FF) layers. The of alltoall communications patterns in GPT-3 MoE and
+MHA and FF input/outputs are of size (embedding DLRM, HxMesh topologies still offer a significant cost ad-
+dimension×batch×sequence length). For example, GPT- vantage compared to traditional topologies. As the scale
+104 COMMUNICATIONS OF THE ACM | DECEMBER 2024 | VOL. 67 | NO. 12
+gnivaS
+tsoC
+evitaleR
+gnivaS
+tsoC
+evitaleR
+nonblocking fat tree Dragonfly
+fat tree 50% tapered 2D HyperX
+fat tree 75% tapered 2D Torus
+H×4Mesh
+8
+6
+4
+2
+0
+GPT-3 GPT-3 CosmoFlow DLRM ResNet GPT-3 GPT-3 CosmoFlow DLRM
+MOE
+7.3
+6.2
+0.2
+2.4
+1.2
+5.0
+4.1 5.1 4.1
+5.2
+8.1 9.1 8.0
+5.0 4.0 6.0
+0.1
+5.0
+5.2
+7.1 3.1
+4.3
+7.1 0.1
+0.4
+3.3 1.3
+2.5
+1.1 4.1
+8.7
+4.5
+1.4
+8.8
+4.4
+0.1 5.1 6.1 5.1
+7.2
+0.2 0.2
+7.2
+7.1 4.1 7.1
+1.3
+6.1
+0.3
+1.2 5.1
+0.4
+1.2 2.1
+6.5
+6.4 4.4
+3.7
+6.1 1.2of the network increases, Hx4Mesh becomes significantly Computing, Networking, Storage and Efficiently training large-scale neural
+Analysis, SC ’22. IEEE Press, (2022). networks with bidirectional pipelines.
+more cost efficient than Hx2Mesh, especially in the pres-
+11. Hoefler, T., Heddes, M.C., and In Proceedings of the Intern. Conf.
+ence of alltoall traffic. Belk, J.R. Distributed processing For High Performance Computing,
+architecture. US Patent Networking, Storage and Analysis
+Discussion: We cover all additional related work and
+Us11076210b1, Jul. 2021. (SC21). ACM, (Nov. 2021).
+comparisons to other topologies, as well as significantly 12. Hoefler, T., Heddes, M.C., Goel, 20. Naumov, M. et al. Deep learning
+D., and Belk, J.R. Distributed recommendation model for
+more detail on HammingMesh configuration options, ta- processing architecture. US Patent personalization and recommendation
+pering, diameter, cost, routing and deadlock avoidance, Us20210209460a1, (Jul. 2021). systems. Arxiv Preprint
+13. Hoefler, T., Lumsdaine, A., and Rehm, Arxiv:1906.00091, (2019).
+as well as scheduling with and without board failures in W. Implementation and performance 21. Prisacari, B., Rodriguez, G.,
+the full version of this paper.10 analysis of non-blocking collective Minkenberg, C., and Hoefler, T.
+operations for MPI. In Proceedings Bandwidth-optimal all-to-all
+of the 2007 Intern. Conf. On High exchanges in fat tree networks.
+5. CONCLUSION Performance Computing, Networking, In Proceedings of the 27th Intern.
+Storage and Analysis, Sc07. IEEE ACM Conf. on Intern. Conf. on
+HammingMesh is optimized specifically for ML work- Computer Society/ACM, (Nov. 2007). Supercomputing. ACM, (Jun. 2013),
+loads and their communication patterns. It relies on 14. Ivanov, A. et al. Data movement is all 139–148.
+you need: A case study on optimizing 22. Renggli, C., Alistarh, D.,
+the observation that deep-learning training uses three- transformers. In Proceedings of Aghagolzadeh, M., and Hoefler, T.
+Machine Learning and Systems 3 Sparcml: High-performance sparse
+dimensional communication patterns and rarely needs
+(Mlsys 2021), (Apr. 2021). communication for machine learning.
+global bandwidth. It supports extreme local bandwidth 15. Kaplan, J. et al. Scaling Laws for In Proceedings of the Intern. Conf.
+Neural Language Models, (2020). For High Performance Computing,
+while controlling the cost of global bandwidth. It banks
+16. Kathareios, G. et al. Cost-effective Networking, Storage and Analysis
+on an inexpensive local PCB-mesh interconnect together diameter—two topologies: Analysis (SC19), (Nov. 2019).
+and evaluation. In Proceedings of the 23. Sack, P. and Gropp, W. Collective
+with a workload-optimized global connectivity forming
+Intern. Conf. For High Performance algorithms for multiported torus
+virtual torus networks at adjustable global bandwidth. Computing, Networking, Storage and networks. ACM Trans. Parallel
+Analysis (SC15). ACM, (Nov. 2015). Comput. 1, 2 (Feb. 2015).
+Due to the lower number of switches and external ca- 17. Kim, J., Dally, W.J., Scott, S., and 24. Shoeybi, M. et al. Megatron-Lm:
+bles, it can be nearly always more cost effective than torus Abts, D. Technology-driven, highly- Training Multi-Billion Parameter
+scalable dragony topology. In Language Models Using Model
+networks while also offering higher global bandwidth and Proceedings of 2008 Intern. Symp. Parallelism, (2020).
+significantly higher flexibility in job allocation and deal- On Computer Architecture, 77–88. 25. Thakur, R., Rabenseifner, R., and
+18. Lepikhin, D. et al. Gshard: Scaling Gropp, W. Optimization of collective
+ing with failures. Giant Models with Conditional communication operations in mpich.
+All-in-all, we believe that HammingMesh will drive fu- Computation and Automatic Int. J. High Perform. Comput. Appl.
+Sharding, (2020). 19, 1 (Feb. 2005), 4966.
+ture deep learning systems and will also support adjacent 19. Li, S. and Hoefler, T. Chimera:
+workloads, such as (multi)linear algebra, quantum simu-
+lation, or parallel solvers, that have Cartesian communi-
+Torsten Hoefler (torsten.hoefler@inf.ethz. Shigang Li (shigang.li@inf.ethz.ch) ETH
+cation patterns. ch) ETH Zurich, Switzerland, Microsoft, Zurich, Switzerland.
+Corp.
+Marco Heddes (marco.heddes@
+6. ACKNOWLEDGMENT Tommaso Bonato (tommaso.bonato@inf. microsoft.com) Microsoft, Redmond, WA,
+ethz.ch) ETH Zurich, Switzerland. USA.
+We thank Microsoft for hosting TH’s sabbatical where
+Daniel De Sensi (daniele.desensi@inf. Deepak Goel (deepak.goel@microsoft.
+much of the idea was developed.11,12 We thank the whole ethz.ch) ETH Zurich, Switzerland. com) Microsoft, Sunnyvale, CA, USA.
+Azure Hardware Architecture team and especially Doug Salvatore Di Girolamo (salvatore. Miguel Castro (miguel.castr@microsoft.
+digirolamo@inf.ethz.ch) ETH Zurich, com) Microsoft, Cambridge, MA, USA.
+Burger for their continued support and deep technical
+Switzerland.
+Steve Scott (steve.scott@microsoft.com)
+discussions. We thank the Swiss National Supercomput-
+Microsoft, Redmond, WA, USA.
+ing Center (CSCS) for the compute resources on Piz Daint
+and the Slim Fly cluster (thanks to Hussein Harake) to run
+the simulations. Daniele De Sensi is supported by an ETH
+Post-doctoral Fellowship (19-2 FEL-50).
+References
+1. Adalsteinsson, H. et al. A simulator 6. Besta, M. and Hoefler, T. Slim fly: A
+for large-scale parallel computer cost effective low-diameter network
+architectures. Int. J. Distrib. Syst. topology. In Proceedings of the
+Technol. 1, 2 (Apr. 2010), 5773. Intern. Conf. On High Performance
+2. Alistarh, D. et al. The convergence Computing, Networking, Storage and
+of sparsified gradient methods. Analysis (SC14), (Nov. 2014).
+Advances in Neural Information 7. Brown, T.B. et al. Language Models
+Processing Systems 31. Curran Are Few-Shot Learners, (2020).
+Associates, Inc. (Dec. 2018). 8. De Sensi, D. et al. An in-depth
+3. Bae, M.M., AlBdaiwi, B.F., and Bose, analysis of the slingshot interconnect.
+B. Edge-disjoint Hamiltonian cycles In Proceedings of the Intern. Conf.
+in two-dimensional torus. Int. J. For High Performance Computing,
+Math. Math. Sci. 2004, 25 (2004), Networking, Storage and Analysis
+1299–1308. (SC20), (Nov. 2020).
+4. Barnett, M., Littlefield, R., Payne, D., 9. Hoefler, T. et al. Sparsity in deep
+and Vandegeijn, R. Global combine learning: Pruning and growth for
+algorithms for 2-D meshes with efficient inference and training in
+wormhole routing. J. Parallel Distrib. neural networks. J. of Machine
+Comput. 24, 2 (Feb. 1995), 191201. Learning Research 22, 241 (Sep.
+5. Ben-Nun, T. and Hoefler, T. 2021), 1–124.
+Demystifying parallel and distributed 10. Hoefler, T. et al. Hammingmesh: A
+deep learning: An in-depth network topology for large-scale
+concurrency analysis. ACM Comput. deep learning. In Proceedings of the This work is licensed under a Creative Commons
+Surv. 52, 4 (Aug. 2019), 65:1–65:43. Intern. Conf. On High Performance Attribution International 4.0 License.
+DECEMBER 2024 | VOL. 67 | NO. 12 | COMMUNICATIONS OF THE ACM 105Copyrightof Communicationsof theACM isthepropertyof Associationfor Computing
+Machineryanditscontentmaynotbecopiedor emailedtomultiplesitesor postedtoa
+listservwithoutthecopyrightholder's express writtenpermission.However, users mayprint,
+download,or emailarticlesfor individualuse.

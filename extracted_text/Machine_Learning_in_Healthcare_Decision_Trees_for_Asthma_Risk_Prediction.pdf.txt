@@ -1,0 +1,306 @@
+Proceedings of the International Conference on Sustainable Expert Systems (ICSES-2024)
+IEEE Xplore Part Number: CFP24VS6-ART; ISBN: 979-8-3315-4036-4
+Machine Learning in Healthcare: Decision Trees for
+Asthma Risk Prediction
+Tanishq Soni Deepali Gupta Monica Dutta
+Chitkara University Institute of Chitkara University Institute of Chitkara University Institute of
+Engineering and Technology, Chitkara Engineering and Technology, Chitkara Engineering and Technology, Chitkara
+University University University
+Punjab, India Punjab, India Punjab, India
+tanishq.soni@chitkara.edu.in deepali.gupta@chitkara.edu.in monica.dutta@chitkara.edu.in
+Abstract—A chronic respiratory condition marked by the development of asthma. Individuals who have a family
+hyperreactivity and inflammation of the airways, asthma history of asthma or other allergy illnesses that are connected
+presents serious health problems worldwide. Asthma prediction to asthma, such as eczema and hay fever, are at a greater risk
+done early and precisely can result in better patient outcomes of acquiring asthma, which indicates that there is a strong
+and care. The effectiveness of many machine learning genetic component behind the condition [5]. Additionally, this
+algorithms in asthma prediction is investigated in this work, propensity frequently interacts with environmental variables
+with an emphasis on a performance comparison of Decision
+that have the potential to either initiate or intensify the illness.
+Tree, K-Nearest Neighbours (KNN), and Random Forest
+The allergens pollen, pet dander, dust mites, and mould are
+classifiers. Created prediction algorithms to detect people at risk
+examples of common environmental triggers that can cause
+of asthma using a large dataset including clinical,
+allergic reactions [6]. Infections in the respiratory system,
+environmental, and genetic variables. Among KNN and
+particularly those that occur during the early years of life, can
+Random Forest classifiers, the Decision Tree method
+also play a significant impact by causing damage to the outperforms them with the maximum prediction accuracy of
+delicate tissue of the lungs and perhaps leading to persistent
+81%. The Decision Tree model outperforms others because of
+asthma. In addition, being exposed to air pollutants such as its interpretability, which offers precise understanding of the
+decision-making process, and its capacity to manage tobacco smoke, industrial pollution, and exhaust from
+complicated relationships between elements. The possibilities of vehicles can irritate the airways and make asthma symptoms
+Decision Tree models in asthma prediction are demonstrated by even more severe [7]. There are a number of other elements
+these results, which also emphasize the need of choosing suitable that can play a role in the development and progression of
+machine learning methods for efficient illness prediction. This asthma symptoms. These elements include occupational risks
+work offers a potential method for early asthma diagnosis and (such as being exposed to dust or chemicals in the job), harsh
+customized therapeutic techniques, therefore supporting the weather conditions, and even stress [8]. Asthma is a very
+continuous attempts to use machine learning in healthcare. prevalent and chronic health concern all over the world due to
+the number of factors that contribute to its development.
+Keywords—Asthma, Decision Tree, KNN, Random Forest,
+Machine Learning The term "machine learning" (ML) refers to the process of
+analysing big datasets in order to recognise patterns that may
+not be obvious using conventional approaches [9]. This has
+I. INTRODUCTION
+the potential to significantly improve the prognosis and
+Breathing becomes difficult with asthma, a chronic treatment of asthma. To construct prediction models that are
+respiratory disease marked by inflammation and airway very accurate in identifying individuals who are at a high risk
+constriction [1]. Frequently brought on by different allergens, of getting asthma, machine learning algorithms may integrate
+irritants, or physical exercise, common symptoms include a wide variety of data sources, such as electronic health
+wheezing, dyspnoea, chest tightness, and coughing. Because records, genetic information, environmental data, and patient-
+of the inflammation, the airways become extremely sensitive, reported symptoms [10]. The intensity of asthma episodes and
+and triggers can cause an asthma attack, in which the the potential factors that cause them may also be predicted by
+symptoms sharply intensify and need for quick treatment [2]. these models, which enables more individualised and
+Though it can strike anybody at any age, asthma usually preventative medical care measures. In addition, machine
+begins in infancy. According to the World Health learning may assist in the monitoring of the evolution of
+Organisation, asthma is thought to impact 262 million people diseases and the success of recommended therapies, including
+worldwide and result in 461,000 deaths yearly [3]. Asthma the modification of these treatments based on real-time data
+incidence varies greatly among nations and is impacted by a inputs [11]. The ability to successfully harness big data not
+confluence of environmental and genetic variables. Asthma only helps in early diagnosis and the development of
+management is avoiding recognised causes and controlling individualised treatment programmes, but it also helps in
+symptoms with drugs like bronchodilators and inhaled understanding the complex interactions that occur between the
+corticosteroids [4]. many risk factors connected with asthma. This, in turn, may
+eventually result in improved patient outcomes and lower
+There is a complicated interaction between a genetic
+costs associated with healthcare [12]. predisposition and environmental exposures that culminates in
+979-8-3315-4036-4/24/$31.00 ©2024 IEEE 1211
+14336701.4202.54436SESCI/9011.01
+:IOD
+|
+EEEI
+4202©
+00.13$/42/4-6304-5133-8-979
+|
+)SESCI(
+smetsyS
+trepxE
+elbaniatsuS
+no
+ecnerefnoC
+lanoitanretnI
+ht4
+4202
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:11:13 UTC from IEEE Xplore. Restrictions apply.Proceedings of the International Conference on Sustainable Expert Systems (ICSES-2024)
+IEEE Xplore Part Number: CFP24VS6-ART; ISBN: 979-8-3315-4036-4
+II. LITERATURE SURVEY approach utilising 20 trees. KNN shown to perform the best
+overall among these models when compared to a fuzzy expert
+Feng et al. [1] focus on Asthma and Chronic Obstructive
+system and other diagnostic techniques. The work
+Pulmonary Disease," the author explores the use of artificial
+demonstrates how well machine learning algorithms work in
+intelligence and machine learning techniques in the diagnosis,
+medical diagnosis, highlighting in particular how crucial pre-
+classification, management, and treatment of asthma and
+processing and parameter optimisation are to improving
+COPD disease. The socioeconomic impact and prevalence of
+model performance.
+these diseases are brought to light, particularly in nations that
+are still in the process of developing. Even while there are AKBAR et al. [5] analyses k-nearest neighbours (KNN),
+rules, the role that precision medicine plays is still very support vector machines (SVM), and random forests (RF) as
+restricted. AI and ML approaches, particularly those used in machine learning methods for asthma diagnosis. From two
+genomics and medical imaging, have demonstrated that they Tehrani hospitals, 169 asthmatic and 85 non-asthmatic
+have the potential to analyse massive amounts of medical data. patients made up the sample. At values of 1.0 for accuracy,
+The considerable clinical influence they have, however, is still specificity, and sensitivity, the KNN algorithm with five
+very restricted. The study highlights the promise and neighbours showed the best result. A radial basis function
+constraints of artificial intelligence and machine learning in kernel SVM produced values of 0.9870, 0.9737, and 0.9934,
+improving the screening, diagnosis, categorization, in that order. Results from the RF technique with 20 trees were
+monitoring, and treatment of chronic airway disorders. It also 0.9652, 0.9211, and 0.9868. KNN shown to perform the best
+advocates for next measures to guarantee that its deployment overall among these models when compared to a fuzzy expert
+in clinical settings is both successful and safe. system and other diagnostic techniques. The work emphasises
+the use of machine learning algorithms in medical diagnosis
+Bose el al. [2] highlighted a machine learning approach
+and the need of parameter optimisation and pre-processing to
+used five machine learning models to forecast asthma
+improve model performance.
+persistence in kids diagnosed before turning five. Among
+these were gradient boosted trees (XGBoost), random forest, Kothalawala et al. [6] built two machine learning models,
+k-nearest neighbours, logistic regression, and naïve Bayes. CAPP and CAPE, to forecast childhood asthma at ten years
+Electronic health records for 9,934 children made up the old. Performance was better in the CAPP model (using a linear
+dataset; 8802 were found to have chronic asthma and 1132 to SVM with twelve variables) and the CAPE model (using a
+have temporary asthma. At 0.43 as the mean average NPV- radial basis function support vector machine (RBF SVM) with
+Specificity area (ANSA), the XGBoost model showed the eight predictors than in the conventional logistic regression
+greatest performance. With ANSA values of 0.42, other models. The AUC (area under the curve) for the CAPE model
+models including logistic regression and random forest also was 0.71, while for the CAPP model it was 0.82. Good
+did well. Important factors found were the age at last asthma generalizability of both models was shown by validation using
+diagnosis, the total number of asthma-related visits, self- data from the Manchester Asthma and Allergy Study
+identified black race, allergic rhinitis, and eczema. These (MAAS). The study found important indicators including
+results demonstrate the ability of machine learning algorithms early life cough and wheeze for CAPE and preschool cough,
+to identify which children will continue to have asthma atopy, and polysensitization for CAPP, and demonstrated the
+symptoms, therefore supporting early childhood asthma care. potential of machine learning to increase asthma prediction
+accuracy. SHAP values were used to assist explain the models'
+TahaSamadSoltaniHeris et al. [3] utilised several machine
+predictions, therefore removing a significant obstacle to
+learning methods to asthma diagnosis. From two Tehrani
+machine learning's therapeutic use. Large datasets and outside
+hospitals, 169 asthmatics and 85 non-asthmatics made up the
+validation are also stressed by the study as being essential to
+dataset. Random forests (RF), support vector machines
+guaranteeing the accuracy and applicability of prediction
+(SVM) and k-nearest neighbours (KNN) were among the
+models in a variety of demographics.
+methods examined. With five neighbours, the KNN algorithm
+produced ideal results with 100% accuracy, sensitivity, and Exarchos et al. [7] assesses the use of artificial intelligence
+specificity. The accuracy, specificity, and sensitivity of the (AI) and machine learning (ML) to many facets of asthma
+SVM using a radial basis function kernel were all 98.70%, study. In four primary categories—asthma screening and
+97.37%, and 99.34%. The RF approach produced 98.68% diagnosis, patient categorization, asthma management and
+sensitivity, 92.11% specificity, and 96.52% accuracy with 20 monitoring, and asthma treatment—98 papers from 1988 to
+trees. In a comparison with a fuzzy expert system and other 2019 were included in the systematic review. Among the
+techniques, these models showed better asthma diagnosis important AI/ML methods employed are k-nearest neighbours
+accuracy. The work emphasises how useful machine (k-NN), decision trees, random forests (RFs), support vector
+learning—KNN in particular—is for medical diagnosis and machines (SVMs), and artificial neural networks (ANNs).
+how crucial pre-processing and parameter optimisation are to With the SVM, for instance, demonstrating great performance
+improve model performance. in identifying airway obstruction using forced oscillation
+technique (FOT) data, studies employing these techniques
+BHAT et al. [4] investigates the use of many machine
+showed encouraging results in asthma prediction and
+learning methods in asthma diagnosis. In all, 169 asthmatics
+classification. Numerous research, meanwhile, were
+and 85 non-asthmatics from two Tehran hospitals made up the
+constrained by things like tiny sample sizes and the
+dataset. KNN, SVM, and random forests (RF) were the
+requirement for larger data sets. Better diagnosis accuracy,
+machine learning algorithms assessed. At 1.0 for specificity,
+patient categorization, and treatment techniques are some of
+sensitivity, and accuracy, the KNN algorithm with five
+the ways that AI/ML can enhance asthma care, but the study
+neighbours outperformed the others. A radial basis function
+also stresses the necessity of bigger studies and more research
+kernel SVM achieved 0.9870 accuracy, 0.9737 specificity,
+to close present gaps and confirm the results.
+and 0.9934 sensitivity. The sensitivity of 0.9868, specificity
+of 0.9211, and accuracy of 0.9652 were obtained using the RF
+979-8-3315-4036-4/24/$31.00 ©2024 IEEE 1212
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:11:13 UTC from IEEE Xplore. Restrictions apply.Proceedings of the International Conference on Sustainable Expert Systems (ICSES-2024)
+IEEE Xplore Part Number: CFP24VS6-ART; ISBN: 979-8-3315-4036-4
+Fontanella et al. [8] highlights about the developing place Firstly the dataset was tested on KNN classifier and it
+of artificial intelligence (AI) and machine learning (ML) in achieve the accuracy of 43%. Figure 1 shows the confusion
+asthma research. It draws attention to the change in research matrix for the KNN.
+methodology from conventional hypothesis-driven to data-
+driven approaches that reveal patterns in huge and
+complicated dataset. It has been difficult to use these
+discoveries in clinical practice even with the abundance of
+data and technical developments. The study groups the studies
+into areas including environmental exposures, atopic illnesses,
+respiratory disease diagnostics, and asthma heterogeneity.
+Improvement in diagnostic accuracy and identification of
+asthma subtypes and biomarkers have been demonstrated by
+the application of ML and AI. But because of worries about
+accuracy, dependability, and interpretability, these
+technologies are still seldom used in clinical environments. To
+fully use big data and contemporary analytics, the paper
+highlights the requirement of integrated, multidisciplinary
+teams that guarantee significant clinical insights and
+improvements in asthma care and treatment. To help better
+understand and treat asthma, the paper ends by arguing for a
+balance between explanatory and predictive models.
+III. DATASET
+The dataset taken from Kaggle consists of 316,800 entries.
+A variety of characteristics pertaining to symptoms, age,
+gender, and the severity of illnesses are included in the dataset Fig. 1. Confusion Matrix of KNN Classifier
+collection. There are a number of features, such as Tiredness,
+On the same dataset decision tree is applied and it achieves
+Dry-Cough, Difficulty-in-Breathing, Sore-Throat, and
+the highest accuracy 81% on predicting the 3 classes of the
+None_Sympton, which indicate whether or not these
+asthma. Figure 2 shows the confusion matrix for the decision
+particular symptoms are present. In addition, it includes
+tree.
+characteristics such as Pains, Nasal Congestion, and Runny
+Nose in order to capture other symptoms that are commonly
+experienced. Other properties, such as None_Experiencing,
+are used to indicate circumstances in which the patient did not
+experience any symptoms. Age-related characteristics are
+broken down into the following age categories: Age_0-9,
+Age_10-19, Age_20-24, Age_25-59, and Age_60+. This
+allows for the classification of individuals into distinct age
+groups. Information pertaining to gender is included in the
+dataset by means of the Gender_Female and Gender_Male
+characteristics. Last but not least, the severity of the disease is
+categorised using qualities such as Severity_Mild,
+Severity_Moderate, and Severity_None. These qualities,
+when taken as a whole, offer a thorough picture of the many
+different elements that were taken into consideration in the
+dataset. The dataset contains an equal number of males and
+females, with each gender having 105,600 entries.
+The previous work was done on the random forest on this
+dataset. For the 80% data is utilised for the training and
+remaining 20% is for testing. After the data splitting the
+random forest achieve the accuracy of 75%.
+Fig. 2. Decision Tree Confusion Matrix
+IV. PROPOSED MODEL Figure 3 is the accuracy comparsion between the 3
+This dataset is collected from Kaggle having 316800 different machine learning models. The models are trained
+entries related to asthma having different attributes that can and tested on the same data split. From this previous random
+cause asthma. 2 different machine learning models are forest have the accuracy of 75%. Tested decision tree have the
+proposed i.e. KNN and decision tree. There 3 class for the highest accuracy of 81% as compared to KNN with 43%.
+asthma which are none asthma, moderate asthma and mild
+asthma. For the 2 different models the dataset is divided into
+2. 80% dataset is used for training and 20% is for testing
+purpose.
+979-8-3315-4036-4/24/$31.00 ©2024 IEEE 1213
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:11:13 UTC from IEEE Xplore. Restrictions apply.Proceedings of the International Conference on Sustainable Expert Systems (ICSES-2024)
+IEEE Xplore Part Number: CFP24VS6-ART; ISBN: 979-8-3315-4036-4
+REFERENCES
+Accuracy comparison
+[1] Feng, Y., Wang, Y., Zeng, C. and Mao, H., 2021. Artificial intelligence
+and machine learning in chronic airway diseases: focus on asthma and
+90% chronic obstructive pulmonary disease. International journal of medical
+81%
+sciences, 18(13), p.2871.
+80% 75%
+[2] Bose, S., Kenyon, C.C. and Masino, A.J., 2021. Personalized
+prediction of early childhood asthma persistence: a machine learning
+70%
+approach. PloS one, 16(3), p.e0247784.
+60% [3] Tahasamadsoltaniheris, M., Mahmoodvand, Z. and Zolnoori, M., 2013.
+Intelligent diagnosis of Asthma using machine learning algorithms.
+50% 43% International Research Journal of Applied and Basic Sciences, 5(1),
+pp.140-145.
+40% [4] Bhat, G.S., Shankar, N., Kim, D., Song, D.J., Seo, S., Panahi, I.M. and
+Tamil, L., 2021. Machine learning-based asthma risk prediction using
+30% IoT and smartphone applications. IEEE Access, 9, pp.118708-118715.
+[5] AKBAR, W., WU, W.P., FAHEEM, M., SALEEM, M.A.,
+20%
+GOLILARZ, N.A. and HAQ, A.U., 2019, December. Machine learning
+classifiers for asthma disease prediction: a practical illustration. In
+10%
+2019 16th International Computer Conference on Wavelet Active
+Media Technology and Information Processing (pp. 143-148). IEEE.
+0%
+[6] Kothalawala, D.M., Murray, C.S., Simpson, A., Custovic, A., Tapper,
+Random Forest KNN Decision Tree
+W.J., Arshad, S.H., Holloway, J.W., Rezwan, F.I. and
+STELAR/UNICORN investigators, 2021. Development of childhood
+asthma prediction models using machine learning approaches. Clinical
+Fig. 3. Accuracy Comparison
+and Translational Allergy, 11(9), p.e12076.
+[7] Exarchos, K.P., Beltsiou, M., Votti, C.A. and Kostikas, K., 2020.
+V. CONCLUSION Artificial intelligence techniques in asthma: a systematic review and
+critical appraisal of the existing literature. European Respiratory
+Outperforming the random forest and K-Nearest Journal, 56(3).
+Neighbours (KNN) models, the decision tree model earned the [8] Fontanella, S., Cucco, A. and Custovic, A., 2021. Machine learning in
+greatest accuracy of 81% based on the dataset analysis. It asthma research: moving toward a more integrated approach. Expert
+Review of Respiratory Medicine, 15(5), pp.609-621.
+appears from this higher performance that the decision tree
+model is more appropriate for identifying the trends and [9] Soni, T., Uppal, M., Gupta, D. and Gupta, G., 2023, May. Efficient
+machine learning model for cardiac disease prediction. In 2023 2nd
+connections in this dataset. Because of its form, which enables
+International Conference on Vision Towards Emerging Trends in
+it to manage the categorical character of the data, the decision Communication and Networking Technologies (ViTECoN) (pp. 1-5).
+tree facilitates the interpretation and comprehension of the IEEE.
+decision-making process. The huge and complicated structure [10] Rani, S., Koundal, D., Kavita, F., Ijaz, M.F., Elhoseny, M. and
+of this dataset challenged the KNN model, which reduced Alghamdi, M.I., 2021. An optimized framework for WSN routing in
+accuracy even if it was helpful for basic and small datasets. the context of industry 4.0. Sensors, 21(19), p.6474.
+Also, in this instance the performance of the single decision [11] Soni, T., Gupta, D. and Uppal, M., 2023, December. Transforming the
+Prediction of Heart Disease: An Empirical Analysis of Machine
+tree was not surpassed by the random forest model, which
+Learning Classifiers. In 2023 IEEE Pune Section International
+usually works well by aggregating several decision trees. With
+Conference (PuneCon) (pp. 1-5). IEEE.
+its high accuracy in categorising the severity of symptoms in
+[12] Goyal, N., Dave, M. and Verma, A.K., 2020. SAPDA: secure
+this dataset, the decision tree model is the better option than authentication with protected data aggregation scheme for improving
+KNN and random forest models for this particular use. QoS in scalable and survivable UWSNs. Wireless Personal
+Communications, 113(1), pp.1-15.
+979-8-3315-4036-4/24/$31.00 ©2024 IEEE 1214
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:11:13 UTC from IEEE Xplore. Restrictions apply.

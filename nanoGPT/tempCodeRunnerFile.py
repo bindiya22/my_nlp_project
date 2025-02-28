@@ -1,0 +1,1 @@
+data = train_data if split == 'train' else val_data

@@ -1,0 +1,504 @@
+2021 IEEE/ACM 18th International Conference on Mining Software Repositories (MSR)
+Denchmark: A Bug Benchmark of Deep
+Learning-related Software
+Misoo Kim Youngkyoung Kim Eunseok Lee
+Department of Electrical Department of Electrical College of Computing
+and Computer Engineering and Computer Engineering Sungkyunkwan University
+Sungkyunkwan University Sungkyunkwan University Suwon, Republic of Korea
+Suwon, Republic of Korea Suwon, Republic of Korea leees@skku.edu
+misoo12@skku.edu agnes66@skku.edu
+Abstract—A growing interest in deep learning (DL) has in- seven recommendations for DLSW practitioners based on
+stigated a concomitant rise in DL-related software (DLSW). their findings, such as the difficulty of controlling big data
+Therefore, the importance of DLSW quality has emerged as
+during the SW maintenance phase [5]. Conversely, Chen et
+a vital issue. Simultaneously, researchers have found DLSW
+al. focused on the deployment of DLSW. They proposed
+more complicated than traditional SW and more difficult to
+debug owing to the black-box nature of DL. These studies the taxonomy and challenges behind DLSW deployment and
+indicate the necessity of automatic debugging techniques for mentioned that DLSW-specific fault localization techniques
+DLSW. Although several validated debugging techniques exist for automatic debugging are required [1]. At the same time,
+forgeneralSW,nosuchtechniquesexistforDLSW.Thereisno
+various studies have analyzed the code, bug, and bug-fixing
+standard bug benchmark to validate these automatic debugging
+pattern of DLSW. Jebnoun et al. examined code smells in
+techniques. In this study, we introduce a novel bug benchmark
+forDLSW,Denchmark,consistingof4,577bugreportsfrom193 DLSW and confirmed that the presence of code smells may
+popular DLSW projects, collected through a systematic dataset increase bug occurrence [6]. Nargiz et al. manually classified
+constructionprocess.TheseDLSWprojectsarefurtherclassified the real faults of DLSW and introduced a large taxonomy for
+intoeightcategories:framework,platform,engine,compiler,tool,
+faults in DL systems. [7]. Johirul et al. showed that data bugs
+library, DL-based application, and others. All bug reports in
+and logic bugs are the most severe types of bugs in DLSW
+Denchmarkcontainrichtextualinformationandlinkswithbug-
+fixing commits, as well as three levels of buggy entities, such [8]. In their subsequent research, they demonstrated that the
+as files, methods, and lines. Our dataset aims to provide an bug and its fixing patterns of the DL models fundamentally
+invaluablestartingpointfortheautomaticdebuggingtechniques differfromthoseofconventionalSW[9].Thesediversestudies
+of DLSW.
+on DLSW illuminate the unique characteristics of DLSW
+Index Terms—Automatic debugging, Bug report, Bug Bench-
+and its bugs. Their findings indicate that it is imperative
+mark, Deep learning-related software
+to consider distinctive automatic debugging techniques for
+DLSW to improve its quality.
+I. INTRODUCTION
+Software debugging is an essential process for bug resolu-
+Deep learning (DL) is a useful technique for big data man- tion.Automaticdebuggingtechniquesofferapossibleremedy
+agement and augmentation of software (SW) intelligence. DL to solve the quality issue of DLSW. While several debugging
+frameworks provide building blocks for the design, training, techniques,suchasbuglocalizationandfixing,havebeenvali-
+and validation of DL models via a high-level programming datedinconventionalSW,nosuchtechniquesexistforDLSW.
+interface. Moreover, several tools and libraries support the As previously mentioned, DLSW is more complicated than
+efficient addition of DL functionality to the software. SW traditionalSW.UnlikegeneralSW,DLmodelsarepoweredby
+developers have developed DL-based SW applications em- dataandareinherentlynon-deterministicowingtotheirhidden
+ploying these frameworks and tools to provide SW with DL feedback loop and randomness [2]. This leads to a strong
+capabilities [1]. Recently, DL-related SW (DLSW), which dependencyofDLSWonthedataquality.Suchcharacteristics
+provides or utilizes DL functionality, significantly increased. make existing debugging techniques unreliable for DLSW.
+The increasing dependency of current SW on DL has Therefore, for the development of debugging techniques for
+aroused research for DLSW in the SW engineering field. DLSW,validationofpreviousdebuggingtechniquesonDLSW
+Saleema et al. noted the fundamental difference between AI must be performed.
+applications, which exploit the power of DL models, and Prior to any validation, development or study of automatic
+conventional applications [2]. Gonzalez et al. also showed debugging techniques for DLSW, a DLSW bug benchmark is
+these differences in communication perspective [3]. Han et required. A bug benchmark generally contains the following
+al.introducedahigh-levelworkflowforDLSWandexamined data: (1) a bug report that describes the bug; (2) a bug-fixing
+discussion topics on popular deep learning frameworks from committhatsplitsthesoftwarestatusbeforeandafterthebug
+discussion platforms, such as GitHub [4]. Zhang et al. made resolution (a fixing commit is also necessary to obtain human
+978-1-7281-8710-5/21/$31.00 ©2021 IEEE 540
+DOI 10.1109/MSR52588.2021.00070
+07000.1202.88525RSM/9011.01
+:IOD
+|
+EEEI
+1202©
+00.13$/02/5-0178-1827-1-879
+|
+)RSM(
+seirotisopeR
+erawtfoS
+gniniM
+no
+ecnerefnoC
+lanoitanretnI
+ht81
+MCA/EEEI
+1202
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:17:31 UTC from IEEE Xplore. Restrictions apply.bug-fixingpatches);and(3)buggyentitiessuchasbuggyfiles,
+PopularDLframeworks
+methods, and lines, that need to be found and modified to tensorflow,keras,cntk,caffe,caffe2,torch,pytorch,mxnet,chainer,theano,deeplearn-
+ing4j,dl4j,paddlepaddle
+resolve the bug.
+CommonDLkeywords
+Whileseveralbugbenchmarksfortraditionalsoftwareexist deep-learning, deep-neural-network, deep-reinforcement-learning, deep-q-learning,
+convolution-neural-network, recurrent-neural network, deep-belief-network, long-
+[10]–[15], no currently released bug benchmarks are devoted short-term-memory-network,deep-boltzmann-machine
+to DLSW. In this study, we introduce a well-made bug
+After retrieving these projects, we selected only DLSW
+benchmark for DLSW, named Denchmark. We constructed a
+that met the following three constraints. First, the projects
+large-scalebugbenchmarkbyutilizingbugreportsasastarting
+should be popular and active. We chose projects with a
+point. Denchmark consists of 4,577 bug reports from 193
+Stargazers count exceeding 100, whose latest commit is after
+DLSW projects, which were classified into eight categories
+2020. Second, the projects should be implemented using the
+based on project description. As the first bug benchmark to
+top-10 programming languages3, namely JavaScript, Python,
+validate automatic debugging techniques for DLSW, Dench-
+Java, Go, C++, Ruby, TypeScript, PHP, C#, and C. Third,
+mark’s main advantages are as follows.
+the projects should have more than 10 closed bug reports.
+• Well-made bug benchmark. A well-made benchmark We considered an issue report with a label containing the
+should be large-scale and accurate. In order to build keyword “bug” (excluding “not bug”) as a bug report to filter
+a large-scale benchmark, we collected large-scale bug- out irrelevant issues (e.g., feature requests or tasks).
+fixingcommitsfromcommitlogsandpullrequests.Then, Afterthestepsabove,275projectswerechosenasourinitial
+we performed five tasks including manual validation to candidates. We then manually investigated these candidates,
+filter out inaccurate commits. filtering out 10 projects that are redirected and duplicated
+• First bug benchmark for the DLSW. To our knowl- projects and 25 projects that do not possess DL functionality.
+edge, no bug benchmark for DLSW currently exists. We For example, the Carla project4 was selected in the initial set
+systematically selected DLSW and constructed the bug as it contains the keyword “deep-learning”. However, Carla
+benchmark, containing bug reports, bug-fixing commits, does not contain explicit DL functionality even though the
+and buggy entities. sub-projectofCarlacontainsthisfunctionality.Suchaproject
+• Diversity of DLSW. The 193 DLSW projects were falls outside of our focus. We excluded the 24 other projects
+manuallyclassifiedintoeightcategories:framework,plat- for similar reasons.
+form, engine, compiler, tool, library, DL-based applica-
+B. Collect bug reports
+tions, and others. Different programming languages and
+DL frameworks are used for the DLSW. From 240 DLSW projects, we automatically downloaded
+• Rich textual information of bug reports. Bug reports 26,156 closed bug reports. The bug reports contain textual
+in Denchmark include textual information and specific descriptions, comments, and HTML tags.
+tagginginformation“code,”whichisthemainstructured The HTML tags in the raw bug reports indicate the type
+text of GitHub issue reports. This text provides a wealth of information provided by the text wrapped by the tag [17].
+of information for text-based debugging techniques. Unlike previous datasets [11], [14], [15], which excluded all
+• Fine-grainedbuggyentities.Buglocationistheprimary HTML tags, our dataset provides a bug report with “CODE”
+dataforbuglocalizationandfixing.Denchmarkprovides tags among HTML tags to keep track of human tagging and
+information about buggy entities in various granularity providecode-relatedinformation.“CODE”iscommonlyused
+levels, such as a buggy file, method, and line. todefineapieceofcomputercodeandsoitcontainsvaluable
+informationforsoftwaredebuggingtechniques.Weutilizethe
+In summary, Denchmark provides rich information that
+“<denchmark-code>”taginourdatasettorepresentthistext.
+enables the validation and development of automatic debug-
+There are several text-based automatic debugging tech-
+ging techniques for DLSW. This dataset can provide valuable
+niques, such as IR-based bug localization [15], [18], bug
+research opportunities to researchers in software engineering
+report-basedfixingtechniques[19],[20]andbugreport-based
+fields, with a focus on DLSW.
+faultinjection[21],whichcantakeadvantageofvaluablehints
+from tags. The tags can provide hints such as bug location,
+II. METHODOLOGY
+patch-related codes, and test-related codes.
+A. Select target DLSW projects C. Identify bug-fixing commits
+To select DLSW, we focused on popular DLSW projects Toextractbug-fixingcommits,welinked26,156closedbug
+onGitHub.UtilizingtheGitHubsearchAPI1,weperformeda reports of 240 DLSW with their corresponding commits that
+keyword-based search. Based on the popular DL frameworks resolved the bugs. Here, we present two approaches used to
+[16] and the popular DL models 2, we defined 22 DL-related discover bug-relevant commits.
+keywords as follows. Thefirstapproachistoretrievethecommitmessagesusing
+the bug identifier (ID) and bug-related keywords (error, fix,
+1https://developer.github.com/v3/search/
+3https://madnight.github.io/githut/#/pull requests/2020/3
+2https://machinelearningmastery.com/a-tour-of-machine-learning-algorithms/
+4https://github.com/carla-simulator/carla
+541
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:17:31 UTC from IEEE Xplore. Restrictions apply.bug, crash, and #) as queries [11], [22]. In this way, we were dataset, finally, we manually validated that no errors existed
+abletofind12,538commitlinksof6,967bugreportsfor228 in the ground-truth data. To do so, we randomly sampled
+DLSW. 450 bug reports (≈10%) and manually investigated them. We
+The second approach involves retrieving the relevant pull confirmedthattherewerenowrongbug-fixingcommitslinked
+requests from the project’s merged pull requests and then tobugreports.Everybugreportinourinvestigationscopewas
+retrieving the corresponding commits of each pull request ID linkedwithactualcommitswhichweremodifiedtofixthebug.
+[14], [23], [24]. In GitHub, the event history of each bug
+E. Extract buggy entities
+report contains relevant pull requests that include the bug
+ID. To minimize the number of irrelevant pull requests, we Buggy entities are important data for the validation of bug
+only extracted pull requests with an ID greater than that of localization and fixing. We extracted the buggy entities by
+the bug ID. This extraction strategy guarantees that we only utilizing PyDriller [29], a Python-based framework that can
+collectpullrequestsregisteredafterthebugreportisreported. effectively extract information from the Git Repository. We
+Accordingly, we collected 9,455 relevant pull requests from extracted the files in each of the 4,577 commits, regardless
+8,511 bug reports of 204 DLSW. We then retrieved the of the added, deleted, and modified files. We also extracted
+commitmessagesbyutilizingpullrequestIDsandbug-related buggy methods and lines when the files were modified.
+keywords as queries, replicating the methodology of the first
+III. DENCHMARK
+approach. We found 8,654 commits linked with 6,511 pull
+Table I summarizes the Denchmark with overall statistics
+requestsandthenlinked5,886bugreportswiththesecommits
+for 193 DLSW projects and detailed statistics for exemplary
+from 172 DLSW projects.
+39 DLSW projects. Exemplary projects indicate the projects
+Finally, we merged the bug-fixing commits extracted from
+with more than 30 bug reports.
+thesetwoseparateapproaches.Intheend,weidentified26,604
+relevant commits for 10,283 bug reports from 229 DLSW A. Project statistics
+projects. As shown in Table I, Denchmark includes 193 DLSW
+projects collected from GitHub. The first column contains the
+D. Filter out bug-fixing commits
+class of each project. We classified DLSW by the SW type
+Fromthe10,283bugreportswithrelevantcommitlinks,we
+they described in their project description to avoid misunder-
+performedfivetaskstodiscardsomecommitsandbugreports
+standing the intentions of each SW developer. There were 36
+to minimize incorrect links between bugs and commits.
+frameworks (F) in total and 10 frameworks had more than 30
+Thefirsttaskistoexcludebugreportslinkedtotwoormore
+bug reports: general frameworks mentioned in Section II-A
+commits. Multiple commits linked to a single bug report can
+and domain-specific frameworks. The number of platforms
+includenotonlybug-fixingcommitsbutalsorefactoringcom-
+(P) and engines (E) among the target DLSW projects were
+mits that modify the already fixed code [25]. The automatic
+12 and five, respectively. There were three compilers, 44
+linkingprocesscannotpreciselyweedoutrefactoringcommits
+toolkits(T),63libraries(L),and17DL-basedSWapplications
+frommultiplecommits.Forthisreason,weperformedthefirst
+(A). Remaining 13 DLSW were the other types such as
+filtering task.
+developmenttools,standard,andDLpracticecoderepository.
+The second task involves excluding the commits with no
+The third column depicts the number of programming
+modified files. Some commits are performed to add new files
+languages utilized, among the top-10 programming languages
+or delete source files. Current bug localization and fixing
+described in Section II-A. The average number of employed
+techniques can localize and fix the actual buggy codes [12],
+languages was 2.2. The fourth column indicates the number
+[18],[19],[26],[27].However,ifallcommittedfilesarenewly
+ofutilizedDLframeworksamongthepopularDLframeworks
+added or deleted, it is difficult to find or change the codes in
+mentionedinSectionII-A.Weextractedtheirrespectivenum-
+the buggy-state software. To avoidthis situation, we excluded
+bers based on “import” and “from” and the name of each DL
+all commits in which there were no modified files in the
+framework [7]. The average number of frameworks used was
+committed files.
+2.7. These statistics suggest that DLSW researchers should
+Furthermore,weexcludedanycommitperformedbeforethe
+understandmulti-languageandmulti-frameworkenvironments
+bug report opening date and after its closing date. These past
+to develop automatic debugging techniques.
+commits are referenced for bug resolution but clearly did not
+fix the bug directly. B. Bug report statistics
+We excluded several bugs that shared the same commit. The fifth column in Table I summarizes the numbers of all
+WhenthecommitmentionedmorethantwobugIDs,thebugs bugreportsandthenumberofbugreportswiththeCODEtag.
+relatedtothiscommitwereremovedfromcandidatesbecause Ranging from 1 to 370 for each project, the total number of
+automaticallyidentifyingthebuggyentityforeachbugreport bug reports was 4,577. The total number of bug reports with
+from one commit can be imprecise [12], [28]. CODEwas1,969,whiletheirratioamongallbugreportswas
+Through these tasks, 5,863 bug reports were removed approximately 43%.
+leaving 4,577 bug reports with bug-fixing links from 193 Thesixthcolumndisplaystheaveragenumberofcomments
+DLSW projects. To guarantee the correctness of the final in the bug reports, which was 3.5. A sufficient number of
+542
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:17:31 UTC from IEEE Xplore. Restrictions apply.Table I: Denchmark Statistics. we have systematically filtered out irrelevant data by inte-
+grating several methods from existing studies. It may reduce
+(#C Pl ra os js e∗ ct) Project #PL #FR Al# lB (Cug os de) #Cmt(cid:3) Day(cid:3) F# iB leu /gg My tE hnt /it Ly i(cid:3) ne the cost of suitable DLSW selection because it offers DLSW
+BentoML 3 3 49(25) 3.0 9.2 4/6.3/42 researchers a representative class for each project and an
+Deeplearning4J 8 6 51(27) 4.7 80.7 11.7/18.3/106.8
+Haystack 1 1 36(15) 4.1 10.8 2.7/4.2/36.6 experimental dataset construction.
+Horovod 2 4 48(30) 4.6 13.3 2.9/5.5/55.6
+(3F 6) Padm dn lx c en Pn ne at ddle 4 3 4 6 4 4 25 642 06( ((1 296 1)8 )) 4 2 2. . .8 3 4 7 1 89 8 .3. .5 5 34 3 .2/ / /6 3 5. .6 8 .1/ / /5 5 45 9 0. .9 9 .4 Themainapplicationsofourdatasetrelatetothefacilitation
+ray 6 3 370(239) 3.7 31.5 3.8/7.3/60.9 of research on locating and fixing DLSW bugs, which are
+Tensorflow 8 5 306(173) 7.1 64.4 2.6/4.1/40.7
+Tensorflow.NET 3 1 36(2) 1.4 4.4 5.5/8.4/41.9 the primary automatic techniques for debugging. Denchmark
+All∗∗ 2.7(cid:3) 3.0(cid:3) 1,466(805) 3.3 31.2 3.1/4.9/35.8 allows researchers to investigate topics relevant to DLSW
+(1P 2) K Ou pb ee nfl Po Aw I 4 6 4 5 8 41 5( (2 89 )) 6 1. .0 8 3 49 8. .4 0 2 2. .8 9/ /2 2. .9 2/ /4 31 3. .5 8 bugs and the methods of fixing them, providing a method to
+All∗∗ 3.3(cid:3) 3.4(cid:3) 275(94) 3.3 30.8 11.8/11.8/46.8 determine optimal techniques. Below, we highlight potential
+E ONNXRuntime 7 6 57(23) 5.2 28.1 3.3/6.9/72.6 research areas that could be leveraged through Denchmark.
+(5) All∗∗ 4.6(cid:3) 2.8(cid:3) 87(38) 6.8 15.4 6.2/13.9/102.8
+C SQLFlow 4 3 48(18) 1.2 17.0 2.3/3/32.8 • Text-based debugging techniques for DLSW: Our
+(3) All∗∗ 5.0(cid:3) 3.3(cid:3) 60(28) 3.8 14.3 2.3/4/45.9 datasetprovidestextualbugreportswithboth<CODE>
+Fairseq 2 2 35(17) 1.7 18.9 2.7/3.8/21.3 and comments, providing valuable textual information.
+garage 1 3 69(11) 2.4 29.5 6.8/11/81.7
+G Mlu Oo Nn ATS I 1 3 3 3 4 41 9( (2 19 1) ) 3 2. .0 1 1 37 .8.8 3 4. .3 1/ /3 7. .4 5/ /3 31 9. .3 9 • Fine-grained bug localization for DLSW: Bug reports
+T NNI 3 3 49(17) 3.0 27.8 2.6/2.8/25.2
+(44) OpenNMT-tf 1 2 33(12) 3.0 5.8 2.1/2.2/12.6 are linked to the buggy entity on three levels, which
+TensorPack 1 3 48(18) 2.0 0.6 2.2/2.3/10
+TorchIO 1 1 37(3) 2.4 4.5 3.1/4.6/23.7 provide fine-grained ground-truth data.
+TuriCreate 4 6 195(89) 2.6 73.4 6.8/71.4/340.9
+All∗∗ 1.7(cid:3) 2.8(cid:3) 895(351) 3.6 20.7 3.5/5.3/69.6 • Automaticbug-fixingforDLSW:Bugreportsarelinked
+AllenNLP 2 2 31(9) 3.4 24.2 3.8/3.8/33.5 to bug-fixing commits so that it can provide human
+DGL 3 5 35(14) 3.4 15.4 2.5/4.6/28.7
+Ignite 1 3 40(21) 2.4 12.2 4.1/11/56.2 patches. The buggy lines provide a fixed location.
+oneDNN 3 8 42(22) 3.8 15.5 4/21/49.2
+Open3D 4 3 45(21) 4.3 55.0 5.5/7.2/61.3
+(6L 3) PyToO rcPp hYe Ln RC iO gV htning 5 2 1 3 2 3 21 455 067 ((( 118 395 3)) ) 3 2 5. . .3 8 4 1 1 17 8 71 . .. 2 78 2 2 3. . .3 9 7/ / /4 5 7. . .8 1 3/ / /4 3 49 4 5. . .8 1 8 V. CONCLUSIONANDFUTUREWORKS
+Syft 1 2 34(17) 3.0 34.0 3.8/4.3/56.9
+TensorflowAddons 2 3 60(31) 3.4 16.4 2.9/3.6/28.1
+Tensorflow.js 7 3 55(25) 6.7 24.3 4.6/4.8/90
+TorchBearer 1 2 44(1) 0.6 6.1 4/9/83.7 Considering the ever-increasing interest and demand for
+All∗∗ 1.9(cid:3) 2.5(cid:3) 1,169(538) 3.5 38.7 5.9/10.9/52 DLSW, an automatic debugging technique should be devel-
+CVAT 3 2 48(12) 3.2 30.7 4/4.2/48.3
+A OctoBot 1 0 34(2) 0.3 23.3 3/4.5/24.4 opedtoensurethequalityofDLSW.Inthisstudy,wecreateda
+(17) PhotoPrism 2 1 49(13) 6.5 28.0 3.6/5/36.1
+All∗∗ 1.9(cid:3) 1.2(cid:3) 228(61) 3.2 41.0 2.8/3.7/133.4 large-scalebugbenchmarkforDLSWcalledDenchmark,con-
+Others◦ DeepForge 2 2 312(30) 0.2 3.8 1.7/5.4/47.9 structed via the aforementioned process, containing features
+(13) All∗∗ 1.8(cid:3) 3.3(cid:3) 397(54) 2.6 60.0 2.3/2.6/65.3 introduced in this study. All datasets and implementations are
+Total∗∗ 193 2.2(cid:3) 2.7(cid:3) 4,577(1,969) 3.5 33.4 4.6/7.3/62 released on https://github.com/RosePasta/Denchmark BRs.
+P∗
+◦
+∗L
+∗:
+::
+F O
+:u
+: t
+Ss hFe
+te
+ad
+r r ta s
+imp
+s:
+tr iDeo cwg sLr
+o S
+oa rm
+W fk,
+am
+lP d
+li
+:
+en pvg
+P re ol
+ll
+a
+joa
+t
+en
+f p
+cog
+m tr
+su
+m
+ea
+in
+ng
+,
+te
+E
+tt, ho:F eoER
+l cn ,
+a:
+g s ti
+tu
+en
+as gnee
+o,
+dd
+raC
+yrf
+,:
+dra nCm
+f ooo
+te
+rm
+mw jupo
+a si
+ttr lk
+e
+ears xn,, edTC
+m:
+pm
+pT r
+lat
+o
+ac:
+o rt
+yc
+il
+cko peim
+t rc
+om
+o o jr
+ee
+d
+cn
+T e
+tt
+so
+s,oin (cid:3)lsee :ta ,c ALh v:b eLu raig
+b
+grr eae rp oyo f,r oAt,
+v:
+eD
+A
+ra
+ap
+ly lp: plir rce oas jto eil
+o
+cu tnt siondays. DeH nco hw mev ae rkr,
+.
+s Co um rre enim tlyp ,ro thve em reen et xs isc ta sn omst eill bb ue gsm wad ite hof uo tr tt eh se
+t
+files in the fixing commit, impeding reproduction. However,
+in our dataset, some bug reports were linked with changed
+test files (approximately 35% in 193 DLSW). These reports
+comments can help DLSW researchers understand bugs. The
+are reproducible with their test files. It can be assumed that
+seventh column shows the average time of bug resolution,
+the failed test file represents the circumstance of bug and
+which was 33.4, which is larger than one month; i.e., if re-
+buggy behavior. We plan to develop a testing framework for
+searchersdevelopautomaticdebuggingtechniques,developers
+DLSW such as Defects4J and BugsInPy [10], [13]. Based on
+can save an average of 33 days of both time and cost.
+the testing framework for DLSW, we will validate existing
+C. Buggy entity statistics debugging techniques, especially bug localization and fixing.
+Furthermore, the bug-fixing patterns in DLSW can provide
+The eighth column presents the average numbers of buggy
+important insights for researchers with respect to automatic
+entities (based on entity level) as 4.6, 7.3, and 62. In case
+debugging techniques. Thus, based on fine-grained buggy en-
+of OpenPAI on Platform class, the average value of modi-
+tities on Denchmark, we will collect these patterns associated
+fied methods is less than that of modified files. This value
+withDLSWbyutilizingseveralstudies[31],[32]andthefault
+potentially means that the bugs could be fixed by 1) chang-
+taxonomy for DLSW derived in [7].
+ing outside the methods (e.g., global variables) rather than
+changing the methods or by 2) changing the files written by
+non-programming languages (e.g., YAML files [30]). ACKNOWLEDGMENT
+IV. RESEARCHOPPORTUNITY
+This work was supported by the National Research
+TheforemostopportunitybasedonDenchmarkisthestudy Foundation of Korea grant funded by the Korea government
+of bugs and debugging techniques for DLSW. Our dataset (MSIT) (2017M3C4A7068179, 2018R1D1A1B07050073,
+represents a well-curated bug benchmark for each project as 2019R1A2C2006411)
+543
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:17:31 UTC from IEEE Xplore. Restrictions apply.REFERENCES [17] Luca Ponzanelli, Andrea Mocci, and Michele Lanza. Stormed: Stack
+overflowreadymadedata.In2015IEEE/ACM12thWorkingConference
+onMiningSoftwareRepositories,pages474–477.IEEE,2015.
+[1] Zhenpeng Chen, Yanbin Cao, Yuanqiang Liu, Haoyu Wang, Tao Xie, [18] Klaus Changsun Youm, June Ahn, and Eunseok Lee. Improved bug
+andXuanzheLiu. Acomprehensivestudyonchallengesindeploying localizationbasedoncodechangehistoriesandbugreports.Information
+deep learning based software. In Proceedings of the 28th ACM Joint andSoftwareTechnology,82:177–192,2017.
+MeetingonEuropeanSoftwareEngineeringConferenceandSymposium [19] AnilKoyuncu,KuiLiu,Tegawende´FBissyande´,DongsunKim,Martin
+ontheFoundationsofSoftwareEngineering,pages750–762,2020. Monperrus,JacquesKlein,andYvesLeTraon. ifixr:Bugreportdriven
+[2] SaleemaAmershi,AndrewBegel,ChristianBird,RobertDeLine,Harald program repair. In Proceedings of the 2019 27th ACM joint meeting
+Gall,EceKamar,NachiappanNagappan,BesmiraNushi,andThomas on european software engineering conference and symposium on the
+Zimmermann. Software engineering for machine learning: A case foundationsofsoftwareengineering,pages314–325,2019.
+study. In 2019 IEEE/ACM 41st International Conference on Software [20] Manish Motwani and Yuriy Brun. Automatically repairing programs
+Engineering:SoftwareEngineeringinPractice(ICSE-SEIP),pages291– usingbothtestsandbugreports.arXivpreprintarXiv:2011.08340,2020.
+300.IEEE,2019. [21] Ahmed Khanfir, Anil Koyuncu, Mike Papadakis, Maxime Cordy,
+[3] DanielleGonzalez,ThomasZimmermann,andNachiappanNagappan. Tegawende´ FBissyande´,JacquesKlein,andYvesLeTraon. Ibir:Bug
+Thestateoftheml-universe:10yearsofartificialintelligence&machine reportdrivenfaultinjection. arXivpreprintarXiv:2012.06506,2020.
+learning software development on github. In Proceedings of the 17th [22] JacekS´liwerski,ThomasZimmermann,andAndreasZeller. Whendo
+InternationalConferenceonMiningSoftwareRepositories,pages431– changesinducefixes?ACMsigsoftsoftwareengineeringnotes,30(4):1–
+442,2020. 5,2005.
+[4] Junxiao Han, Emad Shihab, Zhiyuan Wan, Shuiguang Deng, and Xin [23] Eirini Kalliamvakou, Georgios Gousios, Kelly Blincoe, Leif Singer,
+Xia. What do programmers discuss about deep learning frameworks. Daniel M German, and Daniela Damian. The promises and perils of
+EMPIRICALSOFTWAREENGINEERING,2020. mininggithub.InProceedingsofthe11thworkingconferenceonmining
+softwarerepositories,pages92–101,2014.
+[5] Xufan Zhang, Yilin Yang, Yang Feng, and Zhenyu Chen. Software
+[24] Yue Yu, Zhixing Li, Gang Yin, Tao Wang, and Huaimin Wang. A
+engineeringpracticeinthedevelopmentofdeeplearningapplications.
+datasetofduplicatepull-requestsingithub. InProceedingsofthe15th
+arXivpreprintarXiv:1910.03156,2019.
+InternationalConferenceonMiningSoftwareRepositories,pages22–25,
+[6] HadhemiJebnoun,HoussemBenBraiek,MohammadMasudurRahman,
+2018.
+andFoutseKhomh.Thescentofdeeplearningcode:Anempiricalstudy.
+[25] Cosmin Marsavina, Daniele Romano, and Andy Zaidman. Studying
+InProceedingsofthe17thInternationalConferenceonMiningSoftware
+fine-grainedco-evolutionpatternsofproductionandtestcode. In2014
+Repositories,pages420–430,2020.
+IEEE14thInternationalWorkingConferenceonSourceCodeAnalysis
+[7] NargizHumbatova,GunelJahangirova,GabrieleBavota,VincenzoRic-
+andManipulation,pages195–204.IEEE,2014.
+cio,AndreaStocco,andPaoloTonella.Taxonomyofrealfaultsindeep
+[26] KuiLiu,LiLi,AnilKoyuncu,DongsunKim,ZheLiu,JacquesKlein,
+learningsystems. InProceedingsoftheACM/IEEE42ndInternational
+and Tegawende´ F Bissyande´. A critical review on the evaluation of
+ConferenceonSoftwareEngineering,pages1110–1121,2020.
+automated program repair systems. Journal of Systems and Software,
+[8] Md Johirul Islam, Giang Nguyen, Rangeet Pan, and Hridesh Rajan. 171:110817,2021.
+A comprehensive study on deep learning bug characteristics. In [27] He Ye, Matias Martinez, Thomas Durieux, and Martin Monperrus.
+Proceedingsofthe201927thACMJointMeetingonEuropeanSoftware A comprehensive study of automatic program repair on the quixbugs
+EngineeringConferenceandSymposiumontheFoundationsofSoftware benchmark. In 2019 IEEE 1st International Workshop on Intelligent
+Engineering,pages510–520,2019. BugFixing(IBF),pages1–10.IEEE,2019.
+[9] Md Johirul Islam, Rangeet Pan, Giang Nguyen, and Hridesh Rajan. [28] Xin Ye, Razvan Bunescu, and Chang Liu. Mapping bug reports to
+Repairing deep neural networks: Fix patterns and challenges. arXiv relevantfiles:Arankingmodel,afine-grainedbenchmark,andfeature
+preprintarXiv:2005.00972,2020. evaluation.IEEETransactionsonSoftwareEngineering,42(4):379–402,
+[10] Rene´Just,DarioushJalali,andMichaelDErnst. Defects4j:Adatabase 2015.
+ofexistingfaultstoenablecontrolledtestingstudiesforjavaprograms. [29] Davide Spadini, Maur´ıcio Aniche, and Alberto Bacchelli. Pydriller:
+InProceedingsofthe2014InternationalSymposiumonSoftwareTesting Pythonframeworkforminingsoftwarerepositories. InProceedingsof
+andAnalysis,pages437–440,2014. the201826thACMJointMeetingonEuropeanSoftwareEngineering
+[11] JaekwonLee,DongsunKim,Tegawende´ FBissyande´,WoosungJung, ConferenceandSymposiumontheFoundationsofSoftwareEngineering,
+andYvesLeTraon.Bench4bl:reproducibilitystudyontheperformance pages908–911,2018.
+ofir-basedbuglocalization. InProceedingsofthe27thACMSIGSOFT [30] AdamPaszke,SamGross,FranciscoMassa,AdamLerer,JamesBrad-
+internationalsymposiumonsoftwaretestingandanalysis,pages61–72, bury,GregoryChanan,TrevorKilleen,ZemingLin,NataliaGimelshein,
+2018. LucaAntiga,etal.Pytorch:Animperativestyle,high-performancedeep
+[12] Pe´ter Gyimesi, Be´la Vancsics, Andrea Stocco, Davood Mazinanian, learninglibrary. InAdvancesinneuralinformationprocessingsystems,
+Arpa´dBesze´des,RudolfFerenc,andAliMesbah. Bugsjs:abenchmark pages8026–8037,2019.
+ofjavascriptbugs. In201912thIEEEConferenceonSoftwareTesting, [31] AnilKoyuncu,KuiLiu,Tegawende´FBissyande´,DongsunKim,Jacques
+ValidationandVerification(ICST),pages90–101.IEEE,2019. Klein, Martin Monperrus, and Yves Le Traon. Fixminer: Mining
+[13] Ratnadira Widyasari, Sheng Qin Sim, Camellia Lok, Haodi Qi, Jack relevantfixpatternsforautomatedprogramrepair. EmpiricalSoftware
+Phan,QijinTay,ConstanceTan,FionaWee,JodieEtheldaTan,Yuheng Engineering,pages1–45,2020.
+Yieh,etal.Bugsinpy:adatabaseofexistingbugsinpythonprogramsto [32] WeiLin,ZhifeiChen,WanwangyingMa,LinChen,LeiXu,andBaowen
+enablecontrolledtestinganddebuggingstudies. InProceedingsofthe Xu. An empirical study on the characteristics of python fine-grained
+28thACMJointMeetingonEuropeanSoftwareEngineeringConference source code change types. In 2016 IEEE international conference on
+and Symposium on the Foundations of Software Engineering, pages software maintenance and evolution (ICSME), pages 188–199. IEEE,
+1556–1560,2020. 2016.
+[14] Sandeep Muvva, A Eashaan Rao, and Sridhar Chimalakonda. Bugl–
+a cross-language dataset for bug localization. arXiv preprint
+arXiv:2004.08846,2020.
+[15] Shayan A Akbar and Avinash C Kak. A large-scale comparative
+evaluationofir-basedtoolsforbuglocalization. InProceedingsofthe
+17thInternationalConferenceonMiningSoftwareRepositories,pages
+21–31,2020.
+[16] Giang Nguyen, Stefan Dlugolinsky, Martin Boba´k, Viet Tran,
+A´lvaro Lo´pez Garc´ıa, Ignacio Heredia, Peter Mal´ık, and Ladislav
+Hluchy`. Machinelearninganddeeplearningframeworksandlibraries
+for large-scale data mining: a survey. Artificial Intelligence Review,
+52(1):77–124,2019.
+544
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:17:31 UTC from IEEE Xplore. Restrictions apply.

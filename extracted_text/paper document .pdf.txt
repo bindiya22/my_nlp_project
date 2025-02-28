@@ -1,0 +1,835 @@
+International Journal of Computing & Information Sciences Vol. 7, No. 1, January 2009 On-Line 40
+Automatic Annotation Approach of Events in News Articles
+Aymen Elkhlifi and Rim Faiz
+Pages 40 - 50
+Automatic Annotation Approach
+of Events in News Articles
+Aymen Elkhlifi 1 and Rim Faiz 2
+1 LARODEC, ISG of Tunis
+B.P.1088, 2000 Le Bardo, Tunisia
+Aymen.Elkhlifi@isbb.rnu.tn
+2 LARODEC, IHEC of Carthage,
+2016 Carthage Présidence, Tunisia
+Rim.Faiz@ihec.rnu.tn
+Abstract: Daily, several news agencies publish thousands of articles concerning many events of all types (political,
+economic, cultural, etc.). The decision-makers find themselves in front of a great number of events, a few of which
+concern them. The automatic treatment of such events becomes increasingly necessary. Thus, we propose a
+machine learning-based approach that allows annotating news articles to generate an automatic summary of the
+events. We propose a new similarity measurement between events and we validate our approach by the development
+of the "AnnotEv" system.
+Keywords: Document Annotation, Event Extraction, Machine Learning, Natural Language Processing.
+Received: August 30, 2008 | Revised: September 30, 2008 | Accepted: December 30, 2008
+1. Introduction should think of automatizing the annotation process
+of such articles.
+Acquiring knowledge from texts is a need which has
+increased during the last years. With the considerable
+The documents indexing and events extraction are
+rise of the documents available in electronic format, it
+becoming tiresome. Thus, we are urged to generate
+is necessary to extract, filter and analyse relevant
+an easily consultable semantic annotation that takes
+information from those documents. As an example, the
+into consideration the increase in document size and
+stock market events are numerous and diversified. The
+enriches its indexing. By seeking a given event via a
+stock market experts must analyze these events, in a
+sequential analysis of the article, we noticed
+relatively reasonable time, in order to make important
+sentences which do not refer to any event. We
+decisions. It is a question, therefore, of annotating the
+observe, also, that several other sentences refer to the
+documents presenting the events to be able to extract
+same event. That is why we intend to eliminate the
+those which are relevant. In this respect, our work aims
+non-event sentences, and to group the others in
+at developing of an approach that annotates the news
+cluster form.
+articles.
+Accordingly, our work focuses on the annotation of
+After the beginning of current Web’s extension
+documents: First, we prepare the text in a
+towards the semantic one, the annotation system starts
+preprocessing stage. Second, we omit the non-event
+to take a significant role. In fact, it participates in
+sentences. Then, we group the sentences indicating
+giving the semantic aspect to the different types of
+the same or similar events. Finally, we generate a
+documents.
+summary article.
+Furthermore, with the proliferation of news articles
+The rest of the document is organized as follows:
+from different sources now available on the Web,
+Section (2) introduces the related work on annotation
+summing up such information is becoming more and
+methods. Then, the particular methods of temporal
+more indispensable. Due to the large number of news
+information annotation are exhibited. In section (3),
+sources (such as: BBC, Reuters, CNN, Aljazeera, etc.),
+we present our approach for automatic events
+everyday, thousands of articles are produced in the
+annotation. In order to validate our survey, we
+entire world concerning a given event. That is why we
+describe the four steps we followed to carry out the41 Automatic Annotation Approach of Events in News Articles
+AnnotEv system. The experimentation is described in The system developed by the ACACIA team [4]
+section (4). In section (5) we evaluate the system in allows the annotation of genes. It helps the biologists,
+order to demonstrate its proficiency. In section (6) we who make experiments on the biopuces, to validate
+end our work with a few notes on future work. and interpret of the obtained results. The system
+exempts them of the hard task of research. It offers
+the possibility of a keyword research in genetic
+2. Related Works on Methods of databases. The keyword can correspond to genes or a
+Annotation biological phenomenon studied.
+All previous works are interested in general
+It is worth noting that the annotation definition varies
+documents annotation like scientific articles, Web
+according to the application domain: Linguistics [1, 2],
+documents, biological databases and multimedia
+E-learning [3], Biology [4], Software development [5]
+documents. Only few of them focus on the events
+and Web application [6]. But, it can be said that the
+annotation. We present, in the following, some of
+annotation is all graphic or textual information attached
+these works:
+to a document. It refers to various entities including a
+set of documents, a document, a passage, a sentence, a
+The annotation of temporal information in texts [4]:
+term, a word or an image [7].
+this work focused more specifically on relations
+between events introduced by verbs in finite clauses.
+Several methods and techniques are used for the
+It proposes a procedure that achieves the task of
+current annotation systems such as contextual
+annotation and a way of measuring the results. The
+exploration [8], conceptual graphs [9], meta-thesauri
+authors of this work tested the feasibility of this
+[4] and linguistic indicators [10]. We describe,
+procedure on newswire articles with promising
+thereafter, the main existing annotation systems.
+results. Then, they developed two evaluation
+measures of the annotation: fineness and consistency.
+SyDoM [9] is a semantic annotation system of Web
+pages. It allows the enrichment of these pages in order
+The annotation scheme for annotating features and
+to find them without taking account of their writing
+relations in texts [14]: it enables to determine the
+language. It is devoted to the management of textual
+relative order and, if possible, the absolute time of the
+documents stored with XML formats. We see that
+events. A scheme could be used to construct an
+SyDoM has two main advantages: first, multilingual
+annotated corpus. This corpus would yield the
+research and second, the improvement of the Web
+benefits normally associated with the construction of
+pages representation. But, we notice that SyDoM can
+such resources. It can be also used to better
+carry out research only on Web pages that it has
+understand the phenomena. Moreover, it represents a
+already been annotated, yet it is unable to interrogate
+resource for training and evaluation of adaptive
+Web pages when the annotations were created using
+algorithms. Also it identifies automatically features
+different semantic thesauri.
+and relations of interest. However, we noted that this
+work is based only on the temporal markers to
+EXCOM [12] is an annotation engine that uses a set of
+determine the relations between events. This
+linguistic tools, which aim at annotating a document by
+technique is not completely correct, since there are
+a bloc of internal/external knowledge. This engine is
+implicit inter-events relations which are expressed
+under development and, at the present time, it allows
+without using temporal markers.
+the production of a temporal organization of the stories
+and an automatic reformulation of the questions.
+The time annotation [15] with a canonized
+However, we observe that an important part of this
+representation of the times expressions: a method was
+system is still not implemented, i.e. the semantic
+described for extracting such time expressions in
+indexing of the documents by considering of annotated
+multiple languages. The annotation process is divided
+information.
+into two steps: first, flagging a temporal expression in
+a document (based on the presence of specific lexical
+Annotea [13] is a collaborative Customer Server
+trigger words) and, second, identifying the time value
+system for document annotation. The annotations are
+that the expression designates or the speaker intends
+stored on a specialized server. They are divided in such
+for it to designate.
+a way that anyone, who has an access to the annotation
+server will be able to consult all annotations related to
+We note that the temporal information annotations
+a given document and to add his/her own annotations.
+are generally concerned with the detection of dates
+These annotations can be typographical comments,
+and temporal markers [14], event descriptions and
+corrections, assumptions or estimates. This system was
+finding the events date [16] and the temporal
+developed using the W3C standards. Nevertheless, the
+relations between events in a text [11].
+only possible form of annotation is the text; it cannot
+annotate by images or icons.International Journal of Computing & Information Sciences Vol. 7, No.1, January 2009, On-Line 42
+However, in our study we are interested rather in the 4. Document annotation: it takes various forms
+annotation of the events in the form of metadata on the such as: sentences, form, concept, according
+document. to the field of application of our approach.
+3. The Proposed Approach of Event 3.1 The Preprocessing
+Annotation In the case study, the preprocessing consists in the
+application of some Natural Language Processing
+(NLP) tools to the rough text in order to segment it
+We note that the above-mentioned approaches for the
+into sentences and annotate its entities.
+temporal information annotation are mainly linguistic.
+As well, they are based on the temporal indices.
+We noticed that the segmentation is often neglected
+Moreover, we are interested in the annotation and
+by the annotation systems in spite of its importance
+exploitation of events using machine learning
+compared to the annotation quality. In addition, the
+techniques. Our approach is not restricted to the events
+entity identification is often used in other contexts
+detection, but it also allows gathering the similar events
+like the question-answer systems. We present,
+in order to facilitate an ulterior treatment: indexing,
+thereafter, the segmentation and the named entity
+storage in a database, summarization, categorization,
+recognition.
+information retrieval, etc.
+The segmentation: is the determination of the
+The automatic process of documents annotation which
+sentences borders. It is a hardly-realisable task.
+we present is carried out in four stages (see Figure 1):
+Given that a point followed by a capital letter is not
+enough to detect the end or the beginning of a
+1. Preprocessing: it consists, on the one hand, in
+segment, it is necessary to take into account all
+the text segmentation and, on the other hand, in
+typographical markers. Moreover, other linguistic
+the identification of entities.
+bases are engaged like the syntactic structure of a
+2. Events annotation: it uses a classifier playing
+sentence and the significance of each typographical
+the role of a filter for the non-event sentences.
+marker in a well defined context. The existing tools
+3. Clustering: it consists in gathering the
+segment the well structured texts into paragraphs.
+sentences referring to the same or similar
+But, the segmentation of texts in smaller units
+events. We propose in this stage a new
+(sentences) remains a more complex task.
+similarity measurement between the events.
+Preprocessing Event Annotation
+Synonyms Database
+Sen1; Event1;
+Sen1; Sen1;
+….. …..
+Event3;
+Sen1; Event n;
+Corpus
+Sen1; Event1;
+Sen1; Sen1;
+….. ….. Clustering
+Event3;
+Sen1; Event n;
+Event1;
+E v e n Et 1
+v
+eE nv
+t
+e 6n t3
+Sen1;
+…..
+E Ev ve en nt tn3 ;; E v e n Et2
+v
+E env te nn t 5
+Summary Document Annotation
+K Loe cy aw to ior nd :: K Bil ale gd
+h d ad Event1; Event1;
+E v e n Et 1
+v
+eE nv
+t
+e 6n t3
+Sen1; Sen1;
+….. …..
+Form Event3; Event3;
+Keyword: Killed
+E ventn; E ventn; E v e n Et2
+v
+E env te nn t 5
+DB
+Location: Baghdad
+Time/date: 2 p.m
+Person: U.S. soldier
+Event1;
+Sen1;
+…..
+Concepts Event3;
+Eventn;
+Deserter, war, Iraq
+Figure 1. Proposed approach for automatic annotation of events43 Automatic Annotation Approach of Events in News Articles
+There exist some works related to the monolingual type. The types selected are recognized by rules
+segmentation, in French language [17], English [18] thanks to the joint exploitation of two information
+and German [19]. We tested these systems on a sources:
+corpus, and they gave a precision lower than 90%. • General lexicons allowing finding syntactic
+Other more recent works considered the multilingual and semantic features associated with the
+aspect, like the work of Mourad [20], which proposed simple words in complement of the lexical
+an approach that consists in defining a textual segment features.
+starting from a systematic study of the punctuation • Dictionaries of named entities.
+marks.
+It may be noted that the named entity recognition is
+We have developed our own segmentor while relying an important task of text information extraction. The
+on punctuation marks. Due to the large number of majority of the current systems are able to annotate
+linguistic rules to implement, we have to integrate in the dates and the places. It is possible to find within
+our knowledge base all the rules developed in the one document several mentions which refer to only
+Segatex system [20]. We obtained 96% of precision. one entity.
+The result of the segmentation of a text is to detail
+below on a sample article (cf. Figure 2). Figure 3 presents the same text of Figure 2 after the
+named entities detection. Initially the position of each
+term is fixed. Then, the annotations concerning each
+<?xml version="1.0" encoding="UTF-8"?>
+entity are mentioned by specifying their attributes.
+<article lang="Ang">
+<para id="1">
+<title id="1">
+<phrase id="1"> <?xml version="1.0" encoding="windows-1252" ?>
+Iraqi leader denies civil war as 50 people die <!-- The document content area with serialized nodes –
+</phrase> <TextWithNodes>
+</title> <Node id="4"/>Iraqi<Node id="9"/>
+</para> <Node id="10"/>leader<Node id="16"/>
+<para id="1"> <Node id="17"/>denies<Node id="23"/>
+<phrase id="2"> <Node id="24"/>civil<Node id="29"/>
+BAGHDAD, Iraq (CNN) -- On a day in which at <Node id="30"/>war<Node id="33"/>
+least 50 people were killed, Iraqi Prime Minister <Node id="34"/>as<Node id="36"/>
+Nuri al- Maliki said he did not foresee a civil war <Node id="37"/>50<Node id="39"/>
+in Iraq and that violence in his country was abating. <Node id="40"/>people<Node id="46"/>
+</phrase> <Node id="47"/>die<Node id="50"/>
+</para> <Node id="56"/>BAGHDAD <Node id="63"/>
+<para id="3"> , <Node id="64"/>
+<phrase id="3"> <!-- …………………… –
+<quote id="1"> </TextWithNodes>
+« In Iraq, we'll never be in civil war, » <AnnotationSet>
+</quote> <Annotation Id="485" Type="Location" StartNode="56 "
+al-Maliki told CNN's « Late Edition » on Sunday. EndNode ="63">
+</phrase> <Feature>
+</para> <Name
+<para id="4"> className="java.lang.String">rule2</Name>
+<phrase id="4"> <Value
+Attacks on American troops around the Iraqi className="java.lang.String">LocFinal</Value>
+capital Sunday left six soldiers dead, the U.S . </Feature>
+command in Baghdad reported. <Feature>
+</phrase> <Name
+</para> className="java.lang.String">rule1</Name>
+<para id="5"> <Value
+<phrase id="5"> className="java.lang.String">Location1</Value>
+Other violence nationwide left more than 130 </Feature>
+wounded, local authorities said. <Feature>
+</phrase> <Name
+</para> className="java.lang.String">locType</Name>
+<para id="6"> <Value
+<phrase id="6"> className="java.lang.String">city</Value>
+One U.S . soldier was killed by gunfire in eastern </Feature>
+Baghdad about 2 p.m . </Annotation>
+</phrase> <Annotation Id="478" Type="Person" StartNode="305"
+</para> EndNode ="314">
+<!-- …………………… – <Feature>
+</article > <Name
+className="java.lang.String">gender</Name>
+<Value
+Figure 2. Extract of the article segmentation " Iraqi className="java.lang.String">male</Value>
+leader denies civil war as 50 people die ". BBC 2006. </Feature>
+<Feature>
+<Name
+Named Entities [21] are types of particular lexemes className="java.lang.String">rule1</Name>
+<Value
+which refer to an entity of the concrete world in certain
+className="java.lang.String">PersonFull</Value>
+fields, namely human, social, political, economic or </Feature>
+geographical and which has a name (typically a proper
+name or an acronym). The entities are identified in the
+documents by a tag which corresponds to the entityInternational Journal of Computing & Information Sciences Vol. 7, No.1, January 2009, On-Line 44
+decision tree, the Bayesian network, etc. We chose
+the decision tree for many reasons; it is easily
+<Feature>
+<Name interpretable by people. Moreover, the decision tree
+className="java.lang.String">rule</Name>
+construction is less skeletal compared to the other
+<Value
+className="java.lang.String">PersonFinal</Value> techniques. Hence, it allows the reduction of the
+</Feature>
+system complexity.
+<Feature>
+<Name
+className="java.lang.String">matches</Name>
+The training set is annotated by experts. For each
+<Value className="java.util.ArrayList"
+itemClassName = news article, the events are annotated as follows: the
+"java.lang.Integer">476;478</Value> annotator is brought to assign labels for each sentence
+</Feature>
+</Annotation> representing an event. If a sentence refers to an
+<Annotation Id="431" Type="Split" StartNode="561" event, they assign the label "yes", if not, "no". We
+EndNode ="562">
+<Feature> applied to this same training set various algorithms of
+<Name decision trees construction. Then, we chose the
+className="java.lang.String">kind</Name>
+<Value model which has the biggest PCC (Percentage
+className="java.lang.String">internal</Value> Correctly Classified).
+</Feature>
+</Annotation> <!-- …………………… –
+</AnnotationSet> The result of this stage is the set of sentences
+Figure 3. Extract article "Iraqi leader denies civil war as referring to events. Moreover, the classification of
+50 people die" after the named entity recognition. sentences as an event or not, represents a kind of
+filtering; on the basis of a segmented text, we filter
+the non-event sentences.
+We integrate in this module the dictionaries of GATE
+software [34] (lists of the entities and regular 3.3 Clustering
+expressions). The result of this first stage of our In this stage we gather the sentences referring to the
+approach is the set of segmented sentences with their same or similar events by the application of the
+annotated entities. algorithm 'Hierarchical Agglomerative Clustering
+(HAC)' [25, 26]. This algorithm initially assigns each
+3.2 Events Annotation object with a cluster, then collects, on several
+An event is a specific object which occurs at one occasions, the clusters until one of the stop criteria is
+specific moment and in a well defined place [22]. Our satisfied.
+objective is to identify all events in a document. We
+mark each detected event by a tag. Accordingly, a Our contribution is to put forward a new measure of
+model of classification is built automatically from the similarity between events. Given the importance of
+training set which permits to predict whether a similarity measurements in clustering, we noted that
+sentence contains an event or not. We initially used the there are several of such measurements between
+attributes which refer to the events as they are defined documents including: Salton's cosinus [27], Khi-
+by Naughton [23]. These attributes are the following: Deux distance [28], Cosine in distributional space
+[29]. Other measurements, which are more interesting
+• Length of the sentence. for us, are linked to the similarity between sentences,
+• Numbers of capital letters. the latest of which is Naughton’s measurement [23].
+• Numbers of stop words.
+Similarity between sentences: Similarity
+• Number of city/town.
+measurement, in general, is based on distance
+• Number of numerical marks.
+(Euclidean, Manhattan, Minkowski or that of Entropy
+[30]). We can adopt the Jaccard index for sentences.
+Within the framework of our study, and through the
+If we replace a document by a sentence in the
+analysis of the news articles, we noticed that the
+addition of other attributes to the preceding list is
+formula, we get: S ij= m (m +m −m ).
+c i j c
+possible; e.g. the temporal markers (after, before, The similarity index is the number of common words
+simultaneously, etc.) and the calendar terms (Sunday, divided by the total number of words minus the
+9/12/2004, March). The problem of choosing number of common words:
+significant attributes can be solved by using feature
+selection algorithms, which lead to select a subset of • i and j are tow sentences
+relevant attributes in order to find a predictive model. • m : Number of common words.
+c
+There is a variety of feature selection algorithms (chi- • m: Size of the lexicon of the sentence S (i.e.
+i i
+public garden, Relief and Principal component analysis number of different words in S i).
+[24]). After having carried out experimentation, we • m j: Size of the lexicon of document S j.
+added the attribute "number of calendar terms".
+We put forward a new similarity measurement
+between events inspired by tf-idf “weight term
+Several machine learning techniques can be used for
+frequency–inverse document frequency” [31]. This
+classification problem such as the neural network, the45 Automatic Annotation Approach of Events in News Articles
+measurement also takes account of the clusters position FSIM on a press article:
+in the article.
+C1: Iraqi leader denies civil war as 50 people die.
+C2: On a day in which at least 50 people were killed, Iraqi
+In order to gather sentences expressing the same or Prime Minister Nuri al-Maliki said he did not foresee a
+similar event by two different lexicons, we use a civil war in Iraq and that violence in his country was
+synonyms database for the replacement of the instances abating.
+In Iraq, we'll never be in civil war," al-Maliki told CNN's
+by their classes.
+"Late Edition" on Sunday.
+C3: One U.S. soldier was killed by gunfire in eastern
+For example, let us have the two following event-
+Baghdad about 2 p.m.
+sentences, initially considered as two clusters C 1 and C4: U.S. commander wounded since 1 p.m
+C . …………
+2
+Levin, the ranking Democrat on the Senate Armed Services
+C : In Baquba, two separate shooting incidents left six Committee, called for the United States to set a date to begin
+1
+withdrawing its forces.
+dead and 15 wounded Sunday afternoon.
+C5: In Baquba, two separate shooting incidents Sunday
+afternoon left six dead and 15 wounded, officials said.
+C : In other attacks reported by security and hospital
+2 C6 : Two car bombings in the northern city of Kirkuk
+officials, two car bombings in the northern city of killed 10 and wounded 32, and a blast in the southern city
+Kirkuk killed 10 and wounded 32, and a blast in the of Basra killed five and injured 15
+southern city of Basra killed five and injured 15.
+FSIM (C1, C2) = 0.91 FSIM (C1, C3) = 0.12
+We notice that the words (bombardments and
+FSIM (C1, C4) = 0.1 FSIM (C1, C5) = 0.05
+FSIM (C1, C6) = 0.02 FSIM (C2, C3) = 0.08
+bombings), (wounded and injured) imply the same
+FSIM (C2, C4) = 0.1 FSIM (C2, C5) = 0.32
+meanings. Hence, there is a need to replace these words
+FSIM (C2, C6) = 0.36 FSM (C3, C4) = 0.84
+by their classes from the synonyms database in order to FSIM (C3, C5) = 0.28 FSIM (C3, C6) = 0.23
+increase the similarity between both clusters. In FSIM (C4, C5) = 0.19 FSIM (C4, C6) = 0.15
+general, the similarity between two classes expressing FSIM (C5, C6) = 0.79
+the same or similar event by means of two different
+Figure 4. Application of HAC algorithm (first step)
+lexes. We define SIM between two clusters C
+1
+and C 2,
+then, as follows: The sentences in bold indicate an event. First of all,
+∑t Ct Ct we calculate the FSIM between these sentences
+SIM (C 1,C 2)=
+∑t
+j=1Cj t=1
+12
+j
++1 ∑j
+t
+j2 =j
+1Ct 22
+j
+w vah le ur ee
+s
+e aa
+t
+c th
+h
+es e bn ot te ton mce oi fs fa
+ig
+ucl ru es 4te .r .
+B
+eT sh iden es,
+,
+w we
+e
+o gb rt oa ui pn
+together C and C into only one cluster C (because
+1 2 A
+With Ct ij as the weight of each term in a cluster after they have the biggest FSIM). Finally, we reapply
+the replacement of instances by their classes from HAC on the new clusters.
+synonyms database. It is calculated as follows:
+C t =tf(t ,c)×lo g(N df ( t ) ) with: After 3 iterations, we obtain two new clusters C and
+ij i i B
+D (cf. Figure 5):
+C
+• tf( t , c) the frequency of the term t in a
+i i
+cluster c. C A : Iraqi leader denies civil war as 50 people die.
+• N the number of clusters. On a day in which at least 50 people were killed, Iraqi
+Prime Minister Nuri al-Maliki said he did not foresee a civil war in
+• df (t ) the number of clusters containing the
+i Iraq and that violence in his country was abating.
+term t.
+i In Iraq, we'll never be in civil war," al-Maliki told CNN's
+"Late Edition" on Sunday.
+Based on what has been said so far, and by taking into One U.S. soldier was killed by gunfire in eastern Baghdad
+consideration the sentence position in the article, we C B : about 2 p.m.
+propose the new similarity measurement FSIM which U.S. commander wounded since 1 p.m
+…………
+combines the similarity between sentences and the
+Levin, the ranking Democrat on the Senate Armed Services
+distance between them:
+Committee, called for the United States to set a date to begin
+withdrawing its forces.
+FSIM(C ,C )=α×SIM(Ct ,Ct )+(1−α)×D(Ct ,Ct )
+1 2 1 2 1 2 In Baquba, two separate shooting incidents Sunday
+With D (Ct , Ct ) the distance between both clusters in C c : afternoon left six dead and 15 wounded, officials said.
+1 2 Two car bombings in the northern city of Kirkuk killed 10
+the article and α ∈ [0, 1] fixed during the and wounded 32, and a blast in the southern city of Basra killed
+experimentation. Therefore, for N clusters, we have five and injured 15
+n×(n-1)/2 possible combinations (see [24]).
+FSIM (CA, CB) = 0.14
+FSIM (CA, CC) = 0.07
+It is important to group the sentences indicating the
+FSIM (CB, CC) = 0.09
+same or similar events, since they will be gathered
+even if they use various words. Figure 4, for example, Figure 5. Application of HAC algorithm ( last step)
+presents the application of HAC algorithm by usingInternational Journal of Computing & Information Sciences Vol. 7, No.1, January 2009, On-Line 46
+In this HAC step, we stop the clustering since we have Iraqi leader denies civil war as 50 people die.
+a value of FSIM inferior to the threshold of similarity, On a day in which at least 50 people were killed, Iraqi
+Prime Minister Nuri al-Maliki said he did not foresee a civil war in
+fixed initially at 0,6.
+Iraq and that violence in his country was abating.
+In Iraq, we'll never be in civil war," al-Maliki told CNN's
+3.4 Document Annotation
+"Late Edition" on Sunday.
+Using the clusters and their positions in the article we One U.S. soldier was killed by gunfire in eastern Baghdad
+generate a description which combines the events and about 2 p.m.
+presents the annotation of the article under three types: U.S. commander wounded since 1 p.m
+…………
+• To extract sentences that sum up the article.
+Levin, the ranking Democrat on the Senate Armed Services
+• To structure the annotation in a standard form
+Committee, called for the United States to set a date to begin
+to store events in databases.
+withdrawing its forces.
+• To extract concepts (future work). In Baquba, two separate shooting incidents Sunday
+afternoon left six dead
+Thus, we continue the enrichment of the document by and 15 wounded, officials said.
+Two car bombings in the northern city of Kirkuk killed 10
+other metadata which will be very useful for all ulterior
+and wounded 32, and a blast in the southern city of Basra killed
+treatment (information retrieval, automatic
+five and injured 15
+summarization, question-answer systems, storage of
+the events in a database, indexation, etc).
+Iraqi leader denies civil war as 50
+people die.
+A possible form of metadata is the forms filling, i.e. One U.S. soldier was killed by gunfire
+stoking the events in database while answering has in eastern Baghdad about 2 p.m.
+In Baquba, two separate shooting
+well determined questions (where, when, who) for incidents Sunday afternoon left six
+example: dead and 15 wounded, officials said.
+• Location: Baghdad.
+• Time/date: 2 p.m. Figure 6. Summarization of article
+• Person: U.S. soldier.
+• Keyword: Killed.
+Such annotation can be used to improve indexing and
+information relevant to such articles.
+For each event sentence, we have this information
+since the preprocessing. After having stored this
+information in a relational database, we can find events
+4. Experimentation
+by date, person, or time by a simple request on the
+selected fields.
+To validate our approach, we develop the AnnotEv
+Another form of metadata is the automatic summary, system with Java language; Visual Studio platform,
+which consists in marking the sentences which form particularly Visual J++.
+the summary of a document. In general, the goal of a AnnotEv includes the four following modules:
+summary system is to produce a condensed • Module 1: The segmentation and the
+representation of the contents where the important recognition of the named entities
+information of the original text is preserved. It is also • Module 2: events annotation.
+necessary to consider that the user needs and the • Module 3: clustering.
+specified task [32]. • Module 4: automatic summary.
+In this context, we propose an informative summary We prepared a corpus containing 263 articles. The
+containing the essential information of the article. This articles talk about the Iraq War. They are published in
+summary is also selective since it neglects the general 2008 and collected from 8 news sources (agencies
+aspects of the article. In addition, it can be said that it is and channels): CNN (32 articles), Reuters (30
+targeted since it is correlated to the events. articles), BBC (35 articles), Associated Press (31
+articles), AFP (35 articles). Aljazeera (32 articles),
+For each cluster generated by the third stage we Iraqi Press Agency (33 articles) and Iran Islamic
+annotate the article by the principal events it contains. Republic press agency (35 articles).
+We use the following heuristics: the sentence having
+the maximum value attributes in the classification stage The average length of a sentence is of 14 words, with
+is the best to annotate the cluster. Let us take again the an average of 7 events per article, for a total of
+preceding example, the summary of which is presented approximately 281000 words, 20071 sentences and
+as follows (cf. Figure 6): 1841 events.
+We also use the Weka libraries edition 3.5 [33] and
+Gate 4.0 [34] respectively for decision tree and entity
+identification.47 Automatic Annotation Approach of Events in News Articles
+After removing the images and the legends of the The Precision, the Recall and F1 are defined as
+article we segment them into sentences and, then, we follows:
+annotate entities by calling upon the Gazettee-Annie a a 2× P × R
+P = , R = and F1=
+method from Gate class. We use WordNet [35] as a a + c a + b (P + R)
+synonyms database. Besides, we annotate the events
+and group them according to their similarities. We
+develop several interfaces to ensure the management of
+5. Results
+corpus and training set annotation. We also develop
+other interfaces for the events search and
+The evaluation is done at several levels. We start with
+summarization. We have to integrate a speaker agent
+the classification evaluation by using the PCC, then,
+who is able to read the texts in two different versions.
+the clustering by measuring the Precision and the
+For the system user, it is enough to select a new article
+Recall. We exploit the following algorithms:
+in order to listen to its summary (see Figure 7).
+Figure 7. Interfaces of speak agents for the automatic summarization
+J48: implementation of C4.5 algorithm [36] which
+The training set is part of the group of obtained selects for each level the tree node as the attribute
+sentences after the preprocessing stage. It is annotated which differentiate better the data. Then, it divides
+by two experts. For each sentence the default value of the training set into sub-groups in order to reflect the
+the attribute “Event” is 'No' (sentence not indicating an values of the attribute of the selected node. We repeat
+event), the commentator has to put 'Yes' if the sentence the same treatment for under group until we obtain
+refers to an event. An ARFF file (input format of under homogeneous groups (all the instances or the
+Weka) is generated automatically for each article. It majority have the same attribute of decision).
+will be used like a data source for the algorithms of
+classification. We adopted J48, ADTREE and Random ADTree: construction of the decision trees extended
+Tree with the cases of the events. to the cases of multiclasses and multi-labels.
+To evaluate the clustering method we employ the Random Tree: begin with tree random and chosen by
+precision and recall measurements [35]. We assign the majority best vote.
+each pair of sentences to one of the four following We obtained the following results:
+categories:
+• a: grouped together (and annotated like J48
+referring to the same event). TP FP Precision Recall F- Class
+• b: not grouped together (but annotated as Rate Rate Measure
+referring to the same event). 0.824 0.25 0.778 0.824 0.8 Yes
+• c: grouped inaccurately together. 0.75 0.176 0.8 0.75 0.774 No
+• d: correctly not grouped together.International Journal of Computing & Information Sciences Vol. 7, No.1, January 2009, On-Line 48
+In long term, we look forward to fuse the events. In
+ADTREE
+fact, we have the idea of adopting, to the case of the
+TP FP Precision Recall F- Class events, the MCT model proposed by Smets [37] for
+Rate Rate Measure the fusion of information in general.
+0.765 0.313 0.722 0.765 0.743 yes
+0.688 0.235 0.733 0.688 0.71 no
+References
+RandomTree
+TP FP Precision Recall F- Class
+[1] J. Véronis, Annotation automatique de corpus :
+Rate Rate Measure
+panorama et état de la technique. J.-M. Pierrel
+0.706 0.313 0.706 0.706 0.706 yes (Ed.), Ingénierie des langues. Paris: Editions
+0.688 0.294 0.688 0.688 0.688 no Hermès, 2000.
+For the clustering stage, we obtained a significant value [2] S. Bird, M. Liberman, A formal framework for
+of Recall (R) and Precision (P) and the function F1: linguistic annotation, in Speech
+Communication, Volume 33, Number 1,
+January 2001, pp. 23-60(38)
+• R = 81,43%
+http://dx.doi.org/10.1016/S0167- 6393(00)
+• P= 79,12%
+00068-6
+• F1= 80.25%.
+[3] M. Dominique, Modèles et outils logiciels pour
+This result is made of the similarity measurement that
+l'annotation sémantique de documents
+we proposed. Indeed, it detects the similarity between
+pédagogique. Thèse de doctorat de l’Université
+the sentences even if it contains different terms.
+Joseph Fourier de Grenoble, octobre 2006.
+6. Conclusion and Future Work [4] K. Khelif, R. Dieng-Kuntz, P. Barbry, An
+Ontology-based Approach to Support Text
+Mining and Information Retrieval in the
+In this paper, we have proposed four stages to annotate
+Biological Domain, in J. UCS 13(12), pp.
+press articles starting, in a first stage, by the
+1881-1907, 2007.
+preprocessing that consists in applying NLP tools to
+prepare the data. In a second stage, the filtering of the
+[5] M. Islam Chisty, An Introduction to Java
+non event-driven sentences has been done by dint of a
+Annotations, 2005 at
+classifier. In the third stage we have gathered the
+http://www.developer.com/java/other/article.ph
+sentences in clusters according to their degree of
+p/10936_3556176_1
+similarity (FSIM). Finally, we have generated an
+automatic summary of the principal events constituting
+[6] L. Denoue, L. Vignollet, An annotation tool for
+the article. Our approach was evaluated on news
+Web browsers and its applications to
+articles corpus concerning the Iraq War published in
+information retrieval, in Proceedings of RIA,
+2008.
+2000.
+This approach comes within the framework of the
+[7] E. Desmontils, C. Jacquin, Annotations sur le
+Information Extraction from texts, particularly the
+Web: notes de lecture. In AS CNRS Web
+extraction and the exploitation of the events. Actually,
+Sémantique, 2002.
+it constitutes a considerable target in many application
+domains like the national security, the economy or the
+[8] J.P. Desclés, Systèmes d’exploration contextuelle,
+industry. In such fields the concepts of technological/
+Co-texte et calcul du sens, Claude Guimier,
+economic survey become essential, in particular for the
+Presses de l’université de Caen, 1997, pp. 215-
+help in decision making: definition of strategies,
+232.
+placement towards competition, etc.
+[9] C. Roussey, S. Calabretto, An experiment using
+In short term, in our future works, we propose to adopt
+Conceptual Graph Structure for a Multilingual
+AnnotEv for news articles in Arabic. Indeed, our
+Information System, in the 13th International
+system supports the Arab characters, and the stages of
+Conference on Conceptual Structures,
+our approach are independent of the language. But, it
+ICCS'2005.
+remains to provide linguistic resources (Synonyms data
+base, segmentators, etc) for the Arabic language.
+[10] F. Dau, M-L Mugnier, G. Stumme, Conceptual
+Experimentation was made on a small corpus of 5
+Structures: Common Semantics for Sharing
+articles segmented manually and with a small
+Knowledge, 13th International Conference on
+Synonyms data base to measure.
+Conceptual Structures, ICCS 2005.49 Automatic Annotation Approach of Events in News Articles
+[11] P. Muller, X. Tannier, Annotating and measuring [21] O. Ferret, B. Grau, M. Hurault-Plantet, G.
+temporal relations in texts. In Proceedings of Illouz, C. Jacquemin, L. Monceaux, I. Robba,
+Coling, volume I. Genève, Association for A. Vilnat, How NLP Can Improve Question
+Computational Linguistics, 2004. Answering. In Revue Knowledge Organization,
+2002.
+[12] J.P. Desclés, B. Djioua, La recherche
+d’informations par accès aux contenus [22] W. Li, X. Wang, A. McCallum .In Event
+sémantiques : vers une nouvelle classe de Extraction and Synthesis Confererence Menlo
+Systèmes de Recherches d’Informations et de Park, California, 2006, pp. 48-54.
+moteurs de recherche (aspects linguistiques et
+stratégiques). Rapport Paris Sorbonne et Revue [23] M. Naughton, N. Kushmerick, and J. Carthy,
+Linguistique informatique, Roumanie. pp. 7-57, Event extraction from heterogeneous news
+2007. sources. Proc.Workshop Event Extraction and
+Synthesis, American Nat. Conf. Artificial
+[13] J. Kahan, M-R. Koivunen, Annotea: an open Intelligence, 2006.
+RDF infrastructure for shared Web annotations.
+Proceedings of the 10th international conference [24] A. Elkhlifi, and R. Faiz, Machine Learning
+on World Wide Web, 2001. Approach for the Automatic Annotation of
+Events. Proceedings of the 20th International
+[14] A. Setzer, R. Gaizauskas, TimeML: Robust FLAIRS 2007 - Special Track: Automatic
+specification of event and temporal expressions Annotation and Information Retrieval: New
+in text. In The second international conference Perspectives, D. Wilson and G. Sutcliffe
+on language resources and evaluation, 2000. (Editors), AAAI Press, California, pp. 362-367.
+[15] I. Mani, L. Ferro, B. Sundheim, G. Wilson, [25] H. Liu, L. Yu, Toward Integrating Feature
+Guidelines for Annotating Temporal Information. Selection Algorithms for Classification and
+In Human Language Technology Confererence. Clustering. IEEE Transaction on Knowledge
+San Diego, California, 2001. and Data Engineering, 2005. vol. 17, n. 3.
+[16] Faiz, R. Identifying relevant sentences in news [26] Mannig, C., and Schutze, H. Foundations of
+articles for event information extraction. Statistical Natural Language Processing. MIT
+International Journal of Computer Processing of Press, 1999.
+Oriental Languages (IJCPOL), World Scientific,
+Vol. 19, No. 1, pp. 1-19, 2006. [27] G. Salton, C. Buckley: Term-weighing
+approaches in automatic text retrieval. In
+Information Processing & Management, 24(5),
+[17] A. Dister, Problématique des fins de phrase en pp.513-523, 1988.
+traitement automatique du français. In À qui
+appartient la punctuation ? Actes du colloque [28] L. Lebart, M. Rajaman, Computing Similarities.
+international et interdisciplinaire de Liège, In Dale R., Moisl H. Somers. Editors: Hanbook
+Bruxelles, 1997. of Natural Language Processing, Marcel
+Dekker. New York, 2000.
+[18] C. Jeffrey, C. Reynar, A. Ratnaparkhi, A
+Maximum Entorpy Approach to Identifying [29] B. Escofier, Analyse factorielle et distances
+Sentence Boundaries. In Proceedings of the Fifth répondant au principe d'équivalence
+Conference on Applied Natural Language distributionnelle, Revue de Statist. Appl, vol.
+Processing, Washington, D.C., March 31 - April 26, n°4, 29-37, 1978.
+3 1997.
+[30] F. Alter, Y. Matsushita, X. Tang, An Intensity
+[19] D. Palmer, A. Hearst, Adaptative sentence Similarity Measure in Low-Light Conditions,
+boundary disambiguation. Proceedings of the ECCV06 (IV: 267-280).
+1994 Conference on Applied Natural Language
+Processin. Stuttgart, Germany, 1994. [31] G. Salton, M.J. Mac Gill, Introduction to
+Modern Information Retrieval. In International
+[20] Gh. Mourad, Analyse informatique des signes Student Edition, 1983.
+typographiques pour la segmentation de textes et
+l’extraction automatique de citations. Réalisation [32] J.L. Minel, J.P. Desclés, E.Cartier, G. Crispino,
+des Applications informatiques: SegATex et S. Ben hazez, A. Jackiewicz, Résumé
+CitaRE. Thèse de doctorat Université Paris- automatique par filtrage sémantique
+Sorbonne, 2001. d’informations dans des textes. Revue
+Technique et Science Informatiques, 2001.International Journal of Computing & Information Sciences Vol. 7, No.1, January 2009, On-Line 50
+[33] E. Frank, I. Witten, Data Mining: Practical
+Machine Learning Tools and Techniques Aymen Elkhlifi received a Masters
+(Second Edition). Morgan Kaufmann, 2005. 525 degree in computer sciences in
+pages. 2007 from the University of Tunis,
+High Institute of Management. He
+[34] K. Bontcheva, V. Tablan, D. Maynard, H. is carrying out a PhD degree in
+Cunningham, Evolving GATE to Meet New Computer Sciences between
+Challenges in Language Engineering. Natural University of Tunis and Sorbonne
+Language Engineering. 10 (3/4), pp. 349-373, University (Paris IV), France.
+2004. His research is focused on document annotation with
+the Machine Learning techniques and their
+[35] C. Fellbaum, J. Grabowski, S. Landes, applications on the semantic Web.
+Performance and confidence in a semantic
+annotation task, In C. FELLBAUM, Ed.,
+WordNet: an electronic lexical database, Prof. Dr. Rim Faiz obtained his
+Language, Speech and Communication, chapter Ph.D. in Computer Science from
+9, pp. 216-237. Cambridge, Massachusetts: The the University of Paris-Dauphine, in
+MIT Press, 1998. France. She is currently a Professor
+of Computer Science at the Institute
+[36] J. R. Quinlan, C4.5: Programs for Machine of High Business Study (IHEC) at
+Learning. Morgan Kaufmann Publishers Inc, Carthage, in Tunisia. Her research
+1993. interests include Artificial
+Intelligence, Natural Language Processing, and Web
+[37] Ph. Smets, The Transferable Belief Model and Mining. Dr. Faiz is also the responsible of the MBA
+other Interpretations of Dempster-Shafer's Model. of New Technologies and Electronic Commerce at
+Uncertainty in Artificial Intelligence 6, P.P. the Institute of High Business Study.
+Bonissone, M. Henrion, L.N. Kanal, J.F. Lemmer
+(Editors), Elsevier Science Publishers, 1991, pp.
+375-383.

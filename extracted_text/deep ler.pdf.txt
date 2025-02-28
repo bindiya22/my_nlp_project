@@ -1,0 +1,934 @@
+BriefingsinBioinformatics,2024,25(5),bbae420
+https://doi.org/10.1093/bib/bbae420
+ProblemSolvingProtocol
+BertTCR: a Bert-based deep learning framework for
+predicting cancer-related immune status based on T cell
+receptor repertoire
+MinZhang 1,QiCheng1,ZhenyuWei 1,JiayuXu1,ShiweiWu1,NanXu2,3,ChengkuiZhao 1,3,*,LeiYu2,3,*,WeixingFeng1,*
+1CollegeofIntelligentSystemsScienceandEngineering,HarbinEngineeringUniversity,No.145NantongStreet,NangangDistrict,Harbin,150001,China
+2InstituteofBiomedicalEngineeringandTechnology,ShanghaiEngineeringResearchCenterofMolecularTherapeuticsandNewDrugDevelopment,Schoolof
+ChemistryandMolecularEngineering,EastChinaNormalUniversity,No.500DongchuanRoad,Shanghai,200241,China
+3ShanghaiUnicar-TherapyBio-medicineTechnologyCo.,Ltd,No.1525MinqiangRoad,Shanghai,201612,China
+*Correspondingauthor.WeixingFeng,CollegeofIntelligentSystemsScienceandEngineering,HarbinEngineeringUniversity,No.145NantongStreet,Nangang
+District,Harbin,150001,China.Tel.:+8613804529099;E-mail:fengweixing@hrbeu.edu.cn;ChengkuiZhao,ShanghaiUnicar-TherapyBio-medicineTechnology
+Co.,Ltd,No.1525MinqiangRoad,Shanghai,201612,China.E-mail:zhaochengkui@hrbeu.edu.cn;LeiYu,ShanghaiUnicar-TherapyBio-medicineTechnologyCo.,
+Ltd,No.1525MinqiangRoad,Shanghai,201612,China.E-mail:yulei@nbic.ecnu.edu.cn
+Abstract
+TheTcellreceptor(TCR)repertoireispivotaltothehumanimmunesystem,andunderstandingitsnuancescansignificantlyenhance
+our ability to forecast cancer-related immune responses. However, existing methods often overlook the intra- and inter-sequence
+interactions of T cell receptors (TCRs), limiting the development of sequence-based cancer-related immune status predictions. To
+addressthischallenge,weproposeBertTCR,aninnovativedeeplearningframeworkdesignedtopredictcancer-relatedimmunestatus
+using TCRs.BertTCR combines a pre-trained protein large language model with deep learning architectures,enabling it to extract
+deepercontextualinformationfromTCRs.Comparedtothreestate-of-the-artsequence-basedmethods,BertTCRimprovestheAUC
+onanexternalvalidationsetforthyroidcancerdetectionby21percentagepoints.Additionally,thismodelwastrainedonover2000
+publiclyavailableTCRlibrariescovering17typesofcancerandhealthysamples,andithasbeenvalidatedonmultiplepublicexternal
+datasetsforitsabilitytodistinguishcancerpatientsfromhealthyindividuals.Furthermore,BertTCRcanaccuratelyclassifyvarious
+cancertypesandhealthyindividuals.Overall,BertTCRistheadvancingmethodforcancer-relatedimmunestatusforecastingbasedon
+TCRs,offeringpromisingpotentialforawiderangeofimmunestatuspredictiontasks.
+Keywords:Tcellreceptor;pre-trainedprotein-BERTmodel;deeplearning;multipleinstancelearning;cancer-relatedimmunestatus
+prediction
+Introduction
+obtaininformationabouttheimmuneresponseandtheshared
+Tcellsplayavitalroleintheadaptiveimmuneresponseagainst receptors associated with specific cancer to distinguish cancer-
+foreign and self-antigens [1–3]. Changes in the T cell receptor relatedimmunestatus(cancerorhealth)[16–20].Therefore,the
+(TCR)profilehavebecomeanimportantmarkerformonitoring research on predicting individual immune status based on the
+the immune status of the body, so it has become critical to TCRrepertoireholdsimportantclinicalapplicationpotential.
+accuratelyevaluateandcomparethestatusoftheTCRrepertoire The studies have been showed that various predicators play
+[4,5].IntheTcellreceptors(TCRs),thevariableregionexhibits important role to decipher the of important biological various
+high diversity [6–10], which is crucial for the TCR’s specific biological molecules including proteins and enzymes [21–25].
+recognitionofantigens[11].Withinthesevariableregions,three Traditional machine learning methods such as support vector
+areas exhibit particularly significant variations in their amino machines, random forests, and logistic regression are unable
+acid (AA) sequences, forming spatial configurations that are to effectively represent features of multiple protein sequences,
+complementary to the antigen epitopes [12, 13]. These three handle inconsistent lengths of TCRs, and capture correlations
+regions(CDR1,CDR2,andCDR3)areknownasthecomplemen- betweensequences.Theselimitationsmayrestricttheirabilityto
+tarity determining regions (CDR) [14].Notably,the CDR3 region capture the complex features of TCRs, thus posing significant
+isthemostdiversepartoftheentirevariableregionandisthe challenges in understanding and analyzing individual TCR
+keyareathatdirectlybindswiththeantigenduringtheantigen repertoire, thereby affecting the accuracy of predicting cancer-
+recognitionprocess[15].Ingeneral,TCRrepertoireanalysisrefers relatedimmunestatus.Recently,theintroductionofdeeplearning
+to the study of the CDR3 region. By studying an individual’s models has marked a substantial advancement in processing
+intra-andinter-sequenceinteractionsofTCRrepertoire,wecan large-scale, high-throughput TCR sequencing data [26–31]. For
+Received:May28,2024.Revised:July24,2024.Accepted:August8,2024
+©TheAuthor(s)2024.PublishedbyOxfordUniversityPress.
+ThisisanOpenAccessarticledistributedunderthetermsoftheCreativeCommonsAttributionLicense(https://creativecommons.org/licenses/by/4.0/),which
+permitsunrestrictedreuse,distribution,andreproductioninanymedium,providedtheoriginalworkisproperlycited.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+20242 | Zhangetal.
+example,Emersonetal.(2017)proposedastatisticalclassification OverviewofBertTCR
+framework for predicting the status of cytomegalovirus [32], The workflow is illustrated in Fig.1. Initially, we employed the
+Yokota’s method (2017) aimed to differentiate TCR repertoire MiXCR tool to assemble TCRs, generating TCR sequence data
+inhigh-dimensionalsequencespaces[33],andtheGIANA(2021) that meets the research requirements [42].We select the top k
+utilized isometric transformations for TCR clustering [34]. All CDR3sequences(CDR3s)withthehighestabundanceforfurther
+three methods focus on the similarity comparison between the analysis,asshowninFig.1a.Theoverallarchitectureofthemodel
+whole sequence and fail to pay attention to the CDR3’s short isdetailedinFig.1b,providinganoverviewofthevariouscompo-
+peptidemotifofTCR,whichisveryimportantforantigenbinding nentsandtheirinteractions.Next,weuseapre-trainedprotein-
+specificity. Beshnova’s (2020) deep learning model (DeepCAT), BERT model to embed these chosen sequences, with detailed
+Ostmeyer’s (2019) multiple instance learning method, and information provided in Fig.1c.Then,feature extraction is per-
+Kim’s (2022) Atchley matrix sequence embedding method all formed using CNN, and a score is obtained for each sequence,
+overlook the rich contextual information and interrelations asshowninFig.1d.Finally,weutilizeMILandensemblelearning
+among TCRs.Specifically,Ostmeyer’s model predicts individual techniquestopredictthefinalcancerscore.
+cancer probabilities using single TCR sequences, yet fails to
+adequately consider the intra- and inter-sequence interactions
+ofTCRs.Additionally,DeepCATonlycovers5TCRlengths,failing Datasets
+to utilizefeatures of TCRs with other lengths [35–37].Although The data sources for this study are two publicly available
+DeepLION (2022) considers the interrelations of TCRs, its TCR databases:theNCBIdatabaseandtheZenododatabase.Details
+embedding method and classifier failed to fully capture the aboutthedatabasesusedinthisworkaredescribedasfollows.
+complexityandcontextualinformationofTCRs,greatlylimiting NCBI database.WeusedthepubliclyavailableTCR-seqdata
+itsperformance[38].Zhouetal.(2024)andCaietal.(2024)focus fromtheNationalCenterforBiotechnologyInformation(NCBI),
+more on using the statistical features of the sequence rather which includes 22 groups of peripheral blood mononuclear cell
+than the characteristics of the CDR3 sequence [39, 40]. These (PBMC)andtumor-infiltratingTlymphocyte(TIL)sampleswith17
+methodsnotonlyoverlookthecriticalroleofCDR3shortpeptide diversecancertypesand19groupsofhealthyPBMCindividuals.
+motifsandthecomplexinteractionsamongTCRs,butalsoexhibit Zenododatabase.WeusedthepubliclyavailableTCR-seqdata
+shortcomingsinembeddingproteinsequences. fromtheopen-accessZenododatabase[43],whichcontainsone
+Toaddresstheselimitationsofexistingmethods,wepropose groupofhealthyPBMCindividuals.
+adeeplearningframeworkbasedonself-supervisedpre-trained Moredetailedinformationaboutthedatabasesandtheirusage
+called BertTCR. Compared to traditional approaches, BertTCR canbefoundinTableS1.
+demonstrates significant advantages in feature extraction and
+cancer-related immune status prediction. Our contributions
+Datapreprocessing
+include four aspects: firstly, we utilize pre-trained protein–
+bidirectional encoder representations from transformers (BERT) ToobtaintheCDR3sequencesofTCRβintheNCBIdatabase,the
+models to convert TCRs into high-dimensional representations, SequenceReadArchive(SRA)Toolkitisasetoftoolsdevelopedby
+thereby eliminating the need for manual feature extraction theNCBIforprocessingsequencingdatafromtheSRA.Weused
+and effectively enhancing contextual information. Secondly, thesratoolkit.2.11.3-win64tooltodownloadSRAdataformatand
+we design the CME predictor component that combines con- convertedittofastqdataformat.Furtherprocessingofthesefiles
+volutional neural network (CNN), multiple instance learning was performed using the MiXCR tool, which included aligning,
+(MIL) and ensemble learning (EL), capable of capturing short assembling, and annotating the highly variable CDR3 regions
+peptide motifs related to antigen binding and considering the withintheTCRs[44].Additionally,datafromtheZenododataset
+intra- and inter-sequence interactions among TCRs, thereby canbedownloadedfromtheirwebsiteanduseddirectly.
+enhancingtherobustnessandgeneralizationabilityofthemodel. Determining the length range of CDR3s. To determine the
+Thirdly,weproposeanovelapproachtodefiningahealthscore length range of CDR3s in the study, the frequency distribution
+to assess the health status of healthy or patients and provide of CDR3s lengths was examined using the dataset with bio-
+early intervention for those with slightly lower immune scores. project id PRJEB33490 on the NCBI. As shown in Fig. S1, this
+Finally, our architecture is flexibly applied to multi-class tasks analysiswasconductedinhealthyindividuals(98samples),solid
+forpredictingimmunestatus.Throughthisresearch,wenotonly tumors(141samples),andhematologicaltumors(108samples).
+extendpreviousworkonbinarycancerpredictionbutalsoaddress Theresultsindicatedthatthelengthdistributionsofthesethree
+two additional complex issues: a universal model for cancer categories of sequences approximated a Gaussian distribution,
+detection and multi-class challenges. Overall, our study makes withsequencelengthsrangingfrom10to24encompassingthe
+significantcontributionstotheearlydiagnosisandintervention majority of sequences in the samples. Specifically, CDR3s with
+of cancer-related immune status and provides accurate and lengthsbetween10and24accountedfor99.8%ofallsequencesin
+personalizedmedicalrecommendationsforthehealthcarefield. healthyindividuals,99.8%insolidtumors,and98.9%inhemato-
+logicalcancers.What’smore,Stilleetal.[45]indicatesthatCDR3s
+shorter than nine AA generally do not interact with antigens,
+Materials and methods
+whilesequencesbetween12-19AAaremostfrequentlyincontact
+In this study, we propose a deep learning framework named with antigen epitopes.Our model involves sequence alignment
+BertTCR,whichaimstopredictpersonalimmunestatusthrough issues,wheresequencesthataretoolongortooshortcanlead
+TCRs analysis. Our work mainly includes data preprocessing, to significant errors.Therefore,the sequence length considered
+embeddingofTCRsusingapre-trainedprotein-BERTmodel,the inthisstudyrangesfrom10to24.
+constructionofCMEpredictor[41],aswellasevaluatingmodel Filtering low-quality CDR3s.Toensurethatmodelconstruc-
+performanceusinginternaltestsetsandexternalTCR-seqvali- tionisnotinfluencedbylow-qualityCDR3s,weconductedscreen-
+dationsets. ingofeachsampleandonlyretainedCDR3smeetingthefollowing
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+2024Predictingcancer-relatedimmunestatuswithBertTCR | 3
+Figure1.BertTCRforaccuratecancer-relatedimmunestatusprediction.(a)ProcessingCDR3sequencedatafordownstreamanalysis.Initially,theMiXCR
+toolwasemployedtoassembleTCRs,generatingTCRsequencedatathatmeetstheresearchrequirements.ThetopkCDR3sequences(CDR3s)with
+thehighestabundancewereselectedforfurtheranalysis.(b)Theoverallarchitectureofthemodel.Itprovidesanoverviewofthevariouscomponents
+andtheirinteractions.(c)ThedetailsofembeddingTCRsusingapretrainedprotein-BERTmodel.Forasequenceoflengthl,themodelperformsan
+embeddingoperation,generatingavectorrepresentationofdimensions(l×768).(d)ThedetailsofCNNinBertTCR.ThegeneratedTCRsequencematrix
+isprocessedthroughconvolutionallayerswithdifferentscales(kernelsizesof2,3,4)forfeatureextraction.Itisthenpassedthroughmaxpoolingand
+linearlayers,ultimatelyproducingacancerscorefortheindividualsequence.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+20244 | Zhangetal.
+criteria:(i)resolvedvariablegeneloci;(ii)exclusionofspecialchar- where Q is the query vector, K is the key vector, and dk is the
+acters(X,∗,and_);(iii)Beginningwithcysteine(C)andendingwith dimensionofthekeyvector(64dimensions).Inaddition,byusing
+phenylalanine(F)[46];and(iv)lengthrangingfrom10to24.The multiplelayersofself-attentionmechanisms,theoriginalinput
+dataanalysisaftereachfilteringstep,includingtheproportionof sequence can be transformed into a deeper representation. In
+remainingdataateachstep,thedistributionofremainingdata, theentiremodel,theoutputsof12self-attentionheadsareused
+andthediversityofremainingdata,isshowninFig.S2,Fig.S3,and andconcatenatedtoprovideafinalcontinuousvectorofL×768
+Fig.S4,respectively.Aftercompletingdataprocessing,wesorted dimensionsforeachTCRsequenceand100×L×768dimensional
+the retained TCRs in descending order of clone frequency, and vectorforeachsample.
+extractedthetopksequencesformodeltraining. We also experimented with a protein-BERT model that was
+Selectingthenumberofsequencesk.Todeterminethenum- fine-tunedusingTCRs,buttheoriginalprotein-BERTmodelhad
+berofsequencesinthemodel,duringthetrainingandtestingof thebestperformance.
+eachsample,differentvaluesofk,namely10,100,and1000,were
+considered.Theexperimentalresultsindicatethatwhenk=10, CMEpredictor
+CNNextractsshortpeptidemotifsofvariouslengths
+the performance of the model is not satisfactory, with an AUC
+valueofonly0.671,asshowninFig.S5.However,whenk = 100, This section elaborates on the process of using CNN for fea-
+there is a significant improvement in the model performance, ture extraction from CDR3s. Initially, the CDR3s are embedded
+withthehighestAUCvaluereaching0.99.Topreventoverfitting, usingapre-trainedprotein-BERTmodeltogenerateanembedded
+theoptionofk = 1000wasalsoexcluded,andfinally,kissetto sequencematrix.Subsequently,thismatrixistreatedastheinput
+100. for the CNN framework, resembling a 2D image analysis. To
+maintainconsistencyininputfeaturedimensions,allsequences
+BERTembedding arezero-paddedtoalignwiththelengthofthelongestsequence,
+We utilize the neural network in the TAPE library to embed setto24.TheCNNarchitectureconsistsofconvolutionallayers,
+TCRs,whichisbasedonthepre-trainedBERT.TheTAPEmodelis poolinglayers,andlinearlayers.Variousconvolutionalfiltersof
+developedthroughaself-supervisedlearningapproach,utilizing differentsizesareemployedtoextractshortpeptidemotifsfrom
+alarge-scaledatasetofmorethan31millionproteinsequences. the input TCR matrix.Finally,1-max pooling is applied to each
+Inordertocapturetherelationshipsandcontextualinforma- convolutionalfeature,andtheresultsareconcatenated.
+tion between CDR3s of TCRs and enhance the representation In our model, we utilize CNN to extract important features
+capacityoffeatures,weutilizedapre-trainedprotein-BERTmodel fromCDR3.Byusingconvolutionalkernelsofsizes2,3,and4,we
+to embed CDR3s [47–49]. During the embedding process, each cancaptureinformationfromsequencesofvaryinglengthsof10
+AA was encoded as a token. The input protein sequence was to24AAs,withsequencesof12to16AAsbeingthemostcommon.
+embedded as a token sequence. The pre-trained protein-BERT Research by Ostmeyer et al.indicates that short peptidemotifs
+model in TAPE consisted of 12 self-attention layers, with each contribute the most to the antigen-binding specificity of TCRs,
+layercontaining12attentionheads.Thisarchitectureenabledthe thus our convolutional kernel design fully considers the impor-
+model to capture the complex relationships and dependencies tanceofn-mershortpeptidemotifsinantigenrecognition[36,53].
+withintheinputAAsequence.ForagivensequenceoflengthL, Thisdesignmaintainsthesimplicityandunderstandabilityofthe
+theoutputofthismodelwasaL×768dimensionalvector.These modelstructurewhileensuringtherelationshipbetweenthesizes
+vectors encoded rich contextual information for each position of adjacent convolutional kernels to extract more comprehen-
+in the CDR3 sequence, thus facilitating downstream prediction sivefeatures.Weinitiallydeterminedtheappropriatenumberof
+tasks. convolutionalkernelsbasedonthefrequencyofdifferentlength
+Whenusingself-attentionmechanismstocalculatethecorre- motifsfromsequencesof343healthyindividualsandlungcan-
+lationbetweeneachAAintheTCRs[50,51],firstprepareaninput cerpatients[54],ultimatelyresultinginsixconvolutionallayers
+sequencex = (x1,x2,...,xL),whereeachelementx
+i
+representsan correspondingto3,2,and1convolutionallayers.Furtherdetails
+AA. Query vector (Q), key vector (K), and value vector (V) are canbefoundinTableS2.
+created through linear transformations,which can be achieved Takingasequenceoflength10,‘CASSGTEQFF’,asanexample,
+bymultiplyingthesequencebythecorrespondingweightmatrix.
+whentheconvolutionalkernelsizeis2×d,aconvolutionoperation
+Then,tostabilizethegradient,thescore(cid:2)sare(cid:3)scaledbydividing is performed,which effectively extracts sub-sequences such as
+by the square ro(cid:2)ot of(cid:3)dk, and the score x i,x
+j
+is calculated for ‘CA’,‘AS’,and‘SS’.Withastrideof1,thisresultsinninefeature
+eachpairofAAs x,x inthesequence,asformula(1).Next,the sets. For the sequence of length 10, when using convolutional
+i j
+scores for each AA are normalized using the softmax function,
+kernelsizesof3×dand4×d,weobtaineightandsevenfeature
+whichexponentiatesthescoresanddividesthembythesumof sets,respectively.Anactivationfunctionisaddedaftereachcon-
+allscores.Thenormalizedscoresareusedasweightstomultiply volutionallayer.Sinceitisabinaryclassificationproblemandwe
+eachAAbyitscorrespondingweight,andtheyarethenweighted compared the performance of the ReLU and sigmoid activation
+andsummed[52].Throughthiscalculation,aweightedrepresen- functions under the same parameters, the results showed that
+tationofeachAAx withotherAAsx isobtained,whichisusedto thesigmoidfunctionperformsbetter.Therefore,inthisstudy,we
+i j
+captureimportantinformationintheTCRsequence.Thematrix choosethesigmoidfunctionastheactivationfunction,asshown
+formoperationoftheself-attentionlayerisasfollows: inequation3.
+1
+σ(x)= (3)
+(cid:2) (cid:3) QKT
+1+e−x
+score x,x = (cid:4) (1)
+i j
+dk
+Themaxpoolinglayerisusedtocompressthefeaturemaps
+(cid:5) (cid:6)
+output from the convolutional layers into a vector for further
+QKT
+A(Q,K,V)=softmax (cid:4) V (2) fully connected operations.The purpose of 1-max pooling is to
+dk
+selectthemaximumvalueoneachchannelandcombineallthe
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+2024Predictingcancer-relatedimmunestatuswithBertTCR | 5
+maximumvaluesintoavector.Basedonbiologicalsignificance, obtaining the feature representation for each instance. Subse-
+1-max pooling can extract the most significant features from quently,wemakepredictionsforeachinstance’sfeaturesthrough
+the CDR3 sequence. Therefore, in this study, we choose the 1- alinearlayer.Thisstepenablesustoindependentlyobtainpredic-
+maxfunctionforpooling.Eachsequenceundergoes1-maxpool- tionresultsforeachinstance.
+ing to reduce the feature sets to one dimension.These feature Tofurtherenhancetherobustnessandgeneralizationcapabil-
+vectors are then concatenated to obtain 6×1 feature vectors. ityofourmodel,weintroducedtheconceptofensemblelearn-
+Subsequently,throughasinglelinearlayer,predictionsaremade ing.Ensemble learning combines the prediction results of mul-
+for each sequence, resulting in cancer probabilities. The fully tiplemodels(classifiers)toobtainthefinalcancerscore.Inour
+connectedlayerLisdefinedinequation4below: approach,weutilizemulti-layeredlinearclassifierstoaggregate
+theresultsofksequences.Eachlinearclassifieroutputsavalue
+(cid:2) (cid:3) (cid:2) (cid:3)
+yˆ i=P y i=1 =σ wT Lp i+bL (4) forthesample,andthentheaverageofthesemodels’valuesis
+taken as the final cancer score. We use the cross-entropy loss
+Among them,i = 1,2,···,6,p represents the feature vector functiontotraintheselinearclassifiers,asshownspecificallyin
+i
+equation6andequation7.
+of TCR after 1-max pooling.wL and bL are the weight and bias,
+In the experiment,when setting the number of linear layers
+respectively. The activation function normalizes the predicted
+valuetotherangeof(0,1).Ifyˆ > 0.5,itispredictedasacancer between1and10,theresultsshowsthatthechangesinthevalues
+i
+of loss, accuracy, and AUC become less pronounced when the
+sequence;otherwise,itispredictedashealthysequence.
+numberoflinearlayersexceeds5.Thisisbecauseasthenumber
+Thecross-entropylossfunctionbettermeasuresthediscrep-
+of linear layers increases, the risk of overfitting also increases.
+ancybetweenactualoutputandexpectedoutputinthetraining
+Therefore, we selected a 5-layer linear classifier based on the
+processofneuralnetworkmodels,facilitatingfasterconvergence
+highest AUC on the validation set.Compared to a single linear
+todesirableresults.Furthermore,inthisstudy,fortheTCRclas-
+classifier,employingmultiplelinearclassifiersintroducesgreater
+sificationproblem,consideringthecharacteristicsoffollowinga
+computational costs and complexity. As shown in Table S3, it
+Bernoulliprobabilitydistribution,utilizingthecross-entropyloss
+is evident that the trainable parameters increase slightly,along
+functioncanenhancemodelperformanceandtrainingefficiency.
+withaminorincreaseintrainingtime.However,themodelper-
+Thespecificlogarithmiclikelihoodfunctionisdepictedasequa-
+formance improves.When demanding higher performance and
+tion5.
+(cid:7) (cid:2) (cid:3) (cid:2) (cid:3)(cid:8) whenthehardwarecanaccommodatethesedemands,optingfor
+lnL=− yˆ ilnyˆ i+ 1−yˆ i ln 1−yˆ i (5) multiplelinearclassifiersisviable.
+(cid:9) (cid:10)
+TheTo da rov poi od uo tv laer yf ei rtt rin ang do of mth le ym seo tsde al, cw ere tase inta ped rr co ep no tu at gera ote fnof eu40 ro% n. Yˆ =P(Y=1)=σ m1 (cid:2) wT L(cid:3)yˆ i+bL(cid:3)(cid:3) (6)
+outputs to 0,preventing strong dependencies between neurons
+andimprovingthemodel’sgeneralizationability. wheremrepresentsthenumberoflinearclassifiers,whilewL(cid:3)and
+bL(cid:3)representtheweightsandbiasesoftheclassifiers,respectively.
+MILandensemblelearningtechniques The obtained prediction values are further normalized to the
+ˆ
+Previous studies have often overlooked the intra- and inter-
+rangeof(0,1)throughanactivationfunction.IfY>0.5,thesample
+sequence interactions of TCRs, using single TCR sequences to isclassifiedascancerous;otherwise,itisclassifiedashealthy.
+predict the probability of cancer or averaging scores for all (cid:11) (cid:12) (cid:13) (cid:12) (cid:13)(cid:14)
+sequences. Traditional single-instance learning (SIL) methods lnL(cid:3)=− Yˆ lnYˆ + 1−Yˆ ln 1−Yˆ (7)
+using only a single TCR CDR3 sequence may not fully capture
+anindividual’simmunestatuscomprehensively.Incontrast,MIL Thebinaryclassificationmodelinthisstudyisdesignedbased
+methodsallowasampletoincludemultipleCDR3sequencesas on the aforementioned model and is similar to it. In contrast,
+oneinstance,enablingustocapturemoreimmuneinformation the multi-classification model employs ReLU as the activation
+andprovideamorecomprehensiveandaccuratefeaturedescrip- functionanddoesnotnormalizethepredictedprobabilityvalues.
+tion.Weconductedexperimentstovalidatethis,clearlyshowing Instead, it selects the class label with the maximum predicted
+thatwhenrepresentingasamplewithmultipleinstances,model probabilityasthepredictionresult.Apartfromthisdifference,the
+performanceimproves,asdemonstratedinFig.S6. designsofthetwomodelsarealmostidentical.
+Toaddressthisissue,weintroducetheconceptofMIL.Within
+Modeltrainingandevaluation
+the MIL framework, we consider each biological sample as a
+‘bag’containingmultipleTCRstreatedasdistinct‘instances’.This OurexperimentisconductedonaworkstationrunningUbuntu
+approachallowsustoextractfeaturesandmakepredictionsfor 20.04,equippedwithanAMDRyzenR75700Xprocessor,128GB
+eachinstance,andthencombinethesepredictionstoobtainthe RAM, and an NVIDIA GeForce RTX 4090 (24GB VRAM), using
+finalcancerscorefortheentiresample.TCRswithineachsample Python3.9.7alongwithtorch1.12.1+cu102,numpy1.7.1,pandas
+holdsignificantbiologicalfunctions,reflectingthestatusofthe 1.3.4, and scikit-learn 0.24.2. During the single disease binary
+host T cell immune system and potentially containing crucial model (Lung and THCA) training phase, We adopted a random
+information about tumor progression in the human body. This partitioningmethodandused6:2:2partitioningforthetraining
+problem naturally lends itself to the MIL framework, as each set, verification set and test set. The details of data set parti-
+sampletypicallycontainsnumerousTcellswithdifferentTCRs tioningforeachmodelareshowninTableS4.weemployedthe
+[55–58]. Adamoptimizerwithaninitiallearningrateof0.001.Thecross-
+Inourstudy,weintroducetheconceptofMIL,targetingasam- entropy loss function was utilized as the objective function for
+plesetS={s1,s2,···,sn},whereeachsamples
+i
+containskTCRs. themodel,andtheweight_decayparameterwassetto0.001for
+Firstly,weutilizeBERTtoembed representeachTCRsequence, regularizationpurposes,aimingtomitigatetheriskofoverfitting.
+thenemployCNNforfeatureextractionandpoolingoperations, Dropout(setto40)techniquewasalsoemployedforregularization
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+20246 | Zhangetal.
+during the model training process, where a random subset of trainingset,validationset,andtestsetweredividedintoan8:1:1
+neuronoutputsisdroppedtoreducemodelcomplexity.Theearly ratio.During training,we trained the model on the training set
+stoppingstrategyisimplementedbasedonthecriterionthatthe andsavedthemodelwiththebestAUCvalueonthevalidation
+validation loss does not decrease for a consecutive number of settoensuretheconvergenceofthemodel.Thehyperparameter
+epochs (set to 40). Specifically, if the validation loss does not settingsarethesameasthoseofthesinglediseasebinarymodel.
+improveoverthepatiencethresholdof40epochs,weterminate ThedetailedpartitionofthedatasetisprovidedinTableS7.
+thetrainingprocess.PleaserefertoTableS5fortheperformance
+ofmodelswithdifferentpatiencelevels.Totrainthemodel,we Immunestatusmeasurement
+initiallyoptedforalengthytrainingperiodof1000epochs,with We calculate the health score measuring individual immune
+aninitialbatchsizeof100.Throughoutthetrainingprocess,we statusandanalyzeitsrelationshipwithage.Asshowninequa-
+adjustedhyperparameters,includingbatchsizeanddropoutregu- tion13,weintroduceametriccalled‘healthscore’tomeasurean
+larizationparameter,basedontheperformanceonthevalidation individual’simmunestatus,withhigherscoresindicatingbetter
+set,ensuring optimal generalization ability and performance of immunestatus.Thehealthscorereflectsthecorrelationbetween
+themodel.Duringtheparametertuningprocess,werecordedthe anindividual’sTCRrepertoireandtheiroverallhealthstatus.A
+performanceofthebinaryclassificationmodelonTHCAcancer higherhealthscoresuggestsalowerlikelihoodofcanceroccur-
+test samples for different combinations of convolutional kernel rence and a stronger immune ability. When a person’s health
+count,dropoutrate,andlearningrate,asdetailedinTableS6. scoreisbelow0.5,itisnecessarytopayattentiontothehealth
+Weevaluatetheperformanceofthebinaryclassificationmod- status, and conversely, the higher the score, the healthier the
+elsusingmetricssuchasaccuracy,sensitivity(recall),specificity, immune status of the individual. Therefore, we can correlate
+F1score,AUC,aswellasROCandPRCcurves.Inthecaseofmulti- thehealthscorewithanindividual’simmunestatustoexplore
+classclassificationtasks,wealsoemployaconfusionmatrixto theassociationofTCRswiththefunctionalstatus,activity,and
+assess the model’s effectiveness.The selection of these evalua- immuneregulationoftheimmunesystem.
+tionmetricsaimstocomprehensivelymeasuretheclassification
+performance of the models. The confusion matrix can visually healthscore=1−finalcancerscore (13)
+show the performance of the classifier. These metrics provide
+insightintothemodel’sperformancefromdifferentperspectives.
+Themeasurementmetricsarewell-knownandhavebeenusedin Thefinalcancerscorereferstotheprobabilitythatthemodel
+previousstudies[59,60]asshowninthefollowingequations. predictsacancer-relatedimmunestatus.
+TP+TN Multipleclassificationsmodel
+Accuracy= (8)
+TP+TN+FP+FN We used three datasets, including globally top-ranked cancers:
+lungcancer(PRJNA544699)andbreastcancer(PRJNA301507),as
+TP
+Sensitivity= (9) wellasadatasetofhealthyindividuals[38].Wetunedtheparam-
+TP+FN
+etersbasedontheperformancemetricsofthevalidationsetand
+Specificity= TN (10) theoptimizedparametersfromthepreviousbinaryclassification
+TN+FP
+model. Except that the number of categories is set to 3, the
+Precision= TP (11) otherhyperparametersettingsarethesameasthoseofthesingle
+TP+FP
+disease binary classification model. The data was divided into
+2×Precision×Recall an8:1:1ratio.Thedetailedpartitionofthedatasetisprovidedin
+F1Score= (12)
+Precision+Recall TableS8.
+Statisticalanalysis
+Where TP (True Positive) indicates the number of samples
+correctly predicted as positive (immune status of cancer) by ThisstudyutilizedtheSpearmancorrelationtestmethodtoana-
+themodel,TN(TrueNegative)indicatesthenumberofsamples lyzedatacorrelations,withthesignificancelevelsetatP<0.05.
+correctly predicted as negative (healthy immune status) by Additionally,theMann–WhitneyUtestwasusedtoanalyzethe
+the model, FP (False Positive) indicates the number of samples differencesbetweenthetwogroups,wherethesymbolsnsindi-
+incorrectly predicted as positive by the model, and FN (False cate P >0.05, ∗ indicate P ≤0.05, ∗∗ indicate P ≤0.01, and ∗∗∗
+Negative)indicatesthenumberofsamplesincorrectlypredicted
+indicateP≤0.001.
+asnegativebythemodel.Accuracyistheproportionofcorrectly
+predictedsamplesamongallsamples.Sensitivityistheproportion
+Results
+of actual positives that are correctly identified as positive.
+Specificityistheproportionofactualnegativesthatarecorrectly Inthissection,weintroducetheexperimentalevaluationofthe
+identified as negative. The F1 score is the harmonic mean of proposedmodel inthreepredictiontasks,binarycancer-related
+precisionandrecall.Insummary,F1score,ROCcurve,andPRC immunestatusprediction,universalmodelforcancerdetection,
+curve better reflect the actual performance of the model. To and multiple classification of immune status prediction. The
+avoid bias, we used all the aforementioned evaluation metrics experiments were conducted on the datasets in the Datasets
+tocomparetheperformanceofthemodels. section.
+Theuniversalcancerdetectionmodel Pretrainingimprovesthepredictionof
+cancer-relatedimmunestatus
+To generalize our model in cancer detection research, we inte-
+grateddatafroms22groupsofPBMCandTILsamples,and19 Self-supervised pretraining utilizes a significant amount of
+groups of healthy PBMC individuals, comprising 2296 samples unlabeleddatatoacquirecomprehensiveandexpressivefeature
+including 1132 healthy samples and 1164 cancer patients. The representations,leadingtoenhancedperformanceinsupervised
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+2024Predictingcancer-relatedimmunestatuswithBertTCR | 7
+Table1. TheperformancesofmodelsonTHCAandlungcancertestsamples.
+Disease Model Accuracy Sensitivity Specificity F1-score AUC
+Lung AAMean 0.477 1 0.1 0.617 0.805
+AAMIL 0.739 0.676 0.784 0.685 0.84
+BertSingle 0.841 0.73 0.922 0.794 0.935
+BertTCR 0.898 0.784 0.98 0.866 0.959
+THCA AAMean 0.5 0.975 0.087 0.645 0.693
+AAMIL 0.802 0.625 0.957 0.746 0.899
+BertSingle 0.86 0.725 0.978 0.829 0.979
+BertTCR 0.93 0.875 0.978 0.921 0.99
+learning tasks. This approach has achieved significant success AAMean, which proves the superiority of the MIL method by
+across various domains, including computer vision, natural consideringtheintra-andinter-sequenceinteractionsbetweenk
+language processing, and other related fields. Recent research sequencesineachsample.Theperformanceevaluationmetrics
+has indicated potential benefits of self-supervised pretraining of BertSingle consistently outperform those of AAMIL, with the
+forprotein-relatedtasks,suchasMHC–peptideinteractions[47, lung cancer model using BERT exhibiting 12% improvement
+49]. However, the application of self-supervised pretraining in in AUC. These findings underscore the superiority of pre-
+immune status prediction tasks remains relatively unexplored. trained protein-BERT over traditional encoding methods for AA
+The purpose of this study is to distinguish the TCR repertoire sequencerepresentation.Additionally,theseresultshighlightthe
+in the blood of cancer patients and non-cancer controls under efficacyofemployingappropriatefeatureextractiontechniques
+differentimmunestatus. to enhance model performance. Moreover, BertTCR exhibited
+Regarding the binary cancer-related immune status predic- superior performance across all evaluation metrics compared
+tion models, the THCA [61] or Lung [54] as positive samples, to BertSingle, achieving an impressive AUC of 96% for the
+healthy samples as negative samples. In order to understand diagnosismodelofLungcancerandevenaremarkable99%AUC
+how the pre-trained protein-BERT contributes to improve the forTHCA.
+predictionofcancer-relatedimmunestatus,wecompareditwith These findings provide compelling evidence that ensemble
+the conventional approach commonly used in previous studies, learning further enhances predictive capability. The outcomes
+which involves embedding TCRs using the traditional method of this experiment offer valuable insights for future advance-
+based on the physicochemical properties of AA. We conducted ments in deep neural networks applied to genomic data anal-
+experimentsonmulti-instancelearning(MIL),comparingthepart ysis, emphasizing the criticality of accurately encoding protein
+whereeachsequencescorehasdifferentweights(MIL)withthe and DNA sequences. The research findings indicate that our
+part where each sequence score has equal weights (Mean), in model focuses on interactions within and between sequences,
+ordertodemonstratetheenhancementeffectofMILonprediction significantly enhancing the accuracy of cancer-related immune
+results.Toinvestigatetheimportanceofthenumberofclassifiers status.Specifically,thismodeldemonstratesnotableutilityand
+(singleorensemble),wefurthercomparedthemodelincorporat- effectiveness in applications related to thyroid cancer and lung
+ingtheconceptofensemblelearningwiththemodelthatdoes cancer.
+notincorporateensemblelearninginthisstudy.Weexaminedthe
+predictiveaccuracyofthefollowingfourcombinations:(i)AA+
+Mean(AAMean),(ii)AA+MIL+Single(AAMIL),(iii)Bert+MIL+ Comparisonwithexistingmethods
+Single(BertSingle),and(iv)Bert+MIL+Ensemble(BertTCR). Tovalidatetherobustnessofthetrainedsingle-diseaseprediction
+Weemployedthefouraforementionedcombinationmethods modelsforTHCAandLungcancer,weemployedTHCA[62]and
+to train THCA and Lung models. For each sample, we selected lungcancer[63]externalvalidationsetdiseasetype.
+the top 100 TCRs based on the richness of the processed data. Asmentionedabove,weintroducefourmethodsforTCRreper-
+Methods(i)and(ii)encodedthesequencesusinganAAphysic- toireclassification.Amongthem,BertTCRusesaclassifierbased
+ochemical property matrix(20×15) [35],while methods (iii) and on the pre-trained protein-BERT model and performs well on
+(iv)utilizedprotein-BERTforembeddingtheinputAAsequences. the NCBI dataset, the detail of usage in Table S1. In compari-
+CNNwasusedtoextractthefeaturesofthefourmodels.Classi- son,BertSingleonlyusesasingle-layerclassifier,anditsperfor-
+fiersinmethods(ii)and(iii)employedasinglelineartransforma- mance is relatively unstable. DeepLion and DeepCAT methods
+tion,whereas method (iv) employed five linear transformations both use the training models described in Xu and Beshnova’s
+as classifiers. All models were trained until convergence using papers,andencodeTCRsusinganAAphysicochemicalproperty
+anidenticaltrainingset.Werepeatedthisprocess50timesand matrix(20×15)[35,38].DeepLionusestheprocessedTCRsand
+retainedthemodelwiththehighestAUCvalueonthevalidation extractsfeaturesusingCNN,withonlyasingle-layerlineartrans-
+set.Subsequently,weappliedtestsettoevaluatetrainedmodels formationusedastheclassifier.DeepCATfirstusesiSMART[20]
+and summarized accuracy, sensitivity, specificity, F1-score, and toperformsimilarityclusteringonthesequencesineachsample,
+AUCmetricsinTable1.Highervaluesforallthesemetricsindi- andthensetsfiveCNNmodelstopredictaccordingtodifferentAA
+catesuperiorperformance.TheROCandPRCcurvesofthetest lengths(lengthrange12-16),takingtheaveragecancerprobability
+setareshowninFig.2. ofeachsequenceasthefinalresult.Theperformanceevaluation
+As shown in Fig.2 and Table1, BertTCR in this study shows resultsoffourdifferentmethodsonthesameexternaldatasets
+themostadvancedperformancecomparedwiththeotherthree are shown in Table2.Additionally,Fig.3 shows the ROC curves
+algorithms.AAMILhasbetterperformanceevaluationindexthan forbothdiseases.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+20248 | Zhangetal.
+Figure2.TheROCandPRCcurvesofmodelsonbinarydataset.(a)TheROCcurvesonlungsamples.(b)TheROCcurvesonTHCAsamples.(c)ThePRC
+curvesonlungsamples.(d)ThePRCcurvesonTHCAsamples.
+Table2. Comparisonoftheperformanceofmultiplemodels.
+Disease Model Accuracy Sensitivity Specificity F1-score AUC
+Lung DeepCAT 0.620 0.871 0.388 0.688 0.720
+DeepLion 0.620 0.887 0.373 0.806 0.762
+BertSingle 0.798 0.871 0.731 0.806 0.907
+BertTCR 0.899 0.952 0.851 0.901 0.972
+THCA DeepCAT 0.600 0.917 0.308 0.687 0.731
+DeepLion 0.680 0.583 0.769 0.636 0.769
+BertSingle 0.720 0.583 0.846 0.667 0.785
+BertTCR 0.900 0.875 0.923 0.894 0.912
+Eachboldfacednumberindicatesthebestofthecorrespondingmetric.TheBertSinglemodelwasbuiltbyustocomparetheimportanceofthekeypartsofthe
+model.
+The results in Fig.3 and Table2 clearly demonstrate that model, highlighting its significant feature extraction capability
+BertTCRoutperformstheotherthreemethodsinallperformance usingthepre-trainedprotein-BERTmodel.Aswellasperformance
+evaluation metrics.Combined with the contents in Table2,the enhancementsthroughMILandensemblelearninginthecontext
+stability of BertTCR prediction model is further illustrated. In of THCA and lung cancer, resulting in outstanding predictive
+the external validation set, the THCA model achieved an AUC ability.
+valueof91.2%,whichishigherthanthebest-knownmodel’sAUC Thisvalidationnotonlyreinforcestherobustnessandgener-
+value of 14.3%, while Lung achieved an AUC value of 97.2% in alization capacity of the BertTCR model but also highlights its
+the external validation set, which is 21% higher than the best potential for clinical applications and transformative impact in
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+2024Predictingcancer-relatedimmunestatuswithBertTCR | 9
+Figure3.TheROCcurvesoftheexternalvalidationset.(a)TheROCcurvesoflungsamples.(b)TheROCcurvesofTHCAsamples.Thedatainparentheses
+representthenumberofsamplesofthedisease.
+cancer-related immune status prediction and cancer diagnosis. Theperformanceresultsofthemodelontheexternalvalidation
+Thesevalidationresultsfurtherdemonstratetheeffectivenessof datasetarepresentedinFig.4andTable3.
+ourmodelinpredictingthyroidcancerandlungcancer. As can be seen from Fig.4a, except for the AUC value of
+0.818 for PACA, the AUC values of the four cancer types in
+Developingauniversalmodelforcancer the general model are relatively high, and the AUC values
+detection of THCA, GBM, ESCA and Lung are 0.91, 0.95, 0.97 and 0.95,
+Inordertopromoteourmodelintheresearchofcancerdetection, respectively. As depicted in Fig.4b, there is a clear differ-
+weintegrateddatafromtwosourcesincludinghealthyindividuals ence in the probability of cancer prediction between health
+andvarioustypesofcancer,totaling2296samples.Amongthem, and cancer, including early-stage cancer. By correlating these
+there were 1132 healthy individuals and 1164 cancer patients, findings with the specificity and sensitivity values outlined
+covering 17 different types of cancer. We processed these data in Table3, the analysis indicates highly accurate predictions
+accordingtothepreviousmethod,andusedthislarge-scalepro- for THCA, GBM, ESCA, and Lung. In fact, ESCA and Lung
+cesseddatatotrainauniversalmodelcapableofcancerdetection. exhibit a sensitivity of 1,whereas THCA and GBM demonstrate
+Onthetestset,weobtainedtheROCcurveshownintheFig.S7, sensitivitiesof0.88and0.91,respectively,indicatingoverallgood
+with an AUC value of 0.867. Additionally, the model achieved performance.
+an accuracy of 0.801, sensitivity of 0.792, specificity of 0.811, AsforPACA,itssensitivityis0.625.Therearetworeasonsfor
+andF1-scoreof0.805.ThisshowsthatBertTCRcanidentifythe this: firstly, the small dataset size of only eight samples; more
+common features of various cancer sequences,so as to realize importantly, PACA represents early-stage pancreatic cancer or
+the TCR repertoire that can distinguish cancer patients with benigncyst,wheretheimmunesystemmaynotbesignificantly
+differentimmunestatusesfromhealthypeople.Byassessingan compromised.TheTCRsofearly-stagepancreaticcancerhavea
+individual’sfinalcancerscoreofdevelopingcancer,ifthescore highdegreeofsimilaritywiththoseofhealthyindividuals,making
+ishigh(valuegreaterthan0.5),itshouldbetakenseriouslyand misclassificationmorelikely.Thisobservationindirectlyreflects
+furtherdetailedmedicalexaminationshouldbesought. thatourmodelcanjudgewhethertheimmunestatusisgoodor
+Thebiologicalsignificanceofthisstudyliesinthedevelopment badbasedonthecancerscore.
+ofaninnovativemodelthatutilizesimmunesysteminformation These findings underscore the importance of TCR similarity
+forcancerdetection.Thismodelnotonlyeffectivelydistinguishes betweenearly-stagepancreaticcancerandhealthystatus,aswell
+betweenhealthyindividualsandcancerpatientsbutalsoidenti- asthechallengesofdevelopingandvalidatingauniversalcancer
+fiescommonfeaturesamongdifferenttypesofcancer.Itprovides detectionmodel withsmallsampledatasets.Despitethesensi-
+acrucialtoolforpersonalizedmedicine.Throughthisapproach, tivityofearly-stagepancreaticcancerandbenigncystisnotgood
+weoffernewpotentialforearlycancerscreeninganddiagnosis, enough,ourmodelperformsadmirablyinothertypesofcancer
+aimingtoassisthealthcareprofessionalsindetectingandtreating suchasthyroidcancer,glioblastoma,esophagealcancer,andlung
+cancer at earlier stages. This has the potential to significantly cancer,demonstratinghighprecisioninpredictingthesecancers.
+improvepatientsurvivalratesandqualityoflife.
+Measuringimmunestatuswiththehealthscore
+Externalvalidationoftheuniversalcancer
+Basedontheresearchfindingsoftheprevioussection,wefurther
+detectionmodel
+analyzed the probability of developing cancer in healthy indi-
+Theobjectiveofthistaskwastoassessthestabilityandrobust- viduals,anddetailedresultswereshowninTableS9.Asshown
+nessoftheuniversalmodelusinganexternalvalidationdataset. in equation 13, we introduce a metric called ‘health score’ to
+DatafromZenododatabaseandNCBIdatabasewereused,witha measureanindividual’simmunestatus,withhigherscoresindi-
+cohortofhealthyindividualandsamplesoffivetypesofcancer catingbetterimmunestatus.Wecancorrelatethehealthscore
+asshowninTable3.MoredetailsofusageareshowninTableS1. withanindividual’simmunestatustoexploretheassociationof
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+202410 | Zhangetal.
+Table3. Evaluationoftheuniversalmodel’spredictionsontheexternalvalidationdataset.
+Disease Accuracy Sensitivity Specificity F1-score AUC
+THCA(24) 0.885 0.875 0.892 0.857 0.944
+GBM(11) 0.896 0.909 0.892 0.800 0.948
+PACA(8) 0.844 0.625 0.892 0.588 0.818
+ESCA(10) 0.915 1.0 0.892 0.833 0.965
+Lung(15) 0.923 1.0 0.892 0.882 0.951
+THCA,thyroidcancer;GBM,glioblastoma;PACA,pancreaticcancerandbenigncyst;ESCA,esophagealcancer;Lung,lungcancer.Thesizeofthesampleisin
+parentheses.
+Figure4.TheROCandPRCcurvesoftheexternaldatasets.(a)TheROCcurveoftheexternaldatasets.(b)Cancerscoreforeachimmunestatus.The
+differencebetweenthetwogroupswasanalyzedusingthemanWhitneyUtest.
+TCRswiththefunctionalstatus,activity,andimmuneregulation timely intervention. This finding underscores the critical role
+of the immune system [64]. This connection contributes to a of immune surveillance in the cancer development process.
+deeperunderstandingoftheroleoftheimmunesystemincancer Therefore, the magnitude of early cancer health scores falls
+preventionandmaintaininghealthstatus.Theresultsofanalysis between those of healthy individuals and those with mid-to-
+onhealthscoreinFig.5. late stage cancer, emphasizing the importance of using such
+Weconductedananalysisonthecorrelationbetweenhealth assessmenttoolsinclinicalpractice.Monitoringimmunestatus
+scoresandage,calculatingthehealthscoresofhealthyindivid- throughhealthscorescanassistcliniciansinpromptlyidentifying
+uals and utilizing Spearman’s correlation coefficient (r=−0.51, high-risk individuals and implementing appropriate preventive
+P<0.001).Thefindingsrevealedasignificantnegativecorrelation measures.
+between health score and age,as depicted in Fig.5a.Notably,a Overall,healthscoresservesasaproactiveindicatorforassess-
+declining trend in health scores was observed with increasing ingimmunestatusandispoisedtoplayacrucialroleincancer
+age, suggesting a potential decline in immune status and ele- prevention, early detection, and personalized treatment strate-
+vated cancer risk. Additionally, among the healthy individuals, gies,therebyadvancingcancerresearchinnewdirections.
+fourindividualshadhealthscoresbelow0.5,withagesof51,51,
+73, and 74, respectively. This finding aligns with a widely held
+Multipleclassificationsofimmunestatus
+consensusthatolderadultsaremoresusceptibletocancer.This
+prediction
+susceptibility may stem from the natural aging of the immune
+system,impairingitsabilitytoeffectivelyrecognizeandeliminate Finally, we conducted a multi-classification task to assess
+cancerouscells.Therefore,regularmonitoringofhealthmetrics immune status using multiple datasets. This task aims to
+iscrucialfortheelderlypopulation,servingasacriticaladjunct accuratelypredictwhethertheimmunestatuscorrespondstoa
+forearlycancerscreening.Thisproactiveapproachcanfacilitate specific type of cancer or a healthy status. To ensure a robust
+timelyinterventionsandtreatments. sample size, we selected three datasets (lung cancer, breast
+Furthermore, in Fig.5b, among the eight samples of early cancer,and healthy individuals)with a considerable number of
+pancreatic cancer or benign cyst, three samples had health samples.Throughtrainingthemodel,weachievedpreciseclassi-
+scoresexceeding0.5.Thisobservationholdssignificantbiological ficationofimmunestatus.Theperformanceevaluationmetrics
+implications, suggesting that in the early stages of cancer or are summarized in Table4, indicating improved performance
+benign cysts, the individual’s immune system may maintain a withhighervaluesacrossallindicators.
+relativelyrobustfunctionalstate.Despitethepotentialinfluence AsshowninFig.6andTable4,themodelperformsexcellently
+of cancer cells on immune responses, the immune system in in the Health category,with accuracy,recall,and specificity all
+early-stage cancer may still possess the ability to recognize approachingperfection.TheF1scoreandAUCvaluearealsoat
+and eliminate tumor cells,thus providing a crucial window for averyhighlevel.IntheBRCAcategory,themodelexhibitshigh
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+2024Predictingcancer-relatedimmunestatuswithBertTCR | 11
+Figure5.Theanalysisresultsabouthealthscore.(a)Therelationshipbetweenageandhealthscores.Spearmancorrelationtest.Ns:P>0.05,∗:P<
+=0.05,∗∗:P<=0.01,∗∗∗:P<=0.001.(b)TheboxplotofhealthscoresforESCA,early-stagePACA,andhealthyindividuals.Thedifferencebetweenthe
+twogroupswasanalyzedusingtheMann–WhitneyUtest.Early-stagePACA,early-stagepancreaticcancerorbenigncyst;ESCA,esophagealcancer.
+Table4. Theperformanceofmultipleclassificationmodels.
+Class Accuracy Sensitivity Specificity F1-score AUC
+Health 0.966 1.0 1.0 0.958 1.0
+BRCA 0.931 0.933 0.976 0.875 0.977
+Lung 0.897 0.750 0.881 0.833 0.942
+BRCA,breastcancer;Lung,lungcancer.
+accuracyandspecificity,andtheAUCvaluecanreach0.98.For the conventional AA physicochemical property-based methods,
+the Lung category, the model demonstrates high accuracy and such as DeepCAT [35] and DeepLion [38]. Specifically, the use
+specificity,andtheAUCvaluecanreach0.94. of protein-BERT embeddings led to an impressive AUC of 99%
+In summary,the model demonstrates excellent performance for THCA and 96% for Lung cancer in the BertTCR model,
+inamulti-classificationtask,achievinghighaccuracyandspeci- underscoring the importance of advanced feature extraction
+ficity across different categories. This indicates that the model techniquesingenomicdataanalysis.
+can effectively distinguish the immune status between healthy The exceptional performance of the protein-BERT model
+individualsandcancerpatients,andaccuratelyidentifydifferent reveals its potential implications in cancer diagnostics and
+typesofcancer,therebydemonstratingsignificantclinicalutility. personalizedmedicine.TheabilitytoachievehighAUCvaluesfor
+Additionally,italsomaintainshighrecallratesandF1scoresin THCAandlungcancerillustratesthemodel’scapabilitytoeffec-
+themajorityofcategories,indicatingitsstrongabilitytorecognize tively identify disease-specific protein sequence patterns. This
+immunestatus,whichissignificantforearlycancerdetectionand iscrucialforearlycancerdetectionandcansignificantlyaffect
+thedevelopmentofpersonalizedtreatmentplans.Furthermore, treatmentdecisions,pavingthewayformoretailoredtherapeutic
+themodelexhibitsahighAUCvalue,indicatingitsstrongclassi- approaches. Furthermore, advancements in feature extraction
+ficationabilityfordifferentcategories. andpredictivemodelingcanenhanceourunderstandingofthe
+underlying mechanisms of cancer,thereby leading to improved
+patientsurvivalrates.
+Discussion
+Traditional SIL methods rely on a single CDR3 sequence and
+Theresultsofourstudydemonstratethesignificantadvantages often fail to capture all aspects of an individual’s immune
+of incorporating self-supervised pre-trained protein-BERT, MIL, status comprehensively. In contrast, MIL allows multiple CDR3
+and ensemble learning in the prediction of cancer-related sequences to be treated as a single sample, thereby offering a
+immune status using TCRs. Our proposed model, BertTCR, more comprehensive and accurate representation of immune
+exhibitedsuperiorperformanceacrossvariousmetrics,including information [37]. In our study, using the THCA dataset as an
+accuracy,sensitivity,specificity,F1-score,andAUC,comparedto example,weconductedaseriesofexperimentstoinvestigatethe
+otherexistedmodels[26,34,36,38]. impact of using different numbers of sequences (such as Top1,
+Self-supervised pretraining proved to be a crucial step in Top10,Top30,Top50,Top70,andTop100)onmodelperformance.
+improvingthemodel’sperformance.Byleveraginglargeamounts As shown in Fig. S6 and Table S10, using only one sequence
+of unlabeled data, the protein-BERT model developed robust results in significantly lower model performance compared to
+featurerepresentationsthatenhanceditspredictivecapabilities. consideringTop100(k=100)sequencessimultaneously.Withan
+This is evident from the significant improvements in the increasingnumberofsequences,themodel’sperformancegrad-
+performancemetricswhencomparingBertTCRandBertSingleto uallyimproves.Atk=100,themodelachieves99%performance.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+202412 | Zhangetal.
+Figure6.Thetestresultsofmultipleclassificationmodels.(a)Receiveroperatingcharacteristic.(b)Confusionmatrix.
+To prevent overfitting, we refrain from further increasing the reduce the demand on computational resources, we employed
+numberofsequencesatthispoint. pretrainedmodelsforpredictions,requiringfewerresourcesand
+From a biological perspective, the advantage of this method reducingbothtimeandhardwarerequirements.Additionally,our
+lies inits abilityto providea more comprehensivereflection of studyimplementedastrategyofsavingtrainedmodelsfordirect
+thecomplexityoftheindividualimmunesystem.CDR3sequences predictions on test and independent validation sets, achieving
+representthespecificityofT-cellreceptorsandareinvolvedinrec- testing times as short as ∼ 1 second. This approach highlights
+ognizing different antigens.Therefore,immune responses often the feasibility and effectiveness of using pretrained models in
+involvemultipleTcellsandtheircorrespondingCDR3sequences. resource-constrainedenvironments,ensuringaccuracy,reliability,
+Relyingsolelyonasinglesequencemayoverlookimportantinfor- andenhancingthepracticalapplicabilityofthemodels.
+mationandfailtocapturethediversityofimmuneresponses.By Ourmodelwasdesignedwithscalabilityinmind.Currently,the
+usingMILtoconsidermultiplesequences,wenotonlyenhance model can easily accommodate an increased number of classi-
+therepresentationofimmunestatusbutalsorevealhowindivid- ficationcategoriesbyadjustingasingleparameter.Forinstance,
+ualsadapttheirimmunityincasesofinfection,tumordevelop- oncewecollectasufficientnumber(∼200samplesperdisease)of
+ment,orautoimmunediseases. othertypesofcancersamples,wecanexpandtheclassification
+Ensemble learning significantly enhances model prediction categories from the current three classes to 4,5,or even more
+accuracy. By comparing BertTCR (single classifiers) and BertS- categories.Althoughourmodeliscurrentlyprimarilyutilizedfor
+ingle (multiple classifiers),we found that using multiple classi- thescreeningofbreastcancerandlungcancers,theexpansion
+fiers notably improves model performance. Ensemble methods of the dataset with additional samples will enable the model
+achieve higher AUC values and more stable predictions across to screen a broader range of cancer types, thereby providing
+different datasets, validating their robustness and reliability in more robust support for early intervention and treatment of
+clinicalapplications.UsingtheTHCAdatasetasanexample,we diseases.
+conductedbinaryclassificationexperimentsforasingledisease,
+comparingtheperformance,parametercounts,CPU,andmemory
+Conclusion
+usagebetweensingleandmultiplelinearclassifiers,asdetailed
+in Table S3. Results show that despite slightly increased train- In this paper, we propose a deep learning approach named
+ingand predictiontimesandparameter counts,multiplelinear BertTCRforpredictingcancer-relatedimmunestatus.Leveraging
+classifierssubstantiallyenhanceclassificationperformance.Our a pretrained protein-BERT model, we significantly enhance the
+studyindicatestheneedtobalancecomputationalcostsandcom- embedding of TCRs, highlighting its effectiveness as a feature
+plexitywhilestrivingforimprovedclassificationperformance.In extractiontechnique.Furthermore,ourCMEpredictoreffectively
+scientific research, the demand for higher performance makes captures intra- and inter-sequence interactions within TCRs,
+theadvantagesofusingmultiplelinearclassifiersmoreapparent. thereby improving performance. Compared to state-of-the-art
+The improvement in performance is of significant importance methods,our model achieves higher prediction accuracy based
+inbiomedicalresearch,asitenablesmoreeffectiveearlydetec- on TCRs. The ability to capture these interactions is critical as
+tionofcancersandthedevelopmentofpersonalizedtreatment TCRs exhibit diversity and variability, impacting their binding
+plans. specificity to antigens and thus influencing immune response
+Our THCA binary classification model was trained with the efficacy.Thus,BertTCRholdspromisefordetectingcancer-related
+followingcomputationalsetup:aGPUwith5.4GBmemory,20GB immunestatusfromTCRrepertoiredata.However,thelimitation
+RAM,16 CPU cores,and 6GB storage.The training process took insamplesizeofcancercasesmayaffecttheperformanceand
+∼ 80 min. Directly training the complex models can present generalizability of the model. Future research could further
+practicalchallengesintypicalresearchandclinicalenvironments. explore BertTCR’s performance across various applications,
+However, these challenges can be effectively addressed by includinglargerclinicaldatasets,optimizedmodelarchitectures,
+leveraging cloud computing resources or high-performance fine-tune techniques,and its potential applications in immune
+computing centers at universities and research institutions. To monitoringandearly-stagecancerdiagnostics.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+2024Predictingcancer-relatedimmunestatuswithBertTCR | 13
+2. Wang Z, Zhong Y, Zhang Z. et al. Characteristics and clinical
+KeyPoints significanceofT-cellreceptorrepertoireinhepatocellularcar-
+• Wehavedevelopedadeeplearningframework,BertTCR, cinoma.FrontImmunol2022;13:847263.
+whichaddressthecurrentlimitationofsequencefeature 3. Lin X,George JT,Schafer NP.et al.Rapid assessment of T-cell
+extraction,enablingdeeper-levelfeatureextractionand receptor specificity of the immune repertoire. Nat Comput Sci
+contextual information, and explores intra- and inter- 2021;1:362–73.https://doi.org/10.1038/s43588-021-00076-1.
+sequenceinteractionsofTCRs. 4. BortoneDS,WoodcockMG,ParkerJS.etal.ImprovedT-cellrecep-
+• Compared to three state-of-the-art sequence-based tordiversityestimatesassociatewithsurvivalandresponseto
+methods,BertTCRachievesaremarkable21percentage anti-PD-1therapy.CancerImmunolRes2021;9:103–12.https://doi.
+pointimprovementinAUConexternalvalidationsets. org/10.1158/2326-6066.CIR-20-0398.
+• Ourmodelisflexible,allowingcancer-relatedimmune 5. Vujovic M, Marcatili P, Chain B. et al. Signatures of T cell
+status assessment without external databases and immunity revealed using sequence similarity with TCRDivER
+enablingretrainingfordifferentexternaldatasources. algorithm.CommunBiol2023;6:357.
+• This innovative solution has the potential to detect 6. ChingT,DuncanME,Newman-EerkesT.etal.Analyticalevalu-
+individuals’immunestatusfromperipheralbloodTCR ationoftheclonoSEQassayforestablishingmeasurable(mini-
+sequences,offeringpersonalizedmedicalrecommenda- mal)residualdiseaseinacutelymphoblasticleukemia,chronic
+tionsinhealthcare. lymphocytic leukemia, and multiple myeloma. BMC Cancer
+• Ourmulti-classspecificcancerdiagnostictoolhasthe 2020;20:612.
+potentialtoexpandtomorecancertypes,enablingnon- 7. Milano F, Emerson RO, Salit R. et al. Impact of T cell reper-
+invasivemulti-categorycancerdetection. toirediversityonmortalityfollowingcordbloodtransplantation.
+FrontOncol2020;10:583349.
+8. Kaplinsky J, Arnaout R. Robust estimates of overall immune-
+repertoire diversity from high-throughput measurements on
+Supplementary Data
+samples.NatCommun2016;7:11881.
+Supplementary data is available at Briefings in Bioinformatics 9. Simnica D, Akyuz N, Schliffke S. et al. T cell receptor next-
+generation sequencing reveals cancer-associated repertoire
+online.
+metrics and reconstitution after chemotherapy in patients
+with hematological and solid tumors. Onco Targets Ther
+Conflictofinterest:LY,CZ,andNXareaffiliatedwithShanghai
+2019;8:e1644110.
+Unicar-TherapyBio-medicineTechnologyCo.,Ltd.Theremaining
+10. Li N, Yuan J, Tian W. et al. T-cell receptor repertoire analysis
+authorsdeclarethattheyhavenocompetinginterestsorconflicts
+forthediagnosisandtreatmentofsolidtumor:amethodology
+ofinterestthatcouldbeperceivedaspotentiallyinfluencingthe
+andclinicalapplications.CancerCommun(Lond)2020;40:473–83.
+researchfindings.
+https://doi.org/10.1002/cac2.12074.
+11. Greiff V, Bhat P, Cook SC. et al. A bioinformatic framework
+Funding for immune repertoire diversity profiling enables detection of
+immunologicalstatus.GenomeMed2015;7:49.
+ThisworkwassupportedbytheChinaNationalNaturalScience 12. FichtnerAS,RavensS,PrinzI.HumangammadeltaTCRreper-
+Foundation(62172121,82073800)andNaturalScienceFoundation toiresinhealthanddisease.Cells2020;9:800.
+ofHeilongjiangProvinceofChina(LH2022F012). 13. HughesMM,YassaiM,SedyJR.etal.TcellreceptorCDR3loop
+lengthrepertoireisdeterminedprimarilybyfeaturesoftheV(D)J
+recombinationreaction.EurJImmunol2003;33:1568–75.
+Data availability
+14. Woodsworth DJ, MC, and Robert A Holt1. Sequence analysis
+All the raw TCR-seq datasets used in this study are associated of T-cell repertoires in health and disease. Genome Med 2013;
+with the NCBI (https://www.ncbi.nlm.nih.gov/) and the open- 5:98.
+accessZenododatabase(https://www.zenodo.org/record/826447#. 15. XuJL,DavisMM.DiversityintheCDR3regionofV(H)issufficient
+ZCFI8bJByUk).Thedataandcodeareavailableonlineathttps:// formostantibodyspecificities.Immunity2000;13:37–45.
+github.com/zhangbeibei-min/BertTCR. 16. ChuND,BiHS,EmersonRO.etal.Longitudinalimmunosequenc-
+inginhealthypeoplerevealspersistentTcellreceptorsrichin
+highlypublicreceptors.BMCImmunol2019;20:19.
+Contributor Information 17. Dhodapkar K,Dhodapkar M.Harnessing shared antigens and
+T-cell receptors in cancer: opportunities and challenges. Proc
+WF,CZ,andLYprovidedtheideaandguidance.MZconceivedand
+Natl Acad Sci U S A 2016;113:7944–5. https://doi.org/10.1073/
+designedthestudy,collectedandanalyzedthedata,andwrotethe
+pnas.1608860113.
+manuscript.QCandSWareinvolvedindebugginganddirecting
+18. LeinsterT,CobboldCA.Measuringdiversity:theimportanceof
+the code.CZ made critical revisions to the manuscript.JX,ZW,
+speciessimilarity.Ecology2012;93:477–89.
+andNXhelpanalyzebiologicalsignificance.Allauthorsreadand
+19. WeiZ,ZhaoC,ZhangM.etal.Meta-DHGNN:methodforCRS-
+approvedthefinalmanuscript.
+related cytokines analysis in CAR-T therapy based on meta-
+learning directed heterogeneous graph neural network. Brief
+Bioinform2024;25:bbae104.
+References
+20. ZhangH,LiuL,ZhangJ.etal.Investigationofantigen-specificT-
+1. Munir K, Elahi H, Ayub A. et al. Cancer diagnosis using deep cellreceptorclustersinhumancancers.ClinCancerRes2020;26:
+learning:abibliographicreview.Cancers(Basel)2019;11:1235. 1359–71.https://doi.org/10.1158/1078-0432.CCR-19-3249.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+202414 | Zhangetal.
+21. Khan S, Zaidi S, Alouffi AS. et al. Computational proteome- receptors for accurate cancer detection. Front Genet 2022;13:
+wide study for the prediction of Escherichia coli protein 860510.
+targetinginhostcellorganellesandtheirimplicationindevel- 39. Cai Y, Luo M, Yang W. et al. The deep learning framework
+opmentofcoloncancer.ACSOmega2020;5:7254–61.https://doi. iCanTCRenablesearlycancerdetectionusingtheT-cellrecep-
+org/10.1021/acsomega.9b04042. tor repertoire in peripheral blood.Cancer Res 2024;84:1915–28.
+22. LiY,KhanS,ChaudharyA.etal.Proteome-widescreeningforthe https://doi.org/10.1158/0008-5472.CAN-23-0860.
+analysisofproteintargetingofchlamydiapneumoniaeinendo- 40. Zhou K,Xiao Z,Liu Q.et al.Comprehensive application of AI
+plasmicreticulumofhostcellsandtheirpossibleimplicationin algorithms with TCR NGS data for glioma diagnosis. Sci Rep
+lungcancerdevelopment.BIOCELL2021;46:87–95. 2024;14:15361.
+23. Li J, Zakariah M, Malik A. et al. Analysis of salmonella 41. Zhao C, Xu N, Tan J. et al. ILGBMSH: an interpretable
+typhimurium protein-targeting in the nucleus of host cells classification model for the shRNA target prediction
+and the implications in colon cancer: an in-silico approach. with ensemble learning algorithm. Brief Bioinform 2022;23:
+Infect Drug Resist 2020;13:2433–42. https://doi.org/10.2147/IDR. bbac429.
+S258037. 42. ChenS-Y,YueT,LeiQ.etal.TCRdb:acomprehensivedatabase
+24. Wang Y, Imran A, Shami A. et al. Decipher the helicobacter for T-cell receptor sequences with powerful search function.
+pylori protein targeting in the nucleus of host cell and their NucleicAcidsRes2020;49:D468–74.
+implicationsingallbladdercancer:aninsilicoapproach.JCancer 43. BritanovaOV,ShugayM,MerzlyakEM.etal.Dynamicsofindivid-
+2021;12:7214–22.https://doi.org/10.7150/jca.63517. ualTcellrepertoires:fromcordbloodtocentenarians.JImmunol
+25. YangX,SiddiqueA,KhanAA.etal.Chlamydiatrachomatisinfec- 2016;196:5005–13.
+tion:theirpotentialimplicationintheetiologyofcervicalcancer. 44. SpringerI,TickotskyN,LouzounY.ContributionofTcellrecep-
+JCancer2021;12:4891–900.https://doi.org/10.7150/jca.58582. tor alpha and Beta CDR3,MHC typing,V and J genes to peptide
+26. ZhouK,HuoJ,GaoC.etal.ApplyingT-classifier,binaryclassi- bindingprediction.FrontImmunol2021;12:664514.
+fiers,uponhigh-throughputTCRsequencingoutputtoidentify 45. StilleCJ,ThomasLJ,ReyesVE.etal.Hydrophobicstrip-of-helix
+cytomegalovirusexposurehistory.SciRep2023;13:5024. algorithmforselectionofTcell-presentedpeptides.MolImmunol
+27. Katayama Y, Yokota R, Akiyama T. et al. Machine learn- 1987;24:1021–7.
+ing approaches to TCR repertoire analysis. Front Immunol 46. Lefranc MP, Giudicelli V, Duroux P. et al. IMGT®, the inter-
+2022;13:858057. national ImMunoGeneTics information system® 25 years on.
+28. Venturi V,Kedzierska K,Turner SJ.et al.Methods for compar- Nucleic Acids Res 2015;43:D413–22. https://doi.org/10.1093/nar/
+ing the diversity of samples of the T cell receptor repertoire. gku1056.
+JImmunolMethods2007;321:182–95. 47. Rao R, Bhattacharya N, Thomas N. et al. Evaluating protein
+29. Yohannes DA, Kaukinen K, Kurppa K. et al. Clustering based transferlearningwithTAPE.AdvNeuralInfProcessSyst2019;32:
+approach for population level identification of condition- 9689–701.
+associated T-cell receptor beta-chain CDR3 sequences. BMC 48. LeeJ,YoonW,KimS.etal.BioBERT:apre-trainedbiomedicallan-
+Bioinformatics2021;22:159. guagerepresentationmodelforbiomedicaltextmining.Bioinfor-
+30. WangC,HuangH,DavisMM.GroupingT-cellantigenreceptors matics2020;36:1234–40.https://doi.org/10.1093/bioinformatics/
+by specificity. Methods Mol Biol 2022;2574:291–307. https://doi. btz682.
+org/10.1007/978-1-0716-2712-9_15. 49. Brandes N, Ofer D, Peleg Y. et al. ProteinBERT: a universal
+31. VujovicM,DegnKF,MarinFI.etal.Tcellreceptorsequenceclus- deep-learningmodelofproteinsequenceandfunction.Bioinfor-
+teringandantigenspecificity.ComputStructBiotechnolJ2020;18: matics2022;38:2102–10.https://doi.org/10.1093/bioinformatics/
+2166–73.https://doi.org/10.1016/j.csbj.2020.06.041. btac020.
+32. Emerson RO,DeWitt WS,Vignali M.et al.Immunosequencing 50. Xu Y,Qian X,Tong Y.et al.AttnTAP: a dual-input framework
+identifies signatures of cytomegalovirus exposure history and incorporatingtheattentionmechanismforaccuratelypredict-
+HLA-mediatedeffectsontheTcellrepertoire.NatGenet2017;49: ingTCR-peptidebinding.FrontGenet2022;13:942491.
+659–65.https://doi.org/10.1038/ng.3822. 51. HuY,WangZ,HuH.etal.ACME:pan-specificpeptide-MHCclass
+33. Yokota R, Kaminaga Y, Kobayashi TJ. Quantification of Ibindingpredictionthroughattention-baseddeepneuralnet-
+inter-sample differences in T-cell receptor repertoires using works. Bioinformatics 2019;35:4946–54. https://doi.org/10.1093/
+sequence-basedinformation.FrontImmunol2017;8:1500. bioinformatics/btz427.
+34. ZhangH,ZhanX,LiB.GIANAallowscomputationally-efficient 52. VaswaniA.etal.AttentionIsAllYouNeed.In:IsabelleGuyon
+TCR clustering and multi-disease repertoire classification by etal.(eds).AdvancesinNeuralInformationProcessingSystems,vol.
+isometrictransformation.NatCommun2021;12:4699. 30.CurranAssociates,Inc.,2017,pp.5998–6008.
+35. BeshnovaD,YeJ,OnaboluO.etal.Denovopredictionofcancer- 53. Katayama Y, Kobayashi TJ. Comparative study of repertoire
+associatedTcellreceptorsfornoninvasivecancerdetection.Sci classificationmethodsrevealsdataefficiencyofk-merfeature
+TranslMed2020;12:eaaz3738. extraction.FrontImmunol2022;13:797640.
+36. Ostmeyer J, Christley S, Toby IT. et al. Biophysicochemical 54. LiM,ZhangC,DengS.etal.Lungcancer-associatedTcellreper-
+motifs in T-cell receptor sequences distinguish repertoires toireaspotentialbiomarkerforearlydetectionofstageIlung
+fromtumor-infiltratinglymphocyteandadjacenthealthytissue. cancer. Lung Cancer 2021;162:16–22. https://doi.org/10.1016/j.
+Cancer Res 2019;79:1671–80. https://doi.org/10.1158/0008-5472. lungcan.2021.09.017.
+CAN-18-2292. 55. Zoghlami M, Aridhi S, Maddouri M. et al. Multiple instance
+37. KimY,WangT,XiongD.etal.Multipleinstanceneuralnetworks learningforsequencedatawithacrossbagdependencies.IntJ
+based on sparse attention for cancer detection using T-cell MachLearnCybern2019;11:629–42.
+receptorsequences.BMCBioinformatics2022;23:469. 56. Carbonneau M-A, Cheplygina V, Granger E. et al. Multiple
+38. Xu Y, Qian X, Zhang X. et al. DeepLION: deep multi-instance instancelearning:asurveyofproblemcharacteristicsandappli-
+learning improves the prediction of cancer-associated T cell cations.PatternRecognit2018;77:329–53.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+2024Predictingcancer-relatedimmunestatuswithBertTCR | 15
+57. Pal A, Xue Z, Desai K. et al. Deep multiple-instance learning 61. LanX,CaoJ,YeK.etal.TCR-seqidentifiesdistinctrepertoiresof
+forabnormalcelldetectionincervicalhistopathologyimages. distant-metastaticandnondistant-metastaticthyroidtumors.J
+ComputBiolMed2021;138:104890. ClinEndocrinolMetab2020;105:dgaa452.
+58. XiongD,ZhangZ,WangT.etal.Acomparativestudyofmultiple 62. Cui L,Zhang C,Ding H.et al.Clonal distribution and intratu-
+instance learning methods for cancer detection using T-cell mor heterogeneity of the TCR repertoire in papillary thyroid
+receptorsequences.ComputStructBiotechnolJ2021;19:3255–68. cancerwithorwithoutcoexistentHashimoto’sthyroiditis.Front
+https://doi.org/10.1016/j.csbj.2021.05.038. Immunol2022;13:821601.
+59. LeNQK,LiW,CaoY.Sequence-basedpredictionmodelofpro- 63. JoshiK,deMassyMR,IsmailM.etal.Spatialheterogeneityofthe
+teincrystallizationpropensityusingmachinelearningandtwo- Tcellreceptorrepertoirereflectsthemutationallandscapein
+levelfeatureselection.BriefBioinform2023;24:bbad319. lungcancer.NatMed2019;25:1549–59.https://doi.org/10.1038/
+60. KhaQH,LeVH,HungTNK.etal.Developmentandvalidation s41591-019-0592-2.
+ofanexplainablemachinelearning-basedpredictionmodelfor 64. Zhang M, Zhao C, Cheng Q. et al. A score-based method of
+drug-foodinteractionsfromchemicalstructures.Sensors(Basel) immune status evaluation for healthy individuals with com-
+2023;23:3962. pletebloodcellcounts.BMCBioinformatics2023;24:467.
+Downloaded
+from
+https://academic.oup.com/bib/article/25/5/bbae420/7739675
+by
+Jnls
+Cust
+Serv
+on
+26
+September
+2024©2024Oxford UniversityPress. Copyrightof BriefingsinBioinformaticsisthepropertyof
+Oxford UniversityPress /USA anditscontentmaynotbecopiedor emailedtomultiplesites
+or postedtoalistservwithoutthecopyrightholder's express writtenpermission.However,
+users mayprint,download,or emailarticlesfor individualuse.

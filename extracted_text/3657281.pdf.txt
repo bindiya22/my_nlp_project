@@ -1,0 +1,2170 @@
+Deep Learning for Table Detection and Structure
+Recognition: A Survey
+MAHMOUDSALAHELDINKASEM,FacultyofComputerandInformation,AssiutUniversity,Assiut,
+EgyptandChungbukNationalUniversity,Cheongju,RepublicofKorea
+ABDELRAHMANABDALLAH,FacultyofComputerandInformation,AssiutUniversity,Assiut,Egypt
+andCa’FoscariUniversityofVenice,Venezia,Italy
+ALEXANDERBERENDEYEV,SatbayevUniversity,Almaty,Kazakhstan
+EBRAHEMELKADY,FacultyofComputerandInformation,AssiutUniversity,Assiut,Egypt
+MOHAMED MAHMOUD, Faculty of Computer and Information, Assiut University, Assiut, Egypt
+andChungbukNationalUniversity,Cheongju,Korea(theRepublicof)
+MAHMOUDABDALLA,InformationTechnologyInstitute,Alexandria,Egypt
+MOHAMEDHAMADA,DepartmentofInformationSystem,InternationalITUniversity,Almaty,Kaza-
+khstan
+SEBASTIANOVASCON,Ca’FoscariUniversityofVenice,Venezia,Italy
+DANIYARNURSEITOV,JSCNCKazMunayGas,Astana,Kazakhstan
+ISLAMTAJ-EDDIN,FacultyofComputerandInformation,AssiutUniversity,Assiut,Egypt
+Tablesareeverywhere,fromscientificjournals,articles,websites,andnewspapersallthewaytoitemswe
+buyatthesupermarket.Detectingthemisthusofutmostimportancetoautomaticallyunderstandingthe
+contentofadocument.Theperformanceoftabledetectionhassubstantiallyincreasedthankstotherapid
+developmentofdeeplearningnetworks.Thegoalsofthissurveyaretoprovideaprofoundcomprehension
+ofthemajordevelopmentsinthefieldofTableDetection,offerinsightintothedifferentmethodologies,and
+provide a systematic taxonomy of the different approaches. Furthermore, we provide an analysis of both
+classic and new applications in the field. Lastly, the datasets and source code of the existing models are
+organizedtoprovidethereaderwithacompassonthisvastliterature.Finally,wegooverthearchitectureof
+utilizingvariousobjectdetectionandtablestructurerecognitionmethodstocreateaneffectiveandefficient
+Authors’ContactInformation:MahmoudSalahEldinKasem,FacultyofComputersandInformation,AssiutUniversity,
+Assiut,EgyptandChungbukNationalUniversity,Cheongju,RepublicofKorea;e-mail:mahmoud.salah@aun.edu.eg;Ab-
+delrahman Abdallah, Faculty of Computers and Information, Assiut University, Assiut, Egypt and Ca’ Foscari Univer-
+sity of Venice, Venezia, Veneto, Italy; e-mail: abdelrahmanelsayed@aun.edu.eg; Alexander Berendeyev, Satbayev Uni-
+versity, Almaty, Kazakhstan; e-mail: aberendeyev@gmail.com; Ebrahem Elkady, Faculty of Computers and Informa-
+tion,AssiutUniversity,Assiut,Egypt;e-mail:ebrahemelkady@aun.edu.eg;MohamedMahmoud,FacultyofComputers
+andInformation,AssiutUniversity,Assiut,EgyptandCollegeofElectricalandComputerEngineering,ChungbukNa-
+tionalUniversity,Cheongju,Chungcheongbuk-do,Korea(theRepublicof);e-mail:mohamedabokhalil@aun.edu.eg;Mah-
+moudAbdalla,InformationTechnologyInstitute,Alexandria,Cairo,Egypt;e-mail:mahmoudelsayed201999@gmail.com;
+Mohamed Hamada, Department of Information System, International IT University, Almaty, Almaty, Kazakhstan; e-
+mail:M.hamada@iitu.edu.kz;SebastianoVascon,Ca’FoscariUniversityofVenice,Venezia,Veneto,Italy;e-mail:sebas-
+tiano.vascon@unive.it;DaniyarNurseitov,JSCNCKazMunayGas,Astana,Kazakhstan;e-mail:D.Nurseitov@niikmg.kz;
+IslamTaj-Eddin,FacultyofComputerandInformation,AssiutUniversity,Assiut,Egypt;e-mail:itajeddin@aun.edu.eg.
+Permissiontomakedigitalorhardcopiesofallorpartofthisworkforpersonalorclassroomuseisgrantedwithoutfee
+providedthatcopiesarenotmadeordistributedforprofitorcommercialadvantageandthatcopiesbearthisnoticeand
+thefullcitationonthefirstpage.Copyrightsforcomponentsofthisworkownedbyothersthantheauthor(s)mustbe
+honored.Abstractingwithcreditispermitted.Tocopyotherwise,orrepublish,topostonserversortoredistributetolists,
+requirespriorspecificpermissionand/orafee.Requestpermissionsfrompermissions@acm.org.
+©2024Copyrightheldbytheowner/author(s).PublicationrightslicensedtoACM.
+ACM0360-0300/2024/10-ART305
+https://doi.org/10.1145/3657281
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:2 M.Kasemetal.
+system,aswellasasetofdevelopmenttrendstokeepupwithstate-of-the-artalgorithmsandfutureresearch.
+We have also set up a public GitHub repository where we will be updating the most recent publications,
+opendata,andsourcecode.TheGitHubrepositoryisavailableathttps://github.com/abdoelsayed2016/table-
+detection-structure-recognition.
+CCSConcepts:•Computingmethodologies→Objectdetection;Objectrecognition;
+AdditionalKeyWordsandPhrases:Convolutionalneuralnetworks,deeplearning,tabledetection,tablestruc-
+turerecognition
+ACMReferenceFormat:
+Mahmoud SalahEldin Kasem, Abdelrahman Abdallah, Alexander Berendeyev, Ebrahem Elkady, Mohamed
+Mahmoud, Mahmoud Abdalla, Mohamed Hamada, Sebastiano Vascon, Daniyar Nurseitov, and Islam Taj-
+Eddin. 2024. Deep Learning for Table Detection and Structure Recognition: A Survey. ACM Comput. Surv.
+56,12,Article305(October2024),41pages.https://doi.org/10.1145/3657281
+1 INTRODUCTION
+Textbooks, lists, formulae, graphs, tables, and other elements are common in documents. Most
+articles,inparticular,containseveralsortsoftables.Tables,asasignificantpartofarticles,may
+conveymoreinformationinfewerwordsandallowreaderstoquicklyexplore,compare,andcom-
+prehendthecontent.Tabledetection(TD)andstructureidentificationarecrucialtasksinimage
+analysisbecausetheyallowretrievingvitalinformationfrom tablesinadigitalformat. Because
+ofthedocument’stypeandthevarietyofdocumentlayouts,detectingandextractingimagesor
+documenttablesistough.Researchershavepreviouslyusedheuristictechniquestorecognizeta-
+blesortobreakpagesintomanypartsfortableextraction[51].Fewstudieshavefocusedontable
+structurerecognition(TSR)indocumentsfollowingTD[45,141].
+Thelayoutandcontentanalysisofdocumentsareusedtodetecttables.Tablescomeinanumber
+of layouts and formats. As a result, creating a general method for TD and TSR is quite difficult.
+TDisregardedasadifficultsubjectinthescientificcommunity.Alargenumberofstudieshave
+beenconductedinthissector,althoughthemajorityofthemhavelimitations,suchasTableareas
+cannotbefullydetectedfromdocumentimages(DIs)usingcurrentcommercialandopen-source
+documentanalysisalgorithms,suchasTesseract[44].
+Detecting and Structure recognition of tables in documents is challenging due to their varied
+layoutsandformats,makingthedevelopmentofauniversaldetectionandrecognitionmethoddif-
+ficult.Despiteextensiveresearch,currentalgorithmslikeTesseractstruggletoaccuratelyidentify
+tableareas,underscoringthecomplexityofthisissueindocumentanalysis[44].
+Inrecentyears,avarietyofremarkableandcreativestrategieshavebeenusedtoimprovedeep
+learning model detection accuracy and solve complex challenges encountered during the train-
+ingandtestingprocessofdeeplearningobjectrecognitionmodels.Modificationoftheactivation
+functionofdeepconvolutionalneuralnetworks(CNNs)[136],Transferlearning[71,83],Im-
+age Inpainting [79, 138], cancer diagnosis, detection [1, 46], and classification [20], and medical
+question answers [2–4, 84], as well as software engineering applications such as optimizing the
+timeandscheduleofsoftwareprojects[8,34],CustomerSegmentation[6,54],IntrusionDetection
+inIoT[80,133]andhandwrittenrecognitionforvariouslanguages[55,81,91,125],andinventive
+ways in the combined selection of the activation function and the optimization system for the
+proposed deep learning model are among these unique strategies. Among the various variables
+andinitiativesthathavecontributedtotherapidadvancementofTDalgorithms,thedevelopment
+of deepconvolutionalneuralnetworks(DCNNs)andGPUcomputationalcapacityshouldbe
+credited.Deeplearningmodelsarenowwidelyusedinmanyaspectsofcomputervision,including
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:3
+generalTD[28,109].Tablestructures,ontheotherhand,receivefarlessattention,andthetable
+structureistypicallycharacterizedbytherowsandcolumnsofatable[52,82].
+Figure1showsabasicpipelinecomparisonofdeeplearningtechniquesandconventionalap-
+proaches for the task of understanding tables. Traditional table recognition (TR) techniques
+eithercan’thandlevarieddatasetswellenoughorneedextrametadatafromPDFfiles.Extensive
+pre-andpost-processingwerealsousedinthemajorityofearlyapproachestoimprovetheeffec-
+tivenessofconventionalTRsystems.However,deeplearningalgorithmsretrievefeaturesusing
+neuralnetworks,primarilyCNNs[126],insteadofmanuallycreatedfeatures.Objectdetectionor
+segmentationnetworksthentrytodifferentiatethetabularportionthatisfurtherbrokendown
+andrecognizedinaDI.
+Thissurveyexaminesdeeplearning-basedTD,recognition,andclassificationarchitecturesin
+depth.Whilecurrentevaluationsarecomprehensive[19,139],themajorityofthemdonotaddress
+recentadvancementsinthefield.
+TD[78,94,105]isafoundationaltaskinthedomainofDIanalysis.Thisprocessseekstoidentify
+thepresenceandpreciselocationoftableswithinadocumentorimage.TheprimarygoalofTD
+isnottointerpretorunderstandthedatawithinthetablebutrathertodemarcateitsboundaries
+withinthebroaderdocumentspace.Tablesarestructureddatarepresentationsthatcarrysubstan-
+tialinformationalweightindocuments,makingtheiraccuratedetectioncrucial.Thisisespecially
+significantinscanneddocumentsorPDFswheretablescannotbeprogrammaticallyaccessedbut
+needtobeextractedforfurtherdataanalysisortransformation.WhileTDisaboutfindingwhere
+atableis,TSR[48,109]delvesdeeper.Itinvolvesunderstandingtheinternallayout,organization,
+and relationships of components within a detected table. Specifically, this means identifying in-
+dividual rows, columns, headers, footers, and cells. Recognizing the structure is pivotal for any
+subsequentdataextractionortransformationtasks.Withoutaclearunderstandingofthetable’s
+structure,thedatawithinitcanbemisinterpreted.Forinstance,mistakingaheaderforadatarow
+couldleadtoincorrectdataparsing.Tableclassificationistheprocessofcategorizingtablesbased
+onvariouscriteria,suchaslayout,contenttype,purpose,orcomplexity.Forinstance,tablescould
+beclassifiedasfull-linetables,partial-linetables,andmore.Notalltablesservethesamepurpose,
+andunderstandingthetypeorcategoryofatablecanaidinsubsequentprocessingsteps.
+Theprimarycontributionsofthisarticleinclude:
+(1) A comprehensive overview of historical and contemporary Table Datasets, emphasizing
+theirdistinctcharacteristics.
+(2) Anin-depthreviewofpivotalTDmethodologies,tracingtheirdevelopmentandevolution.
+(3) AnexhaustiveexplorationofTSRtechniques,providingadeepdiveintotheirintricacies.
+(4) AcomparativestudyofvariousTableClassificationmethods,fillinganoticeablegapinthe
+existingliteraturewheresuchabroadsummarywaspreviouslyabsent.
+(5) PresentationofexperimentalresultsbasedonseveraldatasetsrelatedtoTD.
+ThereareseveralchallengesassociatedwithTDandstructurerecognition.Someofthesechal-
+lengesinclude:
+(1) Tables can have a wide range of shapes, sizes, and styles, which can make it difficult for
+algorithmstoaccuratelydetectandrecognizethem.
+(2) Tablescanbelocatedinavarietyofdifferentcontexts,suchasindocuments,webpages,or
+naturalimages,whichcanmakeitdifficultforalgorithmstogeneralizetodifferentsettings.
+(3) Tablescancontainawiderangeofdifferenttypesofinformation,suchastext,numbers,and
+images,whichcanmakeitdifficultforalgorithmstoextractandinterpretthisinformation.
+(4) Tablescanbedistortedoroccludedbyotherobjectsinthescene,whichcanmakeitdifficult
+foralgorithmstoaccuratelydetectandrecognizethem.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:4 M.Kasemetal.
+Fig.1. Tableanalysispipelinecomparisonofconventionalanddeeplearningmethods.Whileconvolutional
+networksareusedindeeplearningtechniques,classicalapproachesprimarilyperformfeatureextraction
+throughimageprocessingtechniques.Deeplearningmethodsforinterpretingtablesaremoregeneralizable
+andindependentofdatathanconventionalapproaches.
+(5) Tables can be presented in a variety of different formats, such as HTML tables, PDF ta-
+bles,orscannedimages,whichcanmakeitdifficultforalgorithmstohandledifferentinput
+formats.
+Overall,thesechallengescanmakeitdifficultforalgorithmstoaccuratelyandreliablydetectand
+recognizetablesinawiderangeofdifferentsettings.
+1.1 ComparisonwithPreviousReviews
+Formanyyears,theissuewithtableanalysishasbeenwidelyacknowledged.Figure2showsthe
+upwardtrendinpublicationsduringthepreviouseightyears;theseanalysisvalueswerederived
+from Scopus. There have been notable TD and table classification surveys published. There are
+outstandingstudiesonthesubjectofTDinthesesurveys[19,139].Therehavebeenfewrecent
+surveys that specifically address the subject of TD and classification. B. Coüasnon [15] released
+anotherreviewonTRandforms.Thereviewgivesaquickrundownofthemostrecenttechniques
+atthetime,S.Khusro[58]standsasthelatestcomprehensivesurveyonPDFtableextraction,to
+ourknowledge.Despitedeeplearning’sbreakthroughsinfieldslikevisualrecognitionandmed-
+ical image analysis, there’s a gap in exhaustive surveys on deep learning approaches for TD. A
+detailedreviewisessentialforprogressinthisarea,particularlybenefitingresearchersnewtothe
+field.
+1.2 Scope
+ThevastnumberofstudiesondeeplearningforTDprecludesafullreviewwithinasinglearticle,
+necessitatingselectivefocusontop-tierjournalandconferencepublications.Thisarticleaimsat
+offeringadetailedsurveyofdeeplearningtechniquesfordetecting,recognizing,andclassifying
+tables, including a taxonomy for understanding these approaches based on datasets, evaluation
+metrics,andmethods.Thetaxonomyisdesignedtoclarifythesimilaritiesanddifferencesbetween
+variousstrategies,aidingreadersandguidingfutureresearchdirections.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:5
+Fig.2. showsanillustrationofanexpandingtrendintheareaoftableanalysis.Thisinformationwasgath-
+eredbylookingthroughtheannualreportsonTDandtableidentificationfromtheyears2015to2022,this
+analysisvalueswerederivedfromScopus.
+2 MAJORCHALLENGES
+2.1 ObjectDetectionChallenges
+Developing a general-purpose algorithm that fulfills two competing criteria of high qual-
+ity/accuracy and great efficiency is ideal for object detection. High-quality detection must accu-
+ratelylocalizeandrecognizeobjectsinimagesorvideoframes,allowingforthedistinctionofa
+wide range of object categories in the real world and localization and recognition of object in-
+stances from the same category, despite intra-class appearance variations, for high robustness.
+Highefficiencynecessitatesthatthefulldetectionprocessiscompletedinrealtimewhilemain-
+tainingreasonablememoryandstoragerequirements.
+2.2 TDChallenges
+Althoughatrainedsegmentationmodelcanaccuratelylocatetables,conventionalmachinelearn-
+ingtechniqueshaveflawsinthestructuralidentificationoftables.Amajorissueisthelargenum-
+berofthingsinsuchalittlespace.Asaresult,thenetworkmissesoutoncriticalvisualcuesthat
+may aid in the detection and recognition of tables [109]. As physical rules are available, inter-
+sectionsofhorizontalandverticallinesarecomputedtorecognizetableformations.TheHough
+transform is a prominent approach in computer vision that aids in the detection of lines in doc-
+umentscans[123].Length,rotation,andaveragedarknessofalineareutilizedtofilteroutfalse
+positivesanddetermineifthelineis,infact,atableline[67].Theintersectionsoftheremaining
+horizontalandverticallinesarecomputedaftertheHoughlineshavebeenfiltered.Tablecellsare
+createdbasedonthecrossings.
+2.3 TSRChallenges
+TR in document analysis is a multifaceted task that involves comprehending the intricate struc-
+turesoftableswithintextualcontent.IntherealmofTSR,scholarsandresearchershaveidentified
+twofundamentalaspects:logicalstructurerecognitionandphysicalstructurerecognition.Logical
+structure recognition delves into the semantic meaning of the table, focusing on understanding
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:6 M.Kasemetal.
+relationshipsandhierarchiesamongdifferentelementswithinthetable,suchasheaders,rows,and
+columns.Ontheotherhand,physicalstructurerecognitioncentersonthespatialarrangementof
+tableelementsonadocumentpage,concentratingonpreciselocalization,boundarydelineation,
+andpositionalinformationofcells.Inthiscomprehensiveexploration,wedelveintothesetwopiv-
+otalaspectsseparately,discussingthediversemethodologiesandtechniquesemployedtotackle
+eachfacet[65,100].
+3 AQUICKOVERVIEWOFDEEPLEARNING
+From image classification and video processing to speech recognition and natural language un-
+derstanding, deep learning has transformed a wide range of machine learning activities. Given
+theincrediblerateofchange[74],thereisaplethoraofcurrentsurveystudiesondeeplearning
+[31,73,137,142],medicalimageanalysisapplications[73],naturallanguageprocessing[137],and
+speechrecognitionsystems[142].
+CNNs, the most common deep learning model, can use the fundamental properties of actual
+signals: translation invariance, local connection, and compositional hierarchies. A typical CNN
+comprisesahierarchicalstructureandnumerouslayersforlearningdatarepresentationsatdiffer-
+entlevelsofabstraction[66].Westartwithaconvolution.
+(cid:2) (cid:4)
+N(cid:3)l−1
+xl−1∗wl, xl =σ xl−1∗wl +bl , σ(x)=max{x,0} (1)
+j i i,j j
+i=1
+betweenafeaturemapfromthepreviouslayerl-1andaninputfeaturemapxl−1,convolvedusing
+a2Dconvolutionalkernel(orfilterorweights)wl.Thisconvolutionisseenasaseriesoflayers
+thathavebeensubjectedtoanonlinearprocessσ,suchthatwithabiastermbl andaconvolution
+j
+between the Nl−1 input feature mapsxl−1 and the matching kernelwl . For each element, the
+i i,j
+element-wise nonlinear functionσ(.) is commonly a rectified linear unit (ReLU) for each ele-
+ment,Finally,poolingistheprocessofdownsamplingandupsamplingfeaturemaps.DCNNsare
+CNNswithalargenumberoflayers,oftenknownas“deep”networks.ACNN’smostbasiclayers
+consistofaseriesoffeaturemaps,eachofwhichoperatesasaneuron.Asetofweightsw con-
+i,j
+nectseachneuroninaconvolutionallayertofeaturemapsfromtheprecedinglayer(essentially
+asetof2Dfilters).WhereasconvolutionalandpoolinglayersmakeuptheearlyCNNlayers,the
+subsequent layers are usually completely connected. The input picture is repeatedly convolved
+fromearliertolaterlayers,andthereceptivefieldorregionofsupportgrowswitheachlayer.In
+general,thefirstCNNlayersextractlow-levelcharacteristics(suchasedges),whereassubsequent
+layersextractmoregenericfeaturesofincreasingcomplexity[9,66].
+DCNNshaveahierarchicalstructurethatallowsthemtolearndatarepresentationsatnumerous
+levels of abstraction, the ability to learn highly complicated functions, and the ability to learn
+featurerepresentationsdirectlyandautomaticallyfromdatawithminimumdomainexpertise.The
+availabilityofhuge-sizelabeleddatasetsandGPUswithextremelyhighcomputationalcapabilities
+iswhathasmadeDCNNssosuccessful.
+Despite the enormous achievements, there are still acknowledged flaws. There is a critical
+needforlabeledtrainingdataaswellasexpensivecomputationalresources,andselectingproper
+learning parameters and network designs still requires substantial expertise and experience.
+Trained networks are difficult to comprehend, and lack resistance to degradations, and many
+DCNNshavebeenproventobevulnerabletoassaults[31],allofwhichrestricttheirapplicability
+inreal-worldapplications.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:7
+Fig.3. ExamplesofimagesinICDAR2013,ICDAR2017,ICDAR2019,andRVL-CDIP.
+4 DATASETSANDEVALUATIONMETRICS
+4.1 Datasets
+ThissectionwilldescribedatasetsthatareavailableandhavebeenmostcommonlyusedforTD,
+TSR,andclassificationtasks.
+4.1.1 ICDAR 2013. The ICDAR2013 dataset, used as the official practice dataset for the IC-
+DAR2013competition,wascreatedbycollectingPDFsfromGooglesearches,limitedtoeuropa.eu
+and *.gov sites for public domain documents [30]. It includes 150 tables from 27 EU and 40 US
+Governmentdocuments,focusingonTDandstructurerecognitiontasks.Thedatasetchallenges
+methodsinidentifyingtablecellstructuresandspansmultiplepages,asshowninFigure3.
+4.1.2 ICDAR 2017 Page Object Detection (POD). The ICDAR2017 POD dataset [26], pub-
+lishedfortestingTDmethods,contains2,417imagesfrom1,500CiteSeerscientificarticles,includ-
+ingfigures,tables,andformulae.It’slargerthantheICDAR2013tabledataset,with1,600images
+fortraining(731tabularareas)and817fortesting(350tabularregions).Examplesareshownin
+Figure3.
+4.1.3 ICDAR2019. ICDAR2019 [25] introduced a dataset for TD (TRACK A) and recognition
+(TRACKB),dividedintohistoricalandmoderntypes.Themoderndatasetincludesdiverseformats
+fromscientificarticles,forms,andfinancialdocuments,whilethehistoricaldatasetfeaturesimages
+fromsourceslikehandwrittenledgersandoldbooks.Itconsistsof1,600trainingimagesand839
+testing images, with TRACK A providing images containing tables and TRACK B divided into
+twosub-tracksforTSRwithorwithoutpriorknowledge.Annotationsfollowaformatsimilarto
+ICDAR2013[30],usingXMLfilestodetailtableandcellpositions.ExamplesareshowninFigure3.
+4.1.4 TabStructDB. TabStructDBisadifferentpubliclyavailableimage-basedTSRdatasetthat
+was promoted by SA Siddiqui [115]. The authors enhanced the well-known POD dataset from
+ICDAR-17byincorporatingdetailedstructuralinformationforallthetabularregionswithinthe
+dataset.Figure4illustratestwoexamplesofthisdataset.
+4.1.5 TABLE2LATEX-450K. TABLE2LATEX-450K[16],alargedatasetreleasedatthelatestIC-
+DAR conference, comprises 450,000 annotated tables and associated images. It was created by
+crawling LaTeX source documents and ArXiv publications from 1991 to 2016, leading to a high-
+quality,refineddataset.ExamplesfromthisdatasetareshowninFigure4.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:8 M.Kasemetal.
+Fig.4. ExamplesofimagesinPubTabNet,TABLE2LATEX-450K,SynthTabNet,andTabStructDB.
+4.1.6 RVL-CDIP(SUBSET). TheRVL-CDIPdataset,aprominentcollectionindocumentanaly-
+sis,contains400,000imagesacross16categories[37].P.Riba[106]createdasubsetofthisdataset
+byannotating518invoicesspecificallyforTDresearch.Thissubset,publiclyavailable,isvitalfor
+testing table identification methods in invoice DIs. Examples from this dataset are illustrated in
+Figure3.
+4.1.7 IIIT-AR-13K. IIT-AR-13K, introduced by A Mondal [85], is a new dataset formed from
+publicly available annual reports in multiple languages, and is the largest manually annotated
+datasetforgraphicalpageobjectrecognition.Itincludesdiverseannotationslikefigures,natural
+images, logos, signatures, and tables, with 11,000 training samples, and 2,000 and 3,000 samples
+forvalidationandtesting,respectively.ExamplesfromthisdatasetareinFigure5.
+4.1.8 CamCap. CamCap, proposed by W. Seo [110], is a dataset of camera-captured photos
+comprising only 85 images, including 38 tables on curved surfaces (1,295 cells) and 47 tables on
+planarsurfaces(1,162cells).Itispubliclyavailablefordetectingandidentifyingtablestructures
+andiscrucialforassessingtheaccuracyoftableidentificationtechniquesincamera-capturedDIs.
+TwoexamplesfromthisdatasetareshowninFigure5.
+4.1.9 UNLVTable. TheUNLVTabledataset[112]consistsof2,889pagesofscannedDIsfrom
+diversesourcessuchasmagazines,newspapers,andbusinessletters,availableinbitonal,grayscale,
+andfaxformatswithresolutionsbetween200to300DPI.Itincludesgroundtruthdatawithman-
+uallymarkedzones,detailedintextformat.ExamplesfromthisdatasetaredisplayedinFigure5.
+4.1.10 UW-3 Table. The UW-3 Table dataset [96] contains 1,600 skew-corrected English DIs
+frombooksandmagazines,withmanuallyeditedboundingboxesforpageframes,text,non-text
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:9
+Fig.5. ExamplesofimagesinIIIT-AR-13K,CamCap,UNLV,andUW3.
+zones,lines,andwords.Approximately120imagesincludeatleastonemarkedtablezone.Ground
+truth,storedinXML,waspreparedusingtheT-Truthtool,withmanualvalidationandcorrections
+foraccuracy.Challengesinlabeling,especiallyforcolumn-spanningcellsandvaryingtablestruc-
+tures,arenoted.ExamplesfromthisdatasetareinFigure5.
+4.1.11 Marmot. The Marmot dataset [23], a pioneer in TD, comprises 2,000 PDF pages from
+conferencepapersinbothEnglishandChinese,rangingfrom1970to2011,andincludesground
+truth data. Labeling was standardized and double-checked by 15 people to ensure consistency.
+The dataset, still expanding, features a balance of Chinese and English pages, with the Chinese
+pagessourcedfromover120e-BooksinFounderApabi’sdigitallibrary,andtheEnglishpagesin
+both one and two columns. It covers a variety of table types, including ruled, partially and non-
+ruled,horizontal,vertical,inside-column,andspan-columntables.Samplesfromthisdatasetare
+displayedinFigure6.
+4.1.12 TableBank. The TableBank dataset [70] introduced a novel weak supervision method
+forautomaticallycreatingadatasetthatissignificantlylargerandofhigherqualitythanexisting
+human-labeleddatasetsfortableanalysis.Itwascompiledbysystematicallygathering.docxdocu-
+mentsfromonlinesourcesandLaTeXdocumentsfromthearXivdatabase.Thisapproachinvolves
+modifyingOfficeXMLcodeforWorddocumentsandLaTeXcodetoidentifytableboundaries,re-
+sulting in high-quality labeled data across various domains like business documents, official fil-
+ings, and research articles. The TableBank dataset comprises 417,234 high-quality labeled tables
+andtheiroriginaldocuments.SamplesfromthisdatasetareillustratedinFigure6.
+4.1.13 DeepFigures. DeepFigures[119],adatasetforfigureextraction,wascreatedwithouthu-
+manassistanceusingscientificarticlesfromdatabaseslikearXivandPubMed.Itcomprisesaround
+5.5milliontablesandfigures-inducedlabels,makingit4,000timeslargerthanitspredecessorand
+achieving an average precision of 96.8%. This substantial dataset supports the development of
+modern,data-drivenapproachesforfigureextraction,withsamplesshowninFigure7.
+4.1.14 PubTables-1M. PubTables-1M [121] is a dataset comprising nearly one million tables
+fromscientificarticles.Itsupportsmultipleinputmodalitiesandoffersdetailedheaderandloca-
+tion information for table structures, suitable for various modeling approaches. The dataset in-
+troduces a novel canonicalization procedure to address over-segmentation, a common issue in
+previousdatasets,enhancingtrainingperformanceandprovidingamoreaccurateassessmentof
+modelperformanceforTSR.Additionally,transformer-basedobjectdetectionmodelstrainedon
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:10 M.Kasemetal.
+Fig.6. ExamplesofimagesinMarmotandTableBank.
+Fig.7. ExamplesofimagesinFinTabNet,DeepFigures,andTNCR.
+PubTables-1M have shown excellent results in detection, structure recognition, and functional
+analysis without task-specific customizations. Two examples from this dataset are displayed in
+Figure8.
+4.1.15 SciTSR. SciTSR[14]presentsalarge-scaleTSRdatasetcompiledbysystematicallycol-
+lecting LaTeX source files from the arXiv repository. that comprise 15,000 tables from PDF files
+andtheirrelatedstructurallabels.Figure8illustratestwoexamplesofthisdataset.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:11
+Fig.8. ExamplesofimagesinPubTabNet-1MandSciTSR.
+4.1.16 FinTabNet. FinTabNet[144]introducesGTE,avision-guidedframeworkforTDandcell-
+structuredidentification,adaptabletoanyobjectdetectionmodel.GTE-Tableusesapenaltybased
+oncellcontainmentconstraintsfortraining,whileGTE-Celldetectscellsusingtablelayouts.The
+authorsdevelopedamethodforautomaticallylabelingtableandcellstructuresintexts,creating
+alargetrainingandtestingcorpuscost-effectively.FinTabNetcomprisesreal-worldscientificand
+financialdatasetswithdetailedstructureannotations.CollaborationwithPubTabNetcreatorsen-
+richedFinTabNetwithcelllabelsfromPubMedscientificarticles.Examplesfromthisdatasetare
+showninFigure7.
+4.1.17 PubTabNet. PubTabNet[146]isalargeopen-accessTRcollectionwith568ktableimages
+andcorrespondingHTMLrepresentations,automaticallyconstructedbycomparingXMLandPDF
+formatsofscientificpublicationsfromthePubMedCentralTMOpenAccessSubset(PMCOA).
+The authors introduced an attention-based encoder-dual-decoder (EDD) architecture for con-
+vertingtableimagestoHTMLcode,featuringastructuredecoderfortablereconstructionanda
+cell decoderforcell contentrecognition.TheyalsoproposedanewTree-Edit-Distance-based
+Similarity(TEDS)metricforTR,effectivelyaddressingmulti-hopcellmisalignmentsandOCR
+errors.ExamplesfromthisdatasetaredisplayedinFigure4.
+4.1.18 TNCR. TNCR[1],anewtablecollection,featuresimagesofvariedqualitysourcedfrom
+freeaccesswebsites,andisdesignedforrecognizingandclassifyingtablesinscannedDIsintofive
+categories. The dataset includes approximately 6,621 images with 9,428 captioned tables. Using
+state-of-the-artdeeplearningapproachesforTD,thestudyestablishedrobustbaselines.Notably,
+Deformable DERT with a Resnet-50 Backbone Network achieved the best performance on the
+TNCRdataset,withanaccuracyof86.7%,recallof89.6%,andanF1scoreof88.1%.Samplesfrom
+thisdatasetarepresentedinFigure7.
+4.1.19 SynthTabNet. SynthTabNet,proposedbyANassar[88],isasyntheticdatasetof600k
+samples,developedtodiversifyappearancestylesandcomplexityintabledatasets.Itsynthesizes
+elements from Tablebank, PubTabNet, and FinTabNet into four distinct styles, ranging from re-
+alistic appearances to colorful, high-contrast, and minimal-content tables. This dataset aims at
+correctingimbalancesinexistingdatasets.SamplesareillustratedinFigure4.
+4.1.20 WiredTableintheWild(WTW). R.Long[76]introducesasolutionforparsingtable
+structuresfromdiverseimages,includingthosewithdeformationsandocclusions,focusingonreal-
+worldscenarioswithanovelmethodcalledCycle-CenterNet.BuiltontheCenterNetarchitecture,
+Cycle-CenterNet features a cycle-pairing module for detecting and grouping tabular cells into
+structuredtables.Additionally,thearticlepresentstheWTWdataset,acomprehensivecollection
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:12 M.Kasemetal.
+of well-annotated tables from photos, scanned files, and web pages, emphasizing various table
+stylesandscenes.
+4.1.21 WikiTableSet. NTLy[77]introducesWSTabNet,aweaklysupervisedmodelforTRin
+images using HTML or LaTeX annotations instead of detailed cell annotations. This end-to-end
+system, comprising an encoder, structure decoder, and cell decoder, is trained using images and
+their HTML/LaTeX codes. The WikiTableSet dataset, sourced from Wikipedia, supports this
+approach with millions of table images in English, Japanese, and French, including their HTML
+representations.
+4.1.22 STDW. M.Haloi[33]introducesacomprehensivedatasetforTDtoovercomethelimi-
+tationsofcurrentbenchmarks.Thisdataset,consistingofoverseventhousanddiversetablesam-
+ples,wascollectedfromscanneddocuments,Wordfiles,andsearchablePDFs,providingavaried
+resourceforanalysisandresearch.ThearticleshowcasesbaselineresultsusingaCNN-basedap-
+proach,demonstratingitssuperiorityovertraditionalcomputervisionmethodsindetectingtable
+structuresindocuments.
+4.1.23 TabRecSet. F. Yang [135] delves into TR in pattern recognition, encompassing TD,
+TSR, and table content recognition (TCR). The study introduces the Table Recognition
+Set (TabRecSet), a comprehensive dataset and the first to include both English and Chinese
+languages,tailoredforend-to-endTRresearch.TabRecSetfeatures38.1Ktables(20.4KEnglish,
+17.7 K Chinese) in various formats, including complete and incomplete borders, regular and
+irregular shapes, and sourced from diverse scenarios like scanned and camera-taken images,
+documents, Excel tables, educational papers, and financial invoices. Additionally, the article
+presentsTableMe,anannotationtooldesignedforimprovedefficiencyandqualityinannotation
+throughvisualizationandinteractivity.
+4.1.24 ICT-TD. B. Xiao [132] improves TD datasets by enhancing annotations in the “Open-
+Tables” dataset and introducing the “ICT-TD” dataset, which contains 175,682 PDF documents
+across 370 ICT commodities. These datasets, manually annotated for quality, offer a reliable re-
+sourceforcross-domainresearch,withexperimentsshowingtheireffectivenessforcross-domain
+evaluationsandtheirabilitytoimprovemodelperformanceinsuchsettings.
+4.1.25 DECO. E Koci [63] introduces the DECO dataset, a collection of 1,165 Enron corpus
+spreadsheet files annotated for both layout and contents, with assigned roles like Header and
+Data.Thedatasetincludesmarkedtablebordersandcategorizationforfileswithouttables.The
+articleextensivelyanalyzesthedatasetandannotations,offeringinsightsforfutureresearch.The
+detailedannotationmethodology,alongwiththeDECOdatasetandtools,isopenlyaccessibleto
+theresearchcommunity.
+Table 1 presents a comparison between some of the popular datasets of TD and structure
+recognition.
+4.2 DatasetChallenges
+The spectrum of table data analysis is broad and fraught with intricacies. While the presented
+datasets offer a treasure trove of data for researchers, they also embody an array of challenges,
+eachdistinctanddemanding.
+StartingwithfoundationaldatasetslikeICDAR2013andICDAR2017-POD,onecandiscernthe
+intricacies tied to source variety. These datasets, which feature data from diverse sources like
+books,journals,andmagazines,presentchallengeslinkedtovariedlayoutsandstructures.Further-
+more,thelatter’sinclusionofdiverseobjectselevatesthedomainofmulti-objectdetectiontasks.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:13
+Table1. TheTableIllustratesaQuantitativeComparisonbetweenSomeFamousDatasetsinTD
+Dataset Totalpages TotalTables Tabledetection TableStructure Classification DocumentType
+ICDAR2013 462 150 ✓ ✓ ✗ Scanned
+ICDAR2017-POD 2,417 - ✓ ✗ ✗ Scanned
+TabStructDB 2.4k - ✗ ✓ ✗ Scanned
+TABLE2LATEX-450K - 450,000 ✗ ✓ ✗ Scanned
+RVL-CDIP(SUBSET) 518 - ✓ ✗ ✗ Scanned
+IIIT-AR-13K 13K - ✓ ✗ ✗ Scanned
+CamCap 85 - ✓ ✓ ✗ CameraCapture
+UNLV 2,889 - ✓ ✓ ✗ Scanned
+UW-3dataset 1,600 - ✓ ✓ ✗ Scanned
+Marmot 2,000 - ✓ ✗ ✗ Scanned
+TableBank - 417,234 ✓ ✓ ✗ Scanned
+ICDAR2019 - 2,000 ✓ ✓ ✗ Scanned
+DeepFigures - 5.5million ✓ ✗ ✗ Scanned
+PubTables-1M 460,589 1million ✓ ✓ ✗ Scanned
+SciTSR - 15,000 ✗ ✓ ✗ PDF
+FinTabNet 89,646 112,887 ✓ ✓ ✗ PDFandHTML
+PubTabNet - 568k ✗ ✓ ✗ Scanned
+TNCR 6621 9,428 ✓ ✗ ✓ Scanned
+SynthTabNet 600k - ✓ ✓ ✓ Scanned
+WTW 14,581 - ✗ ✓ ✗ Scanned
+WikiTableSet - 5M ✗ ✓ ✗ HTMLorLaTeX
+STDW 7K - ✓ ✗ ✗ Scanned
+TabRecSet 32.07K 38.17K ✓ ✓ ✗ Scanned
+ICT-TD 5,000 3,581,805 ✓ ✗ ✗ PDF
+DECO 1,165 - ✗ ✓ ✗ Spreadsheets
+However,aswemovetoMarmotandUNLV,thecomplexitydeepens.ChineseandEnglishlan-
+guageintricaciesinMarmot,coupledwiththevastarrayofscanneddocumentchallengesinUNLV,
+likeskewing,low-resolution,anddiverselayoutarrangements,highlighttheneedforrobustpre-
+processing and detection mechanisms. Meanwhile, DeepFigures and PubTables-1M, due to their
+volumeandfigurediversity,requirerefinedsegmentationtechniquestoensureaccuratedataex-
+traction.Over-segmentation,particularlyinPubTables-1M,emergesasaprimaryconcern,neces-
+sitatingintelligentinterpretationoftablestructures.
+SciTSR and FinTabNet, being domain-specific, carry their unique set of hurdles. SciTSR, cen-
+teredaroundscientificarticles,grappleswithelementslikefootnotes,subscripts,andsuperscripts,
+making data extraction an intricate task. On the other hand, FinTabNet, rooted in the financial
+domain, presentschallengeslikeintricatelayouts, mergedcells, anddomain-specificjargonand
+structures.Suchnuancescaneasilyleadtomisinterpretationsifnothandledadeptly.
+WikiTableSetandTableBankconfrontlinguisticandformatdiversity.Theformer’smultilingual
+arrayandthelatter’sdualityofWordandExceldatasourcesmandateaversatileextractionand
+interpretationstrategy.ToTToandWikiSQL,beingcenteredaroundnaturallanguageinterfaces,
+challengeresearcherswithensuringcontextretentionandsemanticunderstanding.
+TabFact and SQA, while seemingly traditional in format, introduce complexities in reasoning
+andquestionanswering,requiringmodelsnotjusttoextractbutalsotoinferanddeduce.TABMCQ
+andTURL,beingtailoredforeducationalandURL-centeredtasks,respectively,presentchallenges
+ofcontextsensitivityandaccuratesourcelinking.
+Datasets like TabbyQA, WikiTables, and OpenTable emphasize scale and structural diversity.
+Thevastnessofthedatacombinedwithvariationsintablepresentationscallsforrobustandadapt-
+able analysis techniques. The likes of SemTab, TaPas, and Table-Pretrain introduce semantical,
+context-driven,andpretrainingchallenges,urgingresearcherstonotjustperceivetablesasdata
+structuresbutasentitieswithinherentmeanings.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:14 M.Kasemetal.
+Finally,datasetslikeExTab,TableNet,DocBank,andTableSetfurtherwidenthechallengespec-
+trum.Fromextendingtonon-tabularelementsinExTabtograpplingwithannotationsinTableNet
+anddiverseOCRchallengesinDocBank,thesedatasetspushtheboundariesoftableanalysis.Ta-
+bleSet,withitsfocusonadversarialexamples,introducestheneedforresilientmodelscapableof
+withstandingintentionallymisleadingdata.
+Inessence,theexpansivelistofdatasets,whileprovidingrichopportunitiesforresearch,alsoun-
+derscoresthemultifacetedchallengesintabledataanalysis.Asthefieldprogresses,itbecomesim-
+perativetodeveloptechniquesthatarenotonlyaccuratebutalsoversatileacrossvarieddatasets.
+4.3 Metrics
+Evaluation in TD, and more critically, in TSR, requires a careful selection of metrics to ensure
+robustnessandaccuracy.Whiletabledetectorsutilizemetricssuchasframespersecond(FPS)
+for speed evaluation, precision, recall, and mean Average Precision (mAP) are common for
+performanceaccuracy.
+4.3.1 TD. PrecisionisderivedfromIntersectionoverUnion(IoU),whichistheratioofthe
+areaofoverlapandtheareaofunionbetweenthegroundtruthandthepredictedboundingbox.
+Athresholdissettodetermineifthedetectioniscorrect.IftheIoUismorethanthethreshold,it
+isclassifiedasTruePositive,whileanIoUbelowitisclassifiedasFalsePositive.Ifthemodelfails
+todetectanobjectpresentinthegroundtruth,itistermedaFalseNegative.Precisionmeasures
+thepercentageofcorrectpredictions,whilerecallmeasuresthecorrectpredictionswithrespect
+tothegroundtruth.
+TruePositive(TP) TruePositive
+AveragePrecision(AP)= = . (2)
+(TruePositive(TP)+FalsePositive(FP)) AllObservations
+TruePositive(TP) TruePositive
+AverageRecall(AR)= = . (3)
+(TruePositive(TP)+FalseNegative(FN)) AllGroundTruth
+2∗(AP∗AR) Areaofintersection
+F1-score= , IOU = . (4)
+(AP+AR) areaofunion
+Basedontheaboveequation,averageprecisioniscomputedseparatelyforeachclass.Tocom-
+pareperformancebetweenthedetectors,themeanofaverageprecisionofallclasses,calledmAP
+isused,whichactsasasinglemetricforfinalevaluation.
+IOUisametricthatfindsthedifferencebetweengroundtruthannotationsandpredictedbound-
+ingboxes.Thismetricisusedinmoststate-of-the-artobjectdetectionalgorithms.Inobjectdetec-
+tion, the model predicts multiple bounding boxes for each object, and based on the confidence
+scores of each bounding box, it removes unnecessary boxes based on their threshold value. We
+needtodeclarethethresholdvaluebasedonourrequirements.
+4.3.2 TSR. UnlikeTD,TSRdelvesdeeperintounderstandingthecomponentsofthetable,such
+asrows,columns,headers,cells,andtheirinter-relationships.
+Directedadjacencyrelations(DAR)[29,60]:Thismetricconsiderstheconnectivityofcells
+inatable,representedasadirectedgraph.TheDARscoreiscalculatedasthefractionofcorrectly
+predictededgesinthegraph.
+correctlypredictededges
+DAR= . (5)
+totalnumberofedges
+Treeeditdistancesimilarity(TEDS)[118]:Thismetricconsidersthelogicalstructureofatable
+representedasatree.TheTEDSscoreiscalculatedastheminimumnumberofeditsrequiredto
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:15
+transformthepredictedtreeintothegroundtruthtree.
+TEDS= mindist(T,T(cid:4))
+, (6)
+T(cid:4)∈T
+where
+T representsthesetofallpossibletrees,T’isthegroundtruthtree,T (withouttheprime)isthe
+predictedtree.
+dist(T,T’) denotesthedistance(orthenumberofeditoperations)betweenthepredictedtreeT
+andthegroundtruthtree T’. 4-gram BLEU score (BLEU-4) [95, 120]: This metric considers the
+textcontentofcellsinatable,representedasasequenceofwords.TheBLEU-4scoreiscalculated
+asthesimilaritybetweenthepredictedandgroundtruthsequences.
+(cid:2) (cid:4)
+(cid:3)4
+BLEU-4=BP ·exp w logp . (7)
+n n
+n=1
+Here,BPisthebrevitypenalty.w istheweightassignedtothen-gramprecision.p isthemodified
+n n
+n-gramprecision. (cid:5)
+1 ifc >r
+BP = . (8)
+e(1− cr) ifc ≤r
+cisthelengthofthecandidatesequence.risthelengthofthereferencesequence.
+(cid:6)
+p =
+ngram∈Cm (cid:6)in(count C(ngram),count R(ngram))
+. (9)
+n ngram∈Ccount C(ngram)
+C is the set of n-grams in the candidate sequence. R is the set of n-grams in the reference se-
+quence.count (ngram)andcount (ngram)arethecountsofngraminthecandidateandreference
+C R
+sequences,respectively.TEDS-basedIOUsimilarity(TEDS(IOU))[65,100]:Thismetriccombines
+aspectsofTEDSandDAR,consideringboththelogicalandphysicalstructureofatable.TheTEDS
+(IOU)scoreiscalculatedastheweightedaverageoftheTEDSscoreandtheIOUscorebetween
+thepredictedandgroundtruthboundingboxesofthecells.
+TEDS(IOU)=α ·TEDS+(1−α)·IOU.
+(10)
+TEDS(IOU)representsthecombinedTEDSandIOUsimilaritymetric.α istheweightassignedto
+theTEDSscore.TEDSistheTreeEditDistanceSimilarityscore.IOUistheIntersectionoverUnion
+score.(1−α)istheweightassignedtotheIOUscore.Gridtablesimilaritymetric(GriTS)[120]:
+Thismetricevaluatesthecorrectnessofapredictedtabledirectlyinitsnaturalformasamatrix.
+To create a similarity measure between matrices, the authors generalize the two-dimensional
+largestcommonsubstructure(2D-LCS)problemtothe2Dmostsimilarsubstructures(2D-
+MSS)problemandproposeapolynomial-timeheuristicforsolvingit.
+(cid:6)
+2 f(A˜,B˜)
+GriTS (A,B)= i,j . (11)
+f |A|+|B|
+InordertoprovideacomprehensiveunderstandingofthevariousmetricsutilizedinTSR,acom-
+parisonofthemostprevalentevaluationmetricsispresented.Table2showsthesemetrics,break-
+ingdowntheircomponentsbycellattributestheytarget,thedatastructurestheyrepresent,their
+criteriaformatching,andtheirrespectivescoringmethods.Asillustrated,differentmetricspriori-
+tizedifferentaspectsoftablestructure,fromcontenttotopology,andtheircorrespondingscoring
+methodsvaryaccordingly.
+Researchers are still actively developing new evaluation metrics for TSR. This is because the
+task is challenging, and there is no single metric that can perfectly capture all aspects of table
+structure.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:16 M.Kasemetal.
+Table2. EvaluationMetricsforTSR
+EvaluationMetric CellAttributes StructureRepresentation MatchingCriteria Scoring
+DAR[60] Content AdjacencyRelationsSet Exactmatch F-score
+DAR[29] Location AdjacencyRelationsSet Average(MultipleIoU) F-score
+BLEU-4 TopologyandRole TokenSequence Exactmatch BLEU-4
+GriTS Topology CellMatrix IoU F-score
+Top
+GriTS Content CellMatrix NormalizedLCS F-score
+Con
+GriTS Location CellMatrix IoU F-score
+Loc
+5 TDANDSTRUCTURERECOGNITIONMODELS
+TDhasbeenstudiedforanextendedperiodoftime.Researchersuseddifferentmethodsthatcan
+be categorized as follows: heuristic-based methods, machine learning-based methods, and deep
+learning-basedmethods.Primarilyheuristic-basedmethodsweremainlyusedinthe1990s,2000s,
+andearly2010.Theyemployeddifferentvisualcueslikelines,keywords,spacefeatures,andsoon
+todetecttables.
+PPyreddy[98]proposedanapproachtodetectingtablesusingcharacteralignment,holes,and
+gaps. Y Wangt [129]. used a statistical approach to detect table lines depending on the distance
+betweenconsecutivewords.Groupedhorizontalconsecutivewordstogetherwithverticaladjacent
+lineswereemployedtoproposetableentitycandidates.MACAJahan[49]presentedamethodthat
+useslocalthresholdsforwordspacingandlineheightfordetectingtableregions.
+KItonori[48]proposedarule-basedapproachthatledtothetext-blockarrangementandruled
+line position to localize the table in the documents. S Chandran [13] developed another TD ap-
+proach based on vertical and horizontal lines. W Seo [110] used junctions (intersection of the
+horizontalandverticalline)detectionwithfurtherprocessing.
+T Hassan [39] locates and segments tables by analyzing spatial features of text blocks. E Oro
+[93] introduced PDF-TREX, a heuristic bottom-up approach for TR in single-column PDF docu-
+ments.Itusesthespatialfeaturesofpageelementstoalignandgroupthemintoparagraphsand
+tables.ANurminen[90]proposedasetofheuristicstolocatesubsequenttextboxeswithcommon
+alignmentsandassignthemtheprobabilityofbeingatable.
+JFang[22]usedthetableheaderasastartingpointtodetectthetableregionanddecomposeits
+elements.GHarit[36]proposedatechniqueforTDbasedontheidentificationofuniquetablestart
+andtrailerpatterns.STupaj[127]proposedanOCR-basedTDtechnique.Thesystemsearchesfor
+sequencesoftable-likelinesbasedonthekeywords
+Theabovemethodsworkrelativelywellondocumentswithuniformlayouts.However,heuristic
+rulesneedtobetweakedtoawidervarietyoftablesandarenotreallysuitedforgenericsolutions.
+Therefore,machinelearningapproachesstartedtobeemployedtosolvetheTDproblem.
+TKieninger[59]appliedanunsupervisedlearningapproachbyclusteringwordsegments.FCe-
+sarini[12]usedamodifiedXYtreesupervisedlearningapproach.MFan[21]usesbothsupervised
+andunsupervisedapproachestoTDinPDFdocuments.YWang[128]appliedDecisiontreeand
+SVMclassifierstolayout,contenttype,andwordgroupfeatures.TKasar[53]usedthejunction
+detectionandthenpassedtheinformationtotheSVMclassifier.ACeSilva[18]appliedjointprob-
+abilitydistributionoversequentialobservationsofvisualpageelements(HiddenMarkovModels)
+tomergepotentialtablelinesintotables.SKlampfl[61]comparestwounsupervisedTRmethods
+fromdigitalscientificarticles.LO’Gorman’sDocstrumalgorithm[92]appliesKNNtoaggregate
+structures into lines and then uses perpendicular distance and angle between lines to combine
+themintotextblocks.Itmustbenotedthatthisalgorithmwasdevisedin1993,earlierthanother
+methodsmentionedinthissection.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:17
+FShafait[111]proposesausefulmethodforTRthatperformswellondocumentswitharangeof
+layouts,includingbusinessreports,newsstories,andmagazinepages.TheTesseractOCRengine
+offersanopen-sourceimplementationofthealgorithm.
+Asneuralnetworksgainedinterest,researchersstartedtoapplythemtodocumentlayoutanaly-
+sistasks.Initially,theywereusedforsimplertaskslikeTD.Lateron,asmorecomplexarchitectures
+weredeveloped,moreworkwasputintotablecolumnsandoverallstructurerecognition.
+LHao[35]employedCNNtodetectwhetheracertainregionproposalisatableornot.AGilani
+[28]proposedaFasterR-CNN-basedmodeltomakeupforthelimitationsofLHao[35]andother
+priormethodologies.
+SSchreiber[109]wasthefirsttoperformTDandstructurerecognitionusingFasterRCNN.D
+He[40],usedFCNforsemanticpagesegmentation.SArif[7]attemptedtoimprovetheaccuracy
+of Faster R-CNN by using semantic color-coding of text. MM Reza [105] used a combination of
+GAN-basedarchitectureforTD.MAgarwal[5]usedamultistageextensionofMaskR-CNNwith
+adualbackbonefordetectingtables.
+Recently transformer-based models were applied to document layout analysis, B Smock[121]
+applied N Carion[10] DEtection TRansformer framework, a transformer encoder-decoder archi-
+tecture, to their table dataset for both TD and structure recognition tasks. J Li [69] proposed a
+self-supervisedpre-trainedDITransformermodelusinglarge-scaleunlabeledtextimagesfordoc-
+umentanalysis,includingTD
+5.1 TDModels
+In this section, we examine the deep learning methods used for document image TD. We have
+dividedthemethodsintoseveraldeep-learningideasforthebenefitofourreaders’convenience.
+Tables3and4listalltheobjectidentification-basedTDstrategies.Italsodiscussesvariousdeep
+learning-basedmethodsthathavebeenusedinthesemethods.
+CNN-basedModels. DPrasad[97]presentsanautomaticTDapproachforinterpretingtabular
+data in document pictures, which primarily entails addressing two issues: TD and TSR. Using a
+single CNN model, provide an enhanced deep learning-based end-to-end solution for handling
+both TD and structure recognition challenges. CascadeTabNet is a Cascade mask Region-based
+CNNHigh-ResolutionNetwork(CascademaskR-CNNHRNet)-basedmodelthatsimultaneously
+identifiestableareasandrecognizesstructuralbodycellsfromthosetables.
+LHao[35]offersanewmethodfordetectingtablesinPDFdocumentsthatarebasedonCNNs,
+oneofthemostwidelyuseddeeplearningmodels.Thesuggestedmethodbeginsbyselectingsome
+table-likeareasusingsomevagueconstraints,thenbuildingandrefiningconvolutionalnetworks
+toidentifywhethertheselectedareasaretablesornot.Furthermore,theconvolutionalnetworks
+immediately extract and use the visual aspects of table sections, while the non-visual informa-
+tion contained in original PDF documents is also taken into account to aid in better detection
+outcomes.
+DDNguyen[89]introducesTableSegNet,afullyconvolutionalnetwork(FCN)withacom-
+pactdesignthatconcurrentlyseparatesanddetectstables.TableSegNetusesashallowerpathto
+discover table locations in high resolution and a deeper path to detect table areas in low reso-
+lution,splittingthefoundregionsintoseparatetables.TableSegNetemploysconvolutionblocks
+withbroadkernelsizesthroughoutthefeatureextractionprocessandanadditionaltable-border
+classinthemainoutputtoincreasethedetectionandseparationcapabilities.
+AAGurav[32]devisedaninnovativeapproachtoautomatedataextractionfromdiversedigi-
+taldocuments(DDs),includingimages,scannedfiles,e-mails,andbooks.FocusingonDIs,like
+officedocumentsandscans,theyemployedCNNsforsuperiorperformance.Theiruniquemethod,
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:18 M.Kasemetal.
+basedonweaklysupervisedlearning,detectsandrecognizestablelocationsinDIwithouttheneed
+forboundingboxannotations.Thisgroundbreakingapproachpromisesefficientandaccessibleau-
+tomationoftabulardataextractionfromvariedDDs.
+MHaloi[33]addressedlimitationsinexistingTDbenchmarksbyintroducingalarge-scale,di-
+versedatasetcomprisingoverseventhousandsampleswithvariedtablestructuresfrommultiple
+sources.TheyemployedCNN-basedmethods,demonstratingtheirsuperiorityoverclassicalcom-
+putervisiontechniquesindetectingtablestructureswithindocuments.Thisdatasetoffersavalu-
+ableresourcefordevelopingefficientdeeplearningmethodsfordocumentlayoutunderstanding
+andtabulardataprocessing.
+HDong[17]developedTableSense,aninnovativeframeworkforspreadsheetTD,whichiscru-
+cialforspreadsheetdataintelligence.TheyusedaCNNmodeltailoredforprecisetableboundary
+detection,leveraginganactivelearningapproachtocreateadiversetrainingdataset.TableSense
+achievedremarkableperformancewith91.3%recalland86.5%precision,surpassingbothexisting
+detectionalgorithmsincommonspreadsheettoolsandstate-of-the-artCNNsincomputervision.
+RPNModels. AGilani[28]hasshownhowtorecognizetablesusingdeeplearning.Document
+pictures are pre-processed initially in the suggested technique. These photos are then sent into
+aRegionProposalNetworkforTD,whichisfollowedbyafullyconnectedneuralnetwork.The
+suggestedapproachworkswithgreatprecisiononavarietyofdocumentpictures,includingdoc-
+uments,researcharticles,andperiodicals,withvariouslayouts.
+Á Casado-García [11] Uses object detection techniques, The authors have shown that fine-
+tuning from a closer domain improves the performance of TD after conducting a thorough ex-
+amination. The authors have utilized Mask R-CNN, YOLO, SSD, and Retina Net in conjunction
+with object detection algorithms. Two basic datasets are chosen to be used in this investigation,
+TableBank,andPascalVOC.
+NSun[122]presentsacorner-findingapproachforfasterR-CNN-basedTD.TheFasterR-CNN
+network is first used to achieve coarse table identification and corner location. then, coordinate
+matchingisusedtogroupthosecornersthatbelongtothesametable.Untrustworthyedgesarefil-
+teredatthesametime.Finally,thematchingcornergroupfine-tunesandadjuststhetableborders.
+Atthepixellevel,thesuggestedtechniqueenhancestableboundaryfindingprecision.
+A Samari [108] developed an innovative approach for detecting tables in digitized historical
+print, addressing challenges in varied table characteristics and their visual similarity to other
+elements.TheyintroducedtheNASdataset,enhancingevaluationdiversity.Theirmethodutilized
+theGaborfilterfordatasetpreparationandFaster-RCNNfordetection,overcominglabeleddata
+limitations with weakly supervised bounding box extraction and pseudo-labeling, improving
+modelgeneralization.
+GenerativeAdversarialNetwork(GAN)Models. YLi[72]providesanewnetworktoproduce
+thelayoutelementsfortabletextandtoenhancetheperformanceoflessruledtableidentification.
+TheGANsandthisfeaturegeneratormodelarecomparable.Theauthorsmandatethatthefeature
+generatormodelextractcomparablefeaturesforbothheavilygovernedandlooselyruledtables.
+AdaptiveandHybridModels. YHuang[47]describesatable-detectingalgorithmbasedonthe
+YOLO principle. The authors offer various adaptive improvements to YOLOv3, including an an-
+choroptimizationtechniqueandtwopost-processingmethods,toaccountforthesignificantdif-
+ferencesbetweendocumentobjectsandrealobjects.alsoemployk-meansclusteringforanchor
+optimizationtocreateanchorsthataremoresuitedfortablesthannaturalobjects,makingiteasier
+forourmodeltofindtheexactplacementsoftables.Theadditionalwhitespacesandnoisypage
+objectsaredeletedfromtheprojectedresultsduringthepost-processingprocedure.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:19
+D Zhang [140] suggests a YOLO-table-based TD methodology. To enhance the network’s ca-
+pacitytolearnthespatialarrangementaspectsoftables,theauthorsincorporateinvolutioninto
+thenetwork’score,andtheauthorscreateasimpleFeaturePyramidNetworktoincreasemodel
+efficacy.Thisresearchalsosuggestsatable-basedenhancementtechnique.
+XZheng[145]providesGlobalTableExtractor(GTE),amethodforjointlydetectingtables
+and recognizing cell structures that can be implemented on top of any object detection model.
+To train their table network with the help of cell placement predictions, the authors developed
+GTE-Table,whichintroducesanewpenaltybasedontheinherentcellconfinementlimitationof
+tables.AnovelhierarchicalcellidentificationnetworkcalledGTE-Cellmakesuseoftablestyles.
+Additionally, in order to quickly and inexpensively build a sizable corpus of training and test
+data, authors develop a method to automatically classify table and cell structures in preexisting
+texts.
+IKavasidis[56]proposesamethodfordetectingtablesandchartsusingacombinationofdeep
+CNNs,graphicalmodels,andsaliencyideas.MHoleček[43]presentedtheconceptoftableunder-
+standingutilizinggraphconvolutionsinstructureddocumentslikebills,extendingtheapplicabil-
+ityofgraphneuralnetworks.APDFdocumentisusedintheplannedresearchaswell.Thejobof
+lineitemTDandinformationextractionarecombinedinthisstudytotackletheproblemofTD.
+Any word may be quickly identified as a line item or not using the line item technique. Follow-
+ingwordclassification,thetabularregionmaybeeasilyidentifiedsince,incontrasttoothertext
+sectionsonbills,tablelinesareabletodistinguishthemselvesrathereffectively.
+RLiu[75]introducedFewTUD,abenchmarkdatasetfocusingonfew-shottableunderstanding,a
+challengingtaskduetolimitedannotations.TheyaddressedthescarcityofpublicChinesetablesby
+creatingalarge-scalecorpus.Additionally,theydevelopedFewTPT,anovelpre-trainedlanguage
+model,andextensivelyevaluateditsperformanceontheFewTUDbenchmark.
+P Fischer [24] developed Multi-Type-TD-TSR, an end-to-end solution for TR in scanned doc-
+uments.Thismultistagepipelineemploysdeeplearningmodelsanddifferentiatesbetweenthree
+typesoftablesbasedontheirborders.Thesystemaddresseschallengessuchasrotatedimagesand
+noiseartifacts.Theirapproachalsoincludesspecificalgorithmsfornon-borderedandborderedta-
+bles,achievingcomprehensiveTSR.
+TShehzadi[113]proposesaninnovativesemi-supervisedTDmethodutilizingthedeformable
+transformer,adeeplearningtechnique.TraditionaldeeplearningmethodsforTDdemandexten-
+sivelabeleddata,butthisapproachsignificantlyreducestheneedforlabeledsamples.Byleverag-
+ingthedeformabletransformer,thismethodachievesoutstandingresultsonvariousdatasetsin-
+cludingPubLayNet,DocBank,ICADR-19,andTableBank.Itsurpassesbothfullysupervisedmeth-
+odsandprevioussemi-supervisedapproaches,demonstratingsuperiorperformancewithlimited
+labeleddata.
+5.2 DiscussiononTD
+The intricate landscape of TD in DIs has witnessed a seismic shift with the proliferation of
+deep learning methodologies. Within this sphere, several researchers have designed innovative
+strategiestonavigatethenuancesandchallengesinherenttodetectingtablesinvarieddocument
+formats.
+The core tenet of many methodologies, as portrayed by A Gilani [28], revolves around pre-
+processingDIsfollowedbyleveragingneuralarchitecturesliketheRegionProposalNetwork.D
+Prasad[97]’sCascadeTabNetfurtherencapsulatestheessenceofsimultaneousTDandstructure
+recognition, illustrating the benefit of end-to-end solutions. These methodologies showcase the
+powerofemployingCNNmodels,underscoringtheiradeptnessathandlingtheintricaciesofdoc-
+umentsrangingfromperiodicalstoresearcharticles.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:20 M.Kasemetal.
+Table3. AComparisonoftheBenefitsandDrawbacksofSeveralDeepLearning-basedTDMethods
+Literature Method Benefits Drawbacks
+(1)Onscanneddocumentpictures,thisisthe
+firstdeeplearning-basedtabledetectionmethod. Thereareadditionalphases
+AGilani[28] FasterR-CNN
+(2)Theobjectdetectiontechniqueismadeeasier inthepre-processingprocess.
+byconvertingRGBpixelstodistancemeasures.
+end-to-endstrategyfordetectingtablesand Whencomparedtoother
+transferlearningmethods
+SSchreiber[109] tablestructuresthatisstraightforward state-of-the-arttechniques,
++FasterR-CNN
+andefficient itislessaccurate.
+Whencomparedtostandard
+Deformableconvolutionalneuralnetworks’
+DeformableCNN+ convolutions,deformable
+SASiddiqui[117] dynamicreceptivefieldaidsinthereconfiguration
+FasterR-CNN convolutionsarecomputationally
+ofmultipletabularboundaries.
+demanding.
+(1)Nocomparisonstootherstate-of-
+OCR-basedGraphNNthat the-artstrategies.(2)Additional
+Thesuggestedtechniquemakesuseofmoredata
+PRiba[106] makesuseoftextual annotationsareneededusingthis
+thanonlyspatialattributes.
+characteristics strategyinadditiontothetabular
+data.
+(1)Itisnecessarytodopostprocessing
+(1)Betteroutcomesareobtainedusinganovel
+FasterR-CNN+ operationssuchascornerrefining.
+NSun[122] technique.(2)FasterR-CNNisusedtoidentifynot
+Locatecorners (2)Becauseoftheadditionaldetections,
+justtables,butalsothecornersoftabularborders.
+thecomputationismoreinvolved.
+(1)Dilatedconvolutionsratherthanconventional
+combinationofdeepCNNs,
+convolutionsareused.(2)Usingthistechnique, Toprovideequivalentresults,many
+IKavasidis[56] graphicalmodels,and
+saliencydetectionisperformedinplaceoftable processingstagesarenecessary.
+saliency
+detection.
+(1)Limitedbaselineapproachwithout
+Thisapproachyieldsencouragingoutcomeswhen comparisonstootherstate-of-the-art
+GraphNN+lineitem
+MHoleček[43] usedtolayout-intensivedocumentslikeinvoices techniques.(2)Nopubliclyaccessible
+identificationMethod
+andPDFs. tabledatasetsareusedforthe
+evaluationoftheapproach.
+Incomparison,aquickerandmoreeffective Thesuggestedmethodologyrelieson
+YHuang[47] YOLO
+strategy data-drivenpost-processingmethods.
+Forrulingandlessruledtables,theGAN-based Indocumentimageswithdifferent
+YLi[72] strategydrivesthenetworktoextractcomparable tabularlayouts,thegenerator-based
+GAN
+characteristics. modelissusceptible.
+ThismethoddemonstrateshowabasicFaster
+JustasimpleFaster-RCNN
+MLi[70] FasterR-CNN R-CNNcanyieldexcellentresultswhenused
+implementation
+withahugedatasetlikeTableBank.
+CascademaskRegion-based Thestudyshowshowiterativetransferlearning
+Thesameas[28],Thereareadditional
+DPrasad[97] CNNHigh-Resolution maybeusedtotransformpictures,whichcan
+phasesinthepre-processingprocess.
+Network-basedmodel lessentheneedforhugedatasets.
+Likenfine-tuning+ Describetheadvantagesofusingobjectdetection Closeddomainfine-tuningisstill
+ÁCasado-García[11] MaskR-CNN,RetinaNet, networksinconjunctionwithdomain-specific insufficienttogetstate-of-the-art
+SSD,andYOLO fine-tuningtechniquesfortabledetection. solutions.
+(1)Acomprehensiveobjectdetection-basedframe- Thetechniqueiscomputationally
+multistageextensionof
+workutilizingacompositebackbonetodeliverstate- expensivesinceitusesacomposite
+MAgarwal[5] MaskR-CNNwithadual
+of-the-artoutcomes(2)Extensivetestsonbenchmark backboneinadditiontodeformable
+backbone
+datasetsfortabledetectionthatareopenlyaccessible. convolutions.
+(1)Theproblemoftabledetectionisbenefitedbythe
+Annotationsforcellularbordersare
+extrapiece-wiseconstraintlossintroduced.(2)A
+XZheng[145] GTEwhichisgeneral necessarysincetheprocessoftable
+completemethodthatiscompatiblewithallobject
+methodforobjectdetection detectiondependsoncelldetection.
+detectionframeworks.
+(1)Itdoesnotrequiredetailedboundingboxanno- Documentlayout,fonts,andlangua-
+CamNet(ResNet50+
+AAGurav[32] tations.(2)Enablesefficientextractionofstructur- ges’variabilityrequireextraprepro-
+CAMmapprediction)
+eddata cessingforaccuracy
+Several methodologies have extended the foundational principles of popular object detection
+strategiestosuittheTDlandscape.Forinstance,YHuang[47]’sYOLO-basedapproachaccentu-
+atestheessentialmodificationsneeded,suchasanchoroptimization,totailorYOLOv3fordocu-
+mentstructures.Theemphasisonpre-processingandpost-processingtoeliminatenoiseandrefine
+detectionsoffersaholisticviewoftheentireTDpipeline.
+TherealmofTDisn’tjustconfinedtostructureddocuments.LHao[35]’smethodology,focusing
+onPDFdocuments,epitomizestheimportanceofpreliminaryselectionoftable-likeareas,refining
+detectionthroughconvolutionalnetworks.Thisapproachunderscorestheessenceofintertwining
+visualwithnon-visualinformationforenhanceddetectionoutcomes.
+Innovative strategies like SA Siddiqui [117]’s usage of deformable CNN paired with Faster R-
+CNN/FPNfurtherdelineatetheadaptabilityofdeeplearningmodels.Byaccommodatingvariable
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:21
+Table4. AComparisonoftheBenefitsandDrawbacksofSeveralDeepLearning-basedTDMethods
+(ContinueTable3)
+Literature Method Benefits Drawbacks
+(1)Thearticleaddressesthescarcityofcomprehen- Theunavailabilityofpublicaccess
+sivedatasetsfortabledetection,introducingtwo tothetwodatasetspreventsthe
+ASamari[108] FasterR-CNN
+newdatasetswithdiversetablestructuresandcl- evaluationofstate-of-the-artdet-
+asses.(2)Innovativetabledetectionapproach. ectionresults.
+(1)Providesacomprehensivebenchmarkdatasetfor
+FewTPT(TablePre- few-shottableunderstanding.(2)Introducesacom- Requiresubstantialtime,andcom-
+RLiu[75]
+Training) prehensivebenchmarkdatasetforfew-shottable putationalresources.
+understanding,coveringfivedownstreamtasks.
+Theydonotcomparevariousstate-
+(1)Diversedatasetreflectingreal-worldscenarios.
+MHaloi[33] CNN(RetinaNet) of-the-artapproachesontheSTDW
+(2)CNNmethodsoutperformclassicaltechniques.
+dataset.
+(1)Effectivenesstabledetectionapproach.(2)Thein-
+TableSense(CNN
+troductionofaPreciseBoundingBoxRegression
+HDong[17] andemploysactive NeedMorePre-processingEfforts.
+(PBR)modulecontributestomoreaccuratepred-
+learning)
+ictionsoftableboundaries.
+(1)Thealgorithmsaredesignedforta-
+bleswithbasiccellstructures,lack-
+(1)Utilizesadvanceddeeplearningmodels,leverag-
+ingacomprehensivesolutionform-
+ingrecenttrendsintransferlearning,toenhance
+CNNMulti-Type- orecomplex,recursivestructuresof-
+PFischer[24] accuracyandadaptability.(2)Thecombinationof
+TD(ResNeXt-152) tenfoundintables.(2)Theproposed
+twoconventionalalgorithmsintoathird,unified
+algorithm’sF1-scorediminishesat
+algorithmdemonstratesaninsightfulstrategy.
+higherIoUthresholdsduetothe
+inabilitytodetectsharpborders.
+(1)Requiresignificantcomputati-
+(1)Reducesthedependencyonlarge-scaleannotat- onalresources.(2)Theydoesnot
+Semi-supervised eddatasets,makingthemethodmorepracticala- provideinsightsintothepotent-
+TShehzadi[113]
+DeformableDETR ndcost-effective.(2)effectiveforhandlingspatial iallimitationsorchallengesasso-
+deformationsindocumentimages. ciatedwithvaryinglevelsofann-
+otateddata.
+tablesizesandorientations,ittailorsitsreceptivefield,emphasizingthecustomizationandflexi-
+bilitydeeplearningoffersindetectionmethodologies.
+It’salsonoteworthytohighlightthededicatedeffortstowardsrefiningtheprecisionofTD,such
+asNSun[122]’scorner-findingapproach.Byintegratingcoordinatematchingandfilteringuntrust-
+worthyedges,thisstrategyemphasizestheimportanceofpixel-levelprecisionindelineatingtable
+boundaries.
+BeyondtraditionalTD,approacheslikeIKavasidis[56]’scombinationofdeepCNNs,graphical
+models, and saliency ideas, or M Holeček [43]’s exploration of graph convolutions, extend the
+boundariesofwhat’sachievable.Thesemethodsindicatethecontinuedblurringoflinesbetween
+classicalcomputervisiontechniquesanddeeplearningmethodologies.
+However,thelandscapeisfurtherenrichedbytheinclusionofmethodsthatcatertospecialized
+scenarios. AA Gurav [32]’s approach focuses on automating data extraction from diverse DDs,
+leveragingCNNsandemphasizingthesignificanceofweaklysupervisedlearning.Thismethodol-
+ogyexemplifiesthepotentialofdeeplearninginhandlingvariedDDformatswithoutextensive
+annotations. Similarly, A Samari [108]’s strategy for detecting tables in historical prints, R Liu
+[75]’semphasisonfew-shottableunderstanding,andMHaloi’slarge-scaledatasetintroduction
+echothesentimentofembracingdiversityindataandchallenges.
+Innovative frameworks like H Dong [17]’s TableSense accentuate the need for precision in
+unique scenarios such as spreadsheet TD, exemplifying the adaptability of CNN models. Mean-
+while, P Fischer [24]’s Multi-Type-TD-TSR underscores the importance of end-to-end solutions
+tailoredforvariedtabletypes.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:22 M.Kasemetal.
+TShehzadi[113]’ssemi-supervisedapproach,capitalizingonthedeformabletransformer,cap-
+tures the overarching theme of the current research landscape—the quest for optimizing perfor-
+mancewhileminimizingtheneedforextensivelabeleddata.
+5.3 CaseStudyAnalysis:EvaluatingMethodologiesinTR
+ThissectiondelvesintothepracticalapplicationofTRmethodologiesthroughdetailedcasestud-
+ies.Byexaminingspecificimplementationsandtheiroutcomes,weaimathighlightingthereal-
+world challenges and benefits associated with these methods. The analysis not only sheds light
+ontheefficacyofvariousapproachesbutalsounderscorestheadaptabilityandlimitationsofTR
+technologiesinaddressingdiversedataextractionneeds.
+5.3.1 Introduction to Case Study Selection. The case studies were carefully selected to cover
+a wide range of applications, from academic research articles to business financial reports and
+medicalrecords.ThisdiversityensuresacomprehensiveunderstandingofhowTRmethodologies
+perform across different domains. The selection criteria focused on the complexity of the table
+structures,thedocumentformats,andthespecificchallengeseachapplicationpresented.
+5.3.2 CaseStudy1:AcademicResearchArticleDataExtraction. Thegoalwastoautomatedata
+extractionfromtablesinenvironmentalscienceacademicarticlesusingaCNN-basedmodel,over-
+coming challenges like diverse table formats and mixed contenttypes. Implementing multi-step
+preprocessing for format standardization and symbol accuracy, along with semantic analysis in
+post-processing,enhanceddataextractionandorganization.Thismethodsignificantlycutdown
+onmanualdatacompilationtimedespiterequiringsubstantialcomputationaleffort.Automating
+thisprocessboostedmeta-analysisefficiency,enablingtheanalysisoflargerdatasetsmorequickly.
+Thisadvancementnotonlystreamlinesresearchworkflowsbutalsosetsaprecedentforapplying
+similartechnologiesinotherscientificdomains.
+5.3.3 CaseStudy2:FinancialReportTRforBusinessIntelligence. Thiscaseinvolvedextracting
+financial data from tables in quarterly and annual reports of publicly traded companies to en-
+hance business intelligence analyses. An ensemble approach combining OCR technologies with
+machine learning-based TR algorithms was utilized to cater to both scanned and digitally gen-
+erated financial reports. The primary challenge was dealing with the high variability in report
+formats and the accuracy of financial data extraction critical for analysis. Custom OCR correc-
+tion algorithms were developed to address common errors in financial data recognition. Addi-
+tionally,adomain-specificadaptationofthemachinelearningmodelwastrainedonadatasetof
+financial tables to improve accuracy. This approach enabled highly accurate extraction of finan-
+cialdataacrossawiderangeofreportformats,significantlyenhancingthebusinessintelligence
+process. However, the system required ongoing training and adaptation to new report formats,
+presenting scalability challenges. The implementation led to a more efficient and accurate busi-
+nessintelligenceprocess,enablingdeeperandfasterfinancialanalysesofcompetitorandmarket
+trends.
+5.3.4 ComparativeAnalysisandLessonsLearned. Thecasestudiesunderscorethepotentialof
+TRmethodologiestostreamlinedataextractionacrossdiversedomains.Whileeachapproachhas
+its strengths, common challenges include the need for domain-specific adaptations and the bal-
+ancebetweenaccuracyandcomputationalefficiency.Theseinsightspavethewayforfutureinno-
+vationsinTRtechnology,emphasizingtheimportanceofflexible,adaptablesolutionscapableof
+handlingthecomplexitiesofreal-worldapplications.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:23
+5.4 TSRModels
+InordertorecognizetablestructuresinDIs,deeplearningapproachesarereviewedinthispart.We
+dividedthemethodsintodiscretedeep-learningprinciplesforthebenefitofourreaders.Tables5
+and6listallmethodsforrecognizingtablestructuresbasedonobjectdetection,aswellastheir
+benefitsanddrawbacks.Italsodiscussesvariousdeeplearning-basedmethodsthathavebeenused
+inthesemethods.
+CNNBasedModels. SSPaliwal[94]presentsTableNetwhichisanewend-to-enddeeplearning
+model for both TD and structure recognition. To divide the table and column areas, the model
+usesthedependencybetweenthetwinobjectivesofTDandTSR.Then,fromthediscoveredtabu-
+larsub-regions,semanticrule-basedrowextractionisperformed.SASiddiqui[116]describedthe
+structurerecognitionissueasthesemanticsegmentationissue.Tosegmenttherowsandcolumns,
+the authors employed FCNs. The approach of prediction tiling is introduced, which lessens the
+complexityoftablestructuralidentification,assumingconsistencyinatabularstructure.Theau-
+thorimportedpre-trainedmodelsfromImageNetandusedthestructuralmodelsofFCN’sencoder
+anddecoder.Themodelcreatesfeaturesofthesamesizeastheoriginalinputpicturewhengiven
+animage.
+SAKhan[57]presentsarobustdeeplearning-basedsolutionforextractingrowsandcolumns
+fromarecognizedtableindocumentpicturesinthiswork.Thetablepicturesarepre-processedbe-
+forebeingsentintoabi-directionalRecurrentNeuralNetwork(RNN)usingGatedRecurrent
+Units(GRUs)andafully-connectedlayerwithsoftmaxactivationinthesuggestedsolution.
+ANassar[88]providesafreshidentificationmodelfortablestructures.Thelatterenhancesthe
+mostrecentEDDfromPubTabNetend-to-enddeeplearningmodelintwoimportantaspects.First,
+theauthorsprovideabrand-newtable-cellobjectdetectiondecoder.Thisallowsthemtoeasilyac-
+cessthecontentofthetablecellsinprogrammaticPDFswithouthavingtotrainanyproprietary
+OCRdecoders.Theauthorsclaimthatthisarchitecturalimprovementmakestable-contentextrac-
+tionmorepreciseandenablesthemtoworkwithnon-Englishtables.Second,transformer-based
+decoderstaketheplaceofLSTMdecoders.
+C Tensmeyer [124] has presented SPLERGE (Split and Merge), another method using dilated
+convolutions.Theirstrategyentailstheuseoftwodistinctdeeplearningmodels,thefirstofwhich
+establishesthegrid-likelayoutofthetableandthesecondofwhichdeterminesiffurthercellspans
+overmanyrowsorcolumnsarepossible.
+AnotherefforttosegmenttabularstructuresistheReS2TIMarticlebyWXue[134]whichde-
+scribes the reconstruction of syntactic structures from the table. Regressing the coordinates for
+eachcellisthismodel’smainobjective.Anetworkthatcanidentifytheneighborsofeachcellin
+atableisinitiallybuiltusingthenewtechnique.Inthestudy,adistance-basedweightingsystem
+isgiventhatwillassistthenetworkinovercomingthetraining-relatedclassimbalanceproblem.
+Toidentifyrowsandcolumnsintables,KAHashmi[38]suggestedaguidedtechniquefortable
+structureidentification.Thelocalizationofrowsandcolumnsmaybemadebetter,accordingto
+this study, by using an anchor optimization approach. The boundaries of rows and columns are
+detectedintheirproposedworkusingMaskR-CNNandoptimizedanchors.
+Another study by Y Zou [147] called for the development of an image-based table structure
+identification technique using FCNs. the shown work divides a table’s rows, columns, and cells.
+Allofthetablecomponents’estimatedboundsareenhancedusingconnectedcomponentanalysis.
+Based on the placement of the row and column separators, row and column numbers are then
+allocatedforeachcell.Inaddition,specialalgorithmsareusedtooptimizecellularborders.XShen
+[114]suggestedtwomodules,referredtoasRowsAggregated(RA)andColumnsAggregated
+(CA).First,toproducearoughforecastfortherowsandcolumnsandaddresstheissueofhigh
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:24 M.Kasemetal.
+Table5. AComparisonoftheBenefitsandDrawbacksofSeveralDeepLearning-based
+TableStructureRecognitionMethods
+Literature Method Benefits Drawbacks
+Usesthegeometricpos- limitationisinmarkingcolumns
+Norelianceoncomplexlayoutanalysis
+itionofwords+Aneu- boundariesduetovariationsin
+SFRashid[104] Mechanism.Canbeusedonthediverseset
+ralnetworkmodel thenumberofwordsineach
+ofdocumentswithdifferentlayouts.
+(autoMLP) column.
+Encodingofspatialinter-
+(1)Recognitionforsingle-tableandmulti-
+relationsbetweenthese Tableswithfewcolumnsand
+tablespreadsheets.(2)Norelianceonany
+EKoci[62] regionsusingagraphrep- emptycellsarenothandled
+assumptionswithwhatregardsthearran-
+resentation,aswellas well.
+gementoftables.
+rulesandheuristics
+(1)Theuseofdeformableconvolutioncan Thetablesintheproposed
+deformableCNN handlevarioustabularstructures.(2)rel- approachwon’toperateco-
+SASiddiqui[115]
++FasterR-CNN easedanewdatasetthatcontainedtable rrectlyiftheyhavearowa-
+structuredata. ndcolumnspan.
+(1)Additionalpost-processingp-
+rocessesarenecessarywhenro-
+Thecomplexityofthetaskofidentifyingt-
+wsorcolumnsareexcessively
+SASiddiqui[116] FullyCNNs ablestructuresisreducedbytheproposed
+fragmented.(2)Thetechniqueis
+predictiontilingapproach.
+basedonthetabularstructures’
+consistencyassumption.
+(1)Thisarticlealsopresentsaunique,memory-
+Thepubliclyaccessibletable
+efficienttrainingstrategybasedonMonteCa-
+SRQasim[99] GraphNN+CNN datasetsarenotusedtotest
+rlo.(2)Thesuggestedapproachmakesuseof
+thesystem.
+bothtextualandspatialcharacteristics.
+Forthecellrelationshipnetwork,theclass
+GraphNN+weights Whendealingwithsparsetab-
+WXue[134] imbalanceissueissolvedusingthedistance-
+dependingondistance les,theapproachisinsecure.
+basedweightingmethod.
+Thepost-processingheuristics
+DilatedConvolutions Thetechniqueiseffectivewithbothscanned
+CTensmeyer[124] determinehowthemergingp-
++FullyCNN andPDFdocumentimages.
+ortionofthemethodworks.
+Pre-processingproceduresincluding
+ThereducedreceptivefieldofCNNsissolved binarization,noisereduction,and
+SAKhan[57] RNN
+bythebi-directionalGRU. morphologicalmodificationarene-
+cessary.
+(1)Themethodmayhaveproblems
+whendealingwithbordercond-
+(1)Itisnotconstrainedtorigidtabularlay-
+itions.(2)Thereisasmallamount
+GraphNeuralNetworks outsintermsofsinglerows,columnsorpr-
+PRiba[106] oftrainingdataintheRVL-CDIP
+approach esenceofrulelines.(2)Themodelislangua-
+datasetandF1,PrecisionandRe-
+geindependent.
+callmetricsarelowerthanother
+methods.
+(1)Intheworkthatisgiven,issueswithend- Theotherpubliclyaccessible
+to-endtablerecognitionareexamined.(2)Mad tablerecognitiondatasetsarenot
+YDeng[16] Encoderdecodernet
+-eacontributionwithyetanothersizabledata usedtoassessthesuggestedbase-
+-setintheareaoftablecomprehension. linetechnique.
+TheaccuracyofGEdependson
+Graphmodel+Appl- thenumberofedges.Specifica-
+Requireslittletonoinvolvementofdomain
+EKoci[64] icationofgenetic-based lly,wedeterminedthatGEach-
+experts.
+approaches ievesanaccuracyofonly19%
+formulti-tablegraphs.
+(1)Firstattemptatcombiningasinglesolution
+tohandleboththeproblemoftabledetection Thisapproachonlyfunctionson
+Networkswithfully
+SSPaliwal[94] andstructurerecognition.(2)Acomprehensive columndetectionwhenusedfor
+convolutions
+methodforstructurerecognitionanddetection tablestructureextraction.
+indocumentpictures.
+CascademaskReg-
+Tableswith/outrulinglin-
+ionbasedCNNHigh- Directregressionoccursatcellularbound-
+DPrasad[97] esmustundergofurther
+ResolutionNetwork- ariesusinganend-to-endmethod.
+post-processing.
+basedmodel
+(1)Anadditionalalignmentlossissugges-
+MaskR-CNN+ tedforprecisecelldetection.(2)Atrain-
+Whencellsareempty,the
+SRaja[101] ResNet-101based abletop-downforcellidentificationand
+strategyisweak.
+Net bottom-upforstructurerecognitioncoll-
+ectionisproposed.
+errortolerance,featureslicing,andtilingareapplied.Second,theattentionmapsofthechannels
+are computed to further obtain the row and column information. In order to complete the rows
+segmentationandcolumnssegmentation,theauthorsemployRAandCAtoconstructasemantic
+segmentationnetworktermedtheRowsandColumnsAggregatedNetwork(RCANet).
+C Ma [78] presents RobusTabNet, a novel method for recognizing the structure of tables and
+detectingtheirbordersfromavarietyofdocumentpictures.TheauthorssuggestusingCornerNet
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:25
+Table6. AComparisonoftheBenefitsandDrawbacksofSeveralDeepLearning-basedTSR
+Methods(ContinueTable5)
+Literature Method Benefits Drawbacks
+(1)Assumesthatthecoordinates
+cells’boundingboxes
+Onlyutilizesvisualfeatureswithoutanymeta- ofcellsinthetableareknown.
+BXiao[131] +conditionalattention
+data. (2)Difficultieswithtableswith-
+network
+outborders.
+Toprovidecomparisonfindings,
+(1)Usinglinkedcomponentanalysisenhances
+asmallnumberofpost-process-
+YZou[147] FullyCNNs theoutcomes.(2)Inatable,cellsaresegmen-
+ingproceduresutilizingspecific
+tedinadditiontotherowsandcolumns.
+algorithmsarenecessary.
+Dualdecoderwith (1)Toassesstablerecognitiontechniques,the Thetechniquecannotbereadily
+XZhong[146] attention-basedenc- methodologyoffersauniqueevaluationmetric comparedtootherstate-of-the-
+oding calledTEDS.(2)releasedahugetabledataset. arttechniques.
+Utilizinganoptimi- Thisstudyreliesonthepre
+Networksofregionproposalsconvergemo-
+zationtechniquefor liminarypre-processingphase
+KAHashmi[38] requicklyandeffectivelythankstooptim-
+anchors+MaskR- ofclusteringthegroundtruth
+izedanchoring.
+CNN tofindappropriateanchors.
+CharacterRegionAwareness
+Abottom-upmethod,whichemphasizesthat
+forTextDetection(CRAFT)
+thetablestructureisformedbyrelativepos- Cannothandlespreadingrows
+AZucker[148] andDensity-BasedSpatial
+itionsoftextcells,andnotbyinherentbou- orcolumnswell.
+ClusteringofApplications
+ndaries.
+withNoise(DBSCAN)
+Anadditionalinnovativecluster-basedtech Accuratelyclassifyingatable
+Methodforobject
+XZheng[145] niquecombinedwithahierarchicalnetwork isaprerequisiteforfinalcell
+detectinggenerally
+todetecttabularforms. structureidentification.
+AcombinationofFCN+RoI-
+Directlyoperatesontableimageswithno Oversegmentstableswhenspace
+Align+thepretrainedBERT
+ZZhang[143] dependencyonmeta-information,canpro- betweencellsislarge,doesn’t
+model+
+cesssimpleandcomplextables. handlemergedcellswell.
+GRUdecoder
+(1)Supportthemostfrequentta-
+bleformatsonly.Relianceonthe
+Rule-basedalgorithms+ (1)Approachallowsprocessingimagesand presenceofpredefinedkeywords.
+MNamysl[86] graph-basedtableinter- digitaldocuments.(2)Processingstepscan (2)Pronetotheerrorspropagated
+pretationmethod beadaptedseparately. fromtheupstreamcomponents
+ofsystem.(3)Focusontheta-
+bleswithrulings.
+End-to-endneuralnetwork (1)Handlesdifferentlanguageswithoutbeing
+ANassar[88] +CNNBackbone+tran- trainedonthem.(2)Predictstablesstructure WorkwithPDFdocuments.
+sformerbasedlayers andboundingboxesforthetablecontent.
+spatialassociations+dyna- Recognizingcomplextablestructureshaving UsesOCRtoreadwordsfrom
+AJain[50]
+micprogrammingtechniques multi-spanrows/columnsandmissingcells. imagesNotlanguageagnostic.
+Failsforverysparsetableswh-
+SRaja[102] objectdetection Betterdetectionofemptycells.
+eremostofthecellsareempty.
+Simplifiesquestion-answeringbydirectly Limitedscopebeyondtable-rel-
+predictingdenotationsfromtables,outper- atedtasks,requiressubstantial
+TabularPre-trainedLang-
+JHerzig[42] formingtraditionalmethodsinaccuracy, computationalresources,and
+uageModel
+andshowcasingefficienttransferlearning dependsheavilyonthequality
+capabilities. ofpre-trainingdata.
+(1)Computationallydemanding.
+(1)HandlesbothnativePDFsandscannedim- (2)Accuracyhingesonthequa-
+WeakSupervision+
+SXRao12[103] ages.(2)ProvidesTableAnnotatorandExcel- lityoftrainingdata,impacting
+MaskR-CNN
+Annotator,fosteringcollaborativeresearch. performanceifdataisnoisyor
+limited.
+(1)Flexibleandadaptabletovariousdocument
+heuristic-basedstructurere- Mayrequireadjustmentsfor
+layouts.(2)HandlesbothimageandPDFform-
+MNamysł[87] cognition,andgraph-based unconventionallayoutsorfor-
+ats(3)Effectivewhenextractingspecificdata
+semanticinterpretation mats.
+fromchosentablecolumns.
+ReliesheavilyonspecificHT-
+WSTabNet(aweaklysup- (1)Achievestop-tieraccuracyonbenchmark
+MLannotations,limitingapplic-
+NTLy[77] ervisedtablerecognition datasets(2)Simplifiestraining,enhancing
+abilitytodatasetswithoutsuch
+model) modelefficiency.
+annotations.
+(1)Accuratelydetectstablesandrecognizes
+self-supervisedimageclass- structures,demonstratedthroughevaluations Requiressignificantcomputat-
+AGhoshChowdhury[27]
+ifier+pix2pixGAN onmultipledatasets.(2)Reducesdependency ionalresources.
+onmanualannotations.
+as a new region proposal network to produce higher-quality table proposals for Faster R-CNN,
+whichhasgreatlyincreasedthelocalizationaccuracyofFasterR-CNNfortableidentification.by
+utilizingonlytheminimalResNet-18backbonenetwork.Additionally,theauthorssuggestabrand-
+newsplit-and-mergeapproachforrecognizingtablestructures.Inthismethod,eachdetectedtable
+is divided into a grid of cells using a novel spatial CNN separation line prediction module, and
+thenaGridCNNcellmergingmoduleisusedtorecoverthespanningcells.Theirtablestructure
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:26 M.Kasemetal.
+recognizercanaccuratelyidentifytableswithsignificantblankareasandgeometricallydeformed
+(evencurved)tablesbecausethespatialCNNmodulecanefficientlytransmitcontextualinforma-
+tionthroughoutthewholetablepicture.
+A Jain [50] suggests training a deep network to recognize the spatial relationships between
+variouswordpairsincludedinthetablepictureinordertodecipherthetablestructure.Theauthors
+offeranend-to-endpipelinecalledTSR-DSAW:TSRthroughDeepSpatialAssociationofWords,
+whichgeneratesadigitalrepresentationofatablepictureinastructuredformatlikeHTML.The
+suggestedtechniquestartsbyutilizingatext-detectionnetwork,suchasCRAFT,toidentifyevery
+word in the input table picture. Next, using dynamic programming, word pairings are created.
+Theseword pairings are underlined in each individual image and then given to a DenseNet-121
+classifierthathasbeentrainedtorecognizespatialcorrelationslikesame-row,same-column,same-
+cell,ornone.Finally,Theauthorsapplypost-processingtotheclassifieroutputinordertoproduce
+theHTMLtablestructure.
+SX Rao12 [103] developed TableParser, a system adept at parsing tables in native PDFs and
+scanned images with high precision. They emphasized the significance of parsing table struc-
+turesandextractingboundingcontentfromvariousformatssuchasPDFs,images,spreadsheets,
+and CSVs. The study highlighted the efficacy of domain adaptation techniques in developing
+TableParser.Additionally,theyintroducedTableAnnotatorandExcelAnnotator,enablingweaksu-
+pervisionandfacilitatingtableparsing.Theseresourcesweresharedwiththeresearchcommunity
+toencouragefurtherexplorationinthisarea.
+NT Ly [77] introduced WSTabNet, a novel weakly supervised model for TR, reducing depen-
+dency on detailed and costly annotations. Their approach utilizes only HTML (or LaTeX) code-
+level annotations of table images. WSTabNet includes components for feature extraction, table
+structuregeneration,andcellcontentprediction.Themodeltrainedend-to-endusingstochastic
+gradientdescent,demonstratedsuperiororcomparableaccuracytostate-of-the-artmethods.To
+support deep learning in TR, the authors curated WikiTableSet, a vast dataset from Wikipedia,
+containing millions of table images in multiple languages, enabling extensive experiments and
+validations.
+GANModels. AGhoshChowdhury[27]exploresself-supervisedlearningindocumentTD,ad-
+dressing the challenges of extracting tabular information from complex documents. They use a
+self-supervised image classifier as a primary backbone for supervised object detection and em-
+ployapix2pixGANsapproachforTSR.Theirproposedmethodsformarobustmachinelearning
+pipelineforTDandstructurerecognition.Evaluationacrossvariousdatasets,includingdomain-
+specificones,demonstratestheeffectivenessoftheseapproachesinextractingtabularinformation
+fromintricatelystructureddocuments.
+Adaptive and Hybrid Models. A Zucker [148] presents CluSTi, a Clustering approach for rec-
+ognizing the Structure of Tables in invoice scanned images, as an effective way. CluSTi makes
+threecontributions.Tobegin,itusesaclusteringapproachtoeliminatehighnoisefromthetable
+pictures.Second,itusesstate-of-the-arttextrecognitiontoextractalltextboxes.Finally,CluSTior-
+ganizesthetextboxesintothecorrectrowsandcolumnsusingahorizontalandverticalclustering
+techniquewithoptimumparameters.ZZhang[143]presentsSplit,Embed,andMerge(SEM)as
+atablestructurerecognizerthatisaccurate.MNamysl[86]presentsaversatileandmodulartable
+extractionapproachinthisresearch.
+EKoci[62]offersanewmethodforidentifyingtablesinspreadsheetsandconstructinglayout
+areasafterdeterminingthelayoutroleofeachcell.Usingagraphmodel,theyexpressthespatial
+interrelationshipsbetweentheseareas.Onthisfoundation,theypresentRemoveandConquer
+(RAC),aTRalgorithmbasedonasetofcarefullyselectedcriteria.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:27
+Usingthepotentialofdeformableconvolutionalnetworks,SASiddiqui[115]proposesaunique
+approachforanalyzingtabularpatternsindocumentpictures.PRiba[106]presentsagraph-based
+technique for recognizing tables in document pictures in this article. also employ the location,
+context,andcontenttypeinsteadoftherawcontent(recognizedtext),thusit’sjustastructural
+perceptiontechniquethat’snotreliantonthelanguageorthequalityofthetextreading.EKoci
+[64]usesgenetic-basedtechniquesforgraphpartitioning,torecognizethesectionsofthegraph
+matching to tables in the sheet. SR Qasim [99] presents a graph network-based architecture for
+table recognition as a superior alternative to typical neural networks. S Raja [101] describes a
+method for recognizing table structure that combines cell detection and interaction modules to
+locatethecellsandforecasttheirrelationshipswithotherdetectedcellsintermsofrowandcol-
+umn. Also, structural limitations to the loss function for cell identification as extra differential
+components. The existing issues with end-to-end table identification were examined by Y Deng
+[16],whoalsohighlightedtheneedforalargerdatasetinthisarea.SRaja[102]suggestsanovel
+object-detection-baseddeepmodelthatistailoredforquickoptimizationandcapturesthenatural
+alignmentsofcellsinsidetables.DenseTRmaystillbeproblematicevenwithprecisecelldetec-
+tionbecausemulti-row/columnspanningcellsmakeitdifficulttocapturelong-rangerow/column
+relationships.Therefore,theauthorsalsoseektoenhancestructurerecognitionbydetermininga
+uniquerectilineargraph-basedformulation.Theauthoremphasizestherelevanceofemptycells
+in a table from a semantics standpoint by introducing a novel loss function designed to capture
+thenaturalalignmentofcellswithinacelldetectionnetwork.Additionally,theyproposedagraph-
+basedapproachtoestablishconnectionsbetweentheidentifiedcells,enablingamorecomprehen-
+siveunderstandingoftheirrelationships.Theauthorsrecommendamodificationtoawell-liked
+assessmentcriteriontotakethesecellsintoconsideration.Tostimulatefreshperspectivesonthe
+issue,thenprovideamoderatelylargeassessmentdatasetwithannotationsthataremodeledafter
+humancognition.
+B Xiao [131] postulates that a complex table structure may be represented by a graph, where
+theverticesandedgesstandinforindividualcellsandtheconnectionsbetweenthem.Then,the
+authorsdesignaconditionalattentionnetworkandcharacterizethetablestructureidentification
+issueasacellassociationclassificationproblem(CATT-Net).
+HLi[68]formulatestheissueasacellrelationextractionchallengeandprovidesT2,acutting-
+edgetwo-phasemethodthatsuccessfullyextractstablestructuresfromdigitallypreservedtexts.
+T2offersabroadideaknownasaprimeconnectionthataccuratelyrepresentsthedirectrelation-
+ships between cells. To find complicated table structures, it also builds an alignment graph and
+usesamessage-passingnetwork.
+ZChi[14]introducedGraphTSR,anovelgraphneuralnetworkdesignedforrecognizingintri-
+catetablestructureswithinPDFfiles.Theirapproach,GraphTSR,utilizestablecellsasinputand
+predictsrelationshipsamongthesecellstounderstandthetablelayoutaccurately,evenincomplex
+scenariosinvolvingspanningcellsthatoccupymultiplecolumnsorrows.
+MNamysł[87]developedanadvancedtableextractionsystemtoextractquantitativedatafrom
+documentswithdiverselayouts.Theirhybridapproachintegratesadeeplearning-basedTDmod-
+ule,heuristic-basedstructurerecognition,andgraph-basedsemanticinterpretation.Thismodular
+systemhandlesbothimageformatandPDFfiles,outperformingbaselinemethodsandachieving
+resultscomparabletostate-of-the-arttechniques.Additionally,thesystemdemonstrateshighper-
+formance,especiallywhenextractingtargetedinformationfromspecifictablecolumns.
+NLP models. J Herzig[42] introduced TAPAS, a novel method for answering natural language
+questionsovertables.Unliketraditionalsemanticparsingapproaches,TAPASavoidsgenerating
+complexlogicalforms,insteadpredictinganswersdirectlyfromweaksupervisionintheformof
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:28 M.Kasemetal.
+denotations.Themodeloperatesbyselectingrelevanttablecellsandapplyingaggregationopera-
+tors.TAPASextendsBERT’sarchitecturetoencodetablesandistrainedfromajointpre-trainingof
+textsegmentsandWikipediatables.Inevaluationsacrossthreesemanticparsingdatasets,TAPAS
+outperformedormatchedtheaccuracyoftraditionalsemanticparsingmodels,achievingsignifi-
+cantimprovementsinquestion-answeringaccuracy,particularlyontheSQAdataset.Importantly,
+itachievedthiswhileutilizingasimplermodelarchitecture.
+5.5 DiscussiononTSR
+TSR in DIs is pivotal for information retrieval and data digitization, particularly in documents
+thataredensewithtabulardata.Recentadvancementsindeeplearninghavepavedthewayfor
+amultitudeofmodelsandalgorithmsdesignedtotacklethischallenge.Thisdiscussionoffersan
+overviewandinsightintothekeymethodsandtheirrespectivemeritsanddrawbacks.
+At the heart of TR lies the problem of understanding spatial relationships between various
+elements in a document, be they textual or graphical. Most contemporary approaches, such as
+CluSTi[148]andSEM[143],focusoneffectivelysegmentingthetable,recognizingitsstructure,
+andthenextractingdatafromit.Theuseofclusteringandembeddingtechniquesshowcasesthe
+shifttowardsunsupervisedandsemi-supervisedmethodologies,reducingtheneedforexhaustive
+manualannotations.
+Models like TableNet [94] and ReS2TIM [134] highlight the interconnected nature of TD and
+structurerecognition,arguingthataholisticviewofbothprocessescanimproveaccuracy.Such
+anintegratedapproachalsoallowsthesemodelstobemoreflexibleandadaptabletovariedtable
+structures.
+Atrendnoticeableintherecentliteratureisthedrifttowardsmorecontext-awaremodels.These
+models,suchastheonesproposedbySASiddiqui[116]andSAKhan[57],emphasizeunderstand-
+ingtheunderlyingcontextandcontent,movingawayfrompurelystructuralanalysis.Thisshift
+providestwosignificantadvantages:languageindependenceandrobustnessagainstvaryingtext
+quality,ashighlightedbyPRiba[106].
+Transformers,originallydesignedforNLPtasks,havemadeanotableentranceintotheTRdo-
+mainaswell.Nassar’sTableFormer[88]exemplifiestheadaptabilityoftransformer-basedarchi-
+tecturesforspatialtasks.Giventheircapabilitytocapturelong-rangedependencies,transformers
+areparticularlysuitedforTR,especiallywhendealingwithcomplexstructures.
+TheaspectofgranularityinTRcannotbeoverlooked.Whilesomemodelsstriveforamacro-
+level understanding, identifying tables’ boundaries and general layout, others delve into micro-
+leveldetails.Thesemodels,suchastheoneproposedbyRaja[102],emphasizedetectingindividual
+cells and their inter-relationships, which is especially crucial for tables with multi-row/column
+spanningcells.
+Datasetsplayanundeniableroleintheadvancementofanymachinelearningtask.Theneedfor
+extensiveanddiversedatasetsforTRhasbeenaccentuatedbyYDeng[16].Recentefforts,suchas
+theWikiTableSetintroducedbyNTLy[77],catertothisdemand,providingrichtrainingmaterial
+inmultiplelanguages.
+A noteworthy approach to the challenge of TR is self-supervised learning, as advocated by A
+GhoshChowdhury[27].Thismethod’seleganceliesinreducingthedependencyonlabeleddata,
+whichisoftenasignificantbottleneckfordeeplearningprojects.
+In summary, TSR has witnessed a paradigm shift in the past few years. From heuristic-based
+methods to advanced deep learning architectures, the field has evolved rapidly. Each method
+has its unique strengths, catering to different challenges within TR. Future advancements may
+well see a fusion of these techniques, aiming for a universal model adept at handling any table
+structureinDIs.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:29
+5.6 CaseStudyAnalysis:EvaluatingMethodologiesinTSR
+5.6.1 Introduction to Case Study Analysis. Concrete case studies provide invaluable insights
+intothepracticalapplication,challenges,andbenefitsofTSRmethodologies.Thisanalysisaims
+at bridging the gap between theoretical research and real-world application, offering a deeper
+understandingofhowthesemethodologiesperformundervariousconditions.
+5.6.2 SelectionCriteriaforCaseStudies. Thecasestudieswereselectedbasedonseveralcriteria:
+thecomplexityofthetablestructures,thediversityofthedocumentformats(includingscientific
+articles, financial reports, and medical records), and the unique challenges each case presented.
+ThesecriteriaensureabroadperspectiveontheapplicabilityandperformanceofTSRmethods.
+5.6.3 CaseStudy1:FinancialReportAnalysis. Thefirstcasestudyfocusedonautomatingdata
+extraction from financial tables in multinational corporation reports to improve the efficiency
+of quarterly financial analyses. Challenges included variable table formats and the precision re-
+quired for fine-grained numerical data. To overcome these, the study used a custom version of
+theTableNetdeeplearningmodel,enhancedwithspecializedOCRforbetternumericalrecogni-
+tionandfine-tunedonfinancialtables.Despitethehighaccuracyachievedindataextraction,the
+needfordetailedfine-tuningandpreprocessingunderscoredthemodel’slimitationsinhandling
+diversetableswithoutspecificadjustments.ThisadaptationofTableNetsignificantlystreamlined
+thedataextractionportionoffinancialanalysis,markingasubstantialsteptowardautomatingand
+enhancingfinancialreportprocessing.Thesuccessofthisapproachopensavenuesforapplying
+similarmethodologiesacrossdifferentsectorsrequiringdetaileddataextraction.Furthermore,it
+underscoresthepotentialforAItotransformtraditionalbusinessprocesses,makingthemmore
+efficientandlessreliantonmanuallabor.
+5.6.4 CaseStudy2:MedicalRecordsExtraction. Thecasestudyaimedatenhancingdigitization
+accuracyofpatientdatafromscannedmedicalrecordsintoahospital’selectronicsystem,utilizing
+FasterR-CNNforTDandanLSTM-basedmodelforrecognizingstructuresdespitepoorscanqual-
+ityandvariedlayouts.Keychallengeswerelow-qualityscans,handwrittennotes,andmaintaining
+data privacy and security. Solutions included advanced denoising, handwriting recognition, and
+trainingonasecure,anonymizedmedicaldataset.Thisapproachimproveddigitizationaccuracy
+and reduced manual errors, though its scalability was limited by the need for extensive prepro-
+cessing and a secure training setup. The hybrid deep learning technique significantly enhanced
+theefficiencyandaccuracyofconvertingmedicalrecordsintodigitalform,aidingbetterpatient
+datamanagementandcare.
+5.6.5 Comparative Analysis and Lessons Learned. The case studies illustrate the potential of
+deeplearningmethodologiestotransformTSRacrossdifferentdomains.However,theyalsoun-
+derscoretheimportanceofdomain-specificadaptations,thechallengesposedbydiversedocument
+formats,andthecriticalroleofpreprocessingsteps.Lessonslearnedincludetheneedfortargeted
+datasetpreparation,thepotentialforhybridmodelstoaddresscomplexrecognitiontasks,andthe
+importanceofprivacyconsiderationsinmedicalapplications.Theseinsightscontributetoadvanc-
+ingthefieldofTSR,offeringguidanceforfutureresearchandapplication.
+6 EXPERIMENTSRESULTS
+6.1 TDResults
+TDiscrucialforanalyzingthestructureofdocumentsbyidentifyingtablesandtheirboundaries
+withinimages.WeconductacomparativestudyondifferentTDtechniquesusingbenchmarkslike
+ICDARandUNLV,assessingthemwiththeIOUmetricdetailedinTables7and8.Theevolution
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:30 M.Kasemetal.
+Table7. TD
+IoU
+Approach Dataset Method Year
+50% 55% 60% 65% 70% 75% 80% 85% 90% 95% 50%:95%
+Precision - - - - - - - - 86.00 - -
+Tesseract[111] UNLV Tab-stopDetection Recall - - - - - - - - 79.00 - - 2010
+F1-Score - - - - - - - - 82.35 - -
+Precision - - - - - - - - 82.30 - -
+AGilani[28] UNLV FasterR-CNN Recall - - - - - - - - 90.67 - - 2017
+F1-Score - - - - - - - - 86.29 - -
+Precision 78.6 - - - - - - - - - -
+DeformableCNN
+SASiddiqui[117] UNLV Recall 74.9 - - - - - - - - - - 2018
++FasterR-CNN
+F1-Score 76.7 - - - - - - - - - -
+Precision - - 93.0 - 92.0 - 83.0 - 48.0 - -
+ÁCasado-García[11] UNLV YOLO Recall - - 95.0 - 94.0 - 85.0 - 49.0 - - 2020
+F1-Score - - 94.0 - 93.0 - 84.0 - 49.0 - -
+Precision 96.0 - 94.4 - 91.5 - 82.6 - 61.8 - -
+Cascademask
+MAgarwal[5] UNLV Recall 77.0 - 75.8 - 73.4 - 66.3 - 49.6 - - 2018
+R-CNN
+F1-Score 86.5 - 85.1 - 82.5 - 74.4 - 55.7 - -
+Precision 97.40 - - - - - - - - - -
+SSchreiber[109] ICDAR2013 MaskR-CNN Recall 96.15 - - - - - - - - - - 2017
+F1-Score 96.77 - - - - - - - - - -
+Precision 99.6 - - - - - - - - - -
+SASiddiqui[115] ICDAR2013 DeformableCNN Recall 99.6 - - - - - - - - - - 2018
+F1-Score 99.6 - - - - - - - - - -
+Precision 97.5 - - - - - - - - - -
+SemanticImage
+IKavasidis[56] ICDAR2013 Recall 98.1 - - - - - - - - - - 2019
+Segmentation
+F1-Score 97.8 - - - - - - - - - -
+Precision 100 - 98.6 - - - 89.2 - - - -
+YHuang[47] ICDAR2013 YOLO Recall 94.9 - 93.6 - - - 84.6 - - - - 2019
+F1-Score 97.3 - 96.1 - - - 86.8 - - - -
+Precision 96.97 - - - - - - - - - -
+SSPaliwal[94] ICDAR2013 fullyconvolutions Recall 96.28 - - - - - - - - - - 2019
+F1-Score 96.62 - - - - - - - - - -
+Precision - - 70.0 - 70.0 - 70.0 - 47.0 - -
+ÁCasado-García[11] ICDAR2013 MaskR-CNN Recall - - 97.0 - 97.0 - 97.0 - 65.0 - - 2020
+F1-Score - - 81.0 - 81.0 - 81.0 - 54.0 - -
+Precision 100 - - - - - - - - - -
+Cascademask
+DPrasad[97] ICDAR2013 Recall 100 - - - - - - - - - - 2020
+R-CNNHRNet
+F1-Score 100 - - - - - - - - - -
+Precision 96.58 - - - - - - - - - -
+MLi[70] ICDAR2013 FasterR-CNN Recall 95.94 - - - - - - - - - - 2020
+F1-Score 96.25 - - - - - - - - - -
+Precision 100.0 - 100.0 - 98.7 - 94.2 - 66.0 - -
+Cascademask
+MAgarwal[5] ICDAR2013 Recall 100.0 - 100.0 - 98.7 - 94.2 - 66.0 - - 2021
+R-CNN
+F1-Score 100.0 - 100.0 - 98.7 - 94.2 - 66.0 - -
+Precision 98.97 - - - - - - - - - -
+objectdetection
+XZheng[145] ICDAR2013 Recall 99.77 - - - - - - - - - - 2021
+networks
+F1-Score 99.31 - - - - - - - - - -
+Precision - - 96.5 - - - 96.7 - - - -
+SASiddiqui[115] ICDAR2017 DeformableCNN Recall - - 97.1 - - - 93.7 - - - - 2018
+F1-Score - - 96.8 - - - 95.2 - - - -
+Precision - - 97.8 - - - 97.5 - - - -
+YHuang[47] ICDAR2017 YOLO Recall - - 97.2 - - - 96.8 - - - - 2019
+F1-Score - - 97.5 - - - 97.1 - - - -
+Precision 88.8 88.7 88.7 88.6 88.5 88.4 87.2 85.8 82.8 73.2 81.0
+Abdallah[1] TNCR HRNetsCascadeMaskR-CNN Recall 97.0 97.0 97.0 96.7 96.7 96.5 95.5 94.2 91.8 83.6 90.3 2022
+F1-Score 92.7 92.6 92.6 92.4 92.4 92.2 91.1 89.8 87.0 78.0 90.3
+Precision 85.9 85.7 85.7 85.7 85.2 84.8 83.3 81.6 76.4 58.5 81.6
+Abdallah[1] TNCR HRNets-MaskR-CNN Recall 97.1 96.9 96.9 96.9 96.5 96.0 94.7 93.4 88.9 74.4 93.4 2022
+F1-Score 91.1 90.9 90.9 90.9 90.4 90.0 88.6 87.1 82.1 65.4 87.1
+Precision 88.5 88.5 88.3 88.2 88.1 87.5 86.2 84.9 80.8 69.1 78.8
+Abdallah[1] TNCR HRNets-HTC Recall 98.7 98.7 98.4 98.4 98.2 97.6 96.6 95.4 91.5 81.6 90.1 2022
+F1-Score 93.3 93.3 93.0 93.0 92.8 92.2 91.1 89.8 85.8 74.8 84.0
+Precision 86.7 86.5 86.3 85.9 85.3 84.5 82.7 80.6 75.0 55.6 71.1
+Abdallah[1] TNCR HRNets-FasterR-CNN Recall 97.2 97.0 96.8 96.4 95.9 95.2 94.0 91.5 86.9 71.1 84.2 2022
+F1-Score 91.6 91.4 91.2 90.8 90.2 89.5* 87.9 85.7* 80.5* 62.4 77.0
+Precision 89.3 89.1 89.1 89.1 88.8 88.0 87.1 85.4 83.1 70.5 79.9
+Abdallah[1] TNCR HRNets-CascadeR-CNN Recall 96.7 96.5 96.5 96.4 96.1 95.6 94.8 93.5 91.4 81.1 88.9 2022
+F1-Score 92.8 92.6 92.6 92.6 92.3 91.6 90.7 89.2 87.0 75.4 84.1
+Precision 77.8 77.7 77.4 76.9 75.9 74.9 71.3 65.1 47.7 40.7 43.4
+Abdallah[1] TNCR MaskR-CNN-ResNeXt-101 Recall 97.5 97.4 96.8 96.4 95.2 94.1 91.3 85.6 72.5 69.5 62.6 2022
+F1-Score 86.5 86.4 86.0 85.5 84.4 83.4 80.0 73.9* 57.5 51.3 51.2
+Precision 88.4 88.4 88.0 87.9 87.6 87.1 85.6 83.3 78.0 58.1 73.3
+Abdallah[1] TNCR FasterR-CNN-ResNeXt-101 Recall 97.2 97.0 96.9 96.7 96.5 96.1 95.0 93.1 88.4 72.4 84.8 2022
+F1-Score 92.5 92.5 92.2 92.0 91.8 91.3 90.0 87.9 82.8 64.4 78.6
+frombasicstrategieslikeTesseract’stab-stopdetectiontoadvancedCNNsliketheFasterR-CNN
+byAGilani[28]showssignificantimprovementsinaccuracy.Recentmethodshaveimprovedpre-
+cision and recall across various IOU thresholds, though challenges remain at higher thresholds
+indicatingtheneedforfurtherrefinement.Thecomparisonsuggeststhatnewermethods,particu-
+larlythoseleveragingCNNs,offerpromisingadvancementsindetectingcomplextablestructures
+acrossdiversedatasets.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:31
+Table8. TD(ContinueTable7)
+IoU
+Approach Dataset Method Year
+50% 55% 60% 65% 70% 75% 80% 85% 90% 95% 50%:95%
+Precision - - 94.4 - - - 90.3 - - - -
+YLi[72] ICDAR2017 GANs Recall - - 94.4 - - - 90.3 - - - - 2019
+F1-Score - - 94.4 - - - 90.3 - - - -
+Precision - - - - - - 94.3 - - - -
+NSun[122] ICDAR2017 FasterR-CNN Recall - - - - - - 95.6 - - - - 2019
+F1-Score - - - - - - 94.9 - - - -
+Precision - - 92.0 - 92.0 - 89.0 - 79.0 - -
+ÁCasado-García[11] ICDAR2017 RetinaNet Recall - - 87.0 - 87.0 - 84.0 - 75.0 - - 2020
+F1-Score - - 89.0 - 89.0 - 86.0 - 77.0 - -
+Precision - - 96.9 - - - - - - - -
+Cascademask
+MAgarwal[5] ICDAR2017 Recall - - 89.9 - - - - - - - - 2021
+R-CNN
+F1-Score - - 93.4 - - - - - - - -
+Precision - - - - - - - - - - -
+Cascademask
+DPrasad[97] ICDAR2019 Recall - - - - - - - - - - - 2020
+R-CNNHRNet
+F1-Score - - 94.3 - 93.4 - 92.5 - 90.1 - -
+Precision 98.7 - 98.0 - 97.7 - 97.1 - 93.4 - -
+Cascademask
+MAgarwal[5] ICDAR2019 Recall 94.6 - 93.9 - 93.6 - 93.0 - 89.5 - - 2021
+R-CNN
+F1-Score 96.6 - 95.9 - 95.6 - 95.0 - 91.5 - -
+Precision - - - - - - 96.0 - 90.0 - -
+objectdetection
+XZheng[145] ICDAR2019 Recall - - - - - - 95.0 - 89.0 - - 2021
+networks
+F1-Score - - - - - - 94.0 - 94.0 - -
+Precision - - - - - - - - - - -
+fullyconvolutional
+DDNguyen[89] ICDAR2019 Recall - - - - - - - - - - - 2022
+network
+F1-Score - - 92.8 - 91.7 - 91.0 - 87.4 - -
+Precision - - - - - - - - - - -
+VanillaTransformer
+JLi[69] ICDAR2019 Recall - - - - - - - - - - - 2022
+architecture
+F1-Score - - 97.89 - 97.22 - 97.00 - 93.88 - -
+Precision 84.9 - - - - - - - - - -
+SASiddiqui[117] Mormot DeformableCNN Recall 94.6 - - - - - - - - - - 2018
+F1-Score 89.5 - - - - - - - - - -
+Precision 93.4 - 99.5 - - - - - - - -
+Cascademask
+MAgarwal[5] TableBank Recall 92.4 - 97.8 - - - - - - - - 2021
+R-CNN
+F1-Score 92.9 - 98.6 - - - - - - - -
+Precision 15.2 - - - - - - - - - -
+PRiba[106] RVL-CDIP GraphNN Recall 36.5 - - - - - - - - - - 2019
+F1-Score 21.5 - - - - - - - - - -
+Precision 30.80 - - - - - - - - - -
+PRiba[107] RVL-CDIP GraphNN Recall 25.20 - - - - - - - - - - 2022
+F1-Score 39.60 - - - - - - - - - -
+Precision 30.80 - - - - - - - - - -
+PRiba[107] RVL-CDIP GAT Recall 25.20 - - - - - - - - - - 2022
+F1-Score 39.60 - - - - - - - - - -
+Precision 30.80 - - - - - - - - - -
+PRiba[107] RVL-CDIP GAT Recall 25.20 - - - - - - - - - - 2022
+F1-Score 39.60 - - - - - - - - - -
+Precision - - 98.4 - 98.2 - 97.7 - 95.0 - -
+CMa[78] ICDAR2019 FasterR-CNN Recall - - 94.0 - 93.9 - 93.3 - 90.8 - - 2022
+F1-Score - - 96.1 - 96.0 - 95.4 - 92.9 - -
+Precision - - - - - - - - 99.0 - -
+CMa[78] IIIT-AR-13K FasterR-CNN Recall - - - - - - - - 97.8 - - 2022
+F1-Score - - - - - - - - 98.4 - -
+Precision 85.5 85.4 85.3 84.9 83.9 82.3 80.2 76.4 64.6 26.7 56.1
+Abdallah[1] TNCR DynamicR-CNN Recall 97.8 97.7 97.5 97.1 96.3 94.3 92.5 88.8 79.3 45.1 71.4 2022
+F1-Score 91.2 91.1 90.9 90.5 89.6 87.8 85.9 82.1 71.1 33.5 62.8
+Precision 89.3 89.3 89.0 88.8 87.9 87.6 86.2 82.3 74.7 49.5 69.4
+Abdallah[1] TNCR FasterR-CNN Recall 98.1 97.9 97.7 97.5 96.7 96.3 95.0 92.1 86.1 64.5 81.3 2022
+F1-Score 93.4 93.4 93.1 92.9 92.0 91.7 90.3 86.9 79.9 56.0 74.8
+Precision 90.5 90.3 90.2 89.9 89.3 89.1 88.4 87.6 82.6 69.3 79.9
+Abdallah[1] TNCR CascadeR-CNN Recall 98.5 98.4 98.3 97.9 97.6 97.2 96.5 95.8 91.7 81.1 89.8 2022
+F1-Score 94.3 94.1 94.0 93.7 93.2 92.9 92.2 91.5 86.9 74.7 84.5
+Precision 79.0 78.8 78.2 77.9 77.0 75.9 72.9 69.1 59.6 33.5 56.3
+Abdallah[1] TNCR HRNets-FCOS Recall 98.3 97.8 97.2 96.9 95.9 94.7 91.7 87.8 78.6 54.5 76.4 2022
+F1-Score 87.5 87.2 86.6 86.3 85.4 84.2 81.2 77.3 67.7 41.4 64.8
+Tables7and8delveintothespecificsofvariousTDmethodologiesacrossdifferentdatasets.A
+notableobservationistheemploymentofGANsbyYLi[72]andtheimpressiveperformanceof
+Faster R-CNN by N Sun [122] on the ICDAR2017 dataset. On the ICDAR2017 dataset, Y Li [72]
+used GAN and reported an F1-Score of 90.3% at an IoU of 80% in 2019. On the same dataset, N
+Sun[122]employedtheFasterR-CNNmethod,achievinganF1-Scoreof94.9%atanIoUof80%
+in 2019. Á Casado-García [11] utilized RetinaNetand attainedan F1-Score of 86.0% at an IoU of
+80%in2020.MAgarwal[5],usingtheCascademaskR-CNNapproachontheICDAR2017dataset,
+reporteda93.4%F1-Scoreat60%IoUin2021.OntheICDAR2019dataset,DPrasad[97]employed
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:32 M.Kasemetal.
+the Cascade mask R-CNN HRNet and achieved a 94.3% F1-Score at 60% IoU in 2020. Again, M
+Agarwal [5] on the ICDAR2019 dataset with the Cascade mask R-CNN reported an F1-Score of
+95.0% at 80% IoU in 2021. X Zheng[145] proposed the use of object detection networks for the
+ICDAR2019 dataset and reached a 94.0% F1-Score at 80% and 90% IoU in 2021. DD Nguyen [89]
+adopted a fully convolutional network for the ICDAR2019 dataset and reported an F1-Score of
+91.0%at80%IoUin2022.Meanwhile,JLi[69]implementedtheVanillaTransformerarchitecture
+onthesamedatasetandachievedaremarkableF1-Scoreof97.00%at80%IoUin2022.SASiddiqui
+[117] proposed the use of a Deformable CNN on the Mormot dataset, achieving an F1-Score of
+89.5%at50%IoUin2018.OntheTableBankdataset,MAgarwal[5]employedtheCascademaskR-
+CNNandreporteda98.6%F1-Scoreat55%IoUin2021.OntheRVL-CDIPdataset,PRiba[106,107]
+utilizedaGraphNNin2019and2022,achievingF1-Scoresof21.5%and39.60%,respectively.He
+alsoimplementedtheGraphAttentionNeuralNetworks(GAT)in2022forthesamedataset,
+reportingaconsistentF1-Scoreof39.60%.
+On the TNCR dataset, The Faster R-CNN model has achieved good performance in TD com-
+paredwithCascade-RCNNandCascadeMask-RCNNinmostofthebackbones.Wehavetrained
+theFasterR-CNNmodelwithL1Loss[130]withResnet-50forboundingboxregression.Asshown
+inTables7and8,itachievesanf1-scoreof0.921.Resnet-101backboneachievesthehighestF1score
+over50%to65%,ResNeXt-101-64x4dachievesthehighestF1scoreover70%to95%,andResNeXt-
+101-64x4d achieves the highest F1 score over 50%:95% of 0.786. Resnet-50 backbone with 1× Lr
+schedule achieves the lowest performance over 50% to 60% IoUs. Also, the Resnet-50 backbone
+with L1 Los achieves the lowest performance from 65% to 95% IoUs and also achieves the low-
+estperformanceover50%:95%.HRNetsFasterR-CNNdetectorwithvariousbackbonestructures
+with combinations of Lr Schedule. The HRNetV2p-W18 with 1× Lr Schedule backbone shows a
+lowperformancecomparedwithotherbackbones.itachievesanf1scoreof0.770.Itachieves3.2%
+less than HRNetV2p-W18 with 2× Lr Schedule. HRNetV2p-W40 with 1× Lr Schedule backbone
+achievesbetterperformanceover50%to85%IoUsandHRNetV2p-W40with2×LrScheduleback-
+boneachievesbetterperformanceover 90%and 95% IoUs. HRNetV2p-W18with 2×Lr Schedule
+backboneachievesanf1scoreof0.802over50%:95%.HRNetV2p-W32with1×LrScheduleback-
+bonesharethesameperformanceover50%to60%.
+Also,ontheTNCRdataset,WeimplementedMaskR-CNN[41]touseR-CNNfortableobjects
+inanimageandalsoforperformingobjectsegmentationforeachROI.AsseeninTable7,Mask
+R-CNNshowsgoodperformanceinourdatasetinprecision,recall,andF1scoreforallbackbones.
+Resnet-101backbonehasachievedthehighestF1scoreof0.774over50%:95%andmaintainsthe
+highest F1 score at various IoUs. ResNeXt-101-32x4d achieves the lowest performance over 50%
+to95%IoUsandalsoachievesanf1scoreof0.512over50%:95%.ResNeXt-101-64x4dalsoachieves
+thelowestperformanceatvariousIoUsexceptfor95%IoU.
+ThiscomparativeanalysisunderscoresthedynamicnatureofTDresearch.Frombasicmethods
+tosophisticatedCNNframeworks,thetrajectoryhasbeenmarkedbyinnovationandintegration.
+With continual advancements, the quest for the ideal TD algorithm, one that marries precision
+withrobustnessacrossdiversechallenges,continues.
+6.2 TRResults
+Recognizingstructureddatafromtablesinimagesanddocumentsinvolvesaccuratelyidentifying
+componentslikerowsandheadersacrossdiverseformats.Variousmethodshavebeendeveloped
+toenhancethisrecognition,withevaluationsoftenconductedonthewidely-usedICDARdataset,
+whichincludestableimagesandXML-basedgroundtruthdata.Thesemethodsareassessedbased
+on precision, recall, F1-scores, and the IoU metric, which measures the accuracy of area predic-
+tionscomparedtotheactualdata.TheresearchonTRhasprogressedfromFullyConvolutional
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:33
+Table9. TSR
+IoU
+Approach Dataset Method Year
+50% 55% 60% 65% 70% 75% 80% 85% 90% 95% 50%:95%
+Precision 95.93 - - - - - - - - - -
+SSchreiber[109] ICDAR2013 FullyCNN Recall 87.36 - - - - - - - - - - 2017
+F1-Score 91.44 - - - - - - - - - -
+Precision 93.19 - - - - - - - - - -
+SASiddiqui[115] ICDAR2013 DeformableCNN Recall 93.08 - - - - - - - - - - 2019
+F1-Score 92.98 - - - - - - - - - -
+Precision 92.6 - - - - - - - - - -
+GraphNN+weights
+WXue[134] ICDAR2013 Recall 44.7 - - - - - - - - - - 2019
+dependingondistance
+F1-Score 60.3 - - - - - - - - - -
+Precision 92.15 - - - - - - - - - -
+SSPaliwal[94] ICDAR2013 fullyCNN Recall 89.87 - - - - - - - - - - 2019
+F1-Score 90.98 - - - - - - - - - -
+Precision 96.92 - - - - - - - - - -
+SAKhan[57] ICDAR2013 Bi-directionalRNN Recall 90.12 - - - - - - - - - - 2019
+F1-Score 93.39 - - - - - - - - - -
+Precision 95.8 - - - - - - - - - -
+DilatedConvolutions
+CTensmeyer[124] ICDAR2013 Recall 94.6 - - - - - - - - - - 2019
++FullyCNN
+F1-Score 95.2 - - - - - - - - - -
+Precision 88.5 - - - - - - - - - -
+ZChi[14] ICDAR2013 FullyCNN Recall 86.0 - - - - - - - - - - 2019
+F1-Score 87.2 - - - - - - - - - -
+Precision - - 70.0 - 70.0 - 70.0 - 47.0 - -
+ÁCasado-García[11] ICDAR2013 MaskR-CNN Recall - - 97.0 - 97.0 - 97.0 - 65.0 - - 2020
+F1-Score - - 81.0 - 81.0 - 81.0 - 54.0 - -
+Precision 92.7 - - - - - - - - - -
+SRaja[101] ICDAR2013 ObjectDetectionMethods Recall 91.1 - - - - - - - - - - 2020
+F1-Score 91.9 - - - - - - - - - -
+Precision 95.37 - - - - - - - - - -
+KAHashmi[38] ICDAR2013 ObjectDetectionMethods Recall 95.56 - - - - - - - - - - 2021
+F1-Score 95.46 - - - - - - - - - -
+Precision 93.3 - 93.0 - 80.0 - 63.8 - 29.1 - -
+SRaja[102] ICDAR2013 ObjectDetectionMethods Recall 91.5 - 90.8 - 79.1 - 62.4 - 28.4 - - 2022
+F1-Score 92.4 - 91.9 - 79.5 - 63.1 - 28.7 - -
+Precision - - - - - - - - - - -
+DPrasad[97] ICDAR2019 ObjectDetectionMethods Recall - - - - - - - - - - - 2020
+F1-Score - - 43.8 - 35.4 - 19.0 - 3.6 - -
+Precision - - 18.79 - - - 1.71 - - - -
+YZou[147] ICDAR2019 FullyCNN Recall - - 10.07 - - - 0.92 - - - - 2021
+F1-Score - - 13.11 - - - 1.19 - - - -
+Precision - - - - - - - - - - -
+XZheng[145] ICDAR2019 ObjectDetectionMethods Recall - - - - - - - - - - - 2021
+F1-Score 54.8 - 38.5 - - - - - - - -
+Precision 86.4 - 82.2 - 64.1 - 40.4 - 17.5 - -
+SRaja[102] ICDAR2019 ObjectDetectionMethods Recall 84.2 - 78.7 - 62.5 - 37.6 - 13.8 - - 2022
+F1-Score 85.3 - 80.4 - 63.3 - 38.9 - 15.4 - -
+Precision 86.4 - 84.9 - 73.5 - 55.8 - 17.3 - -
+SRaja[102] UNLV ObjectDetectionMethods Recall 84.2 - 82.8 - 71.1 - 53.2 - 14.8 - - 2022
+F1-Score 85.3 - 83.9 - 72.3 - 54.5 - 16.0 - -
+Precision - - - - - - - - 99.4 - -
+CMa[78] SciTSR SpatialCNN Recall - - - - - - - - 99.1 - - 2022
+F1-Score - - - - - - - - 99.3 - -
+Networks (CNN) to more advanced techniques involving Deformable CNNs, Graph Neural Net-
+works, Bi-directional RNNs, and Object Detection Methods. As shown in Table 9 for instance,
+methodsproposedbySSchreiber[109](2017)andSSPaliwal[94](2019)reliedheavilyonFully
+CNN. In contrast, SA Siddiqui [115] (2019) introduced deformable structures into CNN, and W
+Xue[134](2019)combinedGraphNeuralNetworkswithweightdependenciesbasedondistances.
+Precision,recall,andF1-scorearetheprimarymetricstoevaluateperformance.Forinstance,SA
+Khan[57](2019)achievedanimpressiveprecisionof96.92%ontheICDAR2013datasetusingBi-
+directionalRNNs.However,achievinghighprecisionandrecallsimultaneouslycanbechallenging.
+AsseenbyWXue[134](2019),whiletheprecisionwashighat92.6%,therecallwasconsiderably
+lowat44.7%,reflectingthemethod’sdifficultyindetectingallrelevanttableregions.
+IoUoffersamulti-thresholdevaluation.AsseeninTable9,whilemanystudiesreportedmetrics
+attheIoUof50%,ÁCasado-García[11](2020)providedinsightsintoperformanceacrossawide
+rangeofIoUthresholds,from60%to90%.WhilemoststudiesutilizedtheICDAR2013dataset,re-
+cent works like D Prasad [97] (2020) and Y Zou [147] (2021) have started using the ICDAR2019
+dataset, potentially due to its updated and more challenging set of table images. It’s intriguing
+tonotethediversityinmethods.Forinstance,ÁCasado-García[11](2020)usedMaskR-CNN,a
+methodpredominantlyknownforitsapplicationingeneralobjectdetection.Ontheotherhand,
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:34 M.Kasemetal.
+Table10. OpenSourceCodeforMostoftheStudiesArticlesinTDandTSR
+Article Model Year Framework Link
+ZChi[14] SciTSR 2019 Pytorch https://github.com/Academic-Hammer/SciTSR
+DPrasad[97] CascadeTabNet 2020 Pytorch https://github.com/DevashishPrasad/CascadeTabNet
+ÁCasado-García[11] - 2020 mxnet https://github.com/holms-ur/fine-tuning
+MLi[70] TableBank 2020 Pytorch,Detectron2 https://github.com/doc-analysis/TableBank
+SRaja[101] TabStructNet 2020 tensorflow https://github.com/sachinraja13/TabStructNet.git
+XZhong[146] PubTabNet 2020 - https://github.com/ibm-aur-nlp/PubTabNet
+MAgarwal[5] CDeC-Net 2021 PyTorch https://github.com/mdv3101/CDeCNet
+C Tensmeyer [124] (2019) introduced dilated convolutions into Fully CNN, indicating continu-
+ousinnovationsinnetworkarchitecturesforthetask.TRisadynamicfield,facingchallengesin
+achieving both high precision and recall, particularly at strict IoU thresholds. The diversity and
+complexity of tables in DDs highlight the need for models that can adapt to various structures.
+Despite these challenges, the progress shown in evaluations using the ICDAR dataset suggests
+promisingdirectionsforfutureresearchinthisarea.
+6.3 OpenSourceCode
+Several open-source frameworks for creating generic deep learning models, most of which are
+written in Python, are available online, including TensorFlow, Keras, PyTorch, and MXNet.The
+open-sourceprojectsforTDandstructurerecognitionaresummarizedinTable10.Manyofthe
+authorshavealsomadeopen-sourceimplementationsoftheirproposedmodelsavailable.Tensor-
+FlowandPyTorcharethemostoftenutilizedframeworksintheseopen-sourceprojects.
+7 CONCLUSIONANDFUTUREWORKS
+Inthefieldofdocumentanalysis,tableanalysisisasignificantandextensivelyresearchedprob-
+lem.Thechallengeofinterpretingtableshasbeendramaticallytransformed,andnewstandards
+havebeensetthankstotheuseofdeeplearningideas.Aswesaidinthearticle’smaincontribu-
+tionparagraphintheIntroductionsection,wehaveaddressedseveralcurrentprocessesthathave
+advancedtheprocessofinformationextractionfromtablesindocumentpicturesbyimplement-
+ingdeeplearningconcepts.Wehavediscussedmethodsthatusedeeplearningtodetect,identify,
+andclassifytables.Wehavealsoshownthemostandleastwell-knowntechniquesthathavebeen
+usedtodetectandidentifytables,respectively.allofthedatasetsthatarepubliclyaccessibleand
+their access details have been compiled. On numerous datasets, we have presented a thorough
+performancecomparisonofthemethodologiesthathavebeenaddressed.Onwell-knowndatasets
+thatare freely accessibleto the public, state-of-the-artalgorithms for TD have producedalmost
+flawlessresults.Oncethetabularregionhasbeenidentified,theworkofstructurallysegmenting
+tablesandthenrecognizingthemfollows.
+OnepotentialareaforfutureworkinthefieldofTDusingdeeplearningistheintegrationofad-
+ditionaldocumentstructureinformationintothemodels.Currently,manydeeplearningmethods
+forTDprimarilyrelyonthevisualcuesoftableswithindocuments.However,incorporatingsup-
+plementarydetailsaboutthedocument’sstructure,suchasidentifyingheaderrowsandcolumns,
+couldsignificantlyenhancethemodel’sperformance.
+Anotherpromisingdirectionforfutureresearchinvolvestheexplorationofmoresophisticated
+deeplearningarchitecturestailoredforTDtasks.Forinstance,investigatingtheapplicationofad-
+vancedtechniquessuchasCNNsorRNNsholdpromiseinfurtherenhancingthemodel’saccuracy
+androbustness.
+Furthermore, addressing the challenges posed by variations in table formatting and layout
+is a crucial area for future investigation. Tables exhibit diverse formats, making it essential to
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:35
+developmethodsthatcanrobustlydetecttablesinvariouslayouts.Overcomingthesechallenges
+willundoubtedlyleadtosubstantialimprovementsintheoverallperformanceofTDmodels.
+REFERENCES
+[1] AbdelrahmanAbdallah,AlexanderBerendeyev,IslamNuradin,andDaniyarNurseitov.2022.TNCR:Tablenetdetec-
+tionandclassificationdataset.Neurocomputing(2022),79–97.DOI:https://doi.org/10.1016/j.neucom.2021.11.101
+[2] AbdelrahmanAbdallah,DanielEberharter,ZoePfister,andAdamJatowt.2024.Transformersandlanguagemodels
+informunderstanding:Acomprehensivereviewofscanneddocumentanalysis.arXiv:2403.04080.Retrievedfrom
+https://arxiv.org/abs/2403.04080
+[3] AbdelrahmanAbdallahandAdamJatowt.2023.Generator-retriever-generator:Anovelapproachtoopen-domain
+questionanswering.arXiv:2307.11278.Retrievedfromhttps://arxiv.org/abs/2307.11278
+[4] Abdelrahman Abdallah, Mahmoud Kasem, Mahmoud Abdalla, Mohamed Mahmoud, Mohamed Elkasaby, Yasser
+Elbendary, and Adam Jatowt. 2024. ArabicaQA: A comprehensive dataset for arabic question answering.
+arXiv:2403.17848.Retrievedfromhttps://arxiv.org/abs/2403.17848
+[5] MadhavAgarwal,AjoyMondal,andCVJawahar.2021.Cdec-net:Compositedeformablecascadenetworkfortable
+detectionindocumentimages.InProceedingsofthe202025thInternationalConferenceonPatternRecognition(ICPR).
+IEEE,9491–9498.
+[6] AhmedAlsayat.2023.Customerdecision-makinganalysisbasedonbigsocialdatausingmachinelearning:Acase
+studyofhotelsinmecca.NeuralComputingandApplications35,6(2023),4701–4722.
+[7] SamanArifandFaisalShafait.2018.Tabledetectionindocumentimagesusingforegroundandbackgroundfeatures.
+InProceedingsofthe2018DigitalImageComputing:TechniquesandApplications(DICTA).IEEE,1–8.
+[8] AndersArpteg,BjörnBrinne,LukaCrnkovic-Friis,andJanBosch.2018.Softwareengineeringchallengesofdeep
+learning.InProceedingsofthe201844thEuromicroConferenceonSoftwareEngineeringandAdvancedApplications
+(SEAA).IEEE,50–59.
+[9] YoshuaBengio,AaronCourville,andPascalVincent.2013.Representationlearning:Areviewandnewperspectives.
+IEEETransactionsonPatternAnalysisandMachineIntelligence35,8(2013),1798–1828.
+[10] NicolasCarion,FranciscoMassa,GabrielSynnaeve,NicolasUsunier,AlexanderKirillov,andSergeyZagoruyko.
+2020.End-to-endobjectdetectionwithtransformers.InProceedingsoftheEuropeanConferenceonComputerVision.
+Springer,213–229.
+[11] ÁngelaCasado-García,CésarDomínguez,JónathanHeras,EloyMata,andVicoPascual.2020.Thebenefitsofclose-
+domainfine-tuningfortabledetectionindocumentimages.InProceedingsoftheInternationalWorkshoponDocument
+AnalysisSystems.Springer,199–215.
+[12] FrancescaCesarini,SimoneMarinai,LSarti,andGiovanniSoda.2002.Trainabletablelocationindocumentimages.
+InProceedingsoftheObjectRecognitionSupportedbyUserInteractionforServiceRobots.IEEE,236–240.
+[13] SurekhaChandranandRangacharKasturi.1993.Structuralrecognitionoftabulateddata.InProceedingsofthe2nd
+InternationalConferenceonDocumentAnalysisandRecognition(ICDAR’93).IEEE,516–519.
+[14] ZewenChi,HeyanHuang,Heng-DaXu,HoujinYu,WanxuanYin,andXian-LingMao.2019.Complicatedtable
+structurerecognition.arXiv:1908.04729.Retrievedfromhttps://arxiv.org/abs/1908.04729
+[15] BertrandCoüasnonandAurélieLemaitre.2014.Recognitionoftablesandforms.
+[16] YuntianDeng,DavidRosenberg,andGideonMann.2019.Challengesinend-to-endneuralscientifictablerecognition.
+InProceedingsofthe2019InternationalConferenceonDocumentAnalysisandRecognition(ICDAR).IEEE,894–901.
+[17] HaoyuDong,ShijieLiu,ShiHan,ZhouyuFu,andDongmeiZhang.2019.Tablesense:Spreadsheettabledetection
+withconvolutionalneuralnetworks.InProceedingsoftheAAAIConferenceonArtificialIntelligence.69–76.
+[18] AnaCostaeSilva.2009.LearningrichhiddenMarkovmodelsindocumentanalysis:Tablelocation.InProceedings
+ofthe200910thInternationalConferenceonDocumentAnalysisandRecognition.IEEE,843–847.
+[19] DavidW.Embley,MatthewHurst,DanielLopresti,andGeorgeNagy.2006.Table-processingparadigms:Aresearch
+survey.InternationalJournalofDocumentAnalysisandRecognition8,2(2006),66–86.
+[20] RasoolFakoor,FaisalLadhak,AzadeNazi,andManfredHuber.2013.Usingdeeplearningtoenhancecancerdiag-
+nosisandclassification.InProceedingsoftheInternationalConferenceonMachineLearning.ACM,NewYork,USA,
+3937–3949.
+[21] Miao Fan and Doo Soon Kim. 2015. Table region detection on large-scale PDF files without labeled data.
+arXiv:1506.08891.Retrievedfromhttps://arxiv.org/abs/1506.08891
+[22] JingFang,PrasenjitMitra,ZhiTang,andCLeeGiles.2012.Tableheaderdetectionandclassification.InProceedings
+ofthe26thAAAIConferenceonArtificialIntelligence.
+[23] JingFang,XinTao,ZhiTang,RuihengQiu,andYingLiu.2012.Dataset,ground-truthandperformancemetricsfor
+tabledetectionevaluation.InProceedingsofthe201210thIAPRInternationalWorkshoponDocumentAnalysisSystems.
+IEEE,445–449.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:36 M.Kasemetal.
+[24] PascalFischer,AlenSmajic,GiuseppeAbrami,andAlexanderMehler.2021.Multi-type-td-tsr–extractingtablesfrom
+documentimagesusingamulti-stagepipelinefortabledetectionandtablestructurerecognition:Fromocrtostruc-
+turedtablerepresentations.InProceedingsoftheKI2021:AdvancesinArtificialIntelligence:44thGermanConference
+onAI,VirtualEvent,September27–October1,2021.Springer,95–108.
+[25] LiangcaiGao,YilunHuang,HervéDéjean,Jean-LucMeunier,QinqinYan,YuFang,FlorianKleber,andEvaLang.
+2019.ICDAR2019competitionontabledetectionandrecognition(cTDaR).InProceedingsofthe2019International
+ConferenceonDocumentAnalysisandRecognition(ICDAR).IEEE,1510–1515.
+[26] LiangcaiGao,XiaohanYi,ZhuorenJiang,LeipengHao,andZhiTang.2017.ICDAR2017competitiononpageobject
+detection.InProceedingsofthe201714thIAPRInternationalConferenceonDocumentAnalysisandRecognition(ICDAR).
+IEEE,1417–1422.
+[27] ArnabGhoshChowdhury,MartinbenAhmed,andMartinAtzmueller.2022.Towardstabulardataextractionfrom
+richly-structureddocumentsusingsupervisedandweakly-supervisedlearning.InProceedingsofthe2022IEEE27th
+InternationalConferenceonEmergingTechnologiesandFactoryAutomation(ETFA).IEEE,1–4.
+[28] AzkaGilani,ShahRukhQasim,ImranMalik,andFaisalShafait.2017.Tabledetectionusingdeeplearning.InProceed-
+ingsofthe201714thIAPRInternationalConferenceonDocumentAnalysisandRecognition(ICDAR).IEEE,771–776.
+[29] MaxGöbel,TamirHassan,ErmelindaOro,andGiorgioOrsi.2012.Amethodologyforevaluatingalgorithmsfortable
+understandinginPDFdocuments.InProceedingsofthe2012ACMSymposiumonDocumentEngineering.45–48.
+[30] MaxGöbel,TamirHassan,ErmelindaOro,andGiorgioOrsi.2013.ICDAR2013tablecompetition.InProceedingsof
+the201312thInternationalConferenceonDocumentAnalysisandRecognition.IEEE,1449–1453.
+[31] IanGoodfellow,YoshuaBengio,andAaronCourville.2016.DeepLearning.MITPress.
+[32] A.A.GuravandManishaJ.Nene.2020.Weaklysupervisedlearning-basedtabledetection.SNComput.Sci.1,2(2020),
+90.DOI:https://doi.org/10.1007/S42979-020-0113-X
+[33] MrinalHaloi,ShashankShekhar,NikhilFande,SiddhantSwaroopDash,andSanjayG.2022.Tabledetectioninthe
+wild:Anoveldiversetabledetectiondatasetandmethod.arXivpreprintarXiv:2209.09207(2022).
+[34] MohamedAHamada,AbdelrahmanAbdallah,MahmoudKasem,andMohamedAbokhalil.2021.Neuralnetwork
+estimationmodeltooptimizetimingandscheduleofsoftwareprojects.InProceedingsofthe2021IEEEInternational
+ConferenceonSmartInformationSystemsandTechnologies(SIST).IEEE,1–7.
+[35] LeipengHao,LiangcaiGao,XiaohanYi,andZhiTang.2016.Atabledetectionmethodforpdfdocumentsbasedon
+convolutionalneuralnetworks.InProceedingsofthe201612thIAPRWorkshoponDocumentAnalysisSystems(DAS).
+IEEE,287–292.
+[36] GauravHaritandAnukritiBansal.2012.Tabledetectionindocumentimagesusingheaderandtrailerpatterns.In
+Proceedingsofthe8thIndianConferenceonComputerVision,Graphics,andImageProcessing.1–8.
+[37] AdamWHarley,AlexUfkes,andKonstantinosGDerpanis.2015.Evaluationofdeepconvolutionalnetsfordocument
+imageclassificationandretrieval.InProceedingsofthe201513thInternationalConferenceonDocumentAnalysisand
+Recognition(ICDAR).IEEE,991–995.
+[38] Khurram Azeem Hashmi, Didier Stricker, Marcus Liwicki, Muhammad Noman Afzal, and Muhammad Zeshan
+Afzal.2021.Guidedtablestructurerecognitionthroughanchoroptimization.IEEEAccess9(2021),113521–113534.
+DOI:https://doi.org/10.1109/ACCESS.2021.3103413
+[39] TamirHassanandRobertBaumgartner.2007.Tablerecognitionandunderstandingfrompdffiles.InProceedingsof
+the9thInternationalConferenceonDocumentAnalysisandRecognition(ICDAR2007).IEEE,1143–1147.
+[40] DafangHe,ScottCohen,BrianPrice,DanielKifer,andCLeeGiles.2017.Multi-scalemulti-taskfcnforsemantic
+pagesegmentationandtabledetection.InProceedingsofthe201714thIAPRInternationalConferenceonDocument
+AnalysisandRecognition(ICDAR).IEEE,254–261.
+[41] KaimingHe,GeorgiaGkioxari,PiotrDollar,andRossGirshick.2017.MaskR-CNN.InProceedingsofthe2017IEEE
+InternationalConferenceonComputerVision(ICCV).
+[42] JonathanHerzig,PawełKrzysztofNowak,ThomasMüller,FrancescoPiccinno,andJulianMartinEisenschlos.2020.
+TaPas:Weaklysupervisedtableparsingviapre-training.arXiv:2004.02349.Retrievedfromhttps://arxiv.org/abs/2004.
+02349
+[43] MartinHoleček,AntonínHoskovec,PetrBaudiš,andPavelKlinger.2019.Tableunderstandinginstructureddoc-
+uments.InProceedingsofthe2019InternationalConferenceonDocumentAnalysisandRecognitionWorkshops(IC-
+DARW).IEEE,158–164.
+[44] JianyingHu,RamanujanSKashi,DanielLopresti,andGordonTWilfong.2002.Evaluatingtheperformanceoftable
+processingalgorithms.InternationalJournalonDocumentAnalysisandRecognition4,3(2002),140–153.
+[45] Yuan-TingHu,Jia-BinHuang,andAlexanderG.Schwing.2017.MaskRNN:Instancelevelvideoobjectsegmentation.
+InAdvancesinNeuralInformationProcessingSystems30:AnnualConferenceonNeuralInformationProcessingSystems
+2017,December4-9,2017,LongBeach,CA,USA,325–334.Retrievedfromhttps://proceedings.neurips.cc/paper/2017/
+hash/6c9882bbac1c7093bd25041881277658-Abstract.html
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:37
+[46] ZilongHu,JinshanTang,ZimingWang,KaiZhang,LingZhang,andQinglingSun.2018.Deeplearningforimage-
+basedcancerdetectionanddiagnosis-Asurvey.PatternRecognit.83(2018),134–149.DOI:https://doi.org/10.1016/J.
+PATCOG.2018.05.014
+[47] YilunHuang,QinqinYan,YiboLi,YifanChen,XiongWang,LiangcaiGao,andZhiTang.2019.AYOLO-basedtable
+detectionmethod.InProceedingsofthe2019InternationalConferenceonDocumentAnalysisandRecognition(ICDAR).
+IEEE,813–818.
+[48] KatsuhikoItonori.1993.Tablestructurerecognitionbasedontextblockarrangementandruledlineposition.In
+Proceedingsofthe2ndInternationalConferenceonDocumentAnalysisandRecognition(ICDAR’93).IEEE,765–768.
+[49] MACAkmalJahanandRoshanGRagel.2014.Locatingtablesinscanneddocumentsforreconstructingandrepub-
+lishing.InProceedingsofthe7thInternationalConferenceonInformationandAutomationforSustainability.IEEE,
+1–6.
+[50] ArushiJain,ShubhamPaliwal,MonikaSharma,andLovekeshVig.2021.TSR-DSAW:Tablestructurerecognition
+viadeepspatialassociationofwords.In29thEuropeanSymposiumonArtificialNeuralNetworks,Computational
+IntelligenceandMachineLearning,ESANN2021,Onlineevent(Bruges,Belgium),October6-8,2021.DOI:https://doi.
+org/10.14428/ESANN/2021.ES2021-109
+[51] KJain,AnoopMNamboodiri,andJayashreeSubrahmonia.2001.Structureinon-linedocuments.InProceedingsof
+the6thInternationalConferenceonDocumentAnalysisandRecognition.IEEE,844–848.
+[52] ErtugrulKara,MarkTraquair,MuratSimsek,BurakKantarci,andShahzadKhan.2020.Holisticdesignfordeep
+learning-based discovery of tabular structures in datasheet images. Eng. Appl. Artif. Intell. 90 (2020), 103551.
+DOI:https://doi.org/10.1016/J.ENGAPPAI.2020.103551
+[53] ThotreingamKasar,PhilippineBarlas,SebastienAdam,ClémentChatelain,andThierryPaquet.2013.Learningto
+detecttablesinscanneddocumentimagesusinglineinformation.InProceedingsofthe201312thInternationalCon-
+ferenceonDocumentAnalysisandRecognition.IEEE,1185–1189.
+[54] MahmoudSalahEldinKasem,MohamedHamada,andIslamTaj-Eddin.2024.Customerprofiling,segmentation,and
+salespredictionusingAIindirectmarketing.NeuralComputingandApplications36,9(2024),4995–5005.
+[55] MahmoudSalahEldinKasem,MohamedMahmoud,andHyun-SooKang.2023.Advancementsandchallengesin
+Arabicopticalcharacterrecognition:Acomprehensivesurvey.arXiv:2312.11812.Retrievedfromhttps://arxiv.org/
+abs/2312.11812
+[56] Isaak Kavasidis, Carmelo Pino, Simone Palazzo, Francesco Rundo, Daniela Giordano, P. Messina, and Concetto
+Spampinato.2019.Asaliency-basedconvolutionalneuralnetworkfortableandchartdetectionindigitizeddocu-
+ments.InProceedingsoftheInternationalConferenceonImageAnalysisandProcessing.Springer,292–302.
+[57] SaqibAliKhan,SyedMuhammadDaniyalKhalid,MuhammadAliShahzad,andFaisalShafait.2019.Tablestructure
+extractionwithbi-directionalgatedrecurrentunitnetworks.InProceedingsofthe2019InternationalConferenceon
+DocumentAnalysisandRecognition(ICDAR).IEEE,1366–1371.
+[58] ShahKhusro,AsimaLatif,andIrfanUllah.2015.Onmethodsandtoolsoftabledetection,extractionandannotation
+inPDFdocuments.JournalofInformationScience41,1(2015),41–57.
+[59] ThomasKieningerandAndreasDengel.1998.Thet-recstablerecognitionandanalysissystem.InProceedingsofthe
+InternationalWorkshoponDocumentAnalysisSystems.Springer,255–270.
+[60] Yeon-SeokKimandKyong-HoLee.2008.ExtractinglogicalstructuresfromHTMLtables.ComputerStandardsand
+Interfaces30,5(2008),296–308.
+[61] StefanKlampfl,KrisJack,andRomanKern.2014.Acomparisonoftwounsupervisedtablerecognitionmethodsfrom
+digitalscientificarticles.D-LibMagazine20,11(2014),7.
+[62] ElvisKoci,MaikThiele,WolfgangLehner,andOscarRomero.2018.Tablerecognitioninspreadsheetsviaagraph
+representation.InProceedingsofthe201813thIAPRInternationalWorkshoponDocumentAnalysisSystems(DAS).
+IEEE,139–144.
+[63] ElvisKoci,MaikThiele,JosephineRehak,OscarRomero,andWolfgangLehner.2019.DECO:Adatasetofanno-
+tatedspreadsheetsforlayoutandtablerecognition.InProceedingsofthe2019InternationalConferenceonDocument
+AnalysisandRecognition(ICDAR).IEEE,1280–1285.
+[64] ElvisKoci,MaikThiele,OscarRomero,andWolfgangLehner.2019.Agenetic-basedsearchforadaptivetablerecog-
+nitioninspreadsheets.InProceedingsofthe2019InternationalConferenceonDocumentAnalysisandRecognition
+(ICDAR).IEEE,1274–1279.
+[65] Tarun Kumar and Himanshu Sharad Bhatt. 2022. Evaluating table structure recognition: A new perspective.
+arXiv:2208.00385.Retrievedfromhttps://arxiv.org/abs/2208.00385
+[66] YannLeCun,YoshuaBengio,andGeoffreyHinton.2015.Deeplearning.Nature521,7553(2015),436–444.
+[67] Benjamin Charles Germain Lee. 2017. Line detection in binary document scans: A case study with the interna-
+tionaltracingservicearchives.InProceedingsofthe2017IEEEInternationalConferenceonBigData(BigData).IEEE,
+2256–2261.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:38 M.Kasemetal.
+[68] HuichaoLi,LingzeZeng,WeiyuZhang,JianingZhang,JuFan,andMeihuiZhang.2022.Atwo-phaseapproachfor
+recognizingtableswithcomplexstructures.InProceedingsoftheInternationalConferenceonDatabaseSystemsfor
+AdvancedApplications.Springer,587–595.
+[69] JunlongLi,YihengXu,TengchaoLv,LeiCui,ChaZhang,andFuruWei.2022.DiT:Self-supervisedpre-training
+fordocumentimagetransformer.InMM’22:The30thACMInternationalConferenceonMultimedia,Lisboa,Portugal,
+October10-14,2022,ACM,3530–3539.DOI:https://doi.org/10.1145/3503161.3547911
+[70] MinghaoLi,LeiCui,ShaohanHuang,FuruWei,MingZhou,andZhoujunLi.2020.Tablebank:Tablebenchmarkfor
+image-basedtabledetectionandrecognition.InProceedingsofthe12thLanguageResourcesandEvaluationConference.
+1918–1925.
+[71] ShunLi,WeiDongLiu,andGongBingXiao.2019.Detectionofsrewnutimagesbasedondeeptransferlearning
+network.InProceedingsofthe2019ChineseAutomationCongress(CAC).IEEE,951–955.
+[72] YiboLi,LiangcaiGao,ZhiTang,QinqinYan,andYilunHuang.2019.AGAN-basedfeaturegeneratorfortable
+detection.InProceedingsofthe2019InternationalConferenceonDocumentAnalysisandRecognition(ICDAR).IEEE,
+763–768.
+[73] GeertLitjens,ThijsKooi,BabakEhteshamiBejnordi,ArnaudArindraAdiyosoSetio,FrancescoCiompi,Mohsen
+Ghafoorian,JeroenA.W.M.vanderLaak,BramvanGinneken,andClaraI.Sánchez.2017.Asurveyondeeplearning
+inmedicalimageanalysis.MedicalImageAnal.42(2017),60–88.DOI:https://doi.org/10.1016/J.MEDIA.2017.07.005
+[74] LiLiu,WanliOuyang,XiaogangWang,PaulFieguth,JieChen,XinwangLiu,andMattiPietikäinen.2020.Deep
+learningforgenericobjectdetection:Asurvey.InternationalJournalofComputerVision128,2(2020),261–318.
+[75] RuixueLiu,ShaozuYuan,AijunDai,LeiShen,TiangangZhu,MengChen,andXiaodongHe.2022.Few-shottable
+understanding:Abenchmarkdatasetandpre-trainingbaseline.InProceedingsofthe29thInternationalConference
+onComputationalLinguistics.3741–3752.
+[76] RujiaoLong,WenWang,NanXue,FeiyuGao,ZhiboYang,YongpanWang,andGui-SongXia.2021.Parsingtable
+structuresinthewild.InProceedingsoftheIEEE/CVFInternationalConferenceonComputerVision.944–952.
+[77] NamTuanLy,AtsuhiroTakasu,PhucNguyen,andHideakiTakeda.2023.Rethinkingimage-basedtablerecognition
+usingweaklysupervisedmethods.arXiv:2303.07641.Retrievedfromhttps://arxiv.org/abs/2303.07641
+[78] ChixiangMa,WeihongLin,LeiSun,andQiangHuo.2023.Robusttabledetectionandstructurerecognitionfrom
+heterogeneousdocumentimages.PatternRecognit.133(2023),109006.DOI:https://doi.org/10.1016/J.PATCOG.2022.
+109006
+[79] MohamedMahmoudandHyun-SooKang.2023.GANMasker:Atwo-stagegenerativeadversarialnetworkforhigh-
+qualityfacemaskremoval.Sensors23,16(2023),7094.
+[80] MohamedMahmoud,MahmoudKasem,AbdelrahmanAbdallah,andHyunSooKang.2022.AE-LSTM:Autoencoder
+withLSTM-basedintrusiondetectioninIoT.InProceedingsofthe2022InternationalTelecommunicationsConference
+(ITC-Egypt).IEEE,1–6.
+[81] Sabri A Mahmoud, Irfan Ahmad, Wasfi G Al-Khatib, Mohammad Alshayeb, Mohammad Tanvir Parvez, Volker
+Märgner,andGernotAFink.2014.KHATT:AnopenArabicofflinehandwrittentextdatabase.PatternRecognition
+47,3(2014),1096–1112.
+[82] SongMao,AzrielRosenfeld,andTapasKanungo.2003.Documentstructureanalysisalgorithms:Aliteraturesur-
+vey.InDocumentRecognitionandRetrievalX,SantaClara,California,USA,January22-23,2003,Proceedings(SPIE
+Proceedings),SPIE,197–207.DOI:https://doi.org/10.1117/12.476326
+[83] KatlehoLMasita,AliNHasan,andSatyakamaPaul.2018.PedestriandetectionusingR-CNNobjectdetector.In
+Proceedingsofthe2018IEEELatinAmericanConferenceonComputationalIntelligence(LA-CCI).IEEE,1–6.
+[84] ShervinMinaeeandZhuLiu.2017.Automaticquestion-answeringusingadeepsimilarityneuralnetwork.InPro-
+ceedingsofthe2017IEEEGlobalConferenceonSignalandInformationProcessing(GlobalSIP).IEEE,923–927.
+[85] AjoyMondal,PeterLipps,andCVJawahar.2020.IIIT-AR-13K:Anewdatasetforgraphicalobjectdetectionindoc-
+uments.InProceedingsoftheInternationalWorkshoponDocumentAnalysisSystems.Springer,216–230.
+[86] MarcinNamysl,AlexanderMEsser,SvenBehnke,andJoachimKöhler.2022.Flexibletablerecognitionandsemantic
+interpretationsystem.InProceedingsoftheVISIGRAPP(4:VISAPP).27–37.
+[87] MarcinNamysł,AlexanderMEsser,SvenBehnke,andJoachimKöhler.2023.Flexiblehybridtablerecognitionand
+semanticinterpretationsystem.SNComputerScience4,3(2023),246.
+[88] AhmedNassar,Nikolaos Livathinos,MaksymLysak,andPeterStaar.2022.TableFormer:Tablestructure under-
+standingwithtransformers.InProceedingsoftheIEEE/CVFConferenceonComputerVisionandPatternRecognition.
+4614–4623.
+[89] Duc-DungNguyen.2022.TableSegNet:Afullyconvolutionalnetworkfortabledetectionandsegmentationindoc-
+umentimages.InternationalJournalonDocumentAnalysisandRecognition25,1(2022),1–14.
+[90] AnssiNurminen.2013.AlgorithmicExtractionofDatainTablesinPDFDocuments.Master’sthesis.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:39
+[91] DaniyarNurseitov,KairatBostanbekov,DaniyarKurmankhojayev,AnelAlimova,AbdelrahmanAbdallah,andRas-
+sulTolegenov.2021.HandwrittenKazakhandRussian(HKR)databasefortextrecognition.MultimediaToolsand
+Applications80,21(2021),33075–33097.
+[92] LawrenceO’Gorman.1993.Thedocumentspectrumforpagelayoutanalysis.IEEETransactionsonPatternAnalysis
+andMachineIntelligence15,11(1993),1162–1173.
+[93] ErmelindaOroandMassimoRuffolo.2009.TREX:AnapproachforrecognizingandextractingtablesfromPDF
+documents.InProceedingsofthe200910thInternationalConferenceonDocumentAnalysisandRecognition.IEEE,
+906–910.
+[94] ShubhamSinghPaliwal,DVishwanath,RohitRahul,MonikaSharma,andLovekeshVig.2019.Tablenet:Deeplearn-
+ingmodelforend-to-endtabledetectionandtabulardataextractionfromscanneddocumentimages.InProceedings
+ofthe2019InternationalConferenceonDocumentAnalysisandRecognition(ICDAR).IEEE,128–133.
+[95] KishorePapineni,SalimRoukos,ToddWard,andWei-JingZhu.2002.Bleu:Amethodforautomaticevaluation
+ofmachinetranslation.InProceedingsofthe40thAnnualMeetingoftheAssociationforComputationalLinguistics.
+311–318.
+[96] IhsinTsaiyunPhillips.1996.User’sreferencemanualfortheUWenglish/technicaldocumentimagedatabaseIII.
+UW-IIIEnglish/TechnicalDocumentImagedatabaseManual(1996).
+[97] DevashishPrasad,AyanGadpal,KshitijKapadni,ManishVisave,andKavitaSultanpure.2020.CascadeTabNet:An
+approachforendtoendtabledetectionandstructurerecognitionfromimage-baseddocuments.InProceedingsof
+theIEEE/CVFConferenceonComputerVisionandPatternRecognitionWorkshops.572–573.
+[98] PPyreddyandWBCroft.1997.Tinti:Asystemforretrievalintexttablestitle2.
+[99] ShahRukhQasim,HassanMahmood,andFaisalShafait.2019.Rethinkingtablerecognitionusinggraphneural
+networks.In2019InternationalConferenceonDocumentAnalysisandRecognition,ICDAR2019,Sydney,Australia,
+September20-25,2019,IEEE,142–147.DOI:https://doi.org/10.1109/ICDAR.2019.00031
+[100] LiangQiao,ZaishengLi,ZhanzhanCheng,PengZhang,ShiliangPu,YiNiu,WenqiRen,WenmingTan,andFeiWu.
+2021.Lgpma:Complicatedtablestructurerecognitionwithlocalandglobalpyramidmaskalignment.InProceedings
+oftheInternationalConferenceonDocumentAnalysisandRecognition.Springer,99–114.
+[101] SachinRaja,AjoyMondal,andCVJawahar.2020.Tablestructurerecognitionusingtop-downandbottom-upcues.
+InProceedingsoftheEuropeanConferenceonComputerVision.Springer,70–86.
+[102] SachinRaja,AjoyMondal,andCVJawahar.2022.Visualunderstandingofcomplextablestructuresfromdocument
+images.InProceedingsoftheIEEE/CVFWinterConferenceonApplicationsofComputerVision.2299–2308.
+[103] SusieXiRao,JohannesRausch,PeterH.Egger,andCeZhang.2022.TableParser:AutomaticTableParsingwithWeak
+SupervisionfromSpreadsheets.InProceedingsoftheWorkshoponScientificDocumentUnderstandingCo-Located
+with36thAAAIConferenceonArtificialInteligence,SDU@AAAI2022,VirtualEvent,March1,2022(CEURWorkshop
+Proceedings),CEUR-WS.org.Retrievedfromhttps://ceur-ws.org/Vol-3164/paper8.pdf
+[104] SheikhFaisalRashid,AbdullahAkmal,MuhammadAdnan,AliAdnanAslam,andAndreasDengel.2017.Table
+recognitioninheterogeneousdocumentsusingmachinelearning.InProceedingsofthe201714thIAPRInternational
+ConferenceonDocumentAnalysisandRecognition(ICDAR).IEEE,777–782.
+[105] MohammadMohsinReza,SyedSaqibBukhari,MartinJenckel,andAndreasDengel.2019.Tablelocalizationand
+segmentationusingGANandCNN.InProceedingsofthe2019InternationalConferenceonDocumentAnalysisand
+RecognitionWorkshops(ICDARW).IEEE,152–157.
+[106] PauRiba,AnjanDutta,LutzGoldmann,AliciaFornés,OriolRamos,andJosepLladós.2019.Tabledetectionininvoice
+documentsbygraphneuralnetworks.InProceedingsofthe2019InternationalConferenceonDocumentAnalysisand
+Recognition(ICDAR).IEEE,122–127.
+[107] PauRiba,LutzGoldmann,OriolRamosTerrades,DiedeRusticus,AliciaFornés,andJosepLladós.2022.Tablede-
+tectioninbusinessdocumentimagesbymessagepassingnetworks.PatternRecognit.127(2022),108641.DOI:https:
+//doi.org/10.1016/J.PATCOG.2022.108641
+[108] ArashSamari,AndrewPiper,AlisonHedley,andMohamedCheriet.2021.Weaklysupervisedboundingboxextrac-
+tionforunlabeleddataintabledetection.InProceedingsofthePatternRecognition.ICPRInternationalWorkshopsand
+Challenges:VirtualEvent,January10-15,2021.Springer,339–352.
+[109] SebastianSchreiber,StefanAgne,IvoWolf,AndreasDengel,andSherazAhmed.2017.Deepdesrt:Deeplearningfor
+detectionandstructurerecognitionoftablesindocumentimages.InProceedingsofthe201714thIAPRInternational
+ConferenceonDocumentAnalysisandRecognition(ICDAR).IEEE,1162–1167.
+[110] WonkyoSeo,HyungIlKoo,andNamIkCho.2015.Junction-basedtabledetectionincamera-captureddocument
+images.InternationalJournalonDocumentAnalysisandRecognition18,1(2015),47–57.
+[111] FaisalShafaitandRaySmith.2010.Tabledetectioninheterogeneousdocuments.InProceedingsofthe9thIAPR
+InternationalWorkshoponDocumentAnalysisSystems.65–72.
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.305:40 M.Kasemetal.
+[112] AsifShahab,FaisalShafait,ThomasKieninger,andAndreasDengel.2010.Anopenapproachtowardsthebench-
+markingoftablestructurerecognitionsystems.InProceedingsofthe9thIAPRInternationalWorkshoponDocument
+AnalysisSystems.113–120.
+[113] TahiraShehzadi,KhurramAzeemHashmi,DidierStricker,MarcusLiwicki,andMuhammadZeshanAfzal.2023.
+Towardsend-to-endsemi-supervisedtabledetectionwithdeformabletransformer.InProceedingsoftheInternational
+ConferenceonDocumentAnalysisandRecognition.Springer,51–76.
+[114] XinyiShen,LingjunKong,YunchaoBao,YaoweiZhou,andWeiguangLiu.2022.RCANet:Arowsandcolumnsaggre-
+gatednetworkfortablestructurerecognition.InProceedingsofthe20223rdInformationCommunicationTechnologies
+Conference(ICTC).IEEE,112–116.
+[115] ShoaibAhmedSiddiqui,ImranAliFateh,SyedTahseenRazaRizvi,AndreasDengel,andSherazAhmed.2019.DeepT-
+abStR:Deeplearningbasedtablestructurerecognition.InProceedingsofthe2019InternationalConferenceonDocu-
+mentAnalysisandRecognition(ICDAR).IEEE,1403–1409.
+[116] ShoaibAhmedSiddiqui,PervaizIqbalKhan,AndreasDengel,andSherazAhmed.2019.Rethinkingsemanticsegmen-
+tationfortablestructurerecognitionindocuments.InProceedingsofthe2019InternationalConferenceonDocument
+AnalysisandRecognition(ICDAR).IEEE,1397–1402.
+[117] ShoaibAhmedSiddiqui,MuhammadImranMalik,StefanAgne,AndreasDengel,andSherazAhmed.2018.DeCNT:
+DeepdeformableCNNfortabledetection.IEEEAccess6(2018),74151–74161.DOI:https://doi.org/10.1109/ACCESS.
+2018.2880211
+[118] GrigoriSidorov,HelenaGómez-Adorno,IliaMarkov,DavidPinto,andNahunLoya.2015.Computingtextsimi-
+larity using tree edit distance. In Proceedings of the 2015 Annual Conference of the North American Fuzzy Infor-
+mationProcessingSociety(NAFIPS)HeldJointlywith20155thWorldConferenceonSoftComputing(WConSC).1–4.
+DOI:https://doi.org/10.1109/NAFIPS-WConSC.2015.7284129
+[119] NoahSiegel,NicholasLourie,RussellPower,andWaleedAmmar.2018.Extractingscientificfigureswithdistantly
+supervisedneuralnetworks.InProceedingsofthe18thACM/IEEEonJointConferenceonDigitalLibraries.223–232.
+[120] BrandonSmock,RohithPesala,andRobinAbraham.2023.GriTS:Gridtablesimilaritymetricfortablestructure
+recognition.InProceedingsoftheInternationalConferenceonDocumentAnalysisandRecognition.Springer,535–549.
+[121] BrandonSmock,RohithPesala,andRobinAbraham.2022.PubTables-1M:Towardscomprehensivetableextraction
+fromunstructureddocuments.InProceedingsoftheIEEE/CVFConferenceonComputerVisionandPatternRecognition.
+4634–4642.
+[122] NingningSun,YuanpingZhu,andXiaomingHu.2019.FasterR-CNNbasedtabledetectioncombiningcornerlocating.
+InProceedingsofthe2019InternationalConferenceonDocumentAnalysisandRecognition(ICDAR).IEEE,1314–1319.
+[123] RichardSzeliski.2010.ComputerVision:AlgorithmsandApplications.SpringerScienceandBusinessMedia.
+[124] ChrisTensmeyer,VladIMorariu,BrianPrice,ScottCohen,andTonyMartinez.2019.Deepsplittingandmerging
+fortablestructuredecomposition.InProceedingsofthe2019InternationalConferenceonDocumentAnalysisand
+Recognition(ICDAR).IEEE,114–121.
+[125] NazgulToiganbayeva,MahmoudSalahEldinKasem,GalymzhanAbdimanap,KairatBostanbekov,AbdelrahmanAb-
+dallah,AnelAlimova,andDaniyarB.Nurseitov.2022.KOHTD:Kazakhofflinehandwrittentextdataset.SignalPro-
+cess.ImageCommun.108(2022),116827.DOI:https://doi.org/10.1016/J.IMAGE.2022.116827
+[126] MarkTraquair,ErtugrulKara,BurakKantarci,andShahzadKhan.2019.Deeplearningforthedetectionoftabular
+informationfromelectroniccomponentdatasheets.InProceedingsofthe2019IEEESymposiumonComputersand
+Communications(ISCC).IEEE,1–6.
+[127] ScottTupaj,ZhongwenShi,C.HwaChang,andHassanAlam.1996.Extractingtabularinformationfromtextfiles.
+EECSDepartment,TuftsUniversity,Medford,USA1(1996).
+[128] YalinWangandJianyingHu.2002.Amachinelearningbasedapproachfortabledetectionontheweb.InProceedings
+ofthe11thInternationalConferenceonWorldWideWeb.242–250.
+[129] YalinWangt,IhsinTPhillipst,andRobertHaralick.2001.Automatictablegroundtruthgenerationandabackground-
+analysis-basedtablestructureextractionmethod.InProceedingsofthe6thInternationalConferenceonDocument
+AnalysisandRecognition.IEEE,528–532.
+[130] ShengkaiWu,JinrongYang,XinggangWang,andXiaopingLi.2022.IoU-Balancedlossfunctionsforsingle-stage
+objectdetection.PatternRecognit.Lett.156(2022),96–103.DOI:https://doi.org/10.1016/J.PATREC.2022.01.021
+[131] BinXiao,MuratSimsek,BurakKantarci,andAlaAbuAlkheir.2022.Tablestructurerecognitionwithconditional
+attention.arXiv:2203.03819.Retrievedfromhttps://arxiv.org/abs/2203.03819
+[132] BinXiao,MuratSimsek,BurakKantarci,andAlaAbuAlkheir.2023.Revisitingtabledetectiondatasetsforvisually
+richdocuments.arXiv:2305.04833.Retrievedfromhttps://arxiv.org/abs/2305.04833
+[133] WenXu,JulianJang-Jaccard,AmardeepSingh,YuanyuanWei,andFarizaSabrina.2021.Improvingperformanceof
+autoencoder-basednetworkanomalydetectiononNSL-KDDdataset.IEEEAccess9(2021),140136–140146.DOI:https:
+//doi.org/10.1109/ACCESS.2021.3116612
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.DeepLearningforTableDetectionandStructureRecognition:ASurvey 305:41
+[134] WenyuanXue,QingyongLi,andDachengTao.2019.ReS2TIM:Reconstructsyntacticstructuresfromtableimages.
+InProceedingsofthe2019InternationalConferenceonDocumentAnalysisandRecognition(ICDAR).IEEE,749–755.
+[135] FanYang,LeiHu,XinwuLiu,ShuangpingHuang,andZhenghuiGu.2023.Alarge-scaledatasetforend-to-endtable
+recognitioninthewild.ScientificData10,1(2023),110.
+[136] JingYangandGuanciYang.2018.Modifiedconvolutionalneuralnetworkbasedondropoutandthestochasticgra-
+dientdescentoptimizer.Algorithms11,3(2018),28.
+[137] TomYoung,DevamanyuHazarika,SoujanyaPoria,andErikCambria.2018.Recenttrendsindeeplearningbased
+naturallanguageprocessing.IEEEComputationalIntelligenceMagazine13,3(2018),55–75.
+[138] JiahuiYu,ZheLin,JimeiYang,XiaohuiShen,XinLu,andThomasSHuang.2019.Free-formimageinpaintingwith
+gatedconvolution.InProceedingsoftheIEEE/CVFInternationalConferenceonComputerVision.4471–4480.
+[139] RichardZanibbi,DorotheaBlostein,andJamesRCordy.2004.Asurveyoftablerecognition.DocumentAnalysisand
+Recognition7,1(2004),1–16.
+[140] DaqianZhang,RuibinMao,RuntingGuo,YangJiang,andJingZhu.2023.YOLO-table:Disclosuredocumenttable
+detectionwithinvolution.Int.J.DocumentAnal.Recognit.26,1(2023),1–14.DOI:https://doi.org/10.1007/S10032-022-
+00400-Z
+[141] Xi-wenZhang,MichaelRLyu,andGuo-zhongDai.2007.ExtractionandsegmentationoftablesfromChineseink
+documentsbasedonamatrixmodel.PatternRecognition40,7(2007),1855–1867.
+[142] ZixingZhang,JürgenGeiger,JouniPohjalainen,AmrEl-DesokyMousa,WenyuJin,andBjörnSchuller.2018.Deep
+learningforenvironmentallyrobustspeechrecognition:Anoverviewofrecentdevelopments.ACMTransactionson
+IntelligentSystemsandTechnology9,5(2018),1–28.
+[143] ZhenrongZhang,JianshuZhang,JunDu,andFengrenWang.2022.Split,EmbedandMerge:Anaccuratetable
+structurerecognizer.PatternRecognit.126(2022),108565.DOI:https://doi.org/10.1016/J.PATCOG.2022.108565
+[144] XinyiZheng,DougBurdick,LucianPopa,PeterZhong,andNancyXinRuWang.2021.Globaltableextractor(GTE):
+Aframeworkforjointtableidentificationandcellstructurerecognitionusingvisualcontext.InProceedingsofthe
+IEEE/CVFWinterConferenceforApplicationsinComputerVision(WACV).
+[145] XinyiZheng,DouglasBurdick,LucianPopa,XuZhong,andNancyXinRuWang.2021.Globaltableextractor(GTE):
+Aframeworkforjointtableidentificationandcellstructurerecognitionusingvisualcontext.InProceedingsofthe
+IEEE/CVFWinterConferenceonApplicationsofComputerVision.697–706.
+[146] XuZhong,ElahehShafieiBavani,andAntonioJimenoYepes.2020.Image-basedtablerecognition:Data,model,and
+evaluation.InProceedingsoftheEuropeanConferenceonComputerVision.Springer,564–580.
+[147] YajunZouandJinwenMa.2020.Adeepsemanticsegmentationmodelforimage-basedtablestructurerecognition.
+InProceedingsofthe202015thIEEEInternationalConferenceonSignalProcessing(ICSP).IEEE,274–280.
+[148] ArthurZucker,YounesBelkada,HanhVu,andVanNamNguyen.2021.ClusTi:Clusteringmethodfortablestructure
+recognitioninscannedimages.MobileNetworksandApplications26,4(2021),1765–1776.
+Received13December2022;revised11February2024;accepted2April2024
+ACMComput.Surv.,Vol.56,No.12,Article305.Publicationdate:October2024.

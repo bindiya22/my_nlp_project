@@ -1,0 +1,2447 @@
+JOURNAL OF MANAGEMENT INFORMATION SYSTEMS
+2023, VOL. 40, NO. 2, 541–579
+https://doi.org/10.1080/07421222.2023.2196780
+Unbox the Black-Box: Predict and Interpret YouTube
+Viewership Using Deep Learning
+Jiaheng Xiea, Yidong Chaib, and Xiao Liuc
+aDepartment of Accounting & MIS, Lerner College of Business & Economics, University of Delaware, Newark, DE,
+USA; bHefei University of Technology, Anhui, P.R. China; cDepartment of Information Systems, Arizona State
+University, Tempe, AZ, USA
+ABSTRACT KEYWORDS
+As video-sharing sites emerge as a critical part of the social media Design science; deep
+landscape, video viewership prediction becomes essential for content learning; video prediction;
+creators and businesses to optimize influence and marketing outreach analytics interpretability;
+unstructured data
+with minimum budgets. Although deep learning champions viewer-
+ship prediction, it lacks interpretability, which is required by regulators
+and is fundamental to the prioritization of the video production pro-
+cess and promoting trust in algorithms. Existing interpretable predic-
+tive models face the challenges of imprecise interpretation and
+negligence of unstructured data. Following the design-science para-
+digm, we propose a novel Precise Wide-and-Deep Learning (PrecWD)
+to accurately predict viewership with unstructured video data and
+well-established features while precisely interpreting feature effects.
+PrecWD’s prediction outperforms benchmarks in two case studies and
+achieves superior interpretability in two user studies. We contribute to
+IS knowledge base by enabling precise interpretability in video-based
+predictive analytics and contribute nascent design theory with gen-
+eralizable model design principles. Our system is deployable to
+improve video-based social media presence.
+Introduction
+Social media is taking up a greater share of consumers’ attention and time spent online,
+among which video-sharing sites, such as YouTube and Vimeo, are quickly overtaking the
+crown. YouTube alone hosts over 2.6 billion active users and is projected to surpass text-
+and image-based social media platforms, such as Facebook and Instagram [53]. The soaring
+popularity of the contents in video format makes video-sharing sites an effective channel to
+disseminate information and share knowledge.
+Content consumption on these social media platforms has been a phenomenon of
+interest in information systems (IS) and marketing research. Prior work has investigated
+the impact of digital content on improving sales [18] and boosting awareness of a brand or
+a product [22]. They also examined the factors that may increase consumption [35] and
+offered some insights for the design of digital contents [6]. These studies acknowledge that
+digital content consumption and its popularity are understudied [35]. Our study
+approaches this domain with an interpretable predictive analytics lens: viewership
+CONTACT Yidong Chai chaiyd@hfut.edu.cn Hefei University of Technology, P.O. 22, HFUT, 193 Tunxi Road, Hefei,
+Anhui, P.R. China, 230009.
+Supplemental data for this article can be accessed online at https://doi.org/10.1080/07421222.2023.2196780
+© 2023 Taylor & Francis Group, LLC542 J. XIE ET AL.
+prediction. Viewership is the metric video-sharing sites use to pay their content creators,
+defined as the average daily views of a video. While viewership prediction offers immense
+implications, interpretation elevates such value: evaluating a learned model, prioritizing
+features, and building trust with domain experts and end users. Therefore, we propose an
+interpretable machine learning (ML) to predict video viewership (narrative-based long-
+form videos) and interpret the predictors.
+Murdoch et al. [49] show that predictive accuracy, descriptive accuracy, and relevancy
+form the three pillars of an interpretable ML model. Predictive accuracy measures the
+model’s prediction quality. Descriptive accuracy assesses how well the model describes the
+data relationships learned by the prediction, or interpretation quality. Relevancy is defined
+as whether the model provides insight for the domain problem. In this study, both
+predictive and descriptive accuracy have relevancy to content creators, sponsors, and
+platforms.
+For content creators, the high predictive accuracy of viewership improves the allocation
+of promotional funds. If the predicted viewership exceeds expectation, the promotional
+funds can be distributed to less popular videos where content enrichment is insufficient to
+gain organic views. Meanwhile, high predictive accuracy facilitates trustworthy interpreta-
+tion which offers effective actions for content creators. Video production requires novel
+shooting skills and sophisticated communication mindsets for elaborate audio-visual story-
+telling, which average content creators lack. The interpretation navigates them through how
+to prioritize the customizable video features. For sponsors, before their sponsored video is
+published, high predictive accuracy enables them to estimate the return (viewership)
+compared to the sponsorship cost. If the return-cost ratio is unsatisfactory, the sponsors
+could request content enrichment. For platforms, viewership prediction helps control the
+influence of violative videos. Limited by time and resources, the current removal measures
+are far from being sufficient, resulting in numerous high-profile violative videos infiltrating
+the public.1 YouTube projects the percentage of total views from violative videos as
+a measure of content quality [50]. To minimize the influence of violative videos, YouTube
+could rely on viewership prediction to prioritize the screening of potentially popular videos,
+among which violative videos can be banned before they reach the public.
+Interpretable ML models can be broadly categorized as post hoc and model-based [49].
+The general principle of these interpretable methods is to estimate the total effect, defined as
+the change of the outcome when a feature increases by one unit. Post hoc methods explain
+a black-box prediction model using a separate explanation model, such as Shapley Additive
+Explanations (SHAP) and Local Interpretable Model-agnostic Explanations (LIME) [43,
+52]. However, these standalone explanation models could alter the total effect of the
+prediction model, since they possess different specifications [43]. Model-based methods
+address such a limitation by directly interpreting the same prediction model. The cutting-
+edge model-based interpretable methods include the Generalized Additive Model frame-
+work (GAM) and the Wide and Deep Learning framework (W&D). GAM is unable to
+model higher-order feature interactions and caters to small feature sizes, limiting its
+applicability in this study. Addressing that, W&D combines a deep learning model with
+a linear model [13]. However, a few limitations persist for W&Ds. From the prediction
+perspective, W&Ds are restricted to structured data, constrained by the linear component.
+In video analytics, only using structured data hampers the predictive accuracy. From the
+interpretation perspective, W&Ds fall short in producing the precise total effect, defined asJOURNAL OF MANAGEMENT INFORMATION SYSTEMS 543
+the precise change of the prediction when a feature increases one unit. They use the weights
+of the linear component (main effect) to approximate the total effect of the input on the
+prediction, even though the main effect and total effect largely differ.
+To address the limitations of the existing interpretable methods, we propose a novel
+model-based interpretable model that learns from both structured features and unstruc-
+tured video data and produces a precise interpretation, named Precise Wide-and-Deep
+Learning (PrecWD). This work contributes to data analytics methodology and IS design
+theory. First, we develop PrecWD that innovatively extends the W&D framework to
+provide a precise interpretation and perform unstructured data analysis. As our core
+contribution, the proposed interpretation component can precisely capture the total effect
+of each feature. A generative adversarial network learns the data distribution and facilitates
+such an interpretation process. Because of our interpretation component, we are able to add
+the unstructured component to extend the W&D framework to unstructured data analytics.
+Empirical evaluations from two case studies indicate that PrecWD outperforms black-box
+and interpretable models in viewership prediction. We design two user studies to validate
+the contribution of our precise interpretation component, which indicates PrecWD can
+provide better interpretability than state-of-the-art interpretable methods. Our feature
+interpretation results in improved trust and usefulness of the model.
+Second, for design science information systems (IS) research [1, 2, 21, 44, 54, 60], the
+successful model design offers indispensable design principles for model development: 1)
+Our interpretation as well as the user studies suggest generative models can assist the
+interpretation of predictive models; 2) Our ablation studies indicate raw unstructured
+data can complement crafted features in prediction. These design principles along with
+our model provide a “nascent design theory” [27, 40, 41] that is generalizable to other
+problem domains. Our new interpretation component can be leveraged by other IS studies
+to provide precise interpretation for prediction tasks. The user studies can be adopted by IS
+research to evaluate interpretable ML methods. PrecWD is also a deployable information
+system for video-sharing sites. It is capable of predicting potentially popular videos and
+interpreting the factors. Video-sharing sites could leverage this system to actively monitor
+the predictors and manage viewership and content quality.
+Literature Review
+Video viewership prediction
+This study focuses on YouTube, as it is the most successful video-sharing site since its
+establishment in 2005 and constitutes the largest share of Internet traffic [42]. We do not
+use short-form videos (e.g., TikTok and Reels), because most of them use trending songs as
+the background sound without narratives. Those background songs are the templates
+provided by the platform that is irrelevant to the video content. The sound of most
+YouTube videos is the direct description of the video content, for which we designed
+many narrative-related features, such as sentiment and readability, that are relevant to
+video production. Viewership is essential for content creators, as it is the key metric used by
+video-sharing sites to pay them [42]. For the platforms, their user-generated content is
+constantly bombarded with violative videos, ranging from pornography, copyrighted
+material, violent extremism, to misinformation. YouTube has recently developed its AI544 J. XIE ET AL.
+system to prevent violative videos from spreading. This AI system’s effectiveness in finding
+rule-breaking videos is evaluated with a metric called the violative view rate, which is the
+percentage of views coming from violative videos [50]. This disclosure shows that video
+viewership is a vital measure for YouTube to track popular videos where credible videos can
+be approved and violative videos can be banned from publication.
+Recognizing the significance of video viewership prediction, prior studies have devel-
+oped conventional ML and deep learning models [33, 39, 42, 57]. Although reaching
+sufficient predictive power, these models fail to provide actionable insights for business
+decision-making due to the lack of interpretability. Studies show that decision-makers
+exhibit an inherent distrust of automated predictive models, even if they are more accurate
+than humans [46, 47]. Interpretability can increase trust in predictions, expose hidden
+biases, and reduce vulnerability to adversarial attacks, thus a much-needed milestone for
+fully harnessing the power of ML in decision-making.
+Interpretability definition and value proposition
+The definition of interpretability varies based on the domain of interest [37]. Two main
+definitions exist in the area of business analytics, predictive analytics, and social media
+analytics [16, 37, 46, 47]. One definition is the degree to which a user can trust and
+understand the cause of a decision [46]. The interpretability of a model is higher if it is
+easier for a user to trust the model and trace back why a prediction was made. Molnar [47]
+notes that interpretable ML should make the behavior and predictions of ML understand-
+able and trustworthy to humans. Under the first definition, interpretability is related to how
+well humans trust a model. The second definition suggests “AI is interpretable to the extent
+that the produced interpretation is able to maximize a user’s target performance” [16].
+Following this definition, Lee et al. [37] use usefulness to measure ML interpretability, as
+useful models lead to better decision-making performance.
+Interpretability brings extensive value to ML and the business world. The most signifi-
+cant one is social acceptance, which is required to integrate algorithms into daily lives.
+Heider and Simmel [30] show that people attribute beliefs and intentions to abstract objects,
+so they are more likely to accept ML if their decisions are interpretable. As our society is
+progressing toward the integration with ML, new regulations have been imposed to require
+verifiability, accountability, and more importantly, full transparency of algorithm decisions.
+A key example is the European General Data Protection Regulation (GDPR), which was
+enforced to provide data subjects the right to an explanation of algorithm decisions [14].
+For platforms interested in improving content quality management, an interpretable
+viewership prediction method not only identifies patterns of popular videos but also
+facilitates trust and transparency in their ML systems. For content creators, it takes
+significant time and effort to create such content. An interpretable viewership prediction
+method can recommend optimal prioritization of video features in the limited time.
+Interpretable machine learning methods
+We develop a taxonomy of the extant interpretable methods in Table 1 based on the data
+types, the type of algorithms (i.e., model-based and post hoc), the scope of interpretation
+(i.e., instance level and model level), and how they address interpretability..sdohtem
+gninrael
+enihcam
+elbaterpretni
+ni
+krow
+tneceR
+.1
+elbaT
+egasU
+dohteM
+ataD
+epocS
+ledoM
+egasU
+dohteM
+ataD
+epocS
+]ecnerefeR[
+ledoM
+desab-ledoM
+MAG
+ralubaT
+level-ledoM
+]01[
+MAG
+coh
+tsoP
+noitabrutreP
+ynA
+htoB
+]34[
+PAHS
+desab-ledoM
+D&W
+ralubaT
+level-ledoM
+]31[
+D&W
+coh
+tsoP
+noitabrutreP
+ynA
+htoB
+]25[
+EMIL
+desab-ledoM
+D&W
+ralubaT
+level-ledoM
+]9[ NNC-D&W
+coh
+tsoP
+porpkcaB
+ynA
+htoB
+]84[
+PRL
+desab-ledoM
+MAG
+ralubaT
+level-ledoM
+]16[
+MTSL-D&W
+coh
+tsoP
+porpkcaB
+egamI
+level-ecnatsnI
+]57[
+steN
+lanoitulovnoceD
+desab-ledoM
+D&W
+ralubaT
+level-ledoM
+]07[
+MTSLB-D&W
+coh
+tsoP
+MAG
+egamI
+level-ledoM
+]62[
+ECaC
+desab-ledoM
+D&W
+ralubaT
+level-ledoM
+]82[
+D&W
+esiweceiP
+coh
+tsoP
+porpkcaB
+egamI
+level-ecnatsnI
+]65[
+MAC-darG
+desab-ledoM
+DWcerP
+ynA
+htoB
+dohtem
+ruO
+desab-ledoM
+MAG
+ynA
+level-ledoM
+]5[
+MAN
+,PRL
+;krowemarf
+gninraeL
+peeD
+dna
+ediW
+,D&W
+;snoitanalpxE
+citsonga-ledoM
+elbaterpretnI
+lacoL
+,EMIL
+;ledoM
+evitiddA
+dezilareneG
+,MAG
+;snoitanalpxE
+evitiddA
+yelpahS
+,PAHS
+:snoitaiverbbA
+mret-trohs
+gnol
+lanoitceridib
+,MTSLB
+;gnirutcafunaM
+dediA
+retupmoC
+,MAC
+;skrowten
+yromem
+mret-trohs
+gnol
+,MTSL
+;krowteN
+larueN
+lanoitulovnoC
+,NNC
+;noitagaporP
+ecnaveleR
+esiW-reyaL
+.gninraeL
+peeD-dna-ediW
+esicerP
+,DWcerP
+;sledom
+evitidda
+laruen
+,MAN
+;skrowten
+yromem
+JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 545546 J. XIE ET AL.
+Various forms of data have been used to train and develop interpretable ML methods,
+including tabular [28, 61], image [26, 56], and text [5]. The scope of interpretation can be at
+either instance- or model-level. An interpretable ML method can be either embedded in the
+neural network (model-based) or applied as an external model for explanation (post hoc)
+[49]. Post hoc methods build on the predictions of a black-box model and add ad hoc
+explanations [26, 56]. Any interpretable ML algorithm that directly interprets the original
+prediction model falls into the model-based category [5, 10, 28]. For most model-based
+algorithms, any change in the architecture needs alteration in the method or hyperpara-
+meters of the interpretable algorithm.
+Post hoc methods can be backpropagation- or perturbation-based. The backpropagation-
+based methods rely on gradients that are backpropagated from the output layer to the input
+layer [75]. Yet, the most widely used are the perturbation-based methods. These methods
+generate explanations by iteratively probing a trained ML model with different inputs.
+These perturbations can be on the feature level by replacing certain features with zeros or
+random counterfactual instances. SHAP is the most popular perturbation-based post hoc
+method. It probes feature correlations by removing features in a game-theoretic framework
+[43]. LIME is another common perturbation-based method [52]. For an instance and its
+prediction, simulated randomly sampled data around the neighborhood of the input
+instance are generated. An explanation model is trained on this newly created dataset of
+perturbed instances to explain the prediction of the black-box model. SHAP and LIME are
+both feature additive methods that use an explanation model that is a linear function of
+P
+binary variables: gðz0Þ¼ϕ þ M ϕz0 [43]. The prediction of this explanation model
+0 i¼1 i i
+matches the prediction model fðxÞ [43]. Eventually can explain the attribution of each
+feature to the prediction.
+These post hoc methods have pitfalls. Laugel et al. [36] showed that post hoc models risk
+having explanations resulted from the artifacts learned by the explanation model instead of
+the actual knowledge from the data. This is because the most popular post hoc models SHAP
+and LIME use a separate explanation model gðz0Þto explain the original prediction model
+fðxÞ[43]. The model specifications of gðz0Þ are fundamentally different from fðxÞ. The
+feature contributions ϕ from gðz0Þare not the actual feature effect of the prediction model
+i
+fðxÞ. Therefore, the magnitude and direction of the total effect could be misinterpreted.
+Slack et al. [59] revealed that SHAP and LIME are vulnerable, because they can be arbitrarily
+controlled. Zafar and Khan [74] reported that the random perturbation that LIME utilizes
+results in unstable interpretations, even in a given model specification and prediction task.
+Addressing the limitations of post hoc methods, model-based interpretable methods have
+a self-contained interpretation component that is faithful to the prediction. The model-
+based methods are usually based on two frameworks: the GAM and the W&D framework.
+GAM’s outcome variable depends linearly on the smooth functions of predictors, and the
+interest focuses on inference about these smooth functions. However, for prediction tasks
+with many features, GAMs often require millions of decision trees to provide accurate
+results using additive algorithms. Also, depending on the model architecture, over-
+regularization reduces the accuracy of GAM. Many methods have improved GAMs:
+GA2M was proposed to improve the accuracy while maintaining the interpretability of
+GAMs [10]; NAM learns a linear combination of neural networks where each of them
+attends to a single feature, and each feature is parametrized by a neural network [5]. TheseJOURNAL OF MANAGEMENT INFORMATION SYSTEMS 547
+networks are trained jointly and can learn complex-shape functions. Interpreting GAMs is
+easy as the impact of a feature on the prediction does not rely on other features and can be
+understood by visualizing its corresponding shape function. However, GAMs are con-
+strained by the feature size, because each feature is assumed independent and trained by
+a standalone model. When the feature size is large and feature interactions exist, GAMs
+struggle to perform well [5].
+The W&D framework addresses the low- and high-order feature interactions in inter-
+preting the importance of features [13]. W&Ds are originally proposed to improve the
+performance of recommender systems by combining a generalized linear model (wide
+component) and a deep neural network (deep component) [13]. Since the generalized
+linear model is interpretable, as noted in Cheng et al. [13], soon this model has been
+recognized or used as an interpretable model in many applications [12, 28, 62, 68]. The wide
+component produces a weight for each feature, defined as the main effect, that can interpret
+the prediction. The deep component models high-order relations in the neural network to
+improve predictive accuracy. Since W&D, two categories of variants have emerged. The first
+category improves the predictive accuracy of W&D. Burel et al. [9] leveraged convolutional
+neural network (CNN) in the deep component to identify information categories in crisis-
+related posts. Han et al. [29] used a CRF layer to merge the wide and deep components and
+predict named entities of words. The second category improves the interpretability of
+W&D. Chai et al. [12] leveraged W&D for text mining interpretation. Guo et al. [28]
+proposed piecewise W&D where multiple regularizations are introduced to the total loss
+function to reduce the influence of the deep component on the wide component so that the
+weights of the wide component are closer to the total effect. Tsang et al. [62] designed an
+interaction component in W&D. This method was used to interpret the statistical interac-
+tions of housing price and rental bike count predictions.
+The W&D and its variants still fall short in two aspects. First, W&D uses the learned
+weights of the wide component wT (main effect) to interpret the prediction. wTonly reflects
+the linear component which is only a portion of the entire prediction model. Consequently,
+wT is not the total effect of the joint model. For instance, the weight w for feature x does
+1 1
+not imply that if x increases by one unit, the viewership prediction would increase w . The
+1 1
+real feature interpretation for x cannot be precisely reflected in w . This imprecise inter-
+1 1
+pretation also occurs in post hoc methods and GAMs, due to their interpretation mechan-
+isms. Post hoc methods, such as SHAP and LIME, use an independent explanation model as
+a proxy to explain the original prediction model. This separate explanation mechanism
+inherently cannot directly nor precisely interpret the original prediction model. GAMs
+interpret each feature independently using a standalone model, thus cannot interpret the
+precise feature effect when all the features are used together. Precise total effect is critical, as
+it affects the weight (importance) of feature effects, which determines the feature impor-
+tance order and effect direction. Correct feature importance order is essential for content
+creators to know which feature to prioritize. Given limited time, such order informs content
+creators of the prioritization of the work process. In addition, wT is constant for all values of
+x, which assumes the feature effect is insensitive to changes of feature value. This assump-
+tion does not hold in real settings. For instance, when a video is only minutes long,
+increasing one minute would significantly impact its predicted viewership. When a video
+is hours long, increasing one minute does not have a visible effect on predicted viewership.548 J. XIE ET AL.
+Second, unstructured data are not compatible with the W&D framework. The existing
+W&D framework enforces the wide component and the deep component to share inputs
+and be trained jointly, such that the wide component can interpret the deep component.
+The wide component in W&D is a linear model: fWðxÞ¼wTxþb, where x ¼
+½x ;x ;...;x � is a vector of d features, including raw input features and product-
+1 2 d
+transformed features [13]. The raw input features are numeric, including continuous
+features and vectors of categorical features [13]. The product transformation is
+Q
+ϕ ðxÞ¼ x� kið� 2f0;1gÞ, where x is the raw numeric input feature ½x ;x ;...;x �,
+k i i ki 1 2 d
+and � indicates whether the i-th feature appears in the k-th transformation. Both raw
+ki
+input features and product-transformed features are structured data. This is due to the
+structured nature of the linear model wTxþb. It is incapable of processing unstructured
+videos in this study, thus significantly limiting W&D’s performance in unstructured data
+analytics.
+Generative models for synthetic sampling
+In order to calculate the precise total effect, we develop a novel model-based interpretation
+method, which we will detail in the Proposed Approach section. Learning the data dis-
+tribution is critical for the precise total effect with a model-based interpretation method,
+which can be facilitated by synthetic sampling with generative models.
+Early forms of generative models date back to Bayesian Networks and Helmholtz machines.
+Such models are trained via an EM algorithm using variational inference or data augmentation
+[19]. Bayesian Networks require the knowledge of the dependency between each feature pair,
+which is useful for cases with limited features that have domain knowledge. When the feature
+size is large, constructing feature dependencies is infeasible and leads to poor performance.
+Recent years have seen developments in deep generative models. The emerging approaches,
+including Variational Autoencoders (VAEs), diffusion models, and Generative Adversarial
+Networks (GANs), have led to impressive results in various applications. Unlike Bayesian
+Networks, deep generative models do not require the knowledge of feature dependencies.
+VAEs use an encoder to compress random samples into a low-dimensional latent space
+and a decoder to reproduce the original sample [55]. VAEs use variational inferences to
+generate an approximation to a posterior distribution. Diffusion models include a forward
+diffusion stage and a reverse diffusion stage. In the forward diffusion stage, the input data is
+gradually perturbed over several steps by adding Gaussian noise. In the reverse stage,
+a model is tasked at recovering the original input data by learning to gradually reverse
+the diffusion process, step by step [15]. GANs are a powerful class of deep generative models
+consisting of two networks: a generator and a discriminator. These two networks form
+a contest where the generator produces high-quality synthetic data to fool the discriminator,
+and the discriminator distinguishes the generator’s output from the real data. Deep learning
+literature suggests that the generator could learn the precise real data distribution as long as
+those two networks are sufficiently powerful [19, 73]. The resulting model is a generator
+that can closely approximate the real distribution.
+Although VAEs, diffusion models, and GANs are emergent generative models, GANs are
+preferred in this study. VAEs optimize the lower variational bound, whereas GANs have no
+such assumption. In fact, GANs do not deal with any explicit probability density estimation.JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 549
+The requirement of VAEs to learn explicit density estimation hinders their ability to learn
+the true posterior distribution. Consequently, GANs yield better results than VAEs [7].
+Diffusion models are mostly tested in computer vision tasks. Its effectiveness in other
+contexts lacks strong evidence. Besides, diffusion models suffer from long sampling steps
+and slow sampling speed, which limits their practicality [15]. Without careful refinement,
+diffusion models may also introduce inductive bias, which is undesired compared to GANs.
+Proposed approach
+Problem formulation
+Let V denote a set of unstructured raw videos (v ;:::;v ). Let X denote the structured video
+1 N (cid:0) �
+features ðX ;...;X Þ. The feature values of a video v are represented by x ¼ x ;:::;x .
+1 M i i i;1 i;M
+The input to our model is X ¼ðX;VÞ. Viewership is operationalized as the average daily
+all
+views of a video (ADV), computed as the view counts to date divided by the video age in days.
+A longitudinal study about YouTube viewership shows that the average daily views are stable
+in the long term [71]. In other words, “older videos are not forgotten as they get older” [71].
+Many other studies have also used daily views as a variable of interest [23, 34, 71]. The
+intended practical use of our method is also to predict long-term viewership. For this purpose,
+ADV is an appropriate measure. The ADV of video v is denoted as adv. Our objective is to
+i i
+learn a model F to predict adv where adv ¼Fðx; vÞ, and interpret the precise total effect of
+i i i i
+each feature X on the output adv (ΔADV=X) in the given model and feature setting.
+j j
+PrecWD model for video viewership prediction and interpretation
+The proposed model builds upon the state-of-the-art W&D framework while addressing two
+challenges: 1) W&D cannot offer the precise total effect and its dynamic changes; 2) W&D can
+only process structured data. We propose PrecWD, consisting of the following subcomponents.
+Piecewise linear component
+Each feature X captures a different aspect of a video. Within each feature, hetero-
+j
+geneity between different values exists. It is essential to consider the homogeneity
+among similar feature values and the heterogeneity across different feature values.
+Specifically, we need to differentiate the varied feature effects when the feature is at
+different values. We leverage a piecewise linear function in the linear component,
+which is adopted from Guo et al. [28]. For the j-th feature, let β ¼
+� � � � j
+max x ji¼1;:::;N and δ ¼min x ji¼1;:::;N . We partition each feature into
+i;j h i h j i i;j � �
+γ(cid:0) 1 γ
+γ intervals: φ0;φ1 , . . ., φ j ;φ j , where φk ¼δ þ k β (cid:0) δ . The piecewise fea-
+j j j j j j j γ j j
+j
+ture vector for the i-th data point is550 J. XIE ET AL.
+8
+> > <1; x i;j>φk j:
+where ϕk i;j ¼ > >x φi k;j (cid:0)(cid:0) φφ kk j (cid:0)(cid:0) 11 ; φk j(cid:0) 1 �x i;j �φk j: This piecewise vector Φ i is then fed into a linear
+model: : j j
+0; otherwise
+(cid:0) �
+where wL T is the weight in the linear component, bL is the bias, and yL is the output.
+i
+Attention-based second-order component
+Prior studies suggest explicitly modeling feature interactions improves predictive accuracy
+[58]. In parallel with the piecewise linear component, we include an attention-based
+second-order component to model the feature interactions. The input to this component
+is X. For each video feature x i, the interaction term of x i;j and x i;j0 is denoted as
+s
+i;ðj;j0Þ
+¼x i;j�x i;j0. Each interaction term has a parameter. A set of M features will generate
+M2 interaction terms. This will cause the learnable parameters to grow quadratically as the
+feature size increases. To prevent such a quadratic growth and optimize computational
+complexity, we add an attention mechanism in the second-order component where the
+number of interactions is fixed. The attention-based component could scale to a large
+number of interactions while salient interaction terms still stand out. The attention
+mechanism assigns a score a to each interaction term s .
+i;ðj;j0Þ i;ðj;j0Þ
+where wA and bA are learnable parameters that are shared for all ðj;j0Þ. The attention
+score a is used to weigh the interaction terms. The output is as follows, where
+i;ðj;j0Þ
+P P
+wS is a learnable weight and M Ma s is the weighted sum of salient
+j j0 i;ðj;j0Þ i;ðj;j0Þ
+interaction terms.
+Nonlinear Higher-Order Component
+The third component is a deep neural network that captures higher-order effects. The
+number of hidden layers is determined using a grid search in the empirical analyses. The
+purpose of the higher-order component is to leverage deep learning to improve pre-
+dictive accuracy. Without loss of generality, for the i-th video, each hidden layer
+computes:
+where is the layer number. f is the ReLU. a , bH, and WH are the input, bias, and weight
+i;ðlÞ ðlÞ ðlÞ
+at the l-th layer. Therefore, the input of the first layer is the feature vector (i.e.; a ¼x).
+i;ð1Þ i
+The output of this component is given byJOURNAL OF MANAGEMENT INFORMATION SYSTEMS 551
+(cid:0) �
+where wH T is the learnable weight and L is the number of layers.
+Unstructured component
+The W&D enforces the wide component and deep component to share inputs so that the
+wide component can interpret the deep component. Since the wide component can only
+analyze structured data, the W&D is also restricted to structured data. However, videos are
+unstructured by nature. Obtaining high predictive accuracy in video analytics demands the
+capacity to process unstructured data. We relax the restraint of the subcomponents sharing
+inputs, because our proposed interpretation component could offer precise total effects
+without soliciting dependencies on the subcomponents. We extend the W&D with an
+unstructured component. The input to our model is X ¼ðX;VÞ. The structured and
+all
+practically meaningful features are grouped in X, which is fed to the previous three
+components. Unstructured video data are grouped in V that is fed into the unstructured
+component. Two approaches can incorporate the unstructured data into our model: either
+use a representation learning model to learn hidden features for V, then mix those hidden
+features with X; or design an unstructured component that can directly process raw videos
+and separate the unstructured effect from the structured effect. Both approaches are viable
+with our model, but we opt to the latter approach because the learned hidden features of V
+are not human-understandable. Therefore, V is more helpful in improving prediction
+accuracy rather than interpretability. Separating it from X could ensure that X can be
+cleaned up with the carefully designed, understandable, and practically meaningful video
+features. When using the wide component to process X, it will be very clear to see the main
+effect which can be compared with our total effect. We devise a hybrid VGG-LSTM
+architecture for processing videos, shown in Equations 8-11. A VGG-16 architecture is
+designed to process the video frames, and an LSTM layer is added on the top for frame-by-
+frame sequence processing. The last LSTM cell summarizes the video information for the i-
+th video v.
+i
+(cid:0) �
+where iU;fU;oU;gU are the gates, hU is the hidden state, and yU is the output.
+t i
+Precise interpretation component
+Our core contribution lies in the precise interpretation component. Our primary focus is to offer
+the precise total effect of viewership prediction. PrecWD predicts the outcome variable using552 J. XIE ET AL.
+where βþα X þ:::þα X denotes the main effect, SðX ;:::;X Þ denotes the second-
+1 1 M M 1 M
+order effect, Hðx ;:::;x Þ denotes the higher-order effect, and UðvÞ denotes the unstruc-
+1 n
+tured effect. We use ReLU because viewership is non-negative. Take feature X as the
+1
+illustration example, the existing W&Ds would use α to approximate the effect of X on the
+1 1
+prediction, which is different from the actual total effect of X that equals to the change of
+1
+d
+ADV when X increases by one unit. In order to model the precise total effect and its
+1
+dynamic changes, we predict the total effect of each feature at every value. The precise total
+effect of X when X ¼c is
+1 1
+UðvÞis non-negative. Therefore, the precise total effect of X is
+1
+Equation 14 is intractable because of the integral computation. In order to facilitate such
+computation, we utilize the Monte Carlo method. Equation 14 can be transformed to:
+(cid:0) �
+where x ¼c;x ;...;x denotes the k-th sample drawn from the distribution
+k;1 k;2 k;M
+pðX ¼c;X ;...;X Þ. In order to compute the precise total effect of X , it is
+1 2 M 1
+necessary to learn the distribution pðX ¼c;X ;...;X Þ, so that samples can be
+1 2 M
+drawn from it. X ;X ;...;X are very sparse in the Euclidean space when using
+1 2 M
+Monte Carlo method. In order to learn a smooth and accurate distribution, we
+embody a generative adversarial network (GAN) to learn pðX ¼c;X ;...;X Þ. To
+1 2 M
+overcome the instability issues of GANs, we leverage the Wasserstein GAN with
+gradient penalty (WGAN-GP). We cohesively embed WGAN-GP in our model. The
+learning loss of the discriminator in our proposed method is given by
+where Dð�Þis a score that measures the quality of the input sample. P is the real distribu-
+r
+tion. P is the learned distribution by the generator. ^x is sampled uniformly along the
+g
+straight lines between pairs of points sampled from P and P . The distribution of ^x is
+h i r g
+(cid:0) �
+denoted as P . E (cid:209) Dð^xÞ (cid:0) 1 2 is the gradient penalty. λ is a positive scalar to
+^x ^x,P^x ^x 2
+control the degree of the penalty. The loss of the generator is:
+The trained generator can closely approximate the real distribution P , which is fed
+r
+to Equations 12-17 to yield the precise total effects.
+Improving upon W&Ds, our approach corrects the feature effect from α to
+1
+Δ(cid:242) ...(cid:242) Ad DVðX ¼c;X ;...;X ÞpðX ¼c;X ;...;X ÞdðX Þ...dðX Þ. Such
+X2;...;XM 1 2 M 1 2 M 2 MJOURNAL OF MANAGEMENT INFORMATION SYSTEMS 553
+a difference is reflected in different feature rankings and weights, whose material
+impact on the interpretation is shown in the empirical analyses. Online supplemen-
+tary appendix 2 shows the PrecWD algorithm. Figure 1 shows its architecture.
+Novelty of PreCWD
+PrecWD has two original and novel elements: 1) The previous subsection proposes a novel
+interpretation component that differentiates from W&D. W&D approximates the total
+effect using the main effect, while our interpretation component is able to offer a precise
+total effect for the prediction using Equations 12-17. In order to capture the dynamic total
+effect for each feature, our model predicts the total effect at every feature value. 2) We also
+design an unstructured component that extends the applicability of W&D to unstructured
+data analytics.
+Empirical analyses
+Case study 1: Health video viewership prediction
+Data preparation
+Due to the societal impact of healthcare and the timeliness of COVID-19, we first examine
+the utility of PrecWD in health video viewership prediction. We collected videos from well-
+known health organizations’ YouTube channels, including NIH, CDC, WHO, FDA, Mayo
+Clinic, Harvard Medicine, Johns Hopkins Medicine, MD Anderson, and Jama. We gener-
+ated a dataset of 6,528 videos (298 GB). From the data perspective, this study falls into the
+category of unstructured analytics of viewership prediction, as we directly feed unstructured
+raw videos as well as video-based features into our model, in addition to webpage metadata.
+These video-based features and raw videos are directly relevant to video shooting and
+Figure 1. PrecWD architecture.554 J. XIE ET AL.
+editing, articulated in online supplementary appendix 3. This is in contrast with most
+existing viewership prediction studies that only use structured webpage metadata as fea-
+tures, such as duration, resolution, dimension, title, and channel ID, among others [42],
+which lack actionable instructions for video production. Our data size is large among
+unstructured predictive analytics studies [65, 72] and significantly larger than common
+video-based deep-learning analytics benchmarking datasets, which range from 66 to 4,000
+videos [17].
+The raw videos are directly fed into PrecWD via the unstructured component. We also
+generate the commonly adopted video features using BRISQUE. We utilize Liborosa to
+compute the acoustic features. In order to generate transcripts, we develop a speech
+recognition model based on DeepSpeech that achieves a 7.06 percent word error rate on
+the LibriSpeech corpus. The description, webpage, and channel features are extracted from
+the webpage. A description of all the features and practical actions on feature interpretation
+are available in online supplementary appendix 3. This case study presents the most
+prominent features, but our model is not confined to these features. It is a generalized
+precise interpretable model that can take other features as needed by the end users.
+Evaluation of predictive accuracy
+Based on the viewership prediction and interpretable ML literature, we design two groups of
+baselines: black-box (ML and deep learning) [20, 64, 66, 67, 76-78] and interpretable
+methods [13, 28, 61, 70]. The configurations of these baselines are reported in online
+supplementary appendix 4. For all the following analyses, we adopt 10-fold cross-
+validation where the dataset is divided into 10 folds. Each time we use one fold for test,
+one fold for validation, and eight folds for training. All the performances in the empirical
+analysis are the average performance of 10-fold cross-validation. Our model converged as
+evidenced in Table 2. Table 3 shows the prediction comparison with black-box methods.
+Following recent interpretable ML studies (reviewed in online supplementary appen-
+dix 5), since this study focuses on providing a new interpretation mechanism, our goal for
+the predictive accuracy comparison is to be at least on par with, if not better than, the best-
+performing black-box benchmarks, so that our prediction is reliable and trustworthy.
+Compared with the best ML method k-nearest neighbors (KNN-3), PrecWD reduces
+MSE by 17.815 (p < 0.001). Compared with the best deep learning method LSTM-2,
+PrecWD reduces MSE by 26.467 (p < 0.001). PrecWD remains the best when we fine-
+tune the benchmarks. These results suggest our prediction is reliable, even though the
+prediction improvement is not our primary contribution. The main downside of these
+black-box methods is that they cannot offer a feature-based interpretation, which is critical
+from the perspectives of trust, model adoption, regulatory enforcement, algorithm trans-
+parency, and practical implications and interventions for stakeholders. Extending the line of
+interpretability, we compare PrecWD with the state-of-the-art interpretable methods in
+Table 4. Compared with the best interpretable method W&D, PrecWD reduces MSE by
+35.072 (p < 0.001).
+Such enhanced predictive accuracy has a significant practical value. Content creators can
+use our model to help with promotional budget allocation. According to fiverr.com and
+veefly.com, increasing one view costs an average of $0.03. We perform a detailed benefit
+analysis in online supplementary appendix 6, which suggests that the average annual benefit
+of our prediction enhancement over the baseline is up to $6.57 billion, and the unreached.ssol
+tset
+dna
+gniniarT
+.2
+elbaT
+42
+32
+22
+12
+02
+91
+81
+71
+61
+51
+41
+31
+21
+11
+01
+9
+8
+7
+6
+5
+4
+3
+2
+1
+hcopE
+40.2
+40.2
+40.2
+40.2
+50.2
+60.2
+60.2
+70.2
+80.2
+90.2
+11.2
+21.2
+21.2
+31.2
+31.2
+41.2
+51.2
+61.2
+81.2
+91.2
+22.2
+72.2
+26.2
+75.3
+gniniarT
+61.2
+61.2
+61.2
+61.2
+61.2
+51.2
+51.2
+61.2
+51.2
+51.2
+51.2
+51.2
+71.2
+61.2
+61.2
+71.2
+71.2
+71.2
+81.2
+81.2
+91.2
+02.2
+12.2
+70.3
+tseT
+JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 555556 J. XIE ET AL.
+viewership is reduced by up to 73 billion views. Sponsors can use our model to understand
+the viewership of the sponsored videos. If content creators opt to pay for promotion to meet
+sponsors’ expectations, such cost will ultimately be transferred to the sponsorship cost, and
+the economic analysis is similar to that for the content creators.
+We fine-tune the hyperparameters of PrecWD in Table 5 to search for the best predictive
+performance. The hyperparameters include the number of hidden layers and the number of
+neurons in each layer. We also replace the higher-order component in PrecWD with other
+deep neural networks, including CNN, LSTM, and BLSTM, to evaluate our design choice. The
+final model has 3 dense layers in the higher-order component and 16 neurons in each layer.
+To ensure fair comparisons, all the baseline methods in Tables 3-4 underwent the same
+parameter-tuning process, and we reported the final aforementioned fine-tuned results.
+We further perform ablation studies to test the efficacy of the individual components of
+PrecWD. The upper part of Table 6 shows that removing any component of PrecWD
+negatively impacts the performance, suggesting optimal design choices. In order to test the
+effectiveness of each feature group, we remove each feature group stepwise and test its
+contribution to the performance. The lower part of Table 6 shows that removing any feature
+group will hamper the performance.
+Table 3. Prediction comparison of PrecWD with black-box methods.
+Outcome Variable: log(total view) Outcome Variable: ADV (add
+Outcome Variable: ADV (add published_days as a feature) published_days as a feature)
+Method MSE MSLE MSE MSLE MSE MSLE
+PrecWD (Ours) 165.442 0.992 2.411 0.031 165.296 0.991
+Linear regression 285.585*** 2.924*** 2.520** 0.044** 288.174*** 2.931***
+KNN-1 196.114*** 2.961*** 3.668*** 0.058*** 192.582*** 2.940***
+KNN-3 183.257*** 2.994*** 2.616*** 0.042** 182.735*** 2.990***
+KNN-5 398.577*** 4.294*** 2.507*** 0.039** 370.482*** 3.928***
+DT-MSE 382.407*** 3.624*** 4.062*** 0.066*** 378.914*** 3.615***
+DT-MAE 374.503*** 4.065*** 5.071*** 0.079*** 377.583*** 4.017***
+DT-Fredmanmse 216.523*** 2.701*** 4.438*** 0.069*** 214.485*** 2.700***
+SVR-Linear 185.616*** 4.726*** 3.553*** 0.054*** 185.583*** 4.722***
+SVR-RBF 219.136*** 2.836*** 3.540*** 0.054*** 210.105*** 2.807***
+SVR-Poly 201.043*** 3.658*** 3.575*** 0.054*** 197.530*** 3.644***
+SVR-Sigmoid 398.577*** 4.294*** 3.571*** 0.054*** 391.519*** 4.287***
+Gaussian Process-1 999.058*** 20.587*** 4.172*** 1.046*** 997.833*** 20.591***
+Gaussian Process-3 997.295*** 20.222*** 4.347*** 1.036*** 995.534*** 20.185***
+Gaussian Process-5 995.329*** 19.890*** 4.354*** 1.036*** 995.290*** 20.013***
+MLP-1 364.064*** 3.094*** 2.668*** 0.038* 366.852*** 3.152***
+MLP-2 351.437*** 2.852*** 2.635** 0.039* 353.429*** 2.862***
+MLP-3 281.090*** 2.728*** 2.721*** 0.042* 280.441*** 2.705***
+MLP-4 279.648*** 2.550*** 2.663*** 0.035* 277.118*** 2.503***
+CNN-1 207.271*** 1.453*** 2.785*** 0.037* 203.282*** 1.417***
+CNN-2 193.240*** 1.333*** 2.687*** 0.039* 196.350*** 1.352***
+CNN-3 199.997*** 1.414*** 2.824*** 0.039* 199.824*** 1.419***
+CNN-4 196.158*** 1.326*** 2.790*** 0.040* 198.525*** 1.332***
+LSTM-1 271.600*** 1.692*** 2.850*** 0.039* 275.219*** 1.728***
+LSTM-2 191.909*** 1.185*** 2.819*** 0.038* 193.542*** 1.194***
+BLSTM-1 354.760*** 1.942*** 2.724*** 0.037* 342.729*** 1.867***
+BLSTM-2 196.247*** 1.212*** 2.947*** 0.039** 193.573*** 1.202***
+Abbreviations: MSE, mean squared error; MSLE, mean squared log error; PrecWD, Precise Wide-and-Deep Learning; KNN,
+k-nearest neighbors; DT-MSE, design technology-mean squared error; DT-MAE, design technology-modal acoustic emis-
+sion; SVR, support vector regression; SVR-RBF, support vector regression-radial basis function; MLP, multilayer perception;
+CNN, convolutional neural network; LSTM, long short-term memory networks; BLSTM, bidirectional long short-term
+memory networks.
+Note: The details of the baseline models are reported in online supplementary appendix 4.
+*p < 0.05. **p < 0.01. ***p < 0.001..gninrael
+peed
+elbaterpretni
+htiw
+DWcerP
+fo
+nosirapmoc
+noitciderP
+.4
+elbaT
+)erutaef
+a
+sa
+syad_dehsilbup
+dda(
+VDA
+:elbairaV
+emoctuO
+)erutaef
+a
+sa
+syad_dehsilbup
+dda(
+)weiv
+latot(gol
+:elbairaV
+emoctuO
+VDA
+:elbairaV
+emoctuO
+ELSM
+ESM
+ELSM
+ESM
+ELSM
+ESM
+]ecnerefeR[
+dohteM
+199.0
+692.561
+130.0
+114.2
+299.0
+244.561
+)sruO(
+DWcerP
+***582.1
+***835.891
+*630.0
+**065.2
+***003.1
+***415.002
+]31[
+D&W
+***463.1
+***948.812
+*830.0
+***197.2
+***373.1
+***687.222
+]83[
+NNC-D&W
+***153.1
+***335.912
+*730.0
+**665.2
+***343.1
+***889.712
+]16[
+MTSL-D&W
+***032.1
+***417.802
+*530.0
+**955.2
+***332.1
+***577.802
+]07[
+MTSLB-D&W
+***996.1
+***081.072
+*930.0
+***708.2
+***696.1
+***502.862
+]82[
+01-D&W
+esiweceiP
+***483.1
+***185.032
+*730.0
+***059.2
+***093.1
+***009.132
+]82[
+02-D&W
+esiweceiP
+.4
+xidneppa
+yratnemelppus
+enilno
+ni
+detroper
+era
+sledom
+enilesab
+eht
+fo
+sliated
+ehT
+;slavretni
+i
+otni
+tupni
+eht
+edivid
+:i-D&W
+esiweceiP
+:etoN
+laruen
+lanoitulovnoc
+,NNC
+;krowemarf
+gninraeL
+peeD
+dna
+ediW
+,D&W
+;rorre
+gol
+derauqs
+naem
+,ELSM
+;rorre
+derauqs
+naem
+,ESM
+;gninraeL
+peeD-dna-ediW
+esicerP
+,DWcerP
+:snoitaiverbbA
+.skrowten
+yromem
+mret-trohs
+gnol
+lanoitceridib
+,MTSLB
+;skrowten
+yromem
+mret-trohs
+gnol
+,MTSL
+;krowten
+.100.0
+<
+p***
+.10.0
+<
+p**
+.50.0
+<
+p*
+JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 557.gninut-enfi
+retemaraprepyH
+.5
+elbaT
+-reyaL-krowteN-dohteM
+-reyaL-krowteN-dohteM
+-reyaL-krowteN-dohteM
+-reyaL-krowteN-dohteM
+ELSM
+ESM
+norueN
+ELSM
+ESM
+norueN
+ELSM
+ESM
+norueN
+ELSM
+ESM
+norueN
+489.0
+056.861
+61-2-MTSL-DWcerP
+080.1
+235.071
+46-2-NNC-DWcerP
+010.1
+039.761
+23-3-esneD-DWcerP
+510.1
+400.861
+61-1-esneD-DWcerP
+589.0
+385.171
+23-2-MTSL-DWcerP
+231.1
+689.471
+23-3-NNC-DWcerP
+040.1
+253.661
+46-3-esneD-DWcerP
+430.1
+523.961
+23-1-esneD-DWcerP
+699.0
+821.071
+61-1-MTSLB-DWcerP
+341.1
+582.871
+61-2-NNC-DWcerP
+072.1
+446.771
+61-1-NNC-DWcerP
+350.1
+535.171
+46-1-esneD-DWcerP
+499.0
+052.371
+23-1-MTSLB-DWcerP
+451.1
+359.971
+46-3-NNC-DWcerP
+303.1
+583.871
+23-1-NNC-DWcerP
+320.1
+330.861
+61-2-esneD-DWcerP
+299.0
+666.961
+61-2-MTSLB-DWcerP
+510.1
+494.571
+61-1-MTSL-DWcerP
+023.1
+992.081
+46-1-NNC-DWcerP
+610.1
+437.861
+23-2-esneD-DWcerP
+789.0
+232.961
+23-2-MTSLB-DWcerP
+599.0
+446.071
+23-1-MTSL-DWcerP
+450.1
+935.961
+23-2-NNC-DWcerP
+770.1
+895.071
+46-2-esneD-DWcerP
+299.0
+244.561
+61-3-esneD-DWcerP
+;skrowten
+yromem
+mret-trohs
+gnol
+,MTSL
+;krowten
+laruen
+lanoitulovnoc
+,NNC
+;gninraeL
+peeD-dna-ediW
+esicerP
+,DWcerP
+;rorre
+gol
+derauqs
+naem
+,ELSM
+;rorre
+derauqs
+naem
+,ESM
+:snoitaiverbbA
+.skrowten
+yromem
+mret-trohs
+gnol
+lanoitceridib
+,MTSLB
+558 J. XIE ET AL.JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 559
+Table 6. Ablation studies.
+Outcome Variable: log
+(total view) (add Outcome Variable: ADV
+Outcome Variable: published_days as (add published_days as
+ADV a feature) a feature)
+Method MSE MSLE MSE MSLE MSE MSLE
+PrecWD 165.442 0.992 2.411 0.031 165.296 0.991
+PrecWD without Unstructured Component 181.056** 1.060* 2.523** 0.037* 180.029** 1.057*
+PrecWD without Piecewise Linear Component 213.434*** 1.340*** 3.445*** 0.042** 215.283*** 1.352***
+PrecWD without Second-Order Component 187.401*** 1.107** 2.554** 0.037* 188.977*** 1.164**
+PrecWD without High-order Component 191.891*** 1.152** 2.584*** 0.038* 189.538*** 1.146**
+PrecWD with Simple Linear Encoding 189.712*** 1.063* 2.491* 0.037* 189.281*** 1.061*
+PrecWD with 10 Ordinal One-hot Encoding 190.224*** 1.047* 2.523** 0.038* 188.433*** 1.044*
+PrecWD with 20 Ordinal One-hot Encoding 186.767** 0.994 2.483* 0.037* 185.251** 0.992
+PrecWD with 10 Ordinal Encoding 191.969*** 1.149*** 2.477* 0.036* 191.025*** 1.087**
+PrecWD with 20 Ordinal Encoding 195.750*** 1.319*** 2.492* 0.037* 193.992*** 1.294***
+PrecWD without Attention 175.104* 1.053* 2.468* 0.037* 174.582* 1.046*
+All Features 165.442 0.992 2.411 0.031 165.296 0.991
+Without Webpage 189.535*** 1.153** 2.529** 0.035* 189.535*** 1.153**
+Without Unstructured 182.847*** 1.086** 2.492* 0.037* 182.539*** 1.084**
+Without Acoustic 177.610** 1.030 2.484* 0.036* 177.158** 1.033*
+Without Description 174.599* 1.018 2.455* 0.034 175.551** 1.027
+Without Transcript 170.482* 1.004 2.489* 0.036* 169.540* 0.998
+Without Channel 170.391* 1.006 2.493* 0.037* 169.574* 1.000
+Abbreviations: MSE, mean squared error; MSLE, mean squared log error; PrecWD, Precise Wide-and-Deep Learning.
+*p < 0.05. **p < 0.01. ***p < 0.001.
+Interpretation of PrecWD
+As our core contribution, PrecWD can offer precise total effect using the proposed inter-
+pretation component. The WGAN-GP layer in the interpretation component generates
+samples to learn the data distribution to facilitate the computation of Equations 12-17.
+While the standard GAN might have a convergence problem, WGAN-GP resolves this issue
+by penalizing the norm of the gradient of the discriminator with respect to its input.
+Figure 2a shows that the generator loss and discriminator loss both converge in this
+study. Figure 2b shows the discriminator validation loss shrinks together with the training
+loss and both converge, suggesting the discriminator does not overfit in this training
+process. We then evaluate the quality of the generated samples. Figure 3a shows the real
+samples and the generated samples are inseparable, suggesting the generated samples follow
+a distribution similar to the real ones. In addition, we use Principal Component Analysis to
+reduce the feature dimensions to 10 dimensions. Table 7 suggests that WGAN-GP can
+accurately generate samples whose distribution has no statistical difference from the real
+samples. We also examined alternative generative models, including VAE and Bayesian
+Network, whose generated samples differ from the real samples. This suggests that our
+generative process is accurate and is the best design choice. We further show the quality of
+the generated samples by presenting the two most important features in Figure 3b-c.
+WGAN-GP is able to generate very accurate distributions of these features. We plot the
+feature-based interpretations in Figure 4.
+The transcript and description features have a salient influence on the prediction. These
+features include medical knowledge, informativeness, readability, and vocabulary richness.
+The results show that one unit of increase2 in transcript readability results in an increase of
+757.402 predicted average daily views. Medical knowledge, operationalized as the number560 J. XIE ET AL.
+a.Discriminator/GeneratorLoss b.Train/ValidLoss
+Figure 2. Wasserstein generative adversarial networks with gradient penalty (WGAN-GP)
+convergence. a) Discriminator/generator loss and b) train/valid loss. Note: The Wasserstein loss requires
+using y = 1 and -1, rather than 1 and 0. Therefore, WGAN-GP removes the sigmoid activation from the
+final layer of the discriminator, so that predictions are no longer constrained to [0,1], but instead can be
+(–∞, ∞) (https://www.oreilly.com/library/view/generative-deeplearning/9781492041931/ch04.html).
+of medical terms [42], has a sizable influence on the prediction as well. One unit of increase
+in the transcript medical terms will raise the predicted average daily views by 440.649. This
+is because an easy-to-read and medically informative transcript or description is associated
+with higher viewership as the viewers attempt to seek medical information from these
+videos.
+The transcript and description sentiments also significantly affect the prediction.
+These sentiments in the video bring in personal opinions and experiences, which are
+relatable to viewers, thus enticing higher viewership. The channel features have a critical
+influence on the prediction as well. YouTube collects information from verified chan-
+nels, such as phone numbers. Verified channels signal authenticity and credibility to
+viewers. Therefore, the viewers are more likely to watch the videos posted by these
+channels.
+PrecWD is also capable of estimating the dynamic total effect. Figure 5 shows three
+randomly selected examples: description vocabulary richness, description readability, and
+transcript negative sentiment. Figure 5a shows that the total effect of description vocabulary
+richness is positive when its value is low. Such a total effect turns negative when description
+vocabulary richness is high. This is because when description vocabulary richness is low,
+enriching the vocabulary makes the language more appealing. As the vocabulary richness
+continues to increase, the description becomes too hard to comprehend and viewers lose
+interest in the video. Figure 5b shows that the total effect of description readability increases
+when the readability value increases. This could be because when the description is read-
+able, it is also easier for the viewers to understand the medical knowledge and other content
+in the video. Figure 5c indicates that the total effect of transcript negative sentiment
+increases when the value of transcript negative sentiment increases. When a video is
+enriched with negative sentiment, it usually contains opinions and commentaries, which
+may be relatable to the viewers’ experience or belief and even entice them to write
+comments. Those interactions in the comment section further enhance viewership.JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 561
+a.SampleDistribution b.DescriptionReadability
+3.c.TranscriptMedicalKnowledge
+Figure 3. Generated samples evaluation. a) Sample distribution; b) description readability; and
+c) transcript medical knowledge.
+Precise total effect versus main effect
+PrecWD offers the precise interpretation (total effect), while the existing approaches
+(W&D) could only approximate the interpretation using the main effect. The interpre-
+tation error correction by our model has significant improvement on the feature effects.
+For instance, our model interprets description readability to have a positive influence on
+viewership. This is because readable descriptions are easy to comprehend, thus attract-
+ing viewers. However, the existing approach (main effect) interprets description read-
+ability to have a negative influence, contradicting common perception. We also quantify
+the influence of the interpretation error correction in Table 8, where the total effect and
+the existing approaches (main effects and regressions) have many opposite signs and
+very distinct feature importance order. Such differences further validate the contribution
+of our precise interpretation component. The interpretation errors are the direct reason
+for mistrust of W&D, which we will show in the user study later. We also perform
+significance tests of the feature effects in online supplementary appendix 7. The vast
+majority of the feature effects are significant (p < 0.05). Only one low-ranked feature is
+not significant. Nevertheless, its total effect is close to zero as well.
+Our precise interpretation has significant practical value. To be paid by YouTube,
+a content creator needs to obtain 20,000 views, 4,000 watch hours, and 1,000 subscribers..PG-NAGW
+fo
+noitaulavE
+.7
+elbaT
+01
+pmoC
+9 pmoC
+8 pmoC
+7 pmoC
+6 pmoC
+5 pmoC
+4 pmoC
+3 pmoC
+2 pmoC
+1 pmoC
+ledoM
+cirteM
+930.0-
+491.0-
+230.0
+130.0
+752.0-
+751.0-
+401.0-
+700.0
+434.0
+190.2-
+laeR
+naeM
+130.0-
+750.0-
+150.0
+810.0
+271.0-
+713.0-
+592.0-
+771.0
+295.0
+370.2-
+PG-NAGW
+540.0
+*351.0
+300.0
+310.0-
+*342.0
+091.0
+692.0
+014.0-
+*073.0-
+***860.2
+EAV
+520.0
+790.0
+680.0-
+630.0-
+**581.0
+*482.0
+301.0
+622.0
+***656.0-
+***690.2
+naiseyaB
+323.0
+743.0
+674.0
+304.0
+324.0
+474.0
+155.0
+738.0
+157.0
+825.0
+laeR
+ecnairaV
+533.0
+374.0
+744.0
+305.0
+905.0
+754.0
+135.0
+707.0
+597.0
+607.0
+PG-NAGW
+**678.0
+161.1
+392.1
+073.1
+*625.1
+*674.1
+548.1
+916.1
+**905.2
+***528.1
+EAV
+634.1
+763.1
+213.1
+144.1
+*974.1
+**427.1
+446.1
+823.2
+***123.2
+***760.2
+naiseyaB
+.sredocneotuA
+lanoitairaV
+,EAV
+;ytlanep
+tneidarg
+htiw
+skrowten
+lairasrevda
+evitareneg
+nietsressaW
+,PG-NAGW
+:snoitaiverbbA
+.selpmas
+laer
+morf
+ecnereffid
+on
+snaem
+tnacfiingis
+toN
+.selpmas
+laer
+eht
+htiw
+selpmas
+detareneg
+eht
+gnirapmoc
+era
+stset
+ecnacfiingis
+ehT
+:etoN
+.100.0
+<
+p***
+.10.0
+<
+p**
+.50.0
+<
+p*
+562 J. XIE ET AL.JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 563
+Figure 4. Feature-based interpretation (normalized). Note: To compare the features in the same scale, we
+normalized the effect values. The x-axis is the weight of a variable. The higher the absolute value of the
+weight is, the more important the variable is.
+a. Description Vocabulary Richness b. Description Readability
+c. Transcript Negative Sentiment
+Figure 5. Examples of the dynamic total effect. a) Description vocabulary richness; b) description
+readability; and c) transcript negative sentiment.
+The precise interpretation of PrecWD can help content creators achieve these requirements
+by deriving three actions, which are inspired by related interpretable ML studies, reviewed
+in online supplementary appendix 8. First, we can sort the features by importance and
+understand what features are more important in predicting viewership, thus increasing trust
+from end users. Because monetary incentives are involved in practical usage, content564 J. XIE ET AL.
+creators, sponsors, and platforms thrive on adopting the most trustworthy model. Second,
+based on the feature importance order, our model can recommend the most effective
+features to prioritize for getting higher projected viewership. It also recommends the
+prioritization order of the work process for content creators when time is limited. Third,
+content creators can allocate a tiered budget to different features to reach the optimal
+predicted viewership given the fixed budget. Table 8 suggests when the feature effects are
+imprecise (baseline), the feature importance order can be significantly off, and the sign of
+the effect can even be the opposite of common perceptions. Our user study will later validate
+that the feature importance order and signs of feature effects of our precise interpretation
+are more trustworthy and helpful than other imprecise interpretations. Once qualified to be
+paid, content creators can earn money based on the number of views a video receives. They
+can also receive external sponsorships. YouTube’s pay rate hovers between $0.01 and
+$0.03 per view. PrecWD’s interpretation can guide content creators to make adjustments
+in production and improve viewership for higher returns. Online supplementary appendix 9
+provides a more detailed explanation of the actions that can be derived based on the feature
+interpretation.
+Case study 2: Misinformation viewership prediction
+Among all the videos, violative videos, such as misinformation videos, are the most
+concerning, as they lead viewers to institute ineffective, unsafe, costly, or inappropriate
+protective measures; undermine public trust in evidence-based messages and interventions;
+and lead to a range of collateral negative consequences [12]. Early identification and
+prioritized screening based on potential video popularity are the keys to minimizing
+undesired broad consequences of misinformation videos. This goal necessitates misinfor-
+mation viewership prediction as well as the understanding of the factors. Case study 2
+evaluates PrecWD by predicting misinformation viewership. A number of trusted sources
+have identified a set of misinformation videos on YouTube (Online supplementary appen-
+dix 10). We crawled these videos, resulting in 4,445 videos (208 GB of data).
+PrecWD achieved consistent leading performance. Table 9 shows that, compared to the
+best ML model (KNN-3), PrecWD drops mean squared error (MSE) by 11.398. Compared
+with the best deep learning method (CNN-3), PrecWD reduces MSE by 3.988. Compared
+with the best interpretable model (W&D), PrecWD reduces the MSE by 29.206. Ablation
+studies (Table 10) show that excluding any component negatively impacts the performance,
+suggesting good design choices. Table 11 shows the generated data distribution has no
+difference from the real data distribution. We also performed hyperparameter tuning
+(Online supplementary appendix 11). The conclusions are consistent with case study 1
+and in favor of our method.
+The enhanced prediction has profound practical values. According to the website Statista
+2020, the worldwide economic loss resulting from misinformation is about 78 billion
+dollars. With social media being a large part of people’s daily life and an important source
+of information, misinformation shared on these platforms account for a significant portion
+of the damage. Each view of the videos with health misinformation could lead to
+a significant burden on the healthcare system and result in negative outcomes for the
+patients. PrecWD offers a more accurate popularity estimation tool compared to other
+prediction models. Using this tool, YouTube is able to more precisely identify potentially.)dezilamron(
+)tceffe
+niam(
+hcaorppa
+gnitsixe
+.s.v
+)tceffe
+latot(
+noitaterpretni
+esicerP
+.8
+elbaT
+)redro-rehgih
+evomer(
+tceffE
+niaM
+s’DWcerP
+)noitcaretni(
+noissergeR
+raeniL
+)noitcaretni
+on(
+noissergeR
+raeniL
+tceffE
+niaM
+tceffE
+latoT
+erutaeF
+520.0-
+692.4
+252.3
+151.0-
+531.0-
+etartiB
+egarevA
+381.0-
+287.0-
+131.0-
+358.0-
+020.0-
+smargiB
+noitpircseD
+820.0
+057.0
+000.0
+350.0
+000.0
+rehpiC
+esU
+410.0-
+757.0
+000.0
+954.0-
+000.0
+etaR elpmaS
+oiduA
+485.0
+240.0-
+000.0
+259.
+1
+000.0
+tpircsnarT
+ni
+srebmuN
+fo
+ecnaraeppA
+580.1
+550.0-
+000.0
+258.1
+000.0
+noitazinagrO
+sI
+140.0
+600.0
+386.0
+002.0
+520.0
+noitpircseD
+ni
+srebmuN
+fo
+ecnaraeppA
+930.0
+670.0
+609.1-
+900.0
+480.0
+htgneL
+tpircsnarT
+775.2
+600.0
+998.1
+288.5
+680.0
+htgneL
+noitpircseD
+810.0-
+300.0-
+920.0
+002.0-
+501.0
+ssenevitamrofnI
+tpircsnarT
+795.0-
+630.0
+920.0-
+618.0-
+901.0
+smargiB
+tpircsnarT
+958.0
+160.0
+177.0-
+957.0
+041.0
+tnemitneS
+lartueN
+tpircsnarT
+185.1
+810.0-
+844.0
+902.4
+952.0
+tnemitneS
+evitisoP
+noitpircseD
+055.0-
+100.0-
+525.0
+288.0-
+103.0
+tnemitneS
+evitisoP
+tpircsnarT
+592.0
+500.0
+752.0-
+956.0
+853.0
+sgnitaR
+wollA
+851.0
+160.0
+237.0-
+001.0
+483.0
+noitaruD
+oediV
+940.0
+700.0-
+414.0
+959.2-
+093.0
+ytilibadaeR
+tpircsnarT
+725.0
+030.0
+440.0
+340.1
+693.0
+ssenevitamrofnI
+noitpircseD
+277.0
+400.0-
+066.1
+882.5
+004.0
+tnemitneS
+lartueN
+noitpircseD
+002.0-
+320.0-
+166.1-
+122.0-
+344.0
+defiireV
+sI
+385.0-
+200.0-
+253.0-
+681.0-
+305.0
+tnemitneS
+dnuopmoC
+tpircsnarT
+482.1
+700.0
+100.0
+694.0
+035.0
+egdelwonK
+deM
+noitpircseD
+885.1
+110.0-
+319.1-
+495.2
+335.0
+ssenhciR
+yralubacoV
+noitpircseD
+980.0-
+800.0
+000.0
+350.0-
+935.0
+skcarT
+oiduA
+.oN
+700.0-
+100.0-
+693.0-
+858.0
+935.0
+tnetnoC
+eviL
+sI
+385.1
+100.0
+869.0-
+495.2
+595.0
+tnemitneS
+evitageN
+noitpircseD
+500.0
+000.0
+858.0-
+990.0
+096.0
+tnemitneS
+dnuopmoC
+noitpircseD
+804.0
+000.0
+192.0-
+021.0
+487.0
+tnemitneS
+evitageN
+tpircsnarT
+591.1
+100.0
+600.0-
+061.1
+438.0
+ssenhciR
+yralubacoV
+tpircsnarT
+355.0-
+100.0-
+100.0
+885.1-
+049.0
+egdelwonK
+deM
+tpircsnarT
+747.1-
+100.0-
+344.3
+959.3-
+989.0
+ytilibadaeR
+noitpircseD
+osla
+era
+sehcaorppa
+rehto
+dna
+tceffe
+latot
+eht
+fo
+sgniknar
+ecnatropmi
+erutaef
+ehT
+.noitpecrep
+nommoc
+morf
+tnereffid
+era
+sngis
+esohw
+selpmaxe
+evisulcxe-non
+era
+seno dedlob
+ehT
+:etoN
+.tnereffid
+yltnacfiingis
+JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 565566 J. XIE ET AL.
+popular videos. This helps address the misinformation problem by prioritizing the screen-
+ing of potentially popular videos, thus minimizing the influence of misinformation in
+a more accurate manner.
+We also interpreted the prediction. The textual features and video sentiments are critical
+features associated with misinformation viewership. This interpretation sheds light on the
+management of content quality for video-sharing sites. They could monitor the transcript
+and description features. For instance, when videos show overwhelmingly negative content,
+they can be marked for credibility review to prevent the potential wide spread of misinfor-
+mation. The feature interpretation table and explanations are included in online supple-
+mentary appendix 11.
+Table 9. Prediction comparison of PrecWD with baseline models (case study 2).
+Outcome Variable: log(total view) Outcome Variable: ADV (add
+Outcome variable: ADV (add published_days as a feature) published_days as a feature)
+Method MSE MSLE MSE MSLE MSE MSLE
+PrecWD (Ours) 140.202 0.728 2.156 0.022 139.583 0.713
+Linear regression 881.027*** 3.184*** 2.453*** 0.056*** 880.529*** 3.180***
+KNN-1 227.479*** 2.421*** 3.445*** 0.056*** 222.100*** 2.392***
+KNN-3 163.061** 2.327*** 2.354*** 0.039*** 164.580*** 2.281***
+KNN-5 180.479*** 2.264*** 2.317*** 0.038*** 180.583*** 2.277***
+DT-MSE 284.387*** 3.362*** 4.082*** 0.061*** 280.491*** 3.365***
+DT-MAE 288.223*** 3.193*** 3.898*** 0.059*** 285.224*** 3.204***
+DT-Fredmanmse 299.519*** 3.435*** 3.771*** 0.060*** 295.186*** 3.402***
+SVR-Linear 185.644*** 4.924*** 3.503*** 0.052*** 183.584*** 4.885***
+SVR-RBF 185.989*** 4.901*** 3.539*** 0.052*** 186.351*** 4.923***
+SVR-Poly 192.951*** 4.910*** 3.898*** 0.057*** 190.740*** 4.905***
+SVR-Sigmoid 185.646*** 4.924*** 3.494*** 0.052*** 185.438*** 4.913***
+Gaussian Process-1 1290.452*** 8.487*** 3.057*** 5.974*** 1278.945*** 8.469***
+Gaussian Process-3 1287.329*** 8.446*** 4.327*** 6.038*** 1274.183*** 8.459***
+Gaussian Process-5 1283.331*** 8.439*** 4.337*** 6.046*** 1272.429*** 8.420***
+MLP-1 172.460*** 1.005*** 2.245** 0.029* 172.584*** 1.005***
+MLP-2 169.147*** 1.063*** 2.334*** 0.033** 170.291*** 1.074***
+MLP-3 162.249** 0.950** 2.349*** 0.030* 162.692** 0.982**
+MLP-4 181.192*** 0.932** 2.318*** 0.031* 181.583*** 0.941**
+CNN-1 245.382*** 1.377*** 2.235** 0.028** 244.592*** 1.358***
+CNN-2 158.040** 1.090*** 2.244** 0.029** 158.206** 1.024***
+CNN-3 155.651* 1.023*** 2.249** 0.026* 156.583** 1.050***
+CNN-4 169.584** 1.065*** 2.251** 0.029* 167.344** 1.068***
+LSTM-1 341.301*** 1.718*** 2.385*** 0.033** 342.590*** 1.738***
+LSTM-2 182.828*** 1.099*** 2.347*** 0.031** 185.493*** 1.184***
+BLSTM-1 367.261*** 1.661*** 2.356*** 0.028* 370.194*** 1.672***
+BLSTM-2 175.995*** 0.999*** 2.290*** 0.026* 175.143*** 0.999**
+W&D 180.869*** 1.067** 2.210* 0.025* 179.528*** 1.056***
+W&D-CNN 186.773*** 1.866*** 2.223* 0.027* 184.193*** 1.859***
+W&D-LSTM 183.719*** 1.598*** 2.229* 0.027* 184.511*** 1.740***
+W&D-BLSTM 206.321*** 2.454*** 2.231* 0.027* 203.776*** 2.406***
+Piecewise W&D-10 227.633*** 3.116*** 2.359*** 0.035** 219.261*** 3.055***
+Piecewise W&D-20 206.792*** 3.016*** 2.362*** 0.039*** 205.147*** 2.987***
+Abbreviations: MSE, mean squared error; MSLE, mean squared log error; PrecWD, Precise Wide-and-Deep Learning; KNN,
+k-nearest neighbors; DT-MSE, design technology-mean squared error; DT-MAE, design technology-modal acoustic emis-
+sion; SVR, support vector regression; SVR-RBF, support vector regression-radial basis function; MLP, multilayer perception;
+CNN, convolutional neural network; LSTM, long short-term memory networks; BLSTM, bidirectional long short-term
+memory networks; W&D, Wide and Deep Learning framework.
+*p < 0.05. **p < 0.01. ***p < 0.001.JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 567
+Table 10. Ablation studies (case study 2).
+Outcome Variable: log
+(total view) (add Outcome Variable: ADV
+Outcome variable: published_days as (add published_days as
+ADV a feature) a feature)
+Method MSE MSLE MSE MSLE MSE MSLE
+PrecWD 140.202 0.728 2.156 0.022 139.583 0.713
+PrecWD without Unstructured Component 151.259* 0.887* 2.257** 0.028* 150.582* 0.884*
+PrecWD without Piecewise Linear Component 175.136** 0.915* 2.384*** 0.033** 175.249** 0.920*
+PrecWD without Second-Order Component 155.984* 0.890* 2.300*** 0.031** 156.538* 0.894*
+PrecWD without High-order Component 159.354* 0.848 2.296** 0.029* 159.000* 0.841*
+PrecWD with Simple Linear Encoding 153.454* 0.872** 2.204* 0.025* 153.119* 0.870*
+PrecWD with 10 Ordinal One-hot Encoding 167.449** 0.938** 2.297** 0.028* 165.838** 0.923***
+PrecWD with 20 Ordinal One-hot Encoding 168.621** 0.968*** 2.284** 0.028* 167.206** 0.971***
+PrecWD with 10 Ordinal Encoding 195.510*** 0.862*** 2.319*** 0.031** 195.924*** 0.870***
+PrecWD with 20 Ordinal Encoding 195.510*** 0.862*** 2.303*** 0.029** 195.924*** 0.870***
+PrecWD without Attention 153.454* 0.872** 2.227* 0.024* 153.829* 0.869***
+Data Sources MSE MSLE MSE MSLE MSE MSLE
+All (Ours) 140.202 0.728 2.156 0.022 139.583 0.713
+Without Webpage 194.553*** 0.908** 2.219* 0.030* 194.553*** 0.908**
+Without Unstructured 164.936*** 0.779 2.202* 0.025* 164.821*** 0.776
+Without Acoustic 155.798** 0.817* 2.197* 0.026* 154.588** 0.801*
+Without Description 156.647** 0.832* 2.209* 0.026* 157.024** 0.846*
+Without Transcript 149.663* 0.770 2.214* 0.028* 148.763* 0.765
+Without Channel 147.250* 0.737 2.224* 0.028* 146.217* 0.720
+Abbreviations: MSE, mean squared error; MSLE, mean squared log error; PrecWD, Precise Wide-and-Deep Learning.
+*p < 0.05. **p < 0.01. ***p < 0.001.
+Evaluation of the precise interpretation component (descriptive accuracy)
+Since our precise interpretation component is the core contribution, this section compares
+PrecWD’s interpretability with the state-of-the-art interpretable frameworks. There is
+currently no standard quantitative method to evaluate interpretability. Consequently,
+most computer science studies only show interpretability without an evaluation [5, 10,
+75]. In the business analytics discipline, a few studies have reached a consensus that
+conducting user studies via lab or field experiments is the most appropriate approach to
+evaluate ML interpretability [8, 25, 37, 56]. They design surveys to ask participants to rate
+the interpretability of a model. Following this practice, we design a user study with five
+groups in Table 12. We recruited 174 students from two national universities in Asia. They
+were randomly assigned to one of these five groups. We selected nine control variables, and
+this study passed randomization checks, where the control variables, summary statistics,
+and randomization p-values are reported in online supplementary appendix 12. The full
+survey can be found in online supplementary appendix 13.
+The participants were assigned an ML model to predict the daily viewership of
+a YouTube video. We showed them the variables the model uses and the weights of the
+variables. We disclosed that the more reasonable these variables and weights are, the more
+accurate the prediction would be, and that their compensation is positively related to the
+prediction accuracy. To ensure the participants understand how to read the variables and
+weights, we designed a common training session for all participants. To avoid imposing any
+bias, the training session is context-free, and the variables are pseudo-coded as variables 1-7.
+We displayed a pseudo model in the training (Online supplementary appendix 14). We
+informed them the weight of a variable indicates its importance. We showed an example: “If.)2
+yduts
+esac(
+PG-NAGW
+fo
+noitaulavE
+.11
+elbaT
+01
+pmoC
+9 pmoC
+8 pmoC
+7 pmoC
+6 pmoC
+5 pmoC
+4 pmoC
+3
+pmoC
+2 pmoC
+1 pmoC
+ledoM
+cirteM
+200.0
+800.0
+020.0
+620.0-
+030.0
+640.0
+022.0-
+906.0
+984.0-
+770.2-
+laeR
+naeM
+200.0
+810.0
+800.0
+710.0-
+820.0
+240.0
+032.0-
+295.0
+025.0-
+111.2-
+PG-NAGW
+100.0-
+700.0
+010.0
+710.0-
+*200.0
+610.0
+512.0-
+795.0
+*955.0-
+780.2-
+EAV
+300.0-
+230.0-
+830.0-
+060.0
+060.0-
+401.0-
+***466.0
+***897.1-
+***865.1
+***472.6
+naiseyaB
+220.0
+010.0
+710.0
+620.0
+440.0
+080.0
+080.0
+211.0
+371.0
+823.0
+laeR
+ecnairaV
+520.0
+010.0
+310.0
+520.0
+840.0
+470.0
+380.0
+131.0
+261.0
+403.0
+PG-NAGW
+510.0
+400.0
+600.0
+400.0
+*710.0
+430.0
+340.0
+150.0
+*111.0
+811.0
+EAV
+748.2
+370.3
+582.3
+047.3
+653.4
+542.5
+***400.9
+***080.51
+***714.92
+***208.53
+naiseyaB
+.sredocneotua
+lanoitairav
+,EAV
+;ytlanep
+tneidarg
+htiw
+skrowten
+lairasrevda
+evitareneg
+nietsressaW
+,PG-NAGW
+:snoitaiverbbA
+.selpmas
+laer
+morf
+ecnereffid
+on
+snaem
+tnacfiingis
+toN
+.selpmas
+laer
+eht
+htiw
+selpmas
+detareneg
+eht
+gnirapmoc
+era
+stset
+ecnacfiingis
+ehT
+:etoN
+.100.0
+<
+p***
+.10.0
+<
+p**
+.50.0
+<
+p*
+568 J. XIE ET AL.JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 569
+Table 12. User study groups.
+Group Model Rationale
+A PrecWD Our model
+B W&D Best-performing interpretable baseline
+C Piecewise W&D State-of-the-art model-based interpretable model
+D SHAP (using our prediction model) State-of-the-art post hoc explanation model
+E VAE-based model Best-performing generative baseline
+Abbreviations: PrecWD, Precise Wide-and-Deep Learning; W&D, Wide and Deep Learning framework; SHAP, Shapley
+Additive Explanations; VAE, variational autoencoders.
+the weight of a variable is 0.3, this means increasing this variable by 1 unit, the predicted
+viewership will increase by 0.3 units.” After that, we designed the following two test
+questions to teach them how to read a model. If the participants choose an incorrect
+answer, an error message and a hint will appear on the screen (Online supplementary
+appendix 15). They need to find the correct answer before proceeding to the next page. This
+learning process ensures they can understand how to read the interpretation of a model.
+The pseudo model, test questions, error message, and hint wording are the same for all
+groups.
+Question 1: According to the above figure, when using the aforementioned model to predict the
+daily viewership of videos, what are the top two essential variables that have positive effects?
+(Options: Variable 1, Variable 2, Variable 3, Variable 4, Variable 5, Variable 6, Variable 7)
+Question 2: According to the weights in the figure, if variable 6 increases by 1 unit, how will
+the aforementioned model prediction of video viewership change? (Options: Increase by 0.3
+unit, Increase by 0.6 unit, Decrease by 0.3 unit, Decrease by 0.6 unit)
+We first ask the participants to watch the same YouTube video to familiarize the prediction
+target and context. This is a health video for tobacco education from WHO. We then show
+them a screenshot of the video webpage (Online supplementary appendix 16), depicting the
+Figure 6. Our model in user study 1.570 J. XIE ET AL.
+potential variables we can use for prediction. Then, we show them the variables and weights
+of their assigned model (Figure 6). We choose the seven most important variables by weight,
+because seven is considered the “Magical Number” in psychology and is the limit of our
+capacity to process short-term information [45]. To help the participants fully understand
+Figure 6, we design the following four test questions. If the participants choose an incorrect
+answer, an error message and a hint will appear on the screen, as shown in online
+supplementary appendix 17. They need to find the correct answer before proceeding to
+the next page. This learning process aims to teach them to understand the variables and
+weights of their assigned model. The wordings of the error message, hint, and test questions
+are the same across all groups.
+Question 3: According to the aforementioned figure, when using the above model to predict
+video viewership, please rank the following variables from the most important to the least
+important. Please put the most important variable on the top and the least important on the
+bottom. Hint: The importance of a variable can be measured by the weight of the variable.
+(Options: The seven variables in a randomized order)
+Question 4: What are the top 2 most essential variables in the aforementioned model?
+(Options: Four variables)
+Question 5: If the creator of the aforementioned video would like to increase video viewership,
+increasing/decreasing which variable is more effective? (Options: Four variables)
+Question 6: According to the aforementioned figure, if the variable in the bottom row
+increases by 1 unit, how will the model prediction of video viewership change? (Options:
+Four changes)
+After answering these questions correctly, the participants have a good understanding of
+the assigned model. We then ask them to rate the interpretability of their assigned model.
+Following literature review, we use two metrics of interpretability: trust in automated
+systems and model usefulness, adopted from Chai et al. [11] and Adams et al. [4]. The
+Cronbach’s Alpha is 0.963 for the trust in automated systems scale, and 0.975 for the
+usefulness scale, suggesting excellent reliability. The factor loadings are shown in online
+supplementary appendix 18, showing great validity. We designed an attention check ques-
+tion in the scales (“Please just select neither agree nor disagree”). After removing those who
+failed the attention check, 140 participants remained. We perform t-tests in Table 13 on
+PrecWD and the baseline groups to compare interpretability.
+Table 13. Interpretability comparison of PrecWD and interpretable methods.
+Group Mean of Interpretability: Trust Mean of Interpretability: Usefulness
+PrecWD 2.183 2.101
+W&D 1.820* 1.810*
+Piecewise W&D 0.676*** 0.548***
+SHAP 1.429*** 1.304***
+VAE 1.202*** 1.160***
+Abbreviations: PrecWD, Precise Wide-and-Deep Learning; W&D, Wide and Deep Learning framework; SHAP,
+Shapley Additive Explanations; VAE, variational autoencoders.JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 571
+Table 14. Number of participants in original and final model.
+Original: PrecWD Original: Baseline
+Switch to PrecWD 21 84
+Switch to Baseline 7 28
+Abbreviations: PrecWD, Precise Wide-and-Deep Learning.
+PrecWD has significantly better interpretability than the baseline models. Such improve-
+ment is attributed to PrecWD’s ability to capture the precise feature effects that lead to the
+most reasonable and trustworthy variables and ranking. Our model suggests that descrip-
+tion readability, medical knowledge, and video sentiment are the most influential variables
+in predicting the viewership of the given WHO video. These variables are in line with the
+literature which documented that readability [69], medical knowledge [42], and sentiment
+[69] are the driving factors for social media readership. Such alignment with prior knowl-
+edge and perception gained users’ trust. The feature effects in the baseline models, however,
+are imprecise due to the mismatch between the main effect and the total effect. Such
+a feature effect error results in many counter-intuitive variables and importance order in
+the baseline groups. These counter-intuitive variables are the direct reasons for mistrust in
+the baseline groups. For instance, W&D shows that the appearance of numbers in the video
+description is the most important variable, which has a minimal amount to do with the
+video content. Studies have shown that content characteristics are the leading factors for
+social media readership [32]. Users may find it difficult to believe the appearance of
+numbers could predict viewership. SHAP shows more audio tracks reduce viewership,
+which contradicts common sense, because more audio track options should attract more
+foreign language viewers. Piecewise W&D and VAE suggest the frequency of two-word
+phrases is the top variable, while content characteristics, such as medical knowledge and
+readability, are the least important. Such ranking is the inverse of common understanding
+and contradicts the literature [32, 69]. These counter-intuitive examples significantly reduce
+users’ trust in these models.
+After the participants rated interpretability, we conduct a supplementary study to investigate
+which model they would finally adopt. We inform the participants that, if they think the
+variables and weights of the previous model are not reasonable, they have a chance to change
+to a different model. Since we incentivized the participants to choose the most reasonable
+model, their final adoption indicates the model that they trust the most.3 Then we show the
+variables and weights of all the five models, similar to Figure 6. The order of the five models is
+randomized. We ask which model they would like to finally adopt for the prediction, and we
+measure the interpretability of the adopted model, reported in Tables 14 and 15.
+Table 15. Comparison of 1st and 2nd time interpretability.
+Interpretability Measurement
+Mean of 1st Time Mean of 2nd Time Mean of 1st Time Mean of 2nd Time
+Trust Trust Usefulness Usefulness
+PrecWD → PrecWD 2.418 2.635* 2.286 2.500
+Baseline → PrecWD 1.054 2.217*** 0.996 2.219***
+Abbreviations: PrecWD, Precise Wide-and-Deep Learning.572 J. XIE ET AL.
+Figure 7. Models in user study 2 (Left: PrecWD, Right: SHAP).
+Table 16. User study 2.
+Group Mean of Interpretability: Trust Mean of Interpretability: Usefulness
+PrecWD 2.080 2.007
+SHAP 1.470 ** 1.300 **
+Abbreviations: PrecWD, Precise Wide-and-Deep Learning; SHAP, Shapley Additive Explanations.
+A total of 105 participants (75 percent) finally adopted our model. Table 15 shows that,
+for those who finally adopted our model, the second-time interpretability is higher than the
+first time. This is because after the participants see all five models, the relative advantage of
+our model is even more obvious, causing them to rate the interpretability of our model
+higher the second time.
+SHAP’s interpretation only shows the feature importance. It cannot reveal the unit-
+increase effect as our model does. To compare our model and SHAP in the same format,
+we conduct a second user study with two groups (N = 65) from a university in Asia. For each
+group, we only show the feature importance without the unit-increase effect (the weight),
+depicted in Figure 7. Such display shows the variables, their relative importance, and effect
+direction, in which our model and SHAP are already significantly different. Such a difference
+sufficiently attributes to interpretability variance. The second user study uses the same control
+variables and deploys a similar training session, randomization checks, and attention checks,
+reported in Appendices 19-20. After removing those who failed the attention checks, 55
+participants remained. Table 16 suggests our model’s interpretability still outperforms SHAP.
+Discussion
+Implications to IS knowledge base
+In line with the design science research guidelines [31], this study identifies an impactful
+problem in social media analytics: video viewership prediction and interpretation. We devel-
+oped a novel information system that predicts video viewership while interpreting the pre-
+dictors. We conducted comprehensive evaluations and interpretations of the information
+system and design two user studies to assess its utility. This study also fits in the computational
+genre of design science research [51]. Our study develops an interdisciplinary approach that
+involves a novel computational algorithm and an analytical solution to a major societal problem,JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 573
+thus holding great potential for generating IS research with significant societal impact [3, 20, 33,
+41, 65, 72].
+Implications to methodology and IS design theory
+PrecWD uniquely models unstructured data and proposes a novel interpretation component
+to offer precise total effect and its dynamic changes. Our model shows two generalizable
+design principles for model development: 1) Generative models can assist the interpretation
+of predictive models (based on the model interpretation and the user study result); 2) Raw
+unstructured data can complement crafted features in prediction (based on Tables 6 and 10).
+These design principles along with PrecWD provide a “nascent design theory” [27, 40] for the
+design science paradigm of IS studies. Using these design principles, PrecWD can be general-
+ized to understand the underlying factors of predictive analytics in other problem domains.
+Implications to practice
+This study offers many practical implications. For video-sharing sites, PrecWD is
+a deployable analytics system that can predict video viewership and offer the interpretation
+of the prediction. Our model provides insights to monitor video popularity where credible
+videos can be approved and violative videos can be banned before they are published, thus
+minimizing widespread infiltration of violative videos. Content creators can leverage our
+model to predict video viewership in order to determine where to allocate more promo-
+tional funds. Our interpretation ensures the trust of the model and gives content creators
+actionable directions to understand the importance of features and optimize the prioritiza-
+tion of video features in their workflow.
+Limitations and future directions
+First, we focus on long-form videos. Future work can design new features related to the song
+templates of short-form videos. New models can be devised to consider the implicit
+relationship between short-form video content and background song templates. Second,
+content creators could pay for promotion to increase video exposure, which cannot be
+observed publicly. Our features may miss the influence of paid promotions. Nevertheless,
+this issue is mitigated because most of our videos are collected from non-profit health
+organizations that publish educational videos. They have little monetary incentive to pay for
+promotions. Third, recommendations, shares on social networks, long tail, and Mathew
+effects could influence viewership. Omitting them is another limitation. It is challenging to
+estimate these effects on a video as they vary significantly among different viewers. We did
+not attempt to capture these effects in our features. However, the video features reflect the
+video type, quality, visual and audio effects, and more, which affect whether users would
+actually watch a recommended video. Channel-level features (e.g., verification) also impli-
+citly characterize the social network, long tail, and Mathew effects, because verified channels
+are usually more influential. Therefore, our features partially mitigate this limitation.
+Fourth, since SHAP and model-based methods have different underlying interpretation
+mechanisms. Quantitatively comparing them in the absolute same presentation is not
+achievable. User study 2 offers the most approximate comparison design. Nevertheless,574 J. XIE ET AL.
+post hoc methods like SHAP have been repeatedly recommended against usage because of
+their unfaithful, vulnerable, and unstable issues. Fifth, as a shared limitation of most
+interpretable ML models, the interpretation implies correlation not causation. While such
+correlation can be used to derive many actionable recommendations, these models cannot
+directly use the feature weights to derive causal actions. To derive causal actions, studies can
+incorporate econometric models into ML models. Such a causal ML discipline is a largely
+different yet interesting paradigm for future work.
+Conclusion
+This study proposes PrecWD for viewership prediction and interpretation. To address the
+pitfalls of prior interpretable frameworks, our study incorporates an unstructured compo-
+nent and innovatively captures the precise total effect as well as its dynamic changes.
+Empirical results indicate PrecWD outperforms strong baselines. Two user studies confirm
+that the interpretability of PrecWD is significantly better than other interpretable methods,
+particularly in improving trust and model usefulness. These findings offer implementable
+actions for content creators and video-sharing sites to optimize the video production
+process and manage content quality.
+Notes
+1 In May 2020, a video called “Plandemic” featured a prominent anti-vaxxer falsely claiming that
+billionaires were helping to spread the virus to increase use of vaccines. By the time YouTube
+removed the video, it had already hit 7.1 million views [63]. Other examples are in online
+supplementary appendix 1.
+2 This unit effect is consistent with the interpretation format of linear regression. Although the
+prediction capability of linear regression is weak, it offers an easily understandable and largely
+accepted interpretation mechanism. The weight β of a variable is usually interpreted as when
+i
+X increases one unit, y will increase i. This unit effect format has been commonly adopted in
+i
+many interpretable machine learning studies for various applications [24]. Readability is the
+(cid:0) � � �
+Flesch Reading Ease, formulated as: 206:835(cid:0) 1:015 totalwords (cid:0) 84:6 totalsyllables , which is
+totalsentences totalwords
+the most popular and the most widely tested and used readability measurement by marketers,
+research communicators, and policy writers, among many others. Increasing readability means
+using fewer words in a sentence and using words with fewer syllables.
+3 After the survey, we disclosed how their model performed in relative to the other four models.
+We compensated them with different-valued office supplies in the end, according to the model
+performance ranking.
+Disclosure statement
+No potential conflict of interest was reported by the authors.
+Funding
+This research was carried out with the support of the “University of Delaware General University
+Research” fund. Yidong Chai is supported by National Natural Science Foundation of China
+(72293581, 91846201, 72293580, 72188101).JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 575
+Notes on contributors
+Jiaheng Xie (jxie@udel.edu) is an Assistant Professor in the Department of Accounting & MIS at the
+University of Delaware’s Alfred Lerner College of Business and Economics. His research interests are
+interpretable deep learning, health risk analytics, and business analytics. His prior works have been
+published in premier journals, including MIS Quarterly and Journal of Management Information
+Systems.
+Yidong Chai (chaiyd@hfut.edu.cn; corresponding author) received his PhD at Tsinghua University,
+China. He is a researcher in the School of Management of Hefei University of Technology,
+Philosophy and Social Sciences Laboratory of Data Science and Smart Society Governance of
+Ministry of Education, and Key Laboratory of Philosophy and Social Sciences for Cyberspace
+Behaviour and Management, in China. Dr. Chai’s research interests include machine learning,
+cybersecurity, business intelligence, and health informatics.
+Xiao Liu (xiao.liu.10@asu.edu) is an Assistant Professor in the Department of Information Systems at
+Arizona State University. She received her PhD in Management Information Systems from the Eller
+College of Management at the University of Arizona. Dr. Liu’s research interests include data science
+and predictive analytics in healthcare, education, and fintech. Her work has appeared in several
+academic journals and peer-reviewed conferences, such as MIS Quarterly, Journal of Management
+Information Systems, Journal of Medical Internet Research, Journal of the American Medical
+Informatics Association, and the Proceedings of International Conference in Information Systems,
+among others.
+References
+1. Abbasi, A.; Albrecht, C.; Vance, A.; and Hansen, J. Metafraud: Ameta-learning framework for
+detecting financial fraud. MIS Quarterly, 36, 4 (2012), 1293–1327.
+2. Abbasi, A.; Zhang, Z.; Zimbra, D.; Chen, H.; and Nunamaker, J.F. Detecting fake websites: The
+contribution of statistical learning theory. MIS Quarterly, 34, 3 (2010), 435–461.
+3. Abbasi, A.; Zhou, Y.; Deng, S.; and Zhang, P. Text analytics to support sense-making in social
+media: A language-action perspective. MIS Quarterly, 42, 2 (2018), 427–464.
+4. Adams, D.A.; Nelson, R.R.; and Todd, P.A. Perceived usefulness, ease of use, and usage of
+information technology: A replication. MIS Quarterly, 16, 2 (1992), 227–247.
+5. Agarwal, R., Melnick, L., Frosst, N., Zhang, X., Lengerich, B., Caruana, R., and Hinton, G.E.
+Neural additive models: Interpretable machine learning with neural nets. In Advances in
+Neural Information Processing Systems, 2021, 34, pp. 4699–4711.
+6. Akpinar, E.; and Berger, J. Valuable virality. Journal of Marketing Research, 54, 2 (2017),
+318–330.
+7. Alqahtani, H.; Kavakli-Thorne, M.; and Kumar, G. Applications of Generative Adversarial
+Networks (GANs): An updated review. Archives of Computational Methods in Engineering, 28,
+(2021), 525–552.
+8. Bastani, O.; Kim, C.; and Bastani, H. Interpreting blackbox models via model extraction. arXiv,
+arXiv preprint arXiv:1705.08504. (2017).
+9. Burel, G.; Saif, H.; and Alani, H. Semantic wide and deep learning for detecting
+crisis-information categories on social media. In International Semantic Web Conference.
+2017, pp. 138–155.
+10. Caruana, R.; Lou, Y.; Gehrke, J.; Koch, P.; Sturm, M.; and Elhadad, N. Intelligible models for
+healthcare: Predicting pneumonia risk and hospital 30-day readmission. Proceedings of KDD,
+(2015), 1721–1730.
+11. Chai, S.; Das, S.; and Rao, H.R. Factors affecting bloggers’ knowledge sharing: An investigation
+across gender. Journal of Management Information Systems, 28, 3 (2014), 309–342.
+12. Chai, Y.; Li, W.; Zhu, B.; Liu, H.; and Jiang, Y. An interpretable wide and deep model for online
+disinformation detection. SSRN Electronic Journal, SSRN 3879632 (2022).576 J. XIE ET AL.
+13. Cheng, H.T.; Koc, L.; Harmsen, J.; Shaked, T.; Chandra, T.; Aradhye, H.; Anderson, G.;
+Corrado, G.; Chai, W.; Ispir, M.; Anil, R. Wide & deep learning for recommender systems.
+In Proceedings of the 1st workshop on deep learning for recommender systems. 2016, pp. 7–10.
+14. Cichy, P.; Salge, T.O.; and Kohli, R. Privacy concerns and data sharing in the internet of things:
+Mixed methods evidence from connected cars. MIS Quarterly, 45, 4 (2021), 1863–1891.
+15. Croitoru, F.-A.; Hondru, V.; Ionescu, R.T.; and Shah, M. Diffusion models in vision: A survey.
+IEEE Transactions on Pattern Analysis and Machine Intelligence, 14, 8 (2022), 1–22.
+16. Dhurandhar, A.; Iyengar, V.; Luss, R.; and Shanmugam, K. TIP: Typifying the interpretability
+of procedures. arXiv, preprint arXiv:1706.02952. (June 2017).
+17. Dong, L.I.U.; Yue, L.I.; Jianping, L.I.N.; Houqiang, L.I.; and Feng, W.U. Deep learning-based
+video coding: A review and a case study. ACM Computing Surveys, 53, 1 (2019), 1–35.
+18. Duan, W.; Gu, B.; and Whinston, A.B. The dynamics of online word-of-mouth and product
+sales—An empirical investigation of the movie industry. Journal of Retailing, 84, 2 (2008),
+233–242.
+19. Ebrahimi, M.; Chai, Y.; Samtani, S., and Chen, H. Cross-lingual cybersecurity analytics in the
+international dark web with adversarial deep representation learning. MIS Quarterly, 46, 2
+(2022) 1209–1226.
+20. Ebrahimi, M.; Nunamaker, J.F.; and Chen, H. Semi-supervised cyber threat identification in
+dark net markets: A Transductive and deep learning approach. Journal of Management
+Information Systems, 37, 3 (2020), 694–722.
+21. Fang, X.; Hu, P.J.-H.H.; Li, Z. (Lionel) L.; and Tsai, W. Predicting adoption probabilities in
+social networks. Information Systems Research, 24, 1 (2013), 128–145.
+22. Ferguson, R. Word of mouth and viral marketing: Taking the temperature of the hottest trends
+in marketing. Journal of Consumer Marketing, 25, 3 (2008), 179–182.
+23. Fortuna, G.; Schiavo, J.H.; Aria, M.; Mignogna, M.D.; and Klasser, G.D. The usefulness of
+YouTubeTM videos as a source of information on burning mouth syndrome. Journal of oral
+rehabilitation, 46, 7 (2019), 657–665.
+24. Garnica-Caparrós, M.; and Memmert, D. Understanding gender differences in professional
+European football through machine learning interpretability and match actions data. Scientific
+Reports, 11, 1 (2021), 1–14.
+25. Goldstein, J.M.; Hofman, D.G.; Wortman Vaughan, J.; Poursabzi-Sangdeh, F.; Goldstein, D.G.;
+Hofman, J.M.; and Wallach, H. Manipulating and measuring model interpretability. In
+Conference on Human Factors in Computing Systems. 2021, pp. 1–52.
+26. Goyal, Y.; Feder, A.; Shalit, U.; and Kim, B. Explaining Classifiers with Causal Concept Effect
+(CaCE). arXiv, preprint arXiv:1907.07165 (July 2019).
+27. Gregor, S.; and Hevner, A. Positioning and presenting design science research for maximum
+impact. MIS Quarterly, 37, 2 (2013), 337–355.
+28. Guo, M.; Zhang, Q.; Liao, X.; and Zeng, D.D. An interpretable neural network model through
+piecewise linear approximation. arXiv, preprint arXiv:2001.07119 (2020).
+29. Han, Y.; Chen, W.; Xiong, X.; Li, Q.; Qiu, Z.; and Wang, T. Wide & deep learning for
+improving named entity recognition via text-aware named entity normalization. In Thirty-
+Third AAAI Conference on Artificial Intelligence. 2019.
+30. Heider, F.; and Simmel, M. An experimental study of apparent behavior. The American Journal
+of Psychology, 57, 2 (1944), 243–259.
+31. Hevner, A.R.; March, S.T.; Park, J.; and Ram, S. Design science in information systems
+research. MIS Quarterly, 28, 1 (2004), 75–105.
+32. Jaakonmäki, R.; Müller, O.; and vom Brocke, J. The impact of content, context, and creator on
+user engagement in social media marketing. In HICSS. 2017, pp. 1152–1160.
+33. Karahanna, E.; Xu, S.X.; Xu, Y.; and Zhang, N. The needs-affordances-features perspective for
+the use of social media. MIS Quarterly, 42, 3 (2018), 737–756.
+34. Koch, C.; Werner, S.; Rizk, A.; and Steinmetz, R. MIRA: Proactive music video caching using
+convnet-based classification and multivariate popularity prediction. In 26th IEEE International
+Symposium on Modeling, Analysis and Simulation of Computer and Telecommunication
+Systems. 2018, pp. 109–115.JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 577
+35. Krijestorac, H.; Garg, R.; and Mahajan, V. Cross-platform spillover effects in consumption of
+viral content: A quasi-experimental analysis using synthetic controls. Information Systems
+Research, 31, 2 (2020), 449–472.
+36. Laugel, T.; Lesot, M.-J.; Marsala, C.; Renard, X.; and Detyniecki, M. The dangers of post-hoc
+interpretability: Unjustified counterfactual explanations. In Proceedings of the Twenty-Eighth
+International Joint Conference on Artificial Intelligence (IJCAI-19). 2019, pp. 2801–2807.
+37. Lee, D.; Manzoor, E.; and Cheng, Z. Focused Concept Miner (FCM): Interpretable deep
+learning for text exploration. SSRN Electronic Journal, SSRN 3304756 (May 2018).
+38. Lee, J.W.; and Chan, Y.Y. Fine-grained plant identification using wide and deep learning
+model. In 2019 International Conference on Platform Technology and Service. 2019, pp. 1–5.
+39. Li, J.; Larsen, K.; and Abbasi, A. Theoryon: A design framework and system for unlocking
+behavioral knowledge through ontology learning. MIS Quarterly, 44, 4 (2020), 1733–772.
+40. Lin, Y.K.; Chen, H.; Brown, R.A.; Li, S.H.; and Yang, H.J. Healthcare predictive analytics for
+risk profiling in chronic care. MIS Quarterly, 41, 2 (2017), 473–495.
+41. Lin, Y.-K.; and Fang, X. First, do no harm: Predictive analytics to reduce in-hospital adverse
+events. Journal of Management Information Systems, 38, 4 (2021), 1122–1149.
+42. Liu, X.; Zhang, B.; Susarla, A.; and Padman, R. Go to YouTube and Call Me in the Morning:
+Use of Social Media for Chronic Conditions. MIS Quarterly, 44, 1 (2020), 257–283.
+43. Lundberg, S.M.; and Lee, S.-I. A unified approach to interpreting model predictions. In
+Advances in Neural Information Processing Systems 2017. 2017.
+44. Mai, F.; Shan, Z.; Bai, Q.; Wang, X. (Shane); and Chiang, R.H.L. How does social media impact
+bitcoin value? A Test of the silent majority hypothesis. Journal of Management Information
+Systems, 35, 1 (2018), 19–52.
+45. Miller, G.A. The magical number seven, plus or minus two: Some limits on our capacity for
+processing information. Psychological Review, 63, 2 (1956), 81–97.
+46. Miller, T. Explanation in artificial intelligence: Insights from the social sciences. Artificial
+Intelligence, 267, (2019), 1–38.
+47. Molnar, C. Interpretable Machine Learning. Lulu. com, 2019.
+48. Montavon, G.; Binder, A.; Lapuschkin, S.; Samek, W.; and Müller, K.-R. Layer-wise relevance
+propagation: An overview. Lecture Notes in Computer Science, (2019), 193–209.
+49. Murdoch, W.J.; Singh, C.; Kumbier, K.; Abbasi-Asl, R.; and Yu, B. Definitions, methods, and
+applications in interpretable machine learning. Proceedings of the National Academy of Sciences
+of the United States of America, 116, 44 (2019), 22071–22080.
+50. NYTimes. YouTube discloses percentage of views that go to videos that break its rules - The
+New York Times. 2021. Accessed 16 April 2023. https://www.nytimes.com/2021/04/06/technol
+ogy/youtube-views.html .
+51. Rai, A. Editor’s comments: diversity of Design Science Research. MIS Quarterly, 41, 1 (2017), iii–
+xviii.
+52. Ribeiro, M.T.; Singh, S.; and Guestrin, C. “Why should I trust you?” Explaining the predictions
+of any classifier. Proceedings of the ACM SIGKDD International Conference on Knowledge
+Discovery and Data Mining, (2016), 1135–1144.
+53. Ruby, D. YouTube Statistics (2022) — Updated data, facts & figures shared! DEMANDSAGE,
+2022. Accessed April 16, 2023. https://www.demandsage.com/youtube-stats/ .
+54. Saboo, A.R. Using big data to model time-varying effects for marketing resource (RE)
+allocation. MIS Quarterly, 40, 4 (2016), 911–939.
+55. Samtani, S.; Chai, Y., and Chen, H. Linking exploits from the dark web to known vulnerabilities
+for proactive cyber threat intelligence: An attention-based deep structured semantic model MIS
+Quarterly, 46, 2 (2021), 911–946.578 J. XIE ET AL.
+56. Selvaraju, R.R.; Cogswell, M.; Das, A.; Vedantam, R.; Parikh, D., and Batra, D. Grad-CAM:
+Visual explanations from deep networks via gradient-based localization. In Proceedings of the
+IEEE international conference on computer vision, (2017), 618–626.
+57. Shin, D.; He, S.; Lee, G.M.; Whinston, A.B.; Cetintas, S.; and Lee, K.-C. Enhancing Social Media
+Analysis with Visual Data Analytics: A Deep Learning Approach. MIS Quarterly, 44, 4 (2020),
+1459–1492.
+58. Siegmund, N.; Kolesnikov, S.S.; Kästner, C.; Apel, S.; Batory, D.; Rosenmüller, M.; Saake, G. Predicting
+performance via automated feature-interaction detection. In International Conference on Software
+Engineering (ICSE). IEEE, 2012, pp. 167–177.
+59. Slack, D.; Hilgard, S.; Jia, E.; Singh, S.; and Lakkaraju, H. Fooling LIME and SHAP: Adversarial
+attacks on post hoc explanation methods. In Proceedings of the AAAI Conference on AI, Ethics,
+and Society. 2020, pp. 180–186.
+60. Stieglitz, S.; and Dang-Xuan, L. Emotions and information diffusion in social media -
+Sentiment of microblogs and sharing behavior. Journal of Management Information Systems,
+29, 4 (2013), 217–248.
+61. Tosun, N.; Sert, E.; Ayaz, E.; Yilmaz, E.; and Gol, M. Solar power generation analysis and
+forecasting real-world data using LSTM and autoregressive CNN. In In 2020 International
+Conference on Smart Energy Systems and Technologies. 2020, pp. 1–6.
+62. Tsang, M.; Cheng, D.; and Liu, Y. Detecting statistical interactions from neural network
+weights. In ICLR 2018. 2018.
+63. Vynck, G. de, and Lerman, R. Facebook and YouTube are still full of covid misinformation -
+The Washington Post. The Washington Post, 2021. Accessed April 16, 2023.https://www.
+washingtonpost.com/technology/2021/07/22/facebook-youtube-vaccine-misinformation/
+64. Xie, J.; Liu, X.; Zeng, D.; and Fang, X. Understanding reasons for medication nonadherence:
+An exploration in social media using sentiment-enriched deep learning approach. In ICIS 2017
+Proceedings. 2017.
+65. Xie, J.; Liu, X.; Zeng, D.D.; and Fang, X. Understanding medication nonadherence from social
+media: A sentiment-enriched deep learning approach. MIS Quarterly, 46, 1 (2022), 341–372.
+66. Xie, J.; and Zhang, B. Readmission risk prediction for patients with heterogeneous hazard: A
+trajectory-aware deep learning approach. In ICIS 2018 Proceedings. 2018.
+67. Xie, J.; Zhang, Z.; Liu, X.; and Zeng, D. Unveiling the hidden truth of drug addiction: A social
+media approach using similarity network-based deep learning. Journal of Management
+Information Systems, 38, 1 (2021), 166–195.
+68. Xie, L.; Hu, Z.; Cai, X.; Zhang, W.; and Chen, J. Explainable recommendation based on
+knowledge graph and multi-objective optimization. Complex & Intelligent Systems 2021 7:3,
+7, 3 (2021), 1241–1252.
+69. Yang, M.; Ren, Y.; and Adomavicius, G. Understanding user-generated content and customer
+engagement on Facebook business pages. Information Systems Research, 30, 3 (2019), 839–855.
+70. Ye, H.; Cao, B.; Peng, Z.; Chen, T.; Wen, Y.; and Liu, J. Web services classification based on
+wide & Bi-LSTM model. IEEE Access, 7, (2019), 43697–43706.
+71. Yu, H.; Xie, L.; and Sanner, S. The lifecyle of a Youtube video: Phases, content and popularity.
+In International AAAI Conference on Web and Social Media. 2015, pp. 533–542.
+72. Yu, S.; Chai, Y.; Chen, H.; Brown, R.A.; Sherman, S.J.; and Nunamaker, J.F. Fall detection with
+wearable sensors: A hierarchical attention-based convolutional neural network approach.
+Journal of Management Information Systems, 38, 4 (2021), 1095–1121.
+73. Yu, S.; Chai, Y.; Chen, H.; Sherman, S.J.; and Brown, R.A. Wearable sensor-based chronic
+condition severity assessment: An adversarial attention-based deep multisource multitask
+learning approach. MIS Quarterly, Forthcoming, (2022).
+74. Zafar, M.R.; and Khan, N. Deterministic local interpretable model-agnostic explanations for
+stable explainability. Machine Learning and Knowledge Extraction, 3, 3 (2021), 525–541.
+75. Zeiler, M.D.; and Fergus, R. Visualizing and understanding convolutional networks. Lecture
+Notes in Computer Science, (2014), 818–833.JOURNAL OF MANAGEMENT INFORMATION SYSTEMS 579
+76. Zhang, D.; Zhou, L.; Kehoe, J.L.; and Kilic, I.Y. What online reviewer behaviors really matter?
+Effects of verbal and nonverbal behaviors on detection of fake online reviews. Journal of
+Management Information Systems, 33, 2 (April 2016), 456–481.
+77. Zhu, H.; Samtani, S.; Brown, R.A.; and Chen, H. A deep learning approach for recognizing
+activity of daily living (adl) for senior care: Exploiting interaction dependency and temporal
+patterns. MIS Quarterly, 45, 2 (2021), 859–896.
+78. Zhu, H.; Samtani, S.; Chen, H.; and Nunamaker, J.F. Human identification for activities of daily
+living: A deep transfer learning approach. Journal of Management Information Systems, 37, 2
+(2020), 457–483.Copyrightof Journalof ManagementInformationSystemsisthepropertyof Taylor&Francis
+Ltdanditscontentmaynotbecopiedor emailedtomultiplesitesor postedtoalistserv
+withoutthecopyrightholder's express writtenpermission.However, users mayprint,
+download,or emailarticlesfor individualuse.

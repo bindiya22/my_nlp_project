@@ -1,0 +1,432 @@
+2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+Machine Learning in Wireless Link Estimation: A
+Comparative Study of Supervised, Unsupervised,
+and Deep Learning Approaches
+Hoang-Long Nguyen1,2,∗,Ngoc-Nhat Huynh1,2,∗, Huy-Tan Thai1,2, Khanh-Hoi Le-Minh1,2
+1University of Information Technology, Ho Chi Minh City, Vietnam
+2Vietnam National University, Ho Chi Minh City, Vietnam
+Email: {21522304, 21522416}@gm.uit.edu.vn, {tanth, hoilmk}@uit.edu.vn
+*: The authors have the same contribution
+Abstract—The proliferation of Internet of Things devices link estimation faces significant challenges mainly due to
+demands reliable wireless connections against negative envi- channel variation. This is because the transverse channels
+ronmental factors and signal interference. In this paper, we
+are often affected by interference. Signal damping and envi-
+present a comprehensive comparative analysis of about 17 ronmental vibrations make the estimation more complicated.
+machine learning algorithms with different settings, including
+unsupervised,supervised,anddeeplearningmodels,forwireless
+link estimation. We evaluate the accuracy and adaptability of B. Motivation for using machine learning in wireless esti-
+these algorithms under various connection conditions in two mation
+datasets: the publicly available dataset from Colorado and a
+custom dataset collected using Raspberry Pi 4 devices. The To address the challenges in wireless link estimation,
+key finding reveals that while deep learning models achieve various methodologies have been proposed to enhance ac-
+superior performance, they are more prone to overfitting than curacy and adaptability. Traditional estimation methods [2],
+traditionalmachinelearningapproaches.Notably,unsupervised
+[3] tend to rely on mathematical models created to describe
+modelsstruggletofindmeaningfulclusterstructuresincomplex
+thecommunicationchannels,whichcanbechallengingwhen
+datasets but achieve high accuracy on simpler ones. Based on
+this finding, researchers in this field can have insights into dealing with complex and rapidly changing conditions in
+the strengths and limitations of machine learning approaches, challenging environments. This often results in low urgency
+offeringapracticalfoundationfordevelopingmoreeffectiveand and poor productivity in real-world scenarios. To address
+adaptablealgorithmsforwirelesslinkestimationindiverseIoT
+these limitations, machine learning (ML) has emerged as
+environments.
+a promising solution. Machine learning algorithms could
+Index Terms—Wireless link estimation, Machine learning,
+Deep learning, Network performance evaluation. effectivelyextractcomplexpatternsfromdata,enablingmore
+flexible and adaptive estimation models. Unlike traditional
+I. INTRODUCTION methods, they could learn not only complicated network
+features but also their relationship to identify the impact of
+A. Context of wireless link estimation
+environmental conditions on the signal. Therefore, machine
+The growth of the Internet of Things (IoT) and wireless learningalgorithmsoffermoreflexibleandadaptiveapproach
+sensor devices deployed extensively across urban and rural to identifying and responding to high-impact factors, which
+environments, has been notable in recent years. However, are based on supervised learning [4]–[8] and unsupervised
+in wireless networks, signal radio is affected by various learning[9],[10].RegardingsupervisedML,theauthorin[4]
+temporalandspatialfactors,presentingsignificantchallenges proposedamodelbasedonGradientBoostingDecisionTrees
+for consistent communication. Thus, robust wireless link (GBDT) to assess the link quality, classified into four labels:
+estimationtechniques areessential fordynamically adjusting good, average, bad, and very bad. Instead of using models
+radio link parameters in response to changing environmental to evaluate link quality, the authors in [5] used models to
+conditions[1].Indetail,wirelessconnectionestimationisthe predict link quality. This approach enabled the detection of
+processofdeterminingandevaluatingthequalityofthecom- link breaks or routing changes before packet loss occurred.
+municationchannelbetweenatransmitterandreceiverwithin Their model was evaluated based on two network features:
+a wireless system. This process typically involves measuring RSSI and Packet Delivery Ratio (PDR). For unsupervised
+andanalyzingsignalstoestimatechannelcharacteristicssuch ML, Gregor et al. [9] introduced a process for developing
+as signal strength, noise level, and delay. It then adjusts models to detect link exceptions. By sorting and selecting
+transmission parameters to enhance signal quality, minimize the results with the best accuracy, they achieved up to
+errors, and optimize resource utilization. However, wireless 96% accuracy depending on the exception type. The authors
+979-8-3315-4204-7/24/$31.00 ©2024 IEEE
+43241801.4202.05736SIACCI/9011.01
+:IOD
+|
+EEEI
+4202©
+00.13$/42/7-4024-5133-8-979
+|
+)SIACCI(
+secneicS
+noitamrofnI
+dna
+noitamotuA
+,lortnoC
+no
+ecnerefnoC
+lanoitanretnI
+ht31
+4202
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:09 UTC from IEEE Xplore. Restrictions apply.2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+TABLE I: Supervised ML algorithms are used to evaluate
+in [10] constructed an efficient algorithm, namely kernel
+the datasets.
+powerdensity(KPD)togroupmultipathcomponents(MPCs)
+by analyzing the density variations of the K most recent
+Algorithm Hyper-parameter
+components.
+criterion = [’gini’,
+Decision Trees
+’entropy’, ’log loss’]
+C. Overview of Existing Works and Research Gaps
+criterion = [’gini’,
+Random Forest
+Although ML has been applied to link estimation in many ’entropy’, ’log loss’]
+studies, a comprehensive evaluation of various algorithms kernel= [’linear’, ’poly’,
+SVC
+on multiple datasets remains lacking, particularly in unsu- ’rbf’, ’sigmoid’]
+pervised learning and changing channel conditions. Existing KNN algorithm = [’ball tree’, ’kd tree’]
+studiestypicallyfocusonapplyingspecificmachinelearning
+criterion = [’friedman mse’,
+algorithms to solve the link estimation problem, rather than Gradient Boosting
+’squared error’]
+providing a broader comparative analysis. Therefore, this
+study aims to bridge this gap by providing a comprehensive
+review of various machine learning algorithms, particularly a) Decision trees: are commonly used to solve classi-
+focusingonunsupervisedandsupervisedlearning.Thisstudy fication and regression problems. This algorithm recursively
+not only expands the existing knowledge, but also provides divides the dataset into smaller subgroups based on features
+deeper insights into potential solutions to address the current to create branching conditions, yielding individual predic-
+challenges in this research field. tions at each leaf [11]. This algorithm is highly interpretable
+due to its transparent rules.
+D. Objectives and Contributions of the Paper b) Random forests: leverages the power of multiple
+decision trees to enhance accuracy and mitigate the risk
+Light by the identified research gaps, this paper presents
+of overfitting [12]. Unlike a single decision tree, Random
+a systematic review of both supervised and unsupervised
+Forests constructs multiple trees from random samples of
+machinelearningalgorithmsforwirelesslinkestimation.The
+data, each making its own prediction. Its final output is the
+primary goal is to assess the classification performance of
+average (in regression problems) or majority vote (in classi-
+these algorithms across various datasets, providing a com-
+fication problems). This ensemble approach makes Random
+prehensive comparative analysis. In sum, the contributions
+Forests more stable and less sensitive to noise in the data
+of this paper are as follows:
+than individual decision trees.
+• We conduct a comparative analysis of machine learn- c) SVC: focuses on finding an optimal hyperplane to
+ing algorithms for wireless link estimation, including maximize the distance between classes based on the nearest
+various unsupervised, supervised, and deep learning data points, known as ”support vectors” [13]. SVCs are
+models.Thisanalysisaimstoidentifythemosteffective capable of handling complex classification problems through
+approaches for dealing with the complexities of real- the use of kernels, which transform data into a higher-
+world wireless environments. dimensional feature space. The main advantage of SVCs is
+• We comprehensively analyze the current limitations their ability to perform efficiently on datasets with a small
+in machine learning-based wireless link estimation. It number of samples but a large number of features.
+serves as a baseline for proposing future research direc- d) KNN: is a simple yet powerful machine learning
+tions and potential improvements in the application of algorithm that predicts a new data point’s value based on
+machinelearningalgorithmstowirelesslinkestimation. its ”K” nearest neighbors [14]. Despite its simplicity, KNN’s
+performance can be affected by noisy data and is inefficient
+II. METHODOLOGY with computationally expensive when dealing with large
+datasets.
+This paper employs traditional and deep learning mod-
+e) Gradient Boosting: is an ensemble technique that
+els to conduct experiments on two datasets, described in
+constructsastrongmodelbycombiningmultipleweaklearn-
+Section II-B. The traditional machine learning algorithms,
+ers, particularly decision tree [15]. It enhances performance
+encompass both supervised and unsupervised approaches, as
+by adding these learners sequentially to minimize a defined
+detailed in Section II-A1 and II-A2, respectively. The deep
+loss function through gradient descent optimization.
+learning models are outlined in Section II-A3.
+2) Unsupervised Machine Learning Algorithms: Table II
+lists unsupervised algorithms and its hyperparameter com-
+A. Algorithms
+monly used in machine learning tasks as described below:
+1) SupervisedMachinelearningAlgorithms: Asshownin a) GaussianMixture: isaprobabilisticmodelassuming
+TableI,severalsupervisedalgorithmsandtheirhyperparame- data points are generated from a combination of Gaussian
+tersareevaluatedinourworkforthewirelesslinkestimation distributions [16], while each distribution is assigned to a
+task. The details for each algorithm is described below: cluster.Thoughcomputationallyfastandcapableofassigning
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:09 UTC from IEEE Xplore. Restrictions apply.2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+TABLEII:UnsupervisedMLalgorithmsareusedtoevaluate
+decisions, and thereby increasing its reliability in practical
+datasets.
+applications.
+Algorithms Hyper-parameter b) Deep Neural Networks (DNNs): are a popular ar-
+chitecture in deep learning, consisting of multiple layers of
+covariance type = [’full,
+Gaussian Mixture interconnected neurons. When used for tabular data, DNNs
+’tied’, ’diag’, ’spherical’]
+face challenges due to the heterogeneity of features and po-
+covariance type = [’full,
+Bayesian Gaussian Mixture tential nonlinear relationships between variables. Therefore,
+’tied’, ’diag’, ’spherical’]
+data preprocessing, including normalization and encoding of
+K-Means algorithm=[’lloyd’, ’elkan’]
+categorical variables, is important to achieve good perfor-
+Bisecting K-Means algorithm=[’lloyd’, ’elkan’]
+mance.
+linkage=[’ward’, ’complete’,
+Agglomerative Clustering c) Entity Embeddings: is a method that employs em-
+’average’, ’single’]
+bedding techniques to represent categorical variables as nu-
+merical vectors, enabling neural networks to learn relation-
+ships between categorical values [21]. It helps reduce data
+datapointstomultipleclusters,GMcanberesource-intensive
+dimensionality and enhances the model’s performance when
+for large datasets and may require multiple initializations to
+processing tabular data. By capturing hidden features within
+avoid local optima.
+categorical variables, these embedding vectors contribute to
+b) TheBayesianGaussianMixture(BGM): isavariant
+improved model prediction accuracy.
+of GM that uses the Bayesian approach, which produces
+d) TabTransformer: is based on the Transformer archi-
+score estimates for all variables as well as uncertainty in
+tecture and optimized for handling categorical variables in
+the posterior distribution of these estimates [17]. In detail,
+tabular data [22]. With the attention layer, TabTransformer
+Bayesianassumesapriordistributionforθ,adistributionthat
+finds complex relationships between categorical values and
+represents the degree of likelihood of each possible value of
+combines them with continuous features through densely
+θ beforethedataisobserved.Thentodeduceθ,BGMneeds
+connected layers. It is designed to scale and efficiently
+to consider the conditional distribution of θ. This represents
+manage complex data. However, this also requires a high
+the updated beliefs about θ after incorporating the data.
+computational resource and needs to be carefully tuned to
+c) K-Means: aclassichardclusteringalgorithm,defini-
+achieve the best performance.
+tively assigns data points to a single cluster [18]. This
+e) Neural Oblivious Decision Ensembles (NODE): is
+algorithmattemptstoidentifyclustercentersandassignsdata
+a hybrid model between a neural network and a decision
+points based on their proximity, often using Euclidean dis-
+tree[23].NODEuseslayersofrandomdecisiontreesduring
+tanceasameasureofsimilarity.K-Meansdoesnotguarantee
+training to learn nonlinear relationships between variables,
+that the output of cluster centers is the same for each run
+andcombinesthemwithneuralnetworkstoenhancetherep-
+because it depends on the cluster centers being initialized.
+resentation. This model has demonstrated high performance
+d) Bisecting K-Means: is a hybrid approach based
+in many problems involving tabular data, even outperform-
+on K-Means and hierarchical clustering, aiming for im-
+ing models such as XGBoost or Random Forest. However,
+proved cluster quality in less time, particularly with large
+training NODE can be complex and requires tuning many
+datasets [19]. It iteratively divides a cluster using K-Means
+hyperparameters to achieve the best results.
+with k =2 until a predefined number of clusters is obtained.
+f) DeepGBM: isahybridmodel,constructedfromdeep
+ComparedtostandardK-Means,it’scomputationallyefficient
+neural networks (DNNs) and Gradient Boosting Machine
+for numerous clusters and less sensitive to initial conditions.
+(GBM) models such as XGBoost [24]. This model utilizes
+However,bothalgorithmscansufferfromconvergingtolocal
+GBMstogeneratenewfeaturesfromtheoriginaldata,which
+minima.
+are then used as input for the neural network. This helps to
+e) Agglomerative Clustering: is one of the two com-
+takeadvantageofthegeneralizationabilityofDNNsandthe
+monlyusedclusteringtechniques.Atfirst,thisalgorithmcon-
+nonlinear processing power of GBMs.
+siders each data point as an individual cluster and gradually
+g) AutoInt (Automatic Feature Interaction Learning via
+merges the two closet clusters into a new cluster until the
+Self-Attentive Neural Networks): employs the self-attention
+desired number of clusters is satisfied. The distance between
+mechanism to automatically learn how features interact with
+clusterscanbecalculatedbyvariouslinkagecriteria,suchas
+each other in tabular data [25]. This model requires manual
+ward or single.
+compilationoffeaturesorinteractionsbetweenvariables.Au-
+3) Deep learning Models:
+toInt,capableofautomaticallylearningcomplexrelationships
+a) TabNet: is a Transformer-based model, designed for
+from data, proves particularly valuable in scenarios where
+tabular data by Google Cloud AI [20]. It identifies the most
+inter-variable relationships are challenging to identify.
+relevant features at each step, incorporating the attention
+B. Dataset
+mechanismanddecisiontreealgorithmtoeffectivelyprocess
+both continuous and categorical data. In addition, TabNet is This paper utilizes two datasets to benchmark the above
+self-explanatory, helping users better understand the model’s machine learning and deep learning models.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:09 UTC from IEEE Xplore. Restrictions apply.2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+The first dataset from [26], named data col, comprises accuracy of approximately 92% and an F1-score of 88%.
+579,203 samples and 14 features, such as x coordinate, In particular, SVC shows significant performance variability
+y coordinate, tx pow, rssi, rssi mean. Irrelevant features, across different kernel types. The polynomial kernel yields
+includingfile name, coordinate,y coordinate,device name the highest accuracy (98.38%) while the sigmoid kernel
+and received, are removed from the dataset due to their lack resultsinthelowestaccuracy(89.27%).Notably,theKNNal-
+of relevance to the learning process. Subsequently, missing gorithmoutperformsmorecomplexmodels,reaching98.57%
+categorical values are imputed using the “most-frequently” accuracy with high stability in all metrics. In summary, the
+strategy, replacing them with the most commonly occurring majorityofalgorithmsachieveaccuracyexceeding85%,with
+categorical value. Next, one-hot encoding is applied to en- KNN emerging as the top classifier. This consistently high
+code the categorical features before applying MixMax scaler performance across models suggests that the dataset may
+toscaletheentiredataset.Thefinaldata coldatasetcontains possesswell-separatedclassstructureswithminimaloverlap.
+25,722 samples and 18 features, including labels.
+The second dataset, data rasp, employs a Raspberry Pi 4 B. The clustering performance of unsupervised machine
+device for data collection. The collection process comprises learning algorithms
+three main phases. At first, the Raspberry Pi 4 gathers Wi- Figure 1 shows the mean and standard deviation values
+Fi information. Then, it stores and extracts this information, of ARI of unsupervised algorithms on two experimental
+saving it to a CSV file as feature values. The final stage datasets.
+merges all the sub-datasets into the final data rasp dataset. Thefirstsubgraph,regardingtheARIfordata coldataset,
+reveals poor clustering performance across all algorithms,
+C. Evaluation metrics
+with mean ARI scores ranging from a mere 0.002 to 0.011.
+To assess the classification performance of supervised Indetail,theGaussianMixture(GM)andBayesianGaussian
+MLs and deep learning models, accuracy, precision, recall, Mixture (BGM) algorithms attain the highest mean ARI
+and F1 metrics are employed. To ensure robust evaluation, of 0.011. The K-Means and Bisecting K-Means exhibit an
+10-fold cross-validation is implemented, allowing for the equal mean ARI of 0.008. Notably, the ’single’ linkage
+calculation of mean and standard deviation values for each parameter results in the lowest mean ARI of 0.002 among
+metric. Regarding unsupervised MLs, the ARI (Adjusted all algorithms. These consistently low ARI values indicate
+RandIndex)metricisusedtoevaluatethesimilaritybetween that none of the unsupervised algorithms could effectively
+thepredictedclusterandtheactualcluster.TheARImeasures identify the underlying cluster structure in this dataset.
+the similarity between predicted and actual clusters, ranging The second subgraph, regarding the ARI for data rasp
+from -1 to 1. dataset, demonstrates considerably improved clustering per-
+formance across all models, with mean ARI scores rang-
+III. EXPERIMENT
+ing from 0.768 to 0.882. Specifically, the GM algorithm
+A. The classification performance of supervised machine achieves mean ARI values increasing from 0.783 to 0.789
+learning algorithms acrossdifferentsettings.TheBGMalgorithmshowsthemost
+TableIIIpresentstheclassificationperformance(accuracy, variation, ranging from 0.777 to 0.807 depending on the
+recall, precision, F1-score) of five supervised MLs on two covariance type setting. Notably, the AC algorithm with the
+datasets. singlelinkagesettingachievesthehighestmeanARIreported
+In the first dataset, namely data col, the evaluation results of 0.881. The BKM algorithm shows consistent but lowest
+revealdiverseperformanceacrosssupervisedMLalgorithms. performance, with a mean ARI of 0.768. In summary, these
+TheDecisionTree(DT)andGradientBoosting(GB)achieve results highlight the effectiveness of unsupervised models,
+perfectscores(100%)onallmetrics,regardlessofparameter especially AC with the single linkage setting, in capturing
+configurations. This raises concerns about potential over- the underlying structure in this dataset.
+fitting. The Random Forest (RF) algorithm demonstrates
+C. The classification performance of deep learning models
+more reasonable performance, with accuracy and F1-score
+approximately 91% and 92%, respectively. The promising Table IV shows the classification performance of the deep
+approachistheSupportVectorClassifier(SVC),demonstrat- learning models on two experimental datasets.
+ingthemoststableperformancewithconsistentlyhighmean On the data col dataset, TabNet, DNN, DeepGBM, Tab-
+scores over 99% for linear, polynomial, and RBF kernels. In Trans, and NODE demonstrate high performance with accu-
+summary, while several models show high performance, the racy, recall, and F1 scores of 99.9%. Besides, these models
+SVCstandsoutasthemostreliable,balancinghighaccuracy exhibitstability,asevidencedbytheirlowstandarddeviation
+with consistent results across folds. values. Meanwhile, on data rasp, DNN, DeepGBM, Tab-
+In the second data set named data rasp, the DT algorithm Trans,andNODEyieldthehighestvalueofaccuracy,recall,
+achieves high accuracy (above 92%) but exhibits lower pre- andF1scoresat100%,withstandarddeviationsapproaching
+cisionandrecall,resultinginalowF1-scoreatroughly87%. zero. AutoInt model has experienced a similar trend as these
+The RF technique demonstrates similar results, achieving an previous models. This result suggests that these models may
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:09 UTC from IEEE Xplore. Restrictions apply.2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+TABLE III: Mean and standard deviation values of accuracy, recall, precision, and F1 metrics of supervised MLs on two
+experimental datasets.
+data col data rasp
+Models
+Accuracy Recall Precision F1 Accuracy Recall Precision F1
+DecisionTree 100.0 100.0 100.0 100.0 93.13 89.66 90.11 87.96
+(criterion=’gini’) (±0.0) (±0.0) (±0.0) (±0.0) (±5.23) (±8.02) (±9.84) (±9.85)
+DecisionTree 100.0 100.0 100.0 100.0 92.5 89.13 90.7 87.41
+(criterion=’entropy’|’log loss’) (±0.0) (±0.0) (±0.0) (±0.0) (±6.42) (±8.93) (±9.26) (±10.8)
+RandomForest 91.98 92.48 95.8 92.72 91.71 87.94 86.61 86.33
+(criterion=’gini’) (±13.46) (±12.7) (±6.04) (±12.51) (±5.53) (±8.45) (±11.07) (±10.14)
+RandomForest 91.47 92.04 93.97 91.82 92.56 89.27 88.63 88.24
+(criterion=’entropy’|’log loss’) (±12.76) (±11.75) (±8.41) (±12.41) (±5.06) (±7.65) (±9.72) (±9.00)
+SVC 99.90 99.91 99.91 99.91 94.98 92.41 93.83 91.22
+(kernel=’linear’) (±0.06) (±0.05) (±0.05) (±0.05) (±5.06) (±7.74) (±7.09) (±9.49)
+SVC 98.73 98.75 98.72 98.70 98.38 97.53 98.53 97.36
+(kernel=’poly’) (±3.12) (±3.08) (±3.15) (±3.21) (±3.06) (±4.68) (±2.52) (±5.27)
+SVC 99.90 99.91 99.91 99.91 94.70 92.12 92.91 91.11
+(kernel=’rbf’) (±0.06) (±0.05) (±0.05) (±0.05) (±4.63) (±7.13) (±7.17) (±8.65)
+SVC 22.37 22.28 21.95 19.61 89.27 85.00 85.68 84.21
+(kernel=’sigmoid’) (±2.63) (±2.98) (±5.02) (±3.48) (±4.93) (±7.53) (±9.04) (±7.61)
+KNN 82.37 81.29 81.58 80.92 98.57 97.85 98.39 97.88
+(’ball tree’|’kd tree’|’brute’) (±8.27) (±8.42) (±8.34) (±8.76) (±1.77) (±2.72) (±1.78) (±2.69)
+GradientBoosting 100.0 100.0 100.0 100.0 94.04 90.93 93.39 89.32
+(criterion=’friedman mse’|’squared error’) (±0.00) (±0.00) (±0.00) (±0.00) (±5.48) (±8.31) (±8.40) (±10.26)
+TABLE IV: Mean and standard deviation values of Accuracy, Recall, Precision, and F1 metrics of deep learning models on
+two experimental datasets.
+data col data rasp
+Models
+Accuracy Recall Precision F1 Accuracy Recall Precision F1
+99.9 99.9 99.9 99.9 97.4 97.4 98.0 97.3
+TabNet
+(±0.1) (±0.1) (±0.1) (±0.1) (±4.0) (±4.0) (±3.1) (±4.2)
+99.9 99.9 99.9 99.9 100.00 100.00 100.00 100.00
+DNN
+(±0.1) (±0.1) (±0.1) (±0.1) (±0.00) (±0.00) (±0.00) (±0.00)
+95.4 95.4 95.4 95.3 87.0 86.9 86.9 86.9
+EM
+(±1.5) (±1.5) (±1.5) (±1.5) (±0.7) (±0.6) (±0.6) (±0.6)
+99.9 99.9 99.9 99.9 100.00 100.00 100.00 100.00
+TabTrans
+(±0.1) (±0.1) (±0.1) (±0.1) (±0.00) (±0.00) (±0.00) (±0.00)
+99.9 99.9 99.9 99.9 100.00 100.00 100.00 100.00
+NODE
+(±0.00) (±0.00) (±0.00) (±0.00) (±0.00) (±0.00) (±0.00) (±0.00)
+99.9 99.9 99.9 99.9 100.00 100.00 100.00 100.00
+DeepGBM
+(±0.00) (±0.00) (±0.00) (±0.00) (±0.00) (±0.00) (±0.00) (±0.00)
+99.2 99.2 99.3 99.2 100.00 100.00 100.00 100.00
+AutoInt
+(±1.8) (±1.8) (±1.5) (±1.8) (±0.00) (±0.00) (±0.00) (±0.00)
+be overfitting the data rasp dataset. The EM model has the such as data col are suitable for sophisticated machine-
+lowestperformanceonbothdatasets,with95.4%ondata col learning algorithms and deep-learning techniques, achieving
+and 87.0% on data rasp. It is observed that the performance high accuracy. However, this dataset does not have a clear
+on the data col dataset is better than the data rasp dataset. cluster structure, so the results of the cluster algorithms
+It is because the data rasp has a simpler structure that these are extremely low, with an ARI mean of approximately 0.
+modelsreadilylearnandgivethehighestscoreinthetraining Considering the data rasp, while this dataset is effective for
+phase, which might leads to an overfitting situation in real- classification models and clustering models, it encounters an
+worldscenarios.Additionally,thisdatasetmightlacksamples overfitting situation with the deep learning models. These
+to adequately train these deep learning models. findings are crucial for designing wireless link estimation
+systems in IoT networks, suggesting data characteristics
+IV. CONCLUSION when selecting algorithms.
+In this study, we provide a comprehensive comparative
+ACKNOWLEDGMENTS
+analysis of machine-learning algorithms for wireless link es- This research is funded by Vietnam National University
+timation.Thisanalysisshowsthatlargeandcomplexdatasets HoChiMinh City (VNU-HCM) under grant number C2023-
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:09 UTC from IEEE Xplore. Restrictions apply.2024 13th International Conference on Control, Automation and Information Sciences (ICCAIS)
+Fig. 1: The mean and standard deviation values of ARI metric of unsupervised models on two experimental datasets.
+26-05. [12] L. Breiman, “Random forests,” Machine Learning, vol. 45, no. 1,
+pp.5–32,2001.
+REFERENCES [13] C.CortesandV.Vapnik,“Support-vectornetworks,”MachineLearn-
+ing,vol.20,no.3,pp.273–297,1995.
+[1] N.Baccour,A.Koubaˆa,L.Mottola,M.A.Zu´n˜iga,H.Youssef,C.A. [14] T. Cover and P. Hart, “Nearest-neighbor pattern classification,” IEEE
+Boano,andM.Alves,“Radiolinkqualityestimationinwirelesssensor TransactionsonInformationTheory,vol.13,no.1,pp.21–27,1967.
+networks:Asurvey,”ACMTransactionsonSensorNetworks(TOSN), [15] J.H.Friedman,“Greedyfunctionapproximation:agradientboosting
+vol.8,no.4,pp.1–33,2012. machine,”Annalsofstatistics,pp.1189–1232,2001.
+[2] R. Fonseca, O. Gnawali, K. Jamieson, and P. A. Levis, “Four-bit [16] JosepLlu´ısSole´andJosepLlu´ısSole´,“Bookreview:Patternrecogni-
+wirelesslinkestimation.,”inHotNets,2007. tion and machine learning. cristopher m. bishop. information science
+[3] M.Senel,K.Chintalapudi,D.Lal,A.Keshavarzian,andE.J.Coyle, andstatistics.springer2006,738pages,”Sort-statisticsandOperations
+“A kalman filter based link quality estimation scheme for wireless ResearchTransactions,2007.
+sensornetworks,”inIEEEGLOBECOM2007-IEEEGlobalTelecom- [17] J. Lu, “A survey on bayesian inference for gaussian mixture model,”
+municationsConference,pp.875–880,IEEE,2007. 2021.
+[4] K.-H.Le-Minh,K.-H.Le,andQ.Le-Trung,“Alightweightmachine- [18] S.S.KhanandA.Ahmad,“Clustercenterinitializationalgorithmfor
+learningbasedwirelesslinkestimationforiotdevices,”in202227th k-means clustering,” Pattern Recognition Letters, vol. 25, pp. 1293–
+Asia Pacific Conference on Communications (APCC), pp. 526–531, 1302,Aug.2004.
+2022. [19] K.Abirami and Dr. P.Mayilvahanan, “Performance analysis of K-
+[5] M. L. F. Sindjoung and P. Minet, “Estimating and predicting link MeansandbisectingK-Meansalgorithmsinweblogdata,”2016.
+quality in wireless IoT networks,” Annals of Telecommunications, [20] S. O¨. Arik and T. Pfister, “Tabnet: Attentive interpretable tabular
+vol.77,pp.253–265,June2022. learning,”CoRR,vol.abs/1908.07442,2019.
+[6] SrinikethanMadapuziSrinivasan,TramTruong-Huu,andMohanGu- [21] C.GuoandF.Berkhahn,“Entityembeddingsofcategoricalvariables,”
+rusamy, “Machine Learning-Based link fault identification and local- CoRR,vol.abs/1604.06737,2016.
+izationincomplexnetworks,”IEEEInternetofThingsJournal,2019. [22] X. Huang, A. Khetan, M. Cvitkovic, and Z. S. Karnin, “Tabtrans-
+[7] XionghuiLuo,XionghuiLuo,LinlanLiu,LinlanLiu,LinlanLiu,Jian former: Tabular data modeling using contextual embeddings,” CoRR,
+Shu,JianShu,JianShu,ManarAl-Kali,JianShu,andManarAl-Kali, vol.abs/2012.06678,2020.
+“Link quality estimation method for wireless sensor networks based [23] S.Popov,S.Morozov,andA.Babenko,“Neuralobliviousdecisionen-
+onstackedautoencoder,”IEEEAccess,2019. semblesfordeeplearningontabulardata,”CoRR,vol.abs/1909.06312,
+[8] J.PiumaandP.Rattin,“Medicio´ndecaudalesencanalesdeaforome- 2019.
+diantesistemateleme´trico,”in2018IEEE9thPower,Instrumentation [24] G. Ke, Z. Xu, J. Zhang, J. Bian, and T.-Y. Liu, “Deepgbm: A deep
+andMeasurementMeeting(EPIM),pp.1–7,2018. learning framework distilled by gbdt for online prediction tasks,” in
+[9] GregorCerar,GregorCerar,HalilYetgin,HalilYetgin,CarolinaFor- Proceedings of the 25th ACM SIGKDD International Conference on
+tuna,andCarolinaFortuna,“MachineLearning-Basedmodelselection KnowledgeDiscovery&DataMining,pp.384–394,2019.
+for anomalous wireless link detection,” International Conference on [25] W. Song, C. Shi, Z. Xiao, Z. Duan, Y. Xu, M. Zhang, and J. Tang,
+Software,TelecommunicationsandComputerNetworks,2021. “Autoint:Automaticfeatureinteractionlearningviaself-attentiveneu-
+[10] R. He, Q. Li, B. Ai, Y. L.-A. Geng, A. F. Molisch, V. Kristem, ralnetworks,”CoRR,vol.abs/1810.11921,2018.
+Z. Zhong, and J. Yu, “A kernel-power-density-based algorithm for [26] K. Bauer, D. Mccoy, B. Greenstein, D. Grunwald, and D. Sicker,
+channelmultipathcomponentsclustering,”IEEETransactionsonWire- “Physical layer attacks on unlinkability in wireless lans,” vol. 5672,
+lessCommunications,vol.16,no.11,pp.7138–7151,2017. pp.108–127,082009.
+[11] L.Breiman,J.Friedman,R.Olshen,andC.Stone,Classificationand
+RegressionTrees. Wadsworth,1986.
+Authorized licensed use limited to: VIT University. Downloaded on January 05,2025 at 05:29:09 UTC from IEEE Xplore. Restrictions apply.
